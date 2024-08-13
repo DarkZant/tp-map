@@ -1,0 +1,491 @@
+@font-face {
+    font-family: 'TPLocation';
+    src: url(Fonts/TPLocationFont.woff),
+         url('Fonts/TPLocationFont.TTF') format('truetype');
+
+}
+
+/* Leaflet Modifications */
+.leaflet-control-attribution.leaflet-control {
+    display: none;
+}
+/* .leaflet-marker-icon {
+    
+} */
+.leaflet-marker-icon:hover {
+    filter: brightness(130%) !important;
+}
+.leaflet-div-icon {
+    background: none !important;
+    border: none !important;
+}
+.leaflet-popup-content-wrapper, .leaflet-popup-tip{
+    background: #38352e !important;
+    color: #d4d4d4 !important;
+}
+.leaflet-popup-close-button {
+    font-size: 24px !important;
+    margin-right: 1%;
+}
+
+
+body {
+    overflow: hidden;
+    user-select: none;
+    -moz-user-select: none;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #1d1a14;
+}
+#map { 
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh; 
+    width: 100vw;
+    background-color: #1d1a14; 
+}
+/* Made by DarkZant */
+#made {
+    position: absolute;
+    top: 0;
+    font-size: 2.7vmin;
+    font-family: "TPLocation", Arial, sans-serif;
+    color: #ff0000;
+    background-color: #292929;
+    padding: 0.5vh 0.4vw;
+    border-radius: 6px;
+    margin: 1.2vh 0 0 0.5vw;
+    z-index: 1000;
+}
+#dz {
+    color: #FF0000;
+}
+#dz:hover {
+    color: #fd4545;
+}
+/* Dungeon Buttons and Name */
+#dun {
+    display: none;  
+    position: absolute;
+    margin-left: 1%;
+    margin-top: 1%;
+}
+#dn {
+    width: 30vw;
+    position: relative;
+    z-index: 900;
+}
+.di {
+    display: none;
+    border-style: solid;
+    border-width: 0.2vmax;
+    border-color: #38352e;
+    position: relative;
+    z-index: 900;
+}
+#dc {    
+    width: 15vw;
+    max-height: 100%;
+    margin-top: 20%;
+    margin-left: 2vw;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+} 
+.F {   
+    transition: filter 0.15s;
+}
+.F:hover {
+    filter: brightness(225%) !important;
+    width: 15.75vw !important;
+    margin-left: -0.5vw !important;
+}
+/* Top right menu icons */
+#menuicons {
+    position: absolute;
+    display: inline;
+    text-align: right;
+    line-height: 0.812vh;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+}
+.menuicon {
+    display: flex;
+    column-gap: 7px;
+    justify-content: right;
+}
+.menuiconimg {
+    width: 1.875vmax;
+    border-style: solid;
+    border-width: 2%;
+    border-color: #38352e;
+    border-radius: 3px;
+    padding: 0.4vmax;
+    cursor: pointer;
+}
+.menuiconimg:hover {
+    background-color: #2c2c2c;
+}
+#trackerIcon {
+    padding: 0.78vmax 0.4vmax;
+}
+.tt {
+    margin: 0;
+    background-color: #38352e;
+    padding: 1.5vh 0.4vw;
+    border-radius: 2px;
+    opacity: 0%;
+    visibility: hidden;
+    color: #c0c0c0;
+    height: 50%;
+    align-self: center;
+    font-size: 2vmin;
+    transition: opacity 0.2s;
+}
+#setTT:has(+ #setIcon:hover),  #trackerTT:has(+ #trackerIcon:hover),
+#contTT:has(+ #contIcon:hover) {
+    visibility: visible;
+    opacity: 100%;
+}
+/* General menus */
+.menu {
+    visibility: hidden;
+    height: 0%;
+    max-height: 100vh;
+    width: 0%;
+    z-index: 1000;
+    background-color: rgb(56, 53, 46, 0.85);
+    color: #c0c0c0;
+    border-radius: 8px;
+    transition: width 0.1s;
+    overflow-y: scroll; 
+}
+.menuX {
+    position: fixed;
+    top: 0;
+    right: 0.5vw;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    color: #757575;
+    margin: 0;
+    font: 1.4vmax Tahoma, Verdana, sans-serif;
+    font-weight: bolder;
+    cursor: pointer;
+}
+.menuX:hover {
+    filter: brightness(75%);
+}
+@supports not selector(::-webkit-scrollbar) {
+    .menu {
+        scrollbar-width: thin;
+        scrollbar-color: #757575 rgb(56, 53, 46, 0.85); 
+    }
+}
+@supports selector(::-webkit-scrollbar) {
+    .menu::-webkit-scrollbar {
+        width: 0.6vw;
+    }
+    .menu::-webkit-scrollbar-track {
+        background-color: transparent;
+        margin-block: 1vh;
+        border-radius: 4px;
+      }
+    .menu::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: #757575;
+        border: 2px solid transparent;
+        background-clip: content-box; 
+    }
+    .menu::-webkit-scrollbar-thumb:hover {
+       background-color: #8a8a8a;
+    }
+}
+
+/* Check details menu */
+#check {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+#checkX {
+    left: 23.5vw;
+}
+#reqs, #van {  
+    font-size: 1.3vmax;
+    display: none;
+}
+#van {
+    text-align: center;
+}
+#cinfo {
+    font-size: 1vmax;
+    text-align: center;
+    visibility: hidden;
+    padding: 0 5%;
+}
+#vandiv {
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+#vandiv .iti {
+    padding-left: 0;
+}
+.ctitle {
+    text-decoration: underline;
+    text-align: center;
+    margin-top: 0;
+    padding-top: 2vh;
+    margin-bottom: 2vh;
+    font-size: 1.4vmax;
+}
+.item {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-bottom: 1vh;
+    border-style: solid;
+    border-color: #3f3f3f;
+    border-radius: 10px;
+    padding: 0.5vh 0 0.5vh 0.7vw;
+}
+.idot {
+    font-size: 2vmax;
+    margin: 0;
+}
+.ii {
+    padding-right: 1vw;
+    padding-left: 1vw;
+    -webkit-user-drag: none;
+}
+.iti { 
+    max-width: 3.5vmax;
+    max-height: 3.5vmax;
+}
+.itis {
+    max-width: 3vmax;
+    max-height: 3vmax;
+}
+.oritems {
+    display: flex;
+    flex-wrap: wrap;
+    vertical-align: middle;
+    margin-bottom: 1vh;
+    padding-bottom: 0;
+    border-style: solid;
+    border-color: #3f3f3f;
+    border-radius: 10px;
+    padding-left: 0.7vw;
+    padding-top: 1vh;
+}
+.oritf {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    width: 20vw;
+}
+.orits {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    width: 20vw;
+    margin-top: -0.7vh;
+}
+.por {
+    margin-left: 1.8vw;
+    font-size: 1.4vmax;
+    font-style: italic;
+}
+/* Settings menu */
+#settings {
+    position: absolute;
+    right: 0;
+    top: 0;  
+    text-align: center;
+}
+#settitle {
+    text-decoration: underline; 
+    font-size: 1.3vmax;
+    margin: 2vh 0;
+}
+#setButtons {
+    display: flex;
+    justify-content: center;
+    column-gap: 2vw;
+    font-family: Courier;
+}
+.setb {
+    width: 8vmax;
+    max-width: 8vmax;
+    height: 5.5vmin;
+    max-height: 5.5vmin;
+    min-height: 20px;
+    min-width: 50px;
+    background-color: #1d1a14;
+    color:#c0c0c0;
+    border-radius: 7px;
+    font-size: 1vmax;
+    cursor: pointer;
+    margin-bottom: 1vh;
+    font-family: Arial, sans-serif;
+}
+.setbh:hover {
+    background-color: #272727;
+}
+#setche {
+    text-align: left;
+    margin-left: 5%;
+}
+.seth {
+    font-size: 1.05vmax; 
+    margin-bottom: 0.5%;
+    margin-top: 2.5%;
+}
+.bigSC {
+    height: 0.95vmax;
+    aspect-ratio: 1;
+    margin-top: 2.5%;
+    cursor: pointer;
+}
+.bigSL {
+    font-size: 1.05vmax;
+    cursor: pointer;
+    line-break: strict;
+    width: 25vw;
+}
+.SC {
+    height: 0.85vmax;
+    aspect-ratio: 1;
+    margin-left: 3%;
+    margin-top: 2%;
+    cursor: pointer;
+}
+.SL {
+    font-size: 0.9vmax;
+    cursor: pointer;
+}
+.bigSL::after, .SL::after{
+    content: "\a";
+    white-space: pre;
+}
+/* Controls Menu */
+#controls {
+    position: absolute;
+    right: 0;
+    top: 0;  
+    text-align: center;
+}
+#controls h2 {
+    font-size: 1.3vmax;
+    text-decoration: underline;
+}
+#controls ul {
+    font-size: 1.05vmax;
+    text-align: left;
+    padding-left: 2vw;
+    padding-right: 1vw;
+}
+#controls li {
+    margin-bottom: 1.8vh;
+}
+#controls b, #controls i {
+    color: rgb(212, 212, 212);
+    font-weight: bold;
+}
+/* Tracker menu */
+#tracker {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.8vw;
+}
+.titem {
+    position: relative;
+    width: 3.75vmax;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    filter: brightness(50%);
+}
+.titem:hover .tbox {
+    filter: brightness(150%);
+}
+.tbox, .timage{
+    position: absolute;
+    top: 50%; 
+    left: 50%;  
+    transform: translate(-50%, -50%);  
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;  
+    height: auto;
+    -webkit-user-drag: none;
+}
+.timage {
+    max-width: 90%; 
+    max-height: 90%;
+    z-index: 1100;
+}
+.tdungeon {
+    position: relative;
+    width: 6.25vmax;
+    aspect-ratio: 1;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.1vw;
+    row-gap: 0.5vh;
+}
+.tboss {
+    width: 4.5vmax;
+}
+.tdkey {
+    width: 3vmax;
+}
+.tcpt {
+    position: absolute;
+    display: none;
+    text-align: center;
+    line-height: 2.71vmin;
+    z-index: 1200;
+    bottom: 0;
+    right: 0.3vw;
+    font-size: 2vmin;
+    visibility: hidden;
+    color: #c0c0c0;
+    border-radius: 15px;
+    padding-top: 0.4vh;
+    background-color: #38352e;
+    width: 1.25vw;
+    height: 2.71vmin;
+    margin: 0;
+}
+/* Map Counters */
+.cpt {
+    position: absolute;
+    top: 50%; 
+    left: 50%;  
+    transform: translate(-50%, -50%); 
+    text-align: center;
+    border-radius: 100vw;
+    padding: 1px 6px;
+    color:#c0c0c0;
+}
+.subcpt {   
+    font-size: 12px;
+    background-color: rgb(56, 53, 46, 0.75);   
+}
+.procpt {
+    font-size: 20px;
+    background-color: rgb(56, 53, 46, 0.9);
+}
+

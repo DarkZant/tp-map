@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Twilight Princess Interactive Map</title>
+        <link rel="icon" href="Icons/Midna.png">
+        <link rel="stylesheet" href="map.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="map.js"></script>            
+    </head>
+    <body oncontextmenu="return false">
+        <div id="made">
+            Made by <a id="dz" href="https://github.com/darkzant">DarkZant</a>
+        </div>    
+        <div id="check" class="menu">
+            <p id="checkX" class="menuX" onclick="hideDetails()">×</p>
+            <div id="van">
+                <h3 class="ctitle">Content</h3>
+                <div id="vandiv" class="item"></div>
+            </div>
+            <div id="reqs">
+                <h3 class="ctitle">Requirements</h3>
+                <div id="reqsdiv"></div>
+            </div>
+            <div id="cinfo">
+                <h4 class="ctitle">Description</h4>
+                <div id="cinfodiv"></div>
+            </div>
+            <br>
+        </div>
+        <div id="map">
+            <div id="dun">         
+                <img id="dn" class="di">
+                <div id="dc">
+                    <img id="F10" class="F di" src="Dungeons/8F.png">
+                    <img id="F9" class="F di" src="Dungeons/7F.png">
+                    <img id="F8" class="F di" src="Dungeons/6F.png">
+                    <img id="F7" class="F di" src="Dungeons/5F.png">
+                    <img id="F6" class="F di" src="Dungeons/4F.png">
+                    <img id="F5" class="F di" src="Dungeons/3F.png">
+                    <img id="F4" class="F di" src="Dungeons/2F.png">
+                    <img id="F3" class="F di" src="Dungeons/1F.png">
+                    <img id="F2" class="F di" src="Dungeons/B1.png">
+                    <img id="F1" class="F di" src="Dungeons/B2.png">
+                    <img id="F0" class="F di" src="Dungeons/B3.png">
+                </div>  
+            </div>     
+        </div>
+        <div id="menuicons"> 
+            <div class="menuicon">
+                <p class="tt" id="setTT">Settings</p>
+                <img src="Icons/Settings.png" id="setIcon" class="menuiconimg" onclick="showRightMenu('settings', '25vw')">  
+            </div>              
+            <br>
+            <div class="menuicon">
+                <p class="tt" id="contTT">Controls</p>
+                <img src="Icons/Controller.png" id="contIcon" class="menuiconimg" onclick="showRightMenu('controls', '25vw')">  
+            </div>
+            <br>
+            <div class="menuicon">
+                <p class="tt" id="trackerTT">Tracker</p>
+                <img src="Icons/Tracker.png" id="trackerIcon" class="menuiconimg" onclick="showRightMenu('tracker', '29vw')">
+            </div>
+            
+        </div>
+        
+        <div id="settings" class="menu">
+            <p id="setX" class="menuX" onclick="hideRightMenu('settings')">×</p>
+            <h2 id="settitle">Settings</h2>
+            <div id="setButtons">
+                <button class="setb setbh" onclick="resetMap(this)">Reset Map</button>
+                <button class="setb setbh" onclick="resetTracker(this)">Reset Tracker</button>
+            </div>      
+            <div id="setche">
+                <h3 class="seth">Markers visibility</h3>
+
+                <input type="checkbox" id="checkS" class="bigSC" onclick="setChildren(this.checked, 1, 7)">
+                <label for="checkS" class="bigSL">Show Checks</label>
+                <input type="checkbox" id="baseS" class="SC" onclick="iconSet(this.checked, 'base', 1); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="baseS" class="SL">Show Base Checks</label>
+                <input type="checkbox" id="poesS" class="SC" onclick="iconSet(this.checked, 'poes', 2); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="poesS" class="SL">Show Poe Souls</label>
+                <input type="checkbox" id="bugsS" class="SC" onclick="iconSet(this.checked, 'bugs', 3); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="bugsS" class="SL">Show Golden Bugs</label>
+                <input type="checkbox" id="giftsS" class="SC" onclick="iconSet(this.checked, 'gifts', 4); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="giftsS" class="SL">Show Gifts from NPCs</label>
+                <input type="checkbox" id="skyS" class="SC" onclick="iconSet(this.checked, 'skyc', 5); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="skyS" class="SL">Show Sky Characters</label>
+                <input type="checkbox" id="skillS" class="SC" onclick="iconSet(this.checked, 'skills', 6); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="skillS" class="SL">Show Hidden Skills</label>
+                <input type="checkbox" id="shopS" class="SC" onclick="iconSet(this.checked, 'shop', 7); verifyParentCheck(this.checked, 'checkS', 0);">
+                <label for="shopS" class="SL">Show Shop Items</label>
+
+                <input type="checkbox" id="ncheckS" class="bigSC"  onclick="setChildren(this.checked, 9, 11)">
+                <label for="ncheckS" class="bigSL">Show Non-Check Flags</label>
+                <input type="checkbox" id="ooccooS" class="SC" onclick="iconSet(this.checked, 'ooccoo', 9); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <label for="ooccooS" class="SL">Show Ooccoo</label>
+                <input type="checkbox" id="locdoorS" class="SC" onclick="iconSet(this.checked, 'locked', 10); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <label for="locdoorS" class="SL">Show Locked Doors</label>
+                <input type="checkbox" id="notRupeeS" class="SC" onclick="iconSet(this.checked, 'notaRupee', 11); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <label for="notRupeeS" class="SL">Show Notable Rupees & Rupee Boulders</label>
+
+                <input type="checkbox" id="nflagS" class="bigSC"  onclick="setChildren(this.checked, 13, 17)">
+                <label for="nflagS" class="bigSL">Show Non-Flags</label>
+                <input type="checkbox" id="bottleS" class="SC" onclick="iconSet(this.checked, 'bottle', 13); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <label for="bottleS" class="SL">Show Bottled Items</label>
+                <input type="checkbox" id="rshopS" class="SC" onclick="iconSet(this.checked, 'rshop', 14); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <label for="rshopS" class="SL">Show Entire Shops</label>
+                <input type="checkbox" id="grassS" class="SC" onclick="iconSet(this.checked, 'grass', 15); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <label for="grassS" class="SL">Show Horse & Hawk Grass</label>
+                <input type="checkbox" id="monrupeeS" class="SC" onclick="iconSet(this.checked, 'monrup', 16); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <label for="monrupeeS" class="SL">Show Monster + Rupee Groups</label>
+                <input type="checkbox" id="fishS" class="SC" onclick="iconSet(this.checked, 'fish', 17); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <label for="fishS" class="SL">Show Fishing Spots</label>
+
+                <input type="checkbox" id="emptysubS" class="bigSC" onclick="setSettingsFlag(this.checked, 18, true);">
+                <label for="emptysubS" class="bigSL">Show Empty Submaps</label>
+                <input type="checkbox" id="1checksubS" class="bigSC" onclick="setSettingsFlag(this.checked, 19, true);">
+                <label for="1checksubS" class="bigSL">Show Submaps with one Check as Check</label>
+                <input type="checkbox" id="chestS" class="bigSC" onclick="setSettingsFlag(this.checked, 20, true);">
+                <label for="chestS" class="bigSL">Show Chests as their Base Game Content</label>
+
+                <h3 class="seth">General settings</h3>
+                <input type="checkbox" id="subCounterS" class="bigSC" onclick="setSettingsFlag(this.checked, 21, true);">
+                <label for="subCounterS" class="bigSL">Show Check Counters for Submaps</label>
+                <input type="checkbox" id="flagscptS" class="SC" onclick="setSettingsFlag(this.checked, 22, true);">
+                <label for="flagscptS" class="SL">Count Non-Check Flags in Submap Counters</label>
+                <input type="checkbox" id="nflagscptS" class="SC" onclick="setSettingsFlag(this.checked, 23, true);">
+                <label for="nflagscptS" class="SL">Count Non-Flags in Submap Counters</label>
+
+                <input type="checkbox" id="trackerS" class="bigSC" onclick="setSettingsFlag(this.checked, 24, true);">
+                <label for="trackerS" class="bigSL">Enable Tracker Logic</label>
+                <input type="checkbox" id="hideTrackerS" class="SC" onclick="setSettingsFlag(this.checked, 25, true);">
+                <label for="hideTrackerS" class="SL">Hide Checks without Requirements</label>
+
+                <input type="checkbox" id="trackerOverlapS" class="bigSC" onclick="setSettingsFlag(this.checked, 26, false);">
+                <label for="trackerOverlapS" class="bigSL">Overlay Tracker on Map</label>
+                <br>
+            </div>               
+        </div>
+        <div id="controls" class="menu">
+            <p id="contX" class="menuX" onclick="hideRightMenu('controls')">×</p>
+            <h2>General Controls</h2>
+            <ul>
+                <li>Use the <b>Mouse Wheel</b> to <i>Zoom</i></li>
+                <li><b>Click</b> a province to <i>Zoom</i> into it</li>
+                <li><b>Click</b> on a check to <i>Show Details</i> about it</li>
+                <li><b>Click</b> anywhere on the map to <i>Hide</i> the details tab</li>
+                <li><b>Right Click</b> on a check to <i>Mark / Unmark </i> it</li>
+                <li><b>Click</b> on a submap to <i>Zoom</i> into it</li>
+                <li><b>Zoom Out</b> of a submap to <i>Exit</i> it</li>
+                <li><b>Right Click</b> on a submap to <i>Mark / Unmark </i> all the checks inside it</li>
+            </ul>
+            <br>
+            <h2>Dungeon Controls</h2>
+            <ul>
+                <li>Press <b>[ W ]</b> or <b>[ ↑ ]</b> to <i>Move Up</i> a floor</li>
+                <li>Press <b>[ S ]</b> or <b>[ ↓ ]</b> to <i>Move Down</i> a floor</li>
+                <li>Press <b>[ E ]</b> or <b>[ → ]</b> to <i>Check / Uncheck</i> the current floor</li>
+                <li><b>Hover</b> on a floor button to <i>Preview</i> a floor</li>
+                <li><b>Click</b> on a floor button to <i>Select</i> a floor</li>
+                <li><b>Right Click</b> on a floor button to <i>Check / Uncheck</i> a floor</li>
+                <li><b>Zoom Out</b> to <i>Exit</i> the dungeon map</li>
+            </ul>
+        </div>
+        <div id="tracker" class="menu">
+            <p id="traX" class="menuX" onclick="hideRightMenu('tracker')">×</p>
+            <div style="width: 100%;"></div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Fishing Rod0.png" class="timage"> 
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Slingshot.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Lantern.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Boomerang.png" class="timage" >
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Iron Boots.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bow0.png" class="timage">
+            </div>
+            
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Hawkeye.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bomb Bag.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Giant Bomb Bag.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Clawshot0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Spinner.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Ball and Chain0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Dominion Rod0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Horse Call.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Skybook.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Ashei.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Auru.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bottle0.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Shadow Crystal0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Sword0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Shield0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Zora Armor.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Magic Armor.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Wallet0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Skill.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/BeetleM.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Soul0.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Scent0.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Heart Piece0.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Heart Container.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Fused Shadow0.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Shard0.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div style=" width: 3.75vmax; position: relative; aspect-ratio: 1;"></div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Small KeyG.png" class="timage">
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Small KeyHC.png" class="timage">
+                <div class="tcpt">0</div>
+            </div>
+            <div class="titem">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Boss KeyHC0.png" class="timage">
+            </div>
+            <div class="tdungeon">
+                <div class="tboss titem">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Diababa0.png" class="timage">
+                </div>
+                <div class="tdkey titem">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="tdkey titem">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Fyrus0.png" class="timage">
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/GBK2.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Morpheel0.png" class="timage">
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Stallord0.png" class="timage">
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Blizzeta0.png" class="timage">
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/SBK.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Armogohma0.png" class="timage">
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Argorok0.png" class="timage">
+                </div>
+                <br>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <p class="tcpt" style="color: #50C878">0</p>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>
+            <div class="tdungeon">
+                <div class="titem tboss">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Zant0.png" class="timage">
+                </div>
+                <br>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small Key0.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem tdkey">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Boss Key0.png" class="timage">
+                </div>
+            </div>               
+        </div>
+    </body>
+</html>
