@@ -674,13 +674,140 @@ class Province {
     }
 }
 class TrackerItem {
-    constructor(elem, type, max, items) {
+    constructor(elem, id, type, maxState, items, minState) {
         this.elem = elem;
+        this.id = id;
+        //Type Legend:
+        // 0 : One of a kind item (On/off)
+        // 1 : Non Progressive Items (Ex. Bow)
+        // 2 : Progressive Items (Ex. Clawshot, Dominion Rod)
+        // 3 : Items with counters (Ex. Poes, Keys)
         this.type = type;
-        this.max = max;
+        this.maxState = maxState;
         this.items = items;
+        this.prevState = 0;
         this.state = 0;
+        this.minState = minState == undefined ? 0 : minState;
+        elem.addEventListener('click', () => { this.increaseState() });
+        elem.addEventListener('contextmenu', () => { this.decreaseState() });
+        this.initialize();
     } 
+    reset() {
+        let state = this.state;
+        if (state > this.minState) {
+            if (state < this.maxState / 2) {
+                for (let _ = state; _ > this.minState; --_)
+                    this.decreaseState();
+            }
+            else {
+                for (let _ = state; _ < trackerItems[i].maxState + 1; ++_)
+                    this.increaseState();
+            }
+        }
+    }
+    setFlag() {
+        trackerSU.setFlag(this.id, this.maxState >= 10 ? String.fromCharCode(this.state) : this.state.toString());
+    }
+    getFlag() {
+        return this.maxState >= 10 ? trackerSU.getFlagAsCharCode(this.id) : trackerSU.getFlagAsNumber(this.id);     
+    }
+    initialize() {
+        let state = this.getFlag();
+        if (state < this.maxState / 2) {
+            for (let _ = 0; _ < state; ++_)
+                this.increaseState();
+        }
+        else {
+            for (let _ = this.maxState; _ >= state; --_)
+                this.decreaseState();
+        }
+    }
+    increaseState() {
+        this.prevState = this.state;
+        ++this.state;
+        if (this.state > this.maxState)
+            this.state = this.minState;
+        this.update();
+    }
+    decreaseState() {
+        this.prevState = this.state;
+        --this.state;
+        if (this.state < this.minState)
+            this.state = this.maxState;
+        this.update();
+    }
+    update() {
+        this.setFlag();
+        this.updateObtainedItems();
+        this.updateHTMLElement();
+    }
+    updateObtainedItems() {
+        if (this.items == undefined)
+            return;
+        if (this.type == 0 || this.items.length == undefined) {
+            if (this.state == 0) // Remove on unmark
+                removeFromArray(obtainedItems, this.items);
+            else if (this.prevState == 0) // Put on mark from start
+                obtainedItems.push(this.items)
+        }
+        else {
+            if (this.state == this.minState) {
+                if (this.type == 1) //Remove last added item if not progressive
+                    removeFromArray(obtainedItems, this.items[this.prevState - 1]);
+                else {
+                    for(let i = this.minState; i < this.items.length; ++i) // Reset from max to min if progressive
+                        removeFromArray(obtainedItems, this.items[i]);  
+                }
+            }
+            else {
+                if (this.type == 1 || this.prevState > this.state) //Remove previous item if we decreased and not progressive
+                    removeFromArray(obtainedItems, this.items[this.prevState - 1]);
+                if (this.prevState < this.state)
+                    obtainedItems.push(this.items[this.state - 1]);
+                if (this.type == 2 && this.state == this.maxState && this.prevState == this.minState) { // Add all from min to max
+                    for(let i = this.minState; i < this.items.length - 1; ++i)
+                       obtainedItems.push(this.items[i]);  
+                }
+            }
+        }
+        if(settingIsChecked('trackerS'))
+            reloadIcons();
+    }
+    updateHTMLElement() {
+        if (this.state == 0) {
+            this.elem.style.filter = "brightness(50%)"; // Unmark item     
+            if (this.type == 1 || this.type == 2) //Change item to base
+                this.updateImage();
+            else if (this.type == 3) {
+                this.elem.childNodes[5].style.visibility = 'hidden'; //Hide counter
+                if (this.maxState > 1) // Don't change color if item max is 1
+                    this.elem.childNodes[5].style.color = "#c0c0c0";
+            }
+        }
+        else {
+            if (this.state == 1 || this.state == this.maxState) //Mark item
+                this.elem.style.filter = "none"; 
+            if (this.type == 1 || this.type == 2) {  //Change item
+                this.updateImage();
+            }              
+            else if (this.type == 3) {
+                this.elem.childNodes[5].innerHTML = this.state; // Update Counter
+                switch (this.state) {
+                    case 1: this.elem.childNodes[5].style.visibility = 'visible'; break; //Show Counter
+                    case this.maxState - 1: this.elem.childNodes[5].style.color = "#c0c0c0"; break; // Change color off green
+                    case this.maxState:
+                        this.elem.childNodes[5].style.visibility = 'visible'; //Show counter
+                        this.elem.childNodes[5].style.color = "#50C878"; // Change color to green
+                        break;
+                }  
+            }
+        }   
+    }
+    updateImage() {
+        let imgSrc = this.elem.childNodes[3].src;
+        this.elem.childNodes[3].src = imgSrc.slice(0, -5) + 
+        (this.state == 0 ? 0 : this.state - 1) + imgSrc.slice(-4); 
+    }
 }
 class Grotto {
     constructor(id, width, height) {
@@ -720,11 +847,11 @@ function renameIcon(icon, name) { //Rename existing icon
 }
 
 //General Map
-var chest = createIcon('Chest', 570, 494);
-var smallChest = createIcon('Small Chest', 569, 520);
-var bossChest = createIcon('Boss Chest', 750, 650);
+var chest = createIcon('Chest', 505, 462);
+var smallChest = createIcon('Small Chest', 508, 463);
+var bossChest = createIcon('Boss Chest', 649, 541);
 var howlingStone = createIcon('Howling Stone', 528, 802);
-var goldenWolf = createIcon('Golden Wolf', 160, 176);
+var goldenWolf = createIcon('Golden Wolf', 137, 161);
 var rupeeBoulder = createIcon('Rupee Boulder', 2209, 1702);
 var grotto = createIcon('Grotto', 573, 572);
 var door = createIcon('Door', 982 , 1552);
@@ -756,9 +883,9 @@ var worms = createIcon('BottleWorm', 128, 205, 'Worm');
 var heartPiece = createIcon('Heart Piece', 380, 292);
 var heartContainer = createIcon('Heart Container', 1000, 779);
 var coralEarring = createIcon('Coral Earring', 128, 210);
-var quiver = createIcon('Quiver0', 128, 128, 'Quiver');
-var bigQuiver = createIcon('Quiver1', 128, 128, 'Big Quiver');
-var giantQuiver = createIcon('Quiver2', 128, 128, 'Giant Quiver');
+var quiver = createIcon('Quiver0', 97, 128, 'Quiver');
+var bigQuiver = createIcon('Quiver1', 103, 128, 'Big Quiver');
+var giantQuiver = createIcon('Quiver2', 114, 128, 'Giant Quiver');
 var poeSoul = createIcon('Poe Soul', 118, 119);
 var ooccoo = createIcon('OoccooPot', 32, 32, 'Ooccoo');
 var smallKey = createIcon('Small Key', 128, 128);
@@ -827,9 +954,13 @@ var aurusMemo = createIcon("Auru's Memo", 462, 619);
 var spinner = createIcon('Spinner', 179, 128);
 var asheisSketch = createIcon("Ashei's Sketch", 462, 619);
 var ballAndChain = createIcon('Ball and Chain', 128, 107);
-var redDominionRod = createIcon('Dominion Rod0', 128, 205, 'Powerless Dominion Rod');
+var redDominionRod = createIcon('Dominion Rod0', 128, 205, 'Past Dominion Rod');
 var dominionRod = createIcon('Dominion Rod1', 128, 205, 'Dominion Rod');
 var horseCall = createIcon('Horse Call', 64, 128);
+var iliasCharm = renameIcon(horseCall, "Ilia's Charm");
+var renadosLetter = createIcon("Renado's Letter", 128, 107);
+var invoice = createIcon('Invoice', 101, 118);
+var woodenStatue = createIcon('Wooden Statue', 59, 128);
 var skybook = createIcon('Skybook Character', 117, 102);
 var bottle = createIcon('Bottle', 116, 188);
 var shadowCrystal = createIcon('Shadow Crystal', 975, 1990);
@@ -840,7 +971,7 @@ var lightMasterSword = createIcon('Sword3', 79, 127, 'Light Filled Master Sword'
 var ordonShield = createIcon('Shield0', 49.3, 55, 'Ordon Shield');
 var woodenShield = createIcon('Shield1', 41.9, 55, 'Wooden Shield');
 var hylianShield = createIcon('Shield2', 44.3, 55, 'Hylian Shield');
-var zoraArmor = createIcon('Zora Armor', 128, 150);
+var zoraArmor = createIcon('Zora Armor', 125, 148);
 var magicArmor = createIcon('Magic Armor', 125, 149);
 var wallet = createIcon('Wallet0', 68, 114, 'Wallet');
 var bigWallet = createIcon('Wallet1', 81, 124, 'Big Wallet');
@@ -885,7 +1016,7 @@ var skycSU = new StorageUnit('skyc', '000000'); // 6 checks
 var shopSU = new StorageUnit('shop', '0000000'); // 7 checks
 var ooccooSU = new StorageUnit('ooccoo', '0000000'); // 7 flags
 var lockedDoorSU = new StorageUnit('locked', '000000000000000000000000000000000000000000000000000000000000');  // 60 flags      
-var notaRupeesSU = new StorageUnit('notaRupee', '0000000000000000000000000000000000000000'); // 40 flags
+var notaRupeesSU = new StorageUnit('notaRupee', '00000000000000000000000000000000000000000000000000000000000000000000000000000000'); // 80 flags
 
 var trackerSU = new StorageUnit('tracker', '0000000000000000000000010\0\0' + '0\0' + '00000000000000000000000000000'); // 59 flags
 var settingSU = new StorageUnit('settings', '111111111111011111111111111111111111111111111111111111111111'); // 60 flags
@@ -946,81 +1077,75 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     //Loading Tracker
-    var t = document.getElementsByClassName('titem');
-    for (let i = 0; i < t.length; ++i) {
-        t[i].addEventListener('click', function() {increaseState(i)});
-        t[i].addEventListener('contextmenu', function() {decreaseState(i)});
-    }
-    trackerItems[0] = new TrackerItem(t[0], 2, 2, [fishingRod, fishingRodCE]); // Fishing Rods
-    trackerItems[1] = new TrackerItem(t[1], 0, 1, slingshot); // Slingshot
-    trackerItems[2] = new TrackerItem(t[2], 0, 1, lantern); // Lantern
-    trackerItems[3] = new TrackerItem(t[3], 0, 1, boomerang); // Boomerang
-    trackerItems[4] = new TrackerItem(t[4], 0, 1, ironBoots);  // Iron Boots
-    trackerItems[5] = new TrackerItem(t[5], 1, 3, bow); // Bow
-    trackerItems[6] = new TrackerItem(t[6], 0, 1, hawkeye) // Hawkeye
-    trackerItems[7] = new TrackerItem(t[7], 3, 3, bombBag); // Bomb Bags
-    trackerItems[8] = new TrackerItem(t[8], 0, 1, giantBombBag); // Giant Bomb Bag
-    trackerItems[9] = new TrackerItem(t[9], 2, 2, [clawshot, doubleClawshot]); // Clawshots
-    trackerItems[10] = new TrackerItem(t[10], 0, 1, spinner); // Spinner
-    trackerItems[11] = new TrackerItem(t[11], 0, 1, ballAndChain); // Ball and Chain
-    trackerItems[12] = new TrackerItem(t[12], 2, 2, [redDominionRod, dominionRod]); // Dominion Rod
-    trackerItems[13] = new TrackerItem(t[13], 0, 1, horseCall); // Horse Call
-    trackerItems[14] = new TrackerItem(t[14], 3, 7, skybook); // Sky Characters
-    trackerItems[15] = new TrackerItem(t[15], 0, 1, asheisSketch); // Ashei's Sketch
-    trackerItems[16] = new TrackerItem(t[16], 0, 1, aurusMemo); // Auru's Memo
-    trackerItems[17] = new TrackerItem(t[17], 3, 4, bottle); // Bottles
-    trackerItems[18] = new TrackerItem(t[18], 0, 1, shadowCrystal); // Shadow Crystal
-    trackerItems[19] = new TrackerItem(t[19], 2, 4, [woodenSword, ordonSword, masterSword, lightMasterSword]); // Swords
-    trackerItems[20] = new TrackerItem(t[20], 2, 3, [ordonShield, woodenShield, hylianShield]); // Shields
-    trackerItems[21] = new TrackerItem(t[21], 0, 1, zoraArmor); // Zora Armor
-    trackerItems[22] = new TrackerItem(t[22], 0, 1, magicArmor); // Magic Armor
-    trackerItems[23] = new TrackerItem(t[23], 2, 3, [wallet, bigWallet, giantWallet]); // Wallets
-    trackerItems[24] = new TrackerItem(t[24], 3, 7); // Hidden Skills
-    trackerItems[25] = new TrackerItem(t[25], 3, 24); // Golden Bugs
-    trackerItems[26] = new TrackerItem(t[26], 3, 60); // Poes
-    trackerItems[27] = new TrackerItem(t[27], 1, 5); // Scents
-    trackerItems[28] = new TrackerItem(t[28], 3, 45, heartPiece); // Heart Pieces
-    trackerItems[29] = new TrackerItem(t[29], 3, 8, heartContainer); // Heart Containers
-    trackerItems[30] = new TrackerItem(t[30], 3, 3, fusedShadow); // Fused Shadows
-    trackerItems[31] = new TrackerItem(t[31], 3, 4, mirrorShard); // Mirror Shards
-    trackerItems[32] = new TrackerItem(t[32], 0, 1, gateKeys); // Gate Keys
-    trackerItems[33] = new TrackerItem(t[33], 3, 3, smallKeyHC); // Hyrule Castle Keys
-    trackerItems[34] = new TrackerItem(t[34], 0, 1, bossKeyHC); // Hyrule Castle Boss Key
-    trackerItems[35] = new TrackerItem(t[35], 0, 1); // Diababa
-    trackerItems[36] = new TrackerItem(t[36], 3, 4, smallKeyFT); // Forest Temple Keys
-    trackerItems[37] = new TrackerItem(t[37], 0, 1, bossKeyFT); // Forest Temple Boss Key
-    trackerItems[38] = new TrackerItem(t[38], 0, 1); // Fyrus
-    trackerItems[39] = new TrackerItem(t[39], 3, 3, smallKeyGM); // Goron Mines Keys
-    trackerItems[40] = new TrackerItem(t[40], 3, 3, bossKeyGM); // Goron Mines Boss Keys
-    trackerItems[41] = new TrackerItem(t[41], 0, 1); // Morpheel
-    trackerItems[42] = new TrackerItem(t[42], 3, 3, smallKeyLT); // Lakebed Temple Keys
-    trackerItems[43] = new TrackerItem(t[43], 0, 1, bossKeyLT); // Lakebed Temple Boss Key
-    trackerItems[44] = new TrackerItem(t[44], 0, 1); // Stallord
-    trackerItems[45] = new TrackerItem(t[45], 3, 5, smallKeyAG); // Arbiter's Grounds Keys
-    trackerItems[46] = new TrackerItem(t[46], 0, 1, bossKeyAG); // Arbiter's Grounds Boss Key
-    trackerItems[47] = new TrackerItem(t[47], 0, 1); // Blizzeta
-    trackerItems[48] = new TrackerItem(t[48], 3, 4, smallKeySR); // Snowpeak Ruins Keys
-    trackerItems[49] = new TrackerItem(t[49], 0, 1, bedroomKey); // Snowpeak Ruins Bedroom Key
-    trackerItems[50] = new TrackerItem(t[50], 0, 1); // Armogohma
-    trackerItems[51] = new TrackerItem(t[51], 3, 3, smallkeyTT); // Temple of Time Keys
-    trackerItems[52] = new TrackerItem(t[52], 0, 1, bossKeyTT); // Temple of Time Boss Key
-    trackerItems[53] = new TrackerItem(t[53], 0, 1); // Argorok
-    trackerItems[54] = new TrackerItem(t[54], 3, 1, smallKeyCS); // City in the Sky Keys
-    trackerItems[55] = new TrackerItem(t[55], 0, 1, bossKeyCS); // City in the Sky Boss Key
-    trackerItems[56] = new TrackerItem(t[56], 0, 1); // Zant
-    trackerItems[57] = new TrackerItem(t[57], 3, 7, smallKeyPT); // Palace of Twilight Keys
-    trackerItems[58] = new TrackerItem(t[58], 0, 1, bossKeyPT); // Palace of Twilight Boss Key
-    for (let i = 0; i < trackerItems.length; ++i) {
-        let state = i == 25 || i == 26 || i == 28 ? trackerSU.getFlagAsCharCode(i) : trackerSU.getFlagAsNumber(i);
-        if (state < trackerItems[i].max / 2) {
-            for (let _ = 0; _ < state; ++_)
-                increaseState(i);
+    document.querySelectorAll('[onload]').forEach(function(element) {
+        let onloadFunction = element.onload;
+        if (onloadFunction) {
+            onloadFunction.call(element);
         }
-        else {
-            for (let _ = trackerItems[i].max; _ >= state; --_)
-                decreaseState(i);
-        }
-    }
+    });
+    // for (let i = 0; i < t.length; ++i) {
+    //     t[i].addEventListener('click', function() {increaseState(i)});
+    //     t[i].addEventListener('contextmenu', function() {decreaseState(i)});
+    // }
+    // trackerItems[0] = new TrackerItem(t[0], 2, 2, [fishingRod, fishingRodCE]); // Fishing Rods
+    // trackerItems[1] = new TrackerItem(t[1], 0, 1, slingshot); // Slingshot
+    // trackerItems[2] = new TrackerItem(t[2], 0, 1, lantern); // Lantern
+    // trackerItems[3] = new TrackerItem(t[3], 0, 1, boomerang); // Boomerang
+    // trackerItems[4] = new TrackerItem(t[4], 0, 1, ironBoots);  // Iron Boots
+    // trackerItems[5] = new TrackerItem(t[5], 1, 3, bow); // Bow
+    // trackerItems[6] = new TrackerItem(t[6], 0, 1, hawkeye) // Hawkeye
+    // trackerItems[7] = new TrackerItem(t[7], 3, 3, bombBag); // Bomb Bags
+    // trackerItems[8] = new TrackerItem(t[8], 0, 1, giantBombBag); // Giant Bomb Bag
+    // trackerItems[9] = new TrackerItem(t[9], 2, 2, [clawshot, doubleClawshot]); // Clawshots
+    // trackerItems[10] = new TrackerItem(t[10], 0, 1, spinner); // Spinner
+    // trackerItems[11] = new TrackerItem(t[11], 0, 1, ballAndChain); // Ball and Chain
+    // trackerItems[12] = new TrackerItem(t[12], 2, 2, [redDominionRod, dominionRod]); // Dominion Rod
+    // trackerItems[13] = new TrackerItem(t[13], 0, 1, horseCall); // Horse Call
+    // trackerItems[14] = new TrackerItem(t[14], 3, 7, skybook); // Sky Characters
+    // trackerItems[15] = new TrackerItem(t[15], 0, 1, asheisSketch); // Ashei's Sketch
+    // trackerItems[16] = new TrackerItem(t[16], 0, 1, aurusMemo); // Auru's Memo
+    // trackerItems[17] = new TrackerItem(t[17], 3, 4, bottle); // Bottles
+    // trackerItems[18] = new TrackerItem(t[18], 0, 1, shadowCrystal); // Shadow Crystal
+    // trackerItems[19] = new TrackerItem(t[19], 2, 4, [woodenSword, ordonSword, masterSword, lightMasterSword]); // Swords
+    // trackerItems[20] = new TrackerItem(t[20], 2, 3, [ordonShield, woodenShield, hylianShield]); // Shields
+    // trackerItems[21] = new TrackerItem(t[21], 0, 1, zoraArmor); // Zora Armor
+    // trackerItems[22] = new TrackerItem(t[22], 0, 1, magicArmor); // Magic Armor
+    // trackerItems[23] = new TrackerItem(t[23], 2, 3, [wallet, bigWallet, giantWallet], 1); // Wallets
+    // trackerItems[24] = new TrackerItem(t[24], 3, 7); // Hidden Skills
+    // trackerItems[25] = new TrackerItem(t[25], 3, 24); // Golden Bugs
+    // trackerItems[26] = new TrackerItem(t[26], 3, 60); // Poes
+    // trackerItems[27] = new TrackerItem(t[27], 1, 5); // Scents
+    // trackerItems[28] = new TrackerItem(t[28], 3, 45, heartPiece); // Heart Pieces
+    // trackerItems[29] = new TrackerItem(t[29], 3, 8, heartContainer); // Heart Containers
+    // trackerItems[30] = new TrackerItem(t[30], 3, 3, fusedShadow); // Fused Shadows
+    // trackerItems[31] = new TrackerItem(t[31], 3, 4, mirrorShard); // Mirror Shards
+    // trackerItems[32] = new TrackerItem(t[32], 0, 1, gateKeys); // Gate Keys
+    // trackerItems[33] = new TrackerItem(t[33], 3, 3, smallKeyHC); // Hyrule Castle Keys
+    // trackerItems[34] = new TrackerItem(t[34], 0, 1, bossKeyHC); // Hyrule Castle Boss Key
+    // trackerItems[35] = new TrackerItem(t[35], 0, 1); // Diababa
+    // trackerItems[36] = new TrackerItem(t[36], 3, 4, smallKeyFT); // Forest Temple Keys
+    // trackerItems[37] = new TrackerItem(t[37], 0, 1, bossKeyFT); // Forest Temple Boss Key
+    // trackerItems[38] = new TrackerItem(t[38], 0, 1); // Fyrus
+    // trackerItems[39] = new TrackerItem(t[39], 3, 3, smallKeyGM); // Goron Mines Keys
+    // trackerItems[40] = new TrackerItem(t[40], 3, 3, bossKeyGM); // Goron Mines Boss Keys
+    // trackerItems[41] = new TrackerItem(t[41], 0, 1); // Morpheel
+    // trackerItems[42] = new TrackerItem(t[42], 3, 3, smallKeyLT); // Lakebed Temple Keys
+    // trackerItems[43] = new TrackerItem(t[43], 0, 1, bossKeyLT); // Lakebed Temple Boss Key
+    // trackerItems[44] = new TrackerItem(t[44], 0, 1); // Stallord
+    // trackerItems[45] = new TrackerItem(t[45], 3, 5, smallKeyAG); // Arbiter's Grounds Keys
+    // trackerItems[46] = new TrackerItem(t[46], 0, 1, bossKeyAG); // Arbiter's Grounds Boss Key
+    // trackerItems[47] = new TrackerItem(t[47], 0, 1); // Blizzeta
+    // trackerItems[48] = new TrackerItem(t[48], 3, 4, smallKeySR); // Snowpeak Ruins Keys
+    // trackerItems[49] = new TrackerItem(t[49], 0, 1, bedroomKey); // Snowpeak Ruins Bedroom Key
+    // trackerItems[50] = new TrackerItem(t[50], 0, 1); // Armogohma
+    // trackerItems[51] = new TrackerItem(t[51], 3, 3, smallkeyTT); // Temple of Time Keys
+    // trackerItems[52] = new TrackerItem(t[52], 0, 1, bossKeyTT); // Temple of Time Boss Key
+    // trackerItems[53] = new TrackerItem(t[53], 0, 1); // Argorok
+    // trackerItems[54] = new TrackerItem(t[54], 3, 1, smallKeyCS); // City in the Sky Keys
+    // trackerItems[55] = new TrackerItem(t[55], 0, 1, bossKeyCS); // City in the Sky Boss Key
+    // trackerItems[56] = new TrackerItem(t[56], 0, 1); // Zant
+    // trackerItems[57] = new TrackerItem(t[57], 3, 7, smallKeyPT); // Palace of Twilight Keys
+    // trackerItems[58] = new TrackerItem(t[58], 0, 1, bossKeyPT); // Palace of Twilight Boss Key
 
     map = L.map('map', {
         zoom: -5,
@@ -1099,7 +1224,7 @@ document.addEventListener("DOMContentLoaded", function() {
             [-5412, 5564], [-5374, 5998], [-5954, 6282], [-5944, 7028], [-6700, 7216], [-7144, 6960], [-8048, 5568], [-7844, 4680],
             [-7360, 4200], [-6640, 3464], [-6360, 3744], [-5944, 3776], [-5834, 4743], [-5630, 4883]
         ], false, [-6512, 5536], [
-            new Check([-7405, 4910], lantern, baseSU, undefined, undefined, 'Talk to Coro to obtain the lantern.'), //TO VERIFY
+            new Check([-7405, 4910], lantern, notaRupeesSU, undefined, undefined, 'Talk to Coro to obtain the lantern. This is not a Randomizer Check.'),
             new Check([-7023, 4805], smallChest, baseSU, smallKey, undefined, 'Walk into the cave and open the chest to obtain the key to the Faron Woods gate.'),
             new Check([-7023, 4834], chest, baseSU, heartPiece, [lantern], 'Light the 2 torches besides the small chest and climb the ledge to open the chest.'),
             new Check([-7121, 4136], smallChest, baseSU, yellowRupee, undefined, 'Defeat the Deku Baba and open the chest behind it.'),
@@ -1121,6 +1246,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-6975, 3273], chest, baseSU, qI(bombs, 30), [lantern], 'Light the 2 torches in the back of the area to make the chest appear.'),
             new Check([-7137, 3529], poeSoul, poesSU, undefined, [shadowCrystal, [bombBag, ballAndChain]], 'Destroy the rock above the grotto to make the poe appear.'),
             new Check([-7151, 3457], chest, baseSU, orangeRupee, [spinner], 'From the top of the vines, ride the spinner tracks until you reach the chest.'),
+            new Check([-6877, 3703], poeSoul, poesSU, undefined, [shadowCrystal], 'Only appears at Night. After defeating Skull Kid for the 2nd time, you can find this poe in the bottom right of the Master Sword area.'),
 
             new FakeCheck([-7340, 4043], howlingStone, skillsSU, [shadowCrystal], 'Spawns the South Castle Town Golden Wolf, accessible while on the way to the Master Sword.'),
 
@@ -1149,8 +1275,10 @@ document.addEventListener("DOMContentLoaded", function() {
             new Submap([-7123, 3500], grotto, g2.img, g2.imgSize, [
                 new Check([-6868, 3472], chest, baseSU, heartPiece, [shadowCrystal, [bombBag, ballAndChain]], 'Kill all the 8 Deku Serpents to make the chest appear.')
             ]),
-            new Submap([-7204, 3678], door, 'TimeDoor.png', [220, 575], [
+            new Submap([-7204, 3678], door, 'TimeDoor.png', [293, 575], [
                 new Check([-7458, 3700], snailF, bugsSU, undefined, [[boomerang, clawshot]], 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.'),
+                new Check([-7470, 3618], poeSoul, poesSU, undefined, [redDominionRod, shadowCrystal], 'Move the Howl Statue to reveal the poe.'),
+                new Check([-7504, 3704], chest, baseSU, heartPiece, [redDominionRod], 'Move the Howl Statue and go to the end of the tunnel behind it to reach the chest.')
             ])
         ]),
         new Province([ // Eldin
@@ -1234,6 +1362,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5445, 7475], hawkeye, shopSU, undefined, [bow], "You can buy it for 100 rupees after attempting the Talo's Sharpshooting minigame.")
                 //Add Entire Shop
             ]),
+            new FlooredSubmap([-5491, 7699], door, 'Sanctuary', [
+                [[1, 1], [
+
+                ]],
+                [[260, 225], [
+                    new Check([-5510, 7661], renadosLetter, giftsSU, undefined, undefined, 'After clearing the Temple of Time, talk to Renado to obtain his letter. This item is NEVER randomized in Rando.'),
+                ]]
+            ], 2),
             new Submap([-5711, 6043], cave, 'EldinCave.png', [862, 780], [
                 new Check([-5810, 6372], chest, baseSU, purpleRupee, [[bombBag, ballAndChain]], 'Kill the skulltula and open the chest.'),
                 new Check([-5469, 6199], poeSoul, poesSU, undefined, [[bombBag, ballAndChain], shadowCrystal], 'Use your senses to see the poe at the end of this branch.'),
@@ -1546,7 +1682,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5523, 3363], poeSoul, poesSU, undefined, [[bombBag, ballAndChain], shadowCrystal], 'At the entrance of the room.'),
                 new Check([-5555, 3364], chest, baseSU, heartPiece, [[bombBag, ballAndChain], lantern], 'Light the 2 torches to make the chest appear.')
             ]),
-            new Submap([-2025, 4818], cave, 'Ice Cave.png', [79, 369], [
+            new Submap([-2025, 4818], cave, 'Ice Cave.png', [105, 369], [
                 new Check([-1725, 4818], chest, baseSU, heartPiece, [ballAndChain], 'Complete the 3 block puzzles to open all the gates and access the chest.')
             ])
         ]),    
@@ -1761,30 +1897,51 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-4066, 4170], mirrorShard, baseSU, undefined, [bedroomKey, bombBag, ballAndChain], "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the Mirror Shard.")
             ]
         ]), 
-        new Dungeon([-6618, 3681], [-6580, 4425], dungeonStar, 'Temple of Time', [0, 0], 3, [
+        new Dungeon([-6618, 3681], [-6580, 4425], dungeonStar, 'Temple of Time', [1169, 1587], 3, [
             [ // 1F
-
+                new Check([-5497, 4635], chest, baseSU, smallkeyTT, [lantern], 'Light the 2 torches to make the chest appear.'),
+                new NonCheck([-4274, 4301], fairy, 'bottle'),
+                new FakeCheck([-4197, 4350], lockedDoor, lockedDoorSU, [bossKeyTT], 'Boss Door.'),
+                new Check([-3880, 4480], heartContainer, baseSU, undefined, [redDominionRod, bow], 'Defeat Armogohma to obtain the Heart Container.'),
+                new Check([-3880, 4350], mirrorShard, baseSU, undefined, [redDominionRod, bow], 'Defeat Armogohma to obtain the Mirror Shard.'),
             ],
             [ // 2F
+                new FakeCheck([-5725, 4352], ooccoo, ooccooSU, undefined, 'After opening the chest, Ooccoo will wait for you to join her at the top of the stairs.'),
+                new FakeCheck([-5842, 4352], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
+                new Check([-6173, 4351], smallChest, baseSU, qI(arrows, 30), undefined, 'Put a pot on the pressure plate in the middle of the room to open the gate and gain access to the chest.'),
 
             ],
             [ // 3F
-
+                new Check([-5750, 5148], chest, baseSU, dungeonMap, undefined, 'Kill the Armos to make the chest appear.'),
+                new Check([-5818, 5015], smallChest, baseSU, redRupee, undefined, 'Climb up to reach the ledge where the chest is to reach it.'),
+                new Check([-5453, 3966], poeSoul, poesSU, undefined, [redDominionRod, shadowCrystal], 'Break the barrier with the Hammer Statue or put an Iron Pot on the pressure plate behind the gate to get the poe.'),
             ],
             [ // 4F
-
+                
             ],
             [ // 5F
-
+                new Check([-5956, 4149], chest, baseSU, smallkeyTT, [spinner], 'Kill the 2 Armos to make the chest appear.'),
+                new Check([-6244, 4351], smallChest, baseSU, redRupee, [spinner], 'You will find this chest in the back of the room, on the elevated ledge.'),
+                new FakeCheck([-5147, 4350], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
+                new Check([-4977, 3945], chest, baseSU, compass, [spinner, [bow, clawshot, ballAndChain]], 'Hit the crystal twice to reach the chest: Once when you are at sword range, the other when you are halfway across the room.'),
+                new Check([-5054, 3343], chest, baseSU, heartPiece, [spinner, bow, redDominionRod], 'Use the Dominion Rod on the Iron Pot to make it step on the pressure plate, disabling the electricity and granting access to the chest.'),
+                new Check([-5956, 4566], chest, baseSU, heartPiece, [spinner, redDominionRod], 'Throw 2 Iron Pots into the railings in the back of the room, and make them fall onto the 2 pressure plates to make the chest appear.')
             ],
             [ // 6F
-
+                new Check([-5319, 4374], chest, baseSU, purpleRupee, [spinner, bow], 'Kill All the spiders in the room (Baby Gohmas and Young Gohmas) to make the chest appear.'),
             ], 
             [ // 7F
+                new Check([-5386, 4591], poeSoul, poesSU, undefined, [spinner, bow, clawshot, shadowCrystal], 'After reaching the end of the spinner track, the poe is on the left.'),
+                new Check([-5654, 4496], smallChest, baseSU, redRupee, [spinner, bow, clawshot], 'Follow the right edge until you reach the chest'),
+                new Check([-5452, 5081], smallChest, baseSU, redRupee, [spinner, bow, clawshot], 'Clawshot the target on the ceiling to reach the chest.'),
+                new Check([-5451, 4960], bossChest, baseSU, bossKeyTT, [spinner, bow, clawshot], 'Use the 2 Iron Pots and the 2 Helmasaur Shells on the 4 elevated pressure plates to open the gate that is blocking the chest.'),
+                new Check([-6178, 4981], chest, baseSU, smallkeyTT, [spinner, bow], 'Avoid the traps and go behind the sharp pendulum to reach the chest.'),
 
             ],
             [ // 8F
-
+                new Check([-5383, 4976], chest, baseSU, purpleRupee, [spinner, bow], 'Kill all the Baby Gohmas to make the chest appear.'),
+                new FakeCheck([-5511, 4545], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
+                new Check([-5511, 3804], chest, baseSU, redDominionRod, [spinner, bow, woodenSword],'Defeat the Darknut to open the gate that is blocking access to the chest.' )
             ]
         ]),
         new Dungeon([-5306, 3144], [-5472, 3840], dungeonStar, 'City in the Sky', [0, 0], 0, [
@@ -1892,7 +2049,7 @@ function loadTilemapFromImageMap() {
     loadTLIcons(); 
 
     let cpt = 0;
-    map.eachLayer(function(layer){
+    map.eachLayer(function(_){
         ++cpt; 
     });
     console.log('Number of Markers on Tilemap: ' + --cpt);
@@ -2108,25 +2265,8 @@ function resetMap(button) {
     resetButtonsFeedback(button, 'Map');
 }
 function resetTracker(button) {
-    for(let i = 0; i < trackerItems.length; ++i) {
-        let state = trackerItems[i].state;
-        if (i == 23) { // Wallet Special Case
-            if (state == 1)
-                continue;
-            state == 2 ? decreaseState(23) : increaseState(23);
-            continue;
-        }
-        if (state > 0) {
-            if (state < trackerItems[i].max / 2) {
-                for (let _ = state; _ > 0; --_)
-                    decreaseState(i);
-            }
-            else {
-                for (let _ = state; _ < trackerItems[i].max + 1; ++_)
-                    increaseState(i);
-            }
-        }
-    }
+    for(let i = 0; i < trackerItems.length; ++i)
+        trackerItems[i].reset();
     reloadIcons();  
     resetButtonsFeedback(button, 'Tracker'); 
 }
@@ -2141,116 +2281,6 @@ function resetButtonsFeedback(button, text) {
         button.classList.add('setbh');
         button.style.cursor = 'pointer';
     }, 1500);
-}
-
-// Tracker Functions
-function increaseState(traElemIndex) {
-    let item = trackerItems[traElemIndex];
-    let prevState = item.state;
-    ++item.state;
-    if (item.state > item.max)
-        item.state = 0;
-    if (traElemIndex == 23 && item.state == 0) //Wallet
-        ++item.state;
-    setTrackerFlag(traElemIndex, item.state);
-    updateObtainedItems(item, prevState);
-    updateTracker(item);
-}
-function decreaseState(traElemIndex) {
-    let item = trackerItems[traElemIndex];
-    let prevState = item.state;
-    --item.state;
-    if (item.state < 0)
-        item.state = item.max;
-    if (traElemIndex == 23 && item.state == 0) //Wallet
-        item.state = item.max;
-    setTrackerFlag(traElemIndex, item.state);
-    updateObtainedItems(item, prevState);
-    updateTracker(item);
-}
-function setTrackerFlag(index, state) {
-    if (index == 25 || index == 26 || index == 28) //For counters > 9
-        state = String.fromCharCode(state);
-    else 
-        state = state.toString();
-    trackerSU.setFlag(index, state);
-}
-function updateObtainedItems(item, prevState) {
-    if (item.items == undefined)
-        return;
-    if (item.type == 0 || item.items.length == undefined) {
-        if (item.state == 0) // Remove on unmark
-            removeFromArray(obtainedItems, item.items);
-        else if (prevState == 0) // Put on mark from start
-            obtainedItems.push(item.items)
-    }
-    else {
-        if (item.state == 0) {
-            if (item.type == 1) //
-                removeFromArray(obtainedItems, item.items[prevState - 1]);
-            else {
-                for(let i = 0; i < item.items.length; ++i) // Reset from max to 0
-                    removeFromArray(obtainedItems, item.items[i]);  
-            }
-        }
-        else {
-            if (item.type == 1 || prevState > item.state) {
-                removeFromArray(obtainedItems, item.items[prevState - 1]);
-            }
-            if (prevState < item.state)
-                obtainedItems.push(item.items[item.state - 1]);
-            if (item.type == 2 && item.state == item.max && prevState == 0) { // Add all from 0 to max
-                for(let i = 0; i < item.items.length - 1; ++i)
-                   obtainedItems.push(item.items[i]);  
-            }
-            if (item.items[0].name == 'Wallet') { // Handle Wallets since you start with 1
-                if (prevState == 1 && item.state == 3) // From 1 to 3
-                    obtainedItems.push(bigWallet);
-                else if (prevState == 3 && item.state == 1) { //Reset from 3 to 1
-                    removeFromArray(obtainedItems, bigWallet);
-                    removeFromArray(obtainedItems, giantWallet);
-                }
-            }
-        }
-    }
-    if(settingIsChecked('trackerS'))
-        reloadIcons();
-}
-function updateTracker(item) {        
-    if (item.state == 0) {
-        item.elem.style.filter = "brightness(50%)"; // Unmark item     
-        if (item.type == 1 || item.type == 2) { //Change item to base
-            updateTrackerImg(item);
-        }
-        else if (item.type == 3) {
-            item.elem.childNodes[5].style.visibility = 'hidden'; //Hide counter
-            if (item.max > 1) // Don't change color if item max is 1
-                item.elem.childNodes[5].style.color = "#c0c0c0";
-        }
-    }
-    else {
-        if (item.state == 1 || item.state == item.max) //Mark item
-            item.elem.style.filter = "none"; 
-        if (item.type == 1 || item.type == 2) {  //Change item
-            updateTrackerImg(item);
-        }              
-        else if (item.type == 3) {
-            item.elem.childNodes[5].innerHTML = item.state; // Update Counter
-            switch (item.state) {
-                case 1: item.elem.childNodes[5].style.visibility = 'visible'; break; //Show Counter
-                case item.max - 1: item.elem.childNodes[5].style.color = "#c0c0c0"; break; // Change color off green
-                case item.max:
-                    item.elem.childNodes[5].style.visibility = 'visible'; //Show counter
-                    item.elem.childNodes[5].style.color = "#50C878"; // Change color to green
-                    break;
-            }  
-        }
-    }   
-}
-function updateTrackerImg(item) {
-    let imgSrc = item.elem.childNodes[3].src;
-    item.elem.childNodes[3].src = imgSrc.slice(0, -5) + 
-        (item.state == 0 ? 0 : item.state - 1) + imgSrc.slice(-4); 
 }
 
 
