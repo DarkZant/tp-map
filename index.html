@@ -14,7 +14,7 @@
             Made by <a id="dz" href="https://github.com/darkzant">DarkZant</a>
         </div>    
         <div id="check" class="menu">
-            <p id="checkX" class="menuX" onclick="hideDetails()">×</p>
+            <div id="checkX" class="menuX" onclick="hideDetails()">×</div>
             <div id="van">
                 <h3 class="ctitle">Content</h3>
                 <div id="vandiv" class="item"></div>
@@ -49,24 +49,24 @@
         </div>
         <div id="menuicons"> 
             <div class="menuicon">
-                <p class="tt" id="setTT">Settings</p>
+                <div class="tt" id="setTT">Settings</div>
                 <img src="Icons/Settings.png" id="setIcon" class="menuiconimg" onclick="showRightMenu('settings', '25vw')">  
             </div>              
             <br>
             <div class="menuicon">
-                <p class="tt" id="contTT">Controls</p>
+                <div class="tt" id="contTT">Controls</div>
                 <img src="Icons/Controller.png" id="contIcon" class="menuiconimg" onclick="showRightMenu('controls', '25vw')">  
             </div>
             <br>
             <div class="menuicon">
-                <p class="tt" id="trackerTT">Tracker</p>
+                <div class="tt" id="trackerTT">Tracker</div>
                 <img src="Icons/Tracker.png" id="trackerIcon" class="menuiconimg" onclick="showRightMenu('tracker', '29vw')">
             </div>
             
         </div>
         
         <div id="settings" class="menu">
-            <p id="setX" class="menuX" onclick="hideRightMenu('settings')">×</p>
+            <div id="setX" class="menuX" onclick="hideRightMenu('settings')">×</div>
             <h2 id="settitle">Settings</h2>
             <div id="setButtons">
                 <button class="setb setbh" onclick="resetMap(this)">Reset Map</button>
@@ -140,7 +140,7 @@
             </div>               
         </div>
         <div id="controls" class="menu">
-            <p id="contX" class="menuX" onclick="hideRightMenu('controls')">×</p>
+            <div id="contX" class="menuX" onclick="hideRightMenu('controls')">×</div>
             <h2>General Controls</h2>
             <ul>
                 <li>Use the <b>Mouse Wheel</b> to <i>Zoom</i></li>
@@ -151,6 +151,7 @@
                 <li><b>Click</b> on a submap to <i>Zoom</i> into it</li>
                 <li><b>Zoom Out</b> of a submap to <i>Exit</i> it</li>
                 <li><b>Right Click</b> on a submap to <i>Mark / Unmark </i> all the checks inside it</li>
+                <li>You can <i>Reset</i> the Map in the settings</li>
             </ul>
             <br>
             <h2>Dungeon Controls</h2>
@@ -163,286 +164,415 @@
                 <li><b>Right Click</b> on a floor button to <i>Check / Uncheck</i> a floor</li>
                 <li><b>Zoom Out</b> to <i>Exit</i> the dungeon map</li>
             </ul>
+            <h2>Tracker Controls</h2>
+            <ul>
+                <li><b>Click</b> on an item to <i>Mark</i> it</li>
+                <li><b>Right Click</b> on an item to <i>Unmark</i> it</li>
+                <li><b>Middle Click</b> on an item to <i>Reset</i> it</li>
+                <li><b>Click Anywhere</b> on the Tracker to <i>Close</i> a Tracker Submenu</li>
+                <li>You can <i>Reset</i> the Tracker in the settings</li>
+            </ul>
         </div>
-        <div id="tracker" class="menu">
-            <p id="traX" class="menuX" onclick="hideRightMenu('tracker')">×</p>
+        <div id="tracker" class="menu tcontainer">
+            <div id="traX" class="menuX" onclick="hideRightMenu('tracker')">×</div>
             <div style="width: 100%;"></div>
             <div class="titem" onload="new TrackerItem(this, 0, 2, 2, [fishingRod, fishingRodCE])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Fishing Rod0.png" class="timage"> 
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 1, 0, 1, slingshot)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Slingshot.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 2, 0, 1, lantern)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Lantern.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 3, 0, 1, boomerang)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Gale Boomerang.png" class="timage" >
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 4, 0, 1, ironBoots)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Iron Boots.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 5, 1, 3, bow)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Bow0.png" class="timage">
             </div>
             
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 6, 0, 1, hawkeye)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Hawkeye.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 7, 3, 3, bombBag)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Bomb Bag.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 8, 0, 1, giantBombBag)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Giant Bomb Bag.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 9, 2, 2, [clawshot, doubleClawshot])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Clawshot0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 10, 0, 1, spinner)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Spinner.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 11, 0, 1, ballAndChain)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Ball and Chain.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 12, 2, 2, [redDominionRod, dominionRod])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Dominion Rod0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="tsubmenuO" onclick="showTrackerSubmenu('tquest')">
+                <img src="Icons/MenuBox.png" class="tbox">
+                <img src="Icons/Ilia's Charm.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 13, 0, 1, horseCall)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Horse Call.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 14, 3, 7, skyBookChar)">
                 <img src="Icons/ItemBox.png" class="tbox">
-                <img src="Icons/Skybook Character.png" class="timage">
+                <img src="Icons/Sky Book Character.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 15, 0, 1, asheisSketch)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Ashei's Sketch.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 16, 0, 1, aurusMemo)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Auru's Memo.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 17, 3, 4, bottle)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Bottle.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 18, 0, 1, shadowCrystal)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Shadow Crystal.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 19, 2, 4, [woodenSword, ordonSword, masterSword, lightMasterSword])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Sword0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 20, 2, 3, [ordonShield, woodenShield, hylianShield])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Shield0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 21, 0, 1, zoraArmor)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Zora Armor.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 22, 0, 1, magicArmor)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Magic Armor.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 23, 2, 3, [wallet, bigWallet, giantWallet], 1)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Wallet0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 24, 3, 7)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Skill.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
-                <img src="Icons/ItemBox.png" class="tbox">
+            <div class="tsubmenuO" onclick="showTrackerSubmenu('tbugs')">
+                <img src="Icons/MenuBox.png" class="tbox">
                 <img src="Icons/Bug4.png" class="timage">
-                <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 26, 3, 60, poeSoul)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Poe Soul.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 28, 1, 5)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Scent0.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 27, 3, 45, heartPiece)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Heart Piece.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 29, 3, 8, heartContainer)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Heart Container.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 30, 3, 3, fusedShadow)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Fused Shadow.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 31, 3, 4, mirrorShard)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Mirror Shard.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div style=" width: 3.75vmax; position: relative; aspect-ratio: 1;"></div>
-            <div class="titem">
+            <!-- <div style=" width: 3.75vmax; position: relative; aspect-ratio: 1;"></div> -->
+            <div class="titem" onload="new TrackerItem(this, 32, 0, 1, gateKeys)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Small KeyG.png" class="timage">
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 33, 3, 3, smallKeyHC)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Small KeyHC.png" class="timage">
                 <div class="tcpt">0</div>
             </div>
-            <div class="titem">
+            <div class="titem" onload="new TrackerItem(this, 34, 0, 1, bossKeyHC)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Boss KeyHC.png" class="timage">
             </div>
             <div class="tdungeon">
-                <div class="tboss titem">
+                <div class="tboss titem" onload="new TrackerItem(this, 35, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Diababa.png" class="timage">
                 </div>
-                <div class="tdkey titem">
+                <div class="tdkey titem" onload="new TrackerItem(this, 36, 3, 4, smallKeyFT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="tdkey titem">
+                <div class="tdkey titem" onload="new TrackerItem(this, 37, 0, 1, bossKeyFT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload="new TrackerItem(this, 38, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Fyrus.png" class="timage">
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 39, 3, 3, smallKeyGM)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 40, 3, 3, bossKeyGM)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/GBK2.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload="new TrackerItem(this, 41, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Morpheel.png" class="timage">
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 42, 3, 3, smallKeyLT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 43, 0, 1, bossKeyLT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload="new TrackerItem(this, 44, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Stallord.png" class="timage">
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 45, 3, 5, smallKeyAG)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 46, 0, 1, bossKeyAG)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload=" new TrackerItem(this, 47, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Blizzeta.png" class="timage">
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 48, 3, 4, smallKeySR)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 49, 0, 1, bedroomKey)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Bedroom Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload=" new TrackerItem(this, 50, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Armogohma.png" class="timage">
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 51, 3, 3, smallkeyTT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 52, 0, 1, bossKeyTT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload="new TrackerItem(this, 53, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Argorok.png" class="timage">
                 </div>
                 <br>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 54, 3, 1, smallKeyCS)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt" style="color: #50C878">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 55, 0, 1, bossKeyCS)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>
             <div class="tdungeon">
-                <div class="titem tboss">
+                <div class="titem tboss" onload="new TrackerItem(this, 56, 0, 1)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Zant.png" class="timage">
                 </div>
                 <br>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 57, 3, 7, smallKeyPT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey">
+                <div class="titem tdkey" onload="new TrackerItem(this, 58, 0, 1, bossKeyPT)">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Boss Key.png" class="timage">
                 </div>
             </div>               
         </div>
+        <div id="tbugs" class="tsubmenu menu tcontainer">
+            <div id="bugsX" class="menuX tsubmenuX" onclick="hideTrackerSubmenu('tbugs')">×</div>
+            <div style="width: 100%;"></div>
+            <div class="titem" onload="new TrackerItem(this, 25, 0, 1, antM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug0.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 59, 0, 1, antF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug1.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 60, 0, 1, dayflyM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug2.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 61, 0, 1, dayflyF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug3.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 62, 0, 1, beetleM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug4.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 63, 0, 1, beetleF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug5.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 64, 0, 1, mantisM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug6.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 65, 0, 1, mantisF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug7.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 66, 0, 1, stagBeetleM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug8.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 67, 0, 1, stagBeetleF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug9.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 68, 0, 1, pillbugM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug10.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 69, 0, 1, pillbugF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug11.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 70, 0, 1, butterflyM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug12.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 71, 0, 1, butterflyF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug13.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 72, 0, 1, ladybugM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug14.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 73, 0, 1, ladybugF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug15.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 74, 0, 1, snailM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug16.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 75, 0, 1, snailF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug17.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 76, 0, 1, phasmidM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug18.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 77, 0, 1, phasmidF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug19.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 78, 0, 1, grasshopperM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug20.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 79, 0, 1, grasshopperF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug21.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 80, 0, 1, dragonflyM)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug22.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 81, 0, 1, dragonflyF)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bug23.png" class="timage">
+            </div>
+        </div>
+        <div id="tquest" class="tsubmenu menu tcontainer">
+            <div id="questX" class="menuX tsubmenuX" onclick="hideTrackerSubmenu('tquest')">×</div>
+            <div class="titem" onload="new TrackerItem(this, 82, 0, 1, renadosLetter)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Renado's Letter.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 82, 0, 1, invoice)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Invoice.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 83, 0, 1, woodenStatue)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Wooden Statue.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 84, 0, 1, iliasCharm)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Ilia's Charm.png" class="timage">
+            </div>
     </body>
 </html>

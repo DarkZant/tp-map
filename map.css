@@ -161,6 +161,7 @@ body {
 }
 /* General menus */
 .menu {
+    position: absolute;
     visibility: hidden;
     height: 0%;
     max-height: 100vh;
@@ -216,7 +217,6 @@ body {
 
 /* Check details menu */
 #check {
-    position: absolute;
     top: 0;
     left: 0;
 }
@@ -311,7 +311,6 @@ body {
 }
 /* Settings menu */
 #settings {
-    position: absolute;
     right: 0;
     top: 0;  
     text-align: center;
@@ -383,7 +382,6 @@ body {
 }
 /* Controls Menu */
 #controls {
-    position: absolute;
     right: 0;
     top: 0;  
     text-align: center;
@@ -407,14 +405,47 @@ body {
 }
 /* Tracker menu */
 #tracker {
-    position: absolute;
     right: 0;
     top: 0;
-    display: inline-flex;
+}
+.disabled {
+    pointer-events: none;
+}
+.tcontainer {
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     column-gap: 0.8vw;
+}
+.tsubmenu {
+    right: 0;
+    top: 50%;
+    transform: translate(0, -50%);  
+    width: 29vw;
+    height: 42vh;
+    z-index: 1500;
+    filter: brightness(100%);
+}
+.tsubmenuX {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1600;
+}
+#tquest {
+    right: 4vw;
+    width: 21vw;
+    height: 16vh;
+    column-gap: 1.2vw;
+}
+.tsubmenuO {
+    position: relative;
+    width: 3.75vmax;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
 }
 .titem {
     position: relative;
@@ -425,7 +456,7 @@ body {
     cursor: pointer;
     filter: brightness(50%);
 }
-.titem:hover .tbox {
+.titem:hover .tbox, .tsubmenuO:hover .tbox{
     filter: brightness(150%);
 }
 .tbox, .timage{
@@ -461,12 +492,12 @@ body {
 }
 .tcpt {
     position: absolute;
+    /* visibility: hidden; */
     display: none;
-    visibility: hidden;
     z-index: 1200;
     bottom: 0;
     right: 0.3vw;
-    font-size: 2vmin;
+    font-size: 0.95vmax;
     color: #c0c0c0;
     border-radius: 100vw;
     padding: 2.5px 5px;
