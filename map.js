@@ -679,13 +679,18 @@ class TrackerItem {
         this.elem = elem;
         this.id = id;
         //Type Legend:
-        // 0 : One of a kind item (On/off)
+        // On / Off
+        // 0 : One of a kind Items
+        // Image Changing
         // 1 : Non Progressive Items (Ex. Bow)
         // 2 : Progressive Items (Ex. Clawshot, Dominion Rod)
-        // 3 : Items with counters (Ex. Bottles, Poes, Keys)
+        // Counters
+        // 3 : Unlock 1 Unlock All Items (Ex. Bottles, Bomb Bags)
+        // 4 : Specific amount required Items (Ex. Poe Soul Rewards, Hidden Skills)
         this.type = type;
         this.maxState = maxState;
         this.items = items;
+        this.itemIndex = 0; // Used only for type 4
         this.prevState = 0;
         this.state = 0;
         this.shouldReloadIcons = false;
@@ -755,67 +760,73 @@ class TrackerItem {
         this.setFlag();
         this.updateObtainedItems();
         this.updateHTMLElement();
+        console.log(obtainedItems);
+        if(settingIsChecked('trackerS') && this.shouldReloadIcons)
+            reloadIcons();
     }
     updateObtainedItems() {
         if (this.items == undefined)
             return;
         if (this.type == 0 || this.items.length == undefined) {
-            if (this.state == 0) // Remove on unmark
+            if (this.state == this.minState) // Remove on unmark
                 removeFromArray(obtainedItems, this.items);
-            else if (this.prevState == 0) // Put on mark from start
+            else if (this.prevState == this.minState) // Put on mark from start
                 obtainedItems.push(this.items)
+            return;
         }
-        else {
-            if (this.state == this.minState) {
-                if (this.type == 1) //Remove last added item if not progressive
-                    removeFromArray(obtainedItems, this.items[this.prevState - 1]);
-                else {
-                    for(let i = this.minState; i < this.items.length; ++i) // Reset from max to min if progressive
-                        removeFromArray(obtainedItems, this.items[i]);  
-                }
-            }
+        if (this.state == this.minState) {
+            if (this.type == 1) //Remove last added item if not progressive
+                removeFromArray(obtainedItems, this.items[this.prevState - 1]);
             else {
-                if (this.type == 1 || this.prevState > this.state) //Remove previous item if we decreased and not progressive
-                    removeFromArray(obtainedItems, this.items[this.prevState - 1]);
-                if (this.prevState < this.state)
-                    obtainedItems.push(this.items[this.state - 1]);
-                if (this.type == 2 && this.state == this.maxState && this.prevState == this.minState) { // Add all from min to max
-                    for(let i = this.minState; i < this.items.length - 1; ++i)
-                       obtainedItems.push(this.items[i]);  
-                }
+                for(let i = this.minState; i < this.items.length; ++i) // Remove all items
+                    removeFromArray(obtainedItems, this.items[i]);  
+                this.itemIndex = 0;
             }
+            return;
         }
-        if(settingIsChecked('trackerS') && this.shouldReloadIcons)
-            reloadIcons();
+        if (this.type == 1 || this.prevState > this.state)  //Remove previous item if we decreased and not progressive
+            removeFromArray(obtainedItems, this.items[this.prevState - 1]);
+        if (this.type == 1 && this.prevState > this.state) //Push previous item if we decreased and not progressive
+            obtainedItems.push(this.items[this.state - 1]);     
+        else if (this.type != 1 && this.state == this.maxState && this.prevState == this.minState) { // Add all from min to max except type 1
+            for(let i = this.minState; i < this.items.length; ++i) //Add all items
+                obtainedItems.push(this.items[i]);  
+            this.itemIndex = this.items.length;
+        }
+        else if (this.prevState < this.state && this.type != 4) // Add next item for all types except 4 if we increased
+            obtainedItems.push(this.items[this.state - 1]);
+        else if (this.prevState < this.state && this.state == this.items[this.itemIndex].req) //Check if state meets requirement for next item
+            obtainedItems.push(this.items[this.itemIndex++]);
+        else if (this.prevState > this.state && this.itemIndex > 0 && this.state < this.items[this.itemIndex - 1].req) //Remove item if exist and requirement is met and we are decreasing
+            removeFromArray(obtainedItems, this.items[this.itemIndex-- -1]);    
     }
     updateHTMLElement() {
         if (this.state == 0) {
             this.elem.style.filter = "brightness(50%)"; // Unmark item     
             if (this.type == 1 || this.type == 2) //Change item to base
                 this.updateImage();
-            else if (this.type == 3) {
+            else if (this.type >= 3) {
                 this.elem.childNodes[5].style.display = 'none'; //Hide counter
                 if (this.maxState > 1) // Don't change color if item max is 1
                     this.elem.childNodes[5].style.color = "#c0c0c0";
             }
+            return;
         }
-        else {
-            if (this.state == 1 || this.state == this.maxState) //Mark item
-                this.elem.style.filter = "none"; 
-            if (this.type == 1 || this.type == 2)  //Change item
-                this.updateImage();           
-            else if (this.type == 3) {
-                this.elem.childNodes[5].innerHTML = this.state; // Update Counter
-                switch (this.state) {
-                    case 1: this.elem.childNodes[5].style.display = 'inline'; break; //Show Counter
-                    case this.maxState - 1: this.elem.childNodes[5].style.color = "#c0c0c0"; break; // Change color off green
-                    case this.maxState:
-                        this.elem.childNodes[5].style.display = 'inline'; //Show counter
-                        this.elem.childNodes[5].style.color = "#50C878"; // Change color to green
-                        break;
-                }  
-            }
-        }   
+        if (this.state == 1 || this.state == this.maxState) //Mark item
+            this.elem.style.filter = "none"; 
+        if (this.type == 1 || this.type == 2)  //Change item
+            this.updateImage();           
+        else if (this.type >= 3) {
+            this.elem.childNodes[5].innerHTML = this.state; // Update Counter
+            switch (this.state) {
+                case 1: this.elem.childNodes[5].style.display = 'inline'; break; //Show Counter
+                case this.maxState - 1: this.elem.childNodes[5].style.color = "#c0c0c0"; break; // Change color off green
+                case this.maxState:
+                    this.elem.childNodes[5].style.display = 'inline'; //Show counter
+                    this.elem.childNodes[5].style.color = "#50C878"; // Change color to green
+                    break;
+            }  
+        } 
     }
     updateImage() {
         let imgSrc = this.elem.childNodes[3].src;
@@ -859,6 +870,11 @@ function renameIcon(icon, name) { //Rename existing icon
     return L.icon({iconUrl: icon.options.iconUrl, iconSize: icon.options.iconSize, 
         className: name});
 }
+function reqIcon(icon, name, req, isQuantity) {
+    let i = isQuantity ? qI(icon, req) : renameIcon(icon, name);
+    i.req = req;
+    return i;
+}
 
 //General Map
 var chest = createIcon('Chest', 505, 462);
@@ -900,11 +916,13 @@ var worms = createIcon('BottleWorm', 128, 205, 'Worm');
 //Obtainables
 var heartPiece = createIcon('Heart Piece', 380, 292);
 var heartContainer = createIcon('Heart Container', 1000, 779);
+var skyBookChar = createIcon('Sky Book Character', 117, 102);
 var coralEarring = createIcon('Coral Earring', 128, 210);
 var quiver = createIcon('Quiver0', 97, 128, 'Quiver'); //Placeholder
 var bigQuiver = createIcon('Quiver1', 103, 128, 'Big Quiver');
 var giantQuiver = createIcon('Quiver2', 114, 128, 'Giant Quiver');
 var poeSoul = createIcon('Poe Soul', 118, 119);
+var hiddenSkill = createIcon('Hidden Skill', 96, 126);
 var ooccoo = createIcon('OoccooPot', 32, 32, 'Ooccoo');
 var smallKey = createIcon('Small Key', 128, 128);
 var bossKey = createIcon('Boss Key', 32.5, 55);
@@ -929,6 +947,95 @@ var arrows = createIcon('Arrows', 91, 128);
 var bombs = createIcon('Bombs', 128, 140);
 var waterBombs = createIcon('Water Bombs', 128, 120);
 var bomblings = createIcon('Bomblings', 128, 103);
+
+//Tracker Item Icons
+var fishingRod = createIcon('Fishing Rod0', 79, 181, 'Fishing Rod');
+var fishingRodCE = createIcon('Fishing Rod1', 80, 181, 'Fishing Rod & Coral Earring');
+var slingshot = createIcon('Slingshot', 97, 150); 
+var lantern = createIcon('Lantern', 85, 165);
+var boomerang = createIcon('Gale Boomerang', 85, 170);
+var ironBoots = createIcon('Iron Boots', 128, 128);
+var bow = createIcon("Hero's Bow", 138, 138);
+var hawkeye = createIcon('Hawkeye', 55, 49.4);
+var bombBag = createIcon('Bomb Bag', 128, 173);
+var giantBombBag = createIcon('Giant Bomb Bag', 125, 164);
+var clawshot = createIcon('Clawshot0', 128, 179, 'Clawshot');
+var doubleClawshot = createIcon('Clawshot1', 161, 128, 'Double Clawshot');
+var aurusMemo = createIcon("Auru's Memo", 462, 619);
+var spinner = createIcon('Spinner', 179, 128);
+var asheisSketch = createIcon("Ashei's Sketch", 462, 619);
+var ballAndChain = createIcon('Ball and Chain', 128, 107);
+var redDominionRod = createIcon('Dominion Rod0', 128, 205, 'Past Dominion Rod');
+var dominionRod = createIcon('Dominion Rod1', 128, 205, 'Dominion Rod');
+var horseCall = createIcon('Horse Call', 64, 128);
+var iliasCharm = createIcon("Ilia's Charm", 1000, 1227);
+var renadosLetter = createIcon("Renado's Letter", 128, 107);
+var invoice = createIcon('Invoice', 101, 118);
+var woodenStatue = createIcon('Wooden Statue', 59, 128);
+var bottle = createIcon('Bottle', 116, 188);
+var shadowCrystal = createIcon('Shadow Crystal', 975, 1990);
+var woodenSword = createIcon('Sword0', 35.7, 55, 'Wooden Sword');
+var ordonSword = createIcon('Sword1', 35.5, 55, 'Ordon Sword');
+var masterSword = createIcon('Sword2', 79, 127, 'Master Sword');
+var lightMasterSword = createIcon('Sword3', 79, 127, 'Light Filled Master Sword');
+var ordonShield = createIcon('Shield0', 49.3, 55, 'Ordon Shield');
+var woodenShield = createIcon('Shield1', 41.9, 55, 'Wooden Shield');
+var hylianShield = createIcon('Shield2', 44.3, 55, 'Hylian Shield');
+var zoraArmor = createIcon('Zora Armor', 125, 148);
+var magicArmor = createIcon('Magic Armor', 125, 149);
+var wallet = createIcon('Wallet0', 68, 114, 'Wallet');
+var bigWallet = createIcon('Wallet1', 81, 124, 'Big Wallet');
+var giantWallet = createIcon('Wallet2', 96, 125, 'Giant Wallet');
+var youthsScent = createIcon('Scent0', 114, 144, "Youths' Scent");
+var iliaScent = createIcon('Scent1', 114, 114, 'Scent of Ilia');
+var poeScent = createIcon('Scent2', 114, 114, 'Poe Scent');
+var reekfishScent = createIcon('Scent3', 114, 114, "Reekfish Scent");
+var medecineScent = createIcon('Scent4', 114, 114, 'Medecine Scent');
+var gateKeys = createIcon('Small KeyG', 128, 128, 'Gate Keys');
+var smallKeyFT = renameIcon(smallKey, 'Forest Temple Small Key');
+var bossKeyFT = renameIcon(bossKey, 'Forest Temple Boss Key');
+var smallKeyGM = renameIcon(smallKey, 'Goron Mines Small Key');
+var bossKeyGM = createIcon('GBK3', 117, 105, 'Goron Mines Boss Key');
+bossKeyGM.req = 3;
+var smallKeyLT = renameIcon(smallKey, 'Lakebed Temple Small Key');
+var bossKeyLT = renameIcon(bossKey, 'Lakebed Temple Boss Key');
+var smallKeyAG = renameIcon(smallKey, "Arbiter's Grounds Small Key");
+var bossKeyAG = renameIcon(bossKey, "Arbiter's Grounds Boss Key");
+var smallKeySR = renameIcon(smallKey, 'Snowpeak Ruins Small Key');
+var bedroomKey = createIcon("Bedroom Key", 83, 128);
+var smallkeyTT = renameIcon(smallKey, 'Temple of Time Small Key');
+var bossKeyTT = renameIcon(bossKey, "Temple of Time Boss Key");
+var smallKeyCS = renameIcon(smallKey, 'chestty in the Sky Small Key');
+var bossKeyCS = renameIcon(bossKey, 'chestty in the Sky Boss Key');
+var smallKeyPT = renameIcon(smallKey, "Palace of Twilight Small Key");
+var bossKeyPT = renameIcon(bossKey, "Palace of Twilight Boss Key");
+var smallKeyHC = renameIcon(smallKey, "Hyrule Castle Small Key");
+var bossKeyHC = renameIcon(bossKey, "Hyrule Castle Boss Key");
+
+var ancientSkyBook = renameIcon(skyBookChar, 'Ancient Sky Book');
+ancientSkyBook.req = 1;
+var completedAncientSkyBook = renameIcon(skyBookChar, 'Completed Ancient Sky Book');
+completedAncientSkyBook.req = 7;
+
+var poeSouls20 = qI(poeSoul, 20);
+poeSouls20.req = 20;
+var poeSouls60 = qI(poeSoul, 60);
+poeSouls60.req = 60;
+
+var endingBlow = renameIcon(hiddenSkill, 'Ending Blow');
+endingBlow.req = 1;
+var shieldAttack = renameIcon(hiddenSkill, 'Shield Attack');
+shieldAttack.req = 2;
+var backSlice = renameIcon(hiddenSkill, 'Back Slice');
+backSlice.req = 3;
+var helmSplitter = renameIcon(hiddenSkill, 'Helm Splitter');
+helmSplitter.req = 4;
+var mortalDraw = renameIcon(hiddenSkill, 'Mortal Draw');
+mortalDraw.req = 5;
+var jumpStrike = renameIcon(hiddenSkill, 'Jump Strike');
+jumpStrike.req = 6;
+var greatSpin = renameIcon(hiddenSkill, 'Great Spin');
+greatSpin.req = 7;
 
 var antM = createIcon('Bug0', 125, 108, '♂&nbsp Ant');
 var antF = createIcon('Bug1', 123, 119, '♀&nbsp Ant');
@@ -955,65 +1062,14 @@ var grasshopperF = createIcon('Bug21', 146, 73, '♀&nbsp Grasshopper');
 var dragonflyM = createIcon('Bug22', 140, 119, '♂&nbsp Dragonfly');
 var dragonflyF = createIcon('Bug23', 140, 119, '♀&nbsp Dragonfly');
 
-//Item Icons
-var fishingRod = createIcon('Fishing Rod0', 79, 181, 'Fishing Rod');
-var fishingRodCE = createIcon('Fishing Rod1', 80, 181, 'Fishing Rod & Coral Earring');
-var slingshot = createIcon('Slingshot', 97, 150); 
-var lantern = createIcon('Lantern', 85, 165);
-var boomerang = createIcon('Gale Boomerang', 85, 170);
-var ironBoots = createIcon('Iron Boots', 128, 128);
-var bow = createIcon("Hero's Bow", 138, 138);
-var hawkeye = createIcon('Hawkeye', 55, 49.4);
-var bombBag = createIcon('Bomb Bag', 128, 173);
-var giantBombBag = createIcon('Giant Bomb Bag', 125, 164);
-var clawshot = createIcon('Clawshot0', 128, 179, 'Clawshot');
-var doubleClawshot = createIcon('Clawshot1', 161, 128, 'Double Clawshot');
-var aurusMemo = createIcon("Auru's Memo", 462, 619);
-var spinner = createIcon('Spinner', 179, 128);
-var asheisSketch = createIcon("Ashei's Sketch", 462, 619);
-var ballAndChain = createIcon('Ball and Chain', 128, 107);
-var redDominionRod = createIcon('Dominion Rod0', 128, 205, 'Past Dominion Rod');
-var dominionRod = createIcon('Dominion Rod1', 128, 205, 'Dominion Rod');
-var horseCall = createIcon('Horse Call', 64, 128);
-var iliasCharm = createIcon("Ilia's Charm", 1000, 1227);
-var renadosLetter = createIcon("Renado's Letter", 128, 107);
-var invoice = createIcon('Invoice', 101, 118);
-var woodenStatue = createIcon('Wooden Statue', 59, 128);
-var skyBookChar = createIcon('Sky Book Character', 117, 102);
-var ancientSkyBook = renameIcon(skyBookChar, 'Ancient Sky Book');
-var bottle = createIcon('Bottle', 116, 188);
-var shadowCrystal = createIcon('Shadow Crystal', 975, 1990);
-var woodenSword = createIcon('Sword0', 35.7, 55, 'Wooden Sword');
-var ordonSword = createIcon('Sword1', 35.5, 55, 'Ordon Sword');
-var masterSword = createIcon('Sword2', 79, 127, 'Master Sword');
-var lightMasterSword = createIcon('Sword3', 79, 127, 'Light Filled Master Sword');
-var ordonShield = createIcon('Shield0', 49.3, 55, 'Ordon Shield');
-var woodenShield = createIcon('Shield1', 41.9, 55, 'Wooden Shield');
-var hylianShield = createIcon('Shield2', 44.3, 55, 'Hylian Shield');
-var zoraArmor = createIcon('Zora Armor', 125, 148);
-var magicArmor = createIcon('Magic Armor', 125, 149);
-var wallet = createIcon('Wallet0', 68, 114, 'Wallet');
-var bigWallet = createIcon('Wallet1', 81, 124, 'Big Wallet');
-var giantWallet = createIcon('Wallet2', 96, 125, 'Giant Wallet');
-var gateKeys = createIcon('Small KeyG', 128, 128, 'Gate Keys');
-var smallKeyFT = renameIcon(smallKey, 'Forest Temple Small Key');
-var bossKeyFT = renameIcon(bossKey, 'Forest Temple Boss Key');
-var smallKeyGM = renameIcon(smallKey, 'Goron Mines Small Key');
-var bossKeyGM = createIcon('GBK3', 117, 105, 'Goron Mines Boss Key');
-var smallKeyLT = renameIcon(smallKey, 'Lakebed Temple Small Key');
-var bossKeyLT = renameIcon(bossKey, 'Lakebed Temple Boss Key');
-var smallKeyAG = renameIcon(smallKey, "Arbiter's Grounds Small Key");
-var bossKeyAG = renameIcon(bossKey, "Arbiter's Grounds Boss Key");
-var smallKeySR = renameIcon(smallKey, 'Snowpeak Ruins Small Key');
-var bedroomKey = createIcon("Bedroom Key", 83, 128);
-var smallkeyTT = renameIcon(smallKey, 'Temple of Time Small Key');
-var bossKeyTT = renameIcon(bossKey, "Temple of Time Boss Key");
-var smallKeyCS = renameIcon(smallKey, 'chestty in the Sky Small Key');
-var bossKeyCS = renameIcon(bossKey, 'chestty in the Sky Boss Key');
-var smallKeyPT = renameIcon(smallKey, "Palace of Twilight Small Key");
-var bossKeyPT = renameIcon(bossKey, "Palace of Twilight Boss Key");
-var smallKeyHC = renameIcon(smallKey, "Hyrule Castle Small Key");
-var bossKeyHC = renameIcon(bossKey, "Hyrule Castle Boss Key");
+var diababa = createIcon('Diababa', 314, 324, 'Diababa Defeated');
+var fyrus = createIcon('Fyrus', 323, 262, 'Fyrus Defeated');
+var morpheel = createIcon('Morpheel', 349, 397, 'Morpheel Defeated');
+var stallord = createIcon('Stallord', 344, 295, 'Stallord Defeated');
+var blizzeta = createIcon('Blizzeta', 350, 355, 'Blizzeta Defeated');
+var armogohma = createIcon('Armogohma', 384, 298, 'Armogohma Defeated');
+var argorok = createIcon('Argorok', 397, 359, 'Argorok Defeated');
+var zant = createIcon('Zant', 586, 670, 'Zant Defeated');
 
 
 
@@ -1328,8 +1384,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     new FakeCheck([-5481, 7322], dominionRod, notaRupeesSU, [ancientSkyBook], 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod. This is not a Randomizer Check.'),
                 ]],
                 [[260, 225], [
-                    new Check([-5510, 7661], renadosLetter, giftsSU, undefined, undefined, 'After clearing the Temple of Time, talk to Renado to obtain his letter. ' + neverRandomized),
-                    new Check([-5540, 7590], horseCall, giftsSU, undefined, [iliasCharm], 'Show the charm to Ilia for it to be revealed as the horse call and receive it back.'),
+                    new Check([-5510, 7661], renadosLetter, giftsSU, undefined, [armogohma], 'After clearing the Temple of Time, talk to Renado to obtain his letter. ' + neverRandomized),
+                    new Check([-5540, 7590], horseCall, giftsSU, undefined, [iliasCharm], 'Show the charm to Ilia for it to be revealed as the horse call and receive it back. ' + neverRandomized),
                 ]]
             ], 2),
             new Submap([-5711, 6043], cave, 'EldinCave.png', [862, 780], [
@@ -1428,7 +1484,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-432, 3728], poeSoul, poesSU, undefined, [shadowCrystal], poeNightText + 'Above the grotto.'),
             new Check([-344, 3334], poeSoul, poesSU, undefined, [shadowCrystal], poeNightText + 'Above the grotto, behind the tree.'),
             new Check([-2985, 1299], poeSoul, poesSU, undefined, [shadowCrystal], 'When in front of the mansion, go back to the snow trail as Wolf Link and climb the spiral structure. The poe is at the top.'),
-            new Check([-691, 3013], heartPiece, giftsSU, undefined, [bombBag, ballAndChain], 'Requires having cleared Snowpeak Ruins. Race Yeto and win, than go back to the mountaintop and win against Yeta.'),
+            new Check([-691, 3013], heartPiece, giftsSU, undefined, [blizzeta], 'Requires having cleared Snowpeak Ruins. Race Yeto and win, than go back to the mountaintop and win against Yeta.'),
             new Check([-655, 3300], poeSoul, poesSU, undefined, [ballAndChain, shadowCrystal], 'In the cave, break the north ice block with the ball and chain to reveal the poe.'),
             new Check([-675, 3275], chest, baseSU, orangeRupee, [ballAndChain, shadowCrystal, lantern], 'In the cave, break the 2 ice blocks to reveal torches. Light them up to make the chest appear.'),
 
@@ -1505,8 +1561,8 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-5460, 2690], aurusMemo, giftsSU, undefined, undefined, "Climb the tower with the ladder and talk to Auru to obtain the memo."),
             new Check([-3349, 3595], chest, baseSU, heartPiece, [[bombBag, ballAndChain], spinner], 'Destroy the boulders blocking the way, than use the spinner ramps to reach the chest.'),
             new Check([-4314, 3790], poeSoul, poesSU, undefined, [shadowCrystal], 'Appears only at Night. In the middle of the ruins.'),
-            new Check([-3946, 4924], smallChest, baseSU, redRupee, [renadosLetter, invoice, shadowCrystal], 'After giving the doctor the Invoice, push the box hiding the medecine scent, and climb up until you are outside. Once there, the chest is on the balcony.'),
-            new Check([-4676, 4714], woodenStatue, baseSU, undefined, [renadosLetter, invoice, shadowCrystal], 'After collecting the Medicine Scent and talking to Louise, defeat all of the Stallhounds at Night to receive the wooden statue.' + neverRandomized),
+            new Check([-3946, 4924], smallChest, baseSU, redRupee, [invoice, shadowCrystal], 'After giving the doctor the Invoice, push the box hiding the medecine scent, and climb up until you are outside. Once there, the chest is on the balcony.'),
+            new Check([-4676, 4714], woodenStatue, baseSU, undefined, [invoice, shadowCrystal], 'After collecting the Medicine Scent and talking to Louise, defeat all of the Stallhounds at Night to receive the wooden statue.' + neverRandomized),
             new Check([-3701, 4709], goldenWolf, skillsSU, undefined, [shadowCrystal], 'Summoned by the Hidden Village Howling Stone.'),
 
             new FakeCheck([-852, 5918], howlingStone, skillsSU, [shadowCrystal], 'Summons the West Castle Town Golden Wolf. Is accessible while clearing the Lanayru Twilight.'),
@@ -1587,7 +1643,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ]),
             new Submap([-4057, 4837], door, 'Jovani.png', [403, 259], [
                 new Check([-4193, 5102], poeSoul, poesSU, undefined, [shadowCrystal], 'Enter the house using the dig spot to get this poe'),
-                new Check([-3905, 4994], tearsPotion, giftsSU, undefined, [shadowCrystal], 'Talk to Jovani after collecting 20 poe souls to receive this bottle with Great Fairy Tears'),
+                new Check([-3905, 4994], tearsPotion, giftsSU, undefined, [shadowCrystal, poeSouls20], 'Talk to Jovani after collecting 20 poe souls to receive this bottle with Great Fairy Tears'),
             ]),
             new Submap([-4035, 4573], door, 'STAR.png', [404, 304], [
                 new Check([-4113, 4433], bigQuiver, giftsSU, undefined, [clawshot], 'Pay 10 rupees to play the first STAR minigame and win it to receive the big quiver.'),
