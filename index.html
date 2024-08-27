@@ -73,69 +73,85 @@
                 <button class="setb setbh" onclick="resetTracker(this)">Reset Tracker</button>
             </div>      
             <div id="setche">
-                <h3 class="seth">Markers visibility</h3>
-
-                <input type="checkbox" id="checkS" class="bigSC" onclick="setChildren(this.checked, 1, 7)">
+                <h3 class="seth">General Settings</h3>
+                <input type="checkbox" id="trackerS" class="bigSC" onload="new Setting(this, 0, 0, true)">
+                <label for="trackerS" class="bigSL">Enable Tracker Logic</label>
+                <input type="checkbox" id="hideTrackerS" class="SC" onload="new Setting(this, 1, 0, true);">
+                <label for="hideTrackerS" class="SL">Hide Checks without Requirements</label>
+                <input type="checkbox" id="emptysubS" class="bigSC" onload="new Setting(this, 2, 0, true);">
+                <label for="emptysubS" class="bigSL">Show Empty Submaps</label>
+                <input type="checkbox" id="1checksubS" class="bigSC" onload="new Setting(this, 3, 0, true);">
+                <label for="1checksubS" class="bigSL">Show Submaps with 1 Visible Check as Check</label>
+                <input type="checkbox" id="chestS" class="bigSC"onload="new Setting(this, 4, 0, true);">
+                <label for="chestS" class="bigSL">Show Chests as their Base Game Content</label>
+                <input type="checkbox" id="trackerOverlapS" class="bigSC" onload="new Setting(this, 5, 0, true);">
+                <label for="trackerOverlapS" class="bigSL">Overlay Tracker on Map</label>
+                
+                <h3 class="seth">Submap Counters</h3>
+                <input type="checkbox" id="subCounterS" class="bigSC" onload="new Setting(this, 6, 0, true);">
+                <label for="subCounterS" class="bigSL">Show Check Counters for Submaps</label>
+                <input type="checkbox" id="poescptS" class="SC" onload="new Setting(this, 7, 3, 'poes');">
+                <label for="poescptS" class="SL">Count Poes</label>
+                <input type="checkbox" id="bugscptS" class="SC" onload="new Setting(this, 8, 3, 'bugs');">
+                <label for="bugscptS" class="SL">Count Golden Bugs</label>
+                <input type="checkbox" id="giftscptS" class="SC" onload="new Setting(this, 9, 3, 'gifts');">
+                <label for="giftscptS" class="SL">Count Gifts from NPCs</label>
+                <input type="checkbox" id="skycptS" class="SC" onload="new Setting(this, 10, 3, 'skyChars');">
+                <label for="skycptS" class="SL">Count Sky Characters</label>
+                <input type="checkbox" id="skillscptS" class="SC" onload="new Setting(this, 11, 3, 'skills');">
+                <label for="skillscptS" class="SL">Count Hidden Skills</label>
+                <input type="checkbox" id="shopcptS" class="SC" onload="new Setting(this, 12, 3, 'shop');">
+                <label for="shopcptS" class="SL">Count Shop Items</label>
+                <input type="checkbox" id="flagscptS" class="SC" onload="new Setting(this, 13, 0, true);">
+                <label for="flagscptS" class="SL">Count Non-Check Flags</label>
+                <input type="checkbox" id="nflagscptS" class="SC" onload="new Setting(this, 14, 0, true);">
+                <label for="nflagscptS" class="SL">Count Non-Flags</label>
+                
+                <h3 class="seth">Markers Visibility</h3>
+                <input type="checkbox" id="checkS" class="bigSC" 
+                    onload="new Setting(this, 0, 1, ['baseS', 'poesS', 'bugsS', 'giftsS', 'skyS', 'skillS', 'shopS'])">
                 <label for="checkS" class="bigSL">Show Checks</label>
-                <input type="checkbox" id="baseS" class="SC" onclick="iconSet(this.checked, 'base', 1); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="baseS" class="SC" onload="new Setting(this, 15, 2, ['base', 'checkS'])">
                 <label for="baseS" class="SL">Show Base Checks</label>
-                <input type="checkbox" id="poesS" class="SC" onclick="iconSet(this.checked, 'poes', 2); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="poesS" class="SC" onload="new Setting(this, 16, 2, ['poes', 'checkS'])">
                 <label for="poesS" class="SL">Show Poe Souls</label>
-                <input type="checkbox" id="bugsS" class="SC" onclick="iconSet(this.checked, 'bugs', 3); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="bugsS" class="SC" onload="new Setting(this, 17, 2, ['bugs', 'checkS'])">
                 <label for="bugsS" class="SL">Show Golden Bugs</label>
-                <input type="checkbox" id="giftsS" class="SC" onclick="iconSet(this.checked, 'gifts', 4); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="giftsS" class="SC" onload="new Setting(this, 18, 2, ['gifts', 'checkS'])">
                 <label for="giftsS" class="SL">Show Gifts from NPCs</label>
-                <input type="checkbox" id="skyS" class="SC" onclick="iconSet(this.checked, 'skyc', 5); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="skyS" class="SC" onload="new Setting(this, 19, 2, ['skyChars', 'checkS'])">
                 <label for="skyS" class="SL">Show Sky Characters</label>
-                <input type="checkbox" id="skillS" class="SC" onclick="iconSet(this.checked, 'skills', 6); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="skillS" class="SC" onload="new Setting(this, 20, 2, ['skills', 'checkS'])">
                 <label for="skillS" class="SL">Show Hidden Skills</label>
-                <input type="checkbox" id="shopS" class="SC" onclick="iconSet(this.checked, 'shop', 7); verifyParentCheck(this.checked, 'checkS', 0);">
+                <input type="checkbox" id="shopS" class="SC" onload="new Setting(this, 21, 2, ['shop', 'checkS'])">
                 <label for="shopS" class="SL">Show Shop Items</label>
+                <input type="checkbox" id="heartPieceS" class="bigSC" onload="new Setting(this, 30, 4, 'checkS')">
+                <label for="heartPieceS" class="bigSL">Show <b>Only</b> Heart Pieces</label>
 
-                <input type="checkbox" id="ncheckS" class="bigSC"  onclick="setChildren(this.checked, 9, 11)">
+                <input type="checkbox" id="ncheckS" class="bigSC" 
+                    onload="new Setting(this, 0, 1, ['ooccooS', 'locdoorS', 'notRupeeS'])">
                 <label for="ncheckS" class="bigSL">Show Non-Check Flags</label>
-                <input type="checkbox" id="ooccooS" class="SC" onclick="iconSet(this.checked, 'ooccoo', 9); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <input type="checkbox" id="ooccooS" class="SC" onload="new Setting(this, 22, 2, ['ooccoo', 'ncheckS'])">
                 <label for="ooccooS" class="SL">Show Ooccoo</label>
-                <input type="checkbox" id="locdoorS" class="SC" onclick="iconSet(this.checked, 'locked', 10); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <input type="checkbox" id="locdoorS" class="SC" onload="new Setting(this, 23, 2, ['locked', 'ncheckS'])">
                 <label for="locdoorS" class="SL">Show Locked Doors</label>
-                <input type="checkbox" id="notRupeeS" class="SC" onclick="iconSet(this.checked, 'notaRupee', 11); verifyParentCheck(this.checked, 'ncheckS', 8);">
+                <input type="checkbox" id="notRupeeS" class="SC" onload="new Setting(this, 24, 2, ['notaRupee', 'ncheckS'])">
                 <label for="notRupeeS" class="SL">Show Notable Rupees & Rupee Boulders</label>
 
-                <input type="checkbox" id="nflagS" class="bigSC"  onclick="setChildren(this.checked, 13, 17)">
+                <input type="checkbox" id="nflagS" class="bigSC"
+                    onload="new Setting(this, 0, 1, ['bottleS', 'rshopS', 'grassS', 'monrupeeS', 'fishS'])">
                 <label for="nflagS" class="bigSL">Show Non-Flags</label>
-                <input type="checkbox" id="bottleS" class="SC" onclick="iconSet(this.checked, 'bottle', 13); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <input type="checkbox" id="bottleS" class="SC"  onload="new Setting(this, 25, 2, ['bottle', 'nflagS'])">
                 <label for="bottleS" class="SL">Show Bottled Items</label>
-                <input type="checkbox" id="rshopS" class="SC" onclick="iconSet(this.checked, 'rshop', 14); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <input type="checkbox" id="rshopS" class="SC" onload="new Setting(this, 26, 2, ['rshop', 'nflagS'])">
                 <label for="rshopS" class="SL">Show Entire Shops</label>
-                <input type="checkbox" id="grassS" class="SC" onclick="iconSet(this.checked, 'grass', 15); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <input type="checkbox" id="grassS" class="SC" onload="new Setting(this, 27, 2, ['grass', 'nflagS'])">
                 <label for="grassS" class="SL">Show Horse & Hawk Grass</label>
-                <input type="checkbox" id="monrupeeS" class="SC" onclick="iconSet(this.checked, 'monrup', 16); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <input type="checkbox" id="monrupeeS" class="SC" onload="new Setting(this, 28, 2, ['monrup', 'nflagS'])">
                 <label for="monrupeeS" class="SL">Show Monster + Rupee Groups</label>
-                <input type="checkbox" id="fishS" class="SC" onclick="iconSet(this.checked, 'fish', 17); verifyParentCheck(this.checked, 'nflagS', 12);">
+                <input type="checkbox" id="fishS" class="SC" onload="new Setting(this, 29, 2, ['fish', 'nflagS'])">
                 <label for="fishS" class="SL">Show Fishing Spots</label>
-
-                <input type="checkbox" id="emptysubS" class="bigSC" onclick="setSettingsFlag(this.checked, 18, true);">
-                <label for="emptysubS" class="bigSL">Show Empty Submaps</label>
-                <input type="checkbox" id="1checksubS" class="bigSC" onclick="setSettingsFlag(this.checked, 19, true);">
-                <label for="1checksubS" class="bigSL">Show Submaps with 1 Visible Check as Check</label>
-                <input type="checkbox" id="chestS" class="bigSC" onclick="setSettingsFlag(this.checked, 20, true);">
-                <label for="chestS" class="bigSL">Show Chests as their Base Game Content</label>
-
-                <h3 class="seth">General settings</h3>
-                <input type="checkbox" id="subCounterS" class="bigSC" onclick="setSettingsFlag(this.checked, 21, true);">
-                <label for="subCounterS" class="bigSL">Show Check Counters for Submaps</label>
-                <input type="checkbox" id="flagscptS" class="SC" onclick="setSettingsFlag(this.checked, 22, true);">
-                <label for="flagscptS" class="SL">Count Non-Check Flags in Submap Counters</label>
-                <input type="checkbox" id="nflagscptS" class="SC" onclick="setSettingsFlag(this.checked, 23, true);">
-                <label for="nflagscptS" class="SL">Count Non-Flags in Submap Counters</label>
-
-                <input type="checkbox" id="trackerS" class="bigSC" onclick="setSettingsFlag(this.checked, 24, true);">
-                <label for="trackerS" class="bigSL">Enable Tracker Logic</label>
-                <input type="checkbox" id="hideTrackerS" class="SC" onclick="setSettingsFlag(this.checked, 25, true);">
-                <label for="hideTrackerS" class="SL">Hide Checks without Requirements</label>
-
-                <input type="checkbox" id="trackerOverlapS" class="bigSC" onclick="setSettingsFlag(this.checked, 26, false);">
-                <label for="trackerOverlapS" class="bigSL">Overlay Tracker on Map</label>
+                
                 <br>
             </div>               
         </div>
@@ -164,6 +180,7 @@
                 <li><b>Right Click</b> on a floor button to <i>Check / Uncheck</i> a floor</li>
                 <li><b>Zoom Out</b> to <i>Exit</i> the dungeon map</li>
             </ul>
+            <br>
             <h2>Tracker Controls</h2>
             <ul>
                 <li><b>Click</b> on an item to <i>Mark</i> it</li>
@@ -237,7 +254,7 @@
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Horse Call.png" class="timage">
             </div>
-            <div class="titem" onload="new TrackerItem(this, 14, 4, 7, [ancientSkyBook, completedAncientSkyBook])">
+            <div class="titem" onload="new TrackerItem(this, 14, 4, 7, [ancientSkyBook, filledSkyBook])">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Sky Book Character.png" class="timage">
                 <div class="tcpt">0</div>
