@@ -2414,18 +2414,19 @@ function showRightMenu(menuID, width) {
     }
     menu.style.visibility = "visible";
     menu.style.width = '' + width + 'vw';
-    menu.style.height = "100%";
     document.getElementById('menuicons').style.display = "none";
 }
 function hideRightMenu(menuID) {
     let menu = document.getElementById(menuID);
-    if (menuID == "tracker" && !settingIsChecked('trackerOverlapS')) {
-        updateMapSize('100vw');
+    document.getElementById('menuicons').style.display = "inline";
+    if (menuID == "tracker") {
+        if (!settingIsChecked('trackerOverlapS'))
+            updateMapSize('100vw');
+        menu.style.visibility = "hidden";  
+        return;
     }
     menu.style.width = "0%";
-    document.getElementById('menuicons').style.display = "inline";
     setTimeout(function() {
-        menu.style.height = "0%";
         menu.style.visibility = "hidden";  
     }, 100);  
 }
