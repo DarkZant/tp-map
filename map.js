@@ -339,8 +339,9 @@ var Submap = L.Marker.extend({
             bounds = isFloored ? this.floors[0].imageOverlay.getBounds() : this.image.getBounds();
             let nwp = bounds.getNorthWest();
             let sep = bounds.getSouthEast();
+            let controlsOffset = isFloored ? 200 : 100;
             setTimeout(function() {
-                map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - 100], [sep.lat - 100, sep.lng + 100]]));
+                map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - controlsOffset], [sep.lat - 100, sep.lng + 100]]));
             }, 200);  
         }
         TL.setOpacity(0.2);
@@ -465,10 +466,7 @@ var Dungeon = Submap.extend({
         }
     },
     loadIcon: function() {
-        if (mapState == 0) 
-            this._latlng = this.latLngImage;
-        else 
-            this._latlng = this.latLngTile;
+        this._latlng = mapState == 0 ? this.latLngImage : this.latLngTile;
         if (!settingIsChecked('emptysubS') && !this.hasShownChecks()) // Hide if empty
             return;
         if (settingIsChecked('1checksubS') && this.countVisibleChecks() == 1) { // Show as singular check
@@ -2195,8 +2193,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonCheck([-3776, 3738], blueChuJelly, 'bottle')
             ],
             [ // 5F
-                new Check([-3877, 3766], heartContainer, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS], 'Defeat Argorok to obtain the Heart Container in the boss fight area.'),
-                new Check([-3789, 3712], mirrorShard, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS],  'Defeat Argorok to obtain the Mirror Shard in the boss fight area.'),
+                new Check([-3877, 3766], heartContainer, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS, woodenSword], 'Defeat Argorok to obtain the Heart Container in the boss fight area.'),
+                new Check([-3789, 3712], mirrorShard, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS, woodenSword],  'Defeat Argorok to obtain the Mirror Shard in the boss fight area.'),
 
                 new FakeCheck([-3902, 3938], lockedDoor, lockedDoorSU, [bossKeyCS], 'Boss Door.'),
 
@@ -2265,9 +2263,7 @@ function loadImageMap() {
     map.on("zoomend", loadTilemapFromImageMap);
     loadImageIcons(); 
     if (document.getElementById('check').style.visibility == 'visible')
-        hideDetails();
-    if (!settingIsChecked('trackerOverlapS') && document.getElementById('tracker').style.visibility == 'visible')
-        updateMapSize('100vw');  
+        hideDetails(); 
 }
 function loadTilemapFromImageMap() {
     if (map.getZoom() <= -4)
@@ -2282,8 +2278,6 @@ function loadTilemapFromImageMap() {
     removeAllLayers();  
     TL.addTo(map); 
     loadTLIcons(); 
-    if (!settingIsChecked('trackerOverlapS') && document.getElementById('tracker').style.visibility == 'visible') 
-        updateMapSize('71vw');  
 
     let cpt = 0;
     map.eachLayer(function(_){
@@ -2415,22 +2409,18 @@ function hideDetails() {
 }
 function showRightMenu(menuID, width) {
     let menu = document.getElementById(menuID);
-    if (menuID == "tracker") {
-        menu.style.display = "flex";
-        if (!settingIsChecked('trackerOverlapS') && mapState > 0)
-            updateMapSize('71vw');
+    if (menuID == "tracker" && !settingIsChecked('trackerOverlapS')) {
+        updateMapSize((100 - width) + 'vw');
     }
     menu.style.visibility = "visible";
-    menu.style.width = width;
+    menu.style.width = '' + width + 'vw';
     menu.style.height = "100%";
     document.getElementById('menuicons').style.display = "none";
 }
 function hideRightMenu(menuID) {
     let menu = document.getElementById(menuID);
-    if (menuID == "tracker") {
-        menu.style.display = "none";
-        if (!settingIsChecked('trackerOverlapS'))
-            updateMapSize('100vw');
+    if (menuID == "tracker" && !settingIsChecked('trackerOverlapS')) {
+        updateMapSize('100vw');
     }
     menu.style.width = "0%";
     document.getElementById('menuicons').style.display = "inline";
