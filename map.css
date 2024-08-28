@@ -2,7 +2,10 @@
     font-family: 'TPLocation';
     src: url(Fonts/TPLocationFont.woff),
          url('Fonts/TPLocationFont.TTF') format('truetype');
-
+}
+@font-face {
+    font-family: 'TPText';
+    src: url(Fonts/TPText.otf);
 }
 
 /* Leaflet Modifications */
@@ -253,6 +256,7 @@ body {
     font-size: 1.4vmax;
 }
 .item {
+    font-family: Arial, sans-serif;
     display: flex;
     align-items: center;
     vertical-align: middle;
@@ -280,6 +284,7 @@ body {
     max-height: 3vmax;
 }
 .oritems {
+    font-family: Arial, sans-serif;
     display: flex;
     flex-wrap: wrap;
     vertical-align: middle;
@@ -305,6 +310,7 @@ body {
     margin-top: -0.7vh;
 }
 .por {
+    font-family: Arial, sans-serif;
     margin-left: 1.8vw;
     font-size: 1.4vmax;
     font-style: italic;

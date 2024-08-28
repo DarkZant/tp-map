@@ -1128,7 +1128,7 @@ var iliasCharm = createIcon("Ilia's Charm", 1000, 1227);
 var renadosLetter = createIcon("Renado's Letter", 128, 107);
 var invoice = createIcon('Invoice', 101, 118);
 var woodenStatue = createIcon('Wooden Statue', 59, 128);
-var bottle = createIcon('Bottle', 116, 188);
+var bottle = createIcon('Bottle', 116, 188, 'Empty Bottle');
 var shadowCrystal = createIcon('Shadow Crystal', 975, 1990);
 var woodenSword = createIcon('Sword0', 35.7, 55, 'Wooden Sword');
 var ordonSword = createIcon('Sword1', 35.5, 55, 'Ordon Sword');
@@ -1161,8 +1161,8 @@ var smallKeySR = renameIcon(smallKey, 'Snowpeak Ruins Small Key');
 var bedroomKey = createIcon("Bedroom Key", 83, 128);
 var smallkeyTT = renameIcon(smallKey, 'Temple of Time Small Key');
 var bossKeyTT = renameIcon(bossKey, "Temple of Time Boss Key");
-var smallKeyCS = renameIcon(smallKey, 'chestty in the Sky Small Key');
-var bossKeyCS = renameIcon(bossKey, 'chestty in the Sky Boss Key');
+var smallKeyCS = renameIcon(smallKey, 'City in the Sky Small Key');
+var bossKeyCS = renameIcon(bossKey, 'City in the Sky Boss Key');
 var smallKeyPT = renameIcon(smallKey, "Palace of Twilight Small Key");
 var bossKeyPT = renameIcon(bossKey, "Palace of Twilight Boss Key");
 var smallKeyHC = renameIcon(smallKey, "Hyrule Castle Small Key");
@@ -1411,6 +1411,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
             new Submap([-7447, 4718], cave, 'FaronEntryCave', [455, 495], [
                 new Check([-7340, 4450], smallChest, baseSU, yellowRupee, undefined, 'Use the lantern to be able to locate the chest more easily.')
+            ]),
+            new Submap([-7410, 4936], door, "Coro's House", [484, 369], [
+
             ]),
             new Submap([-6662, 5180], grotto, g2.img, g2.imgSize, [
                 new Check([-6928, 5138], smallChest, baseSU, yellowRupee, [shadowCrystal], 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'),
@@ -1707,13 +1710,14 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-5460, 2690], aurusMemo, giftsSU, undefined, undefined, "Climb the tower with the ladder and talk to Auru to obtain the memo."),
             new Check([-3349, 3595], chest, baseSU, heartPiece, [[bombBag, ballAndChain], spinner], 'Destroy the boulders blocking the way, then use the spinner ramps to reach the chest.'),
             new Check([-4314, 3790], poeSoul, poesSU, undefined, [shadowCrystal], 'Appears only at Night. In the middle of the ruins.'),
-            new Check([-3946, 4924], smallChest, baseSU, redRupee, [invoice, shadowCrystal], 'After giving the doctor the Invoice, push the box hiding the medecine scent, and climb up until you are outside. Once there, the chest is on the balcony.'),
+            new Check([-3940, 4890], smallChest, baseSU, redRupee, [invoice, shadowCrystal], 'After giving the doctor the Invoice, push the box hiding the medecine scent, and climb up until you are outside. Once there, the chest is on the balcony.'),
             new Check([-4676, 4714], woodenStatue, baseSU, undefined, [invoice, shadowCrystal], 'After collecting the Medicine Scent and talking to Louise, defeat all of the Stallhounds at Night to receive the wooden statue.' + neverRandomized),
             new Check([-3701, 4709], goldenWolf, skillsSU, undefined, [shadowCrystal], 'Summoned by the Hidden Village Howling Stone.'),
             new Check([-4220, 3378], skyBookChar, skyCharsSU, undefined, [clawshot, dominionRod], 'Move the Howl Statue under the vines, then clawshot them and drop onto the statue. Finally, jump to the sky character to obtain it.'),
             new Check([-4216, 3433], chest, baseSU, orangeRupee, [clawshot, dominionRod], 'Once on the sky character platform, move the Howl Statue next to the east wall. Then, jump on it and onto the plaftorm on your left to reach the chest.'),
             new Check([-4281, 3766], skyBookChar, skyCharsSU, undefined, [dominionRod], 'Move the Howl Statue between the broken part of the stairs and the pillar with the sky character to obtain it.'),
             new Check([-4334, 3835], chest, baseSU, orangeRupee, [dominionRod], 'Move the Howl Statue between the nearby broken part of the stairs and the pillar with the sky character to obtain it.'),
+            new Check([-4550, 4505], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path down the chasm to reach the chest.'),
 
             new FakeCheck([-852, 5918], howlingStone, skillsSU, [shadowCrystal], 'Summons the West Castle Town Golden Wolf. Is accessible while clearing the Lanayru Twilight.'),
             new FakeCheck([-5405, 3014], howlingStone, skillsSU, [shadowCrystal], 'Summons the Gerudo Desert Golden Wolf. Climb the ladder to reach it.'),
@@ -1754,6 +1758,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5558, 3491], smallChest, baseSU, blueRupee, [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the right.'),
                 new Check([-5538, 3542], smallChest, baseSU, qI(bombs, 5), [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the left.'),
                 new Check([-5559, 3526], chest, baseSU, heartPiece, [clawshot, lantern], 'Light the 2 torches in the room to make the chest appear.'),
+                new Check([-5128, 3232], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
+                new Check([-5145, 3773], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
 
                 new FakeCheck([-5322, 3394], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
                 new FakeCheck([-5171, 3447], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
@@ -1810,6 +1816,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     new NonCheck([-4282, 4523], postman, 'bottle') //Postman
                 ],
                 []
+            ]),
+            new Submap([-3940, 4930], door, 'Doctor', [262, 225], [
+
+            ]),
+            new FlooredSubmap([-4090, 4656], door, 'Goron Shops', [660, 293], [
+                [
+                    //Kid Shop 
+                ],
+                [
+                    //Kid Shop
+                ]
+            ]),
+            new Submap([-4147, 4643], door, "Fanadi's Palace", [247, 227], [
+
             ]),
             new Submap([-3733, 3820], grotto, g1.img, g1.imgSize, [
                 new Check([-3718, 3801], chest, baseSU, orangeRupee, [clawshot, shadowCrystal], "Use the clawshot on the vines to reach the grotto entrance. Once inside, " + 
@@ -2123,30 +2143,65 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5511, 3804], chest, baseSU, redDominionRod, [spinner, bow, woodenSword],'Defeat the Darknut to open the gate that is blocking access to the chest.' )
             ]
         ]),
-        new Dungeon([-5306, 3144], [-5472, 3840], dungeonStar, 'City in the Sky', [0, 0], 0, [
+        new Dungeon([-5306, 3144], [-5472, 3840], dungeonStar, 'City in the Sky', [2228, 1745], 0, [
             [ // B3
-
+                new Check([-4586, 5765], chest, baseSU, doubleClawshot, [clawshot, spinner, ironBoots, smallKeyCS], 'After defeating the Aeralfos, clawshot the target above the chest to reach it.')
             ],
             [ // B2
 
             ],
             [ // B1
-
+                new Check([-4641, 4857], chest, baseSU, compass, [doubleClawshot, spinner, smallKeyCS], 'From the east entrance, follow the falling clawshot target path to reach the chest.'),
+                new Check([-4404, 2998], smallChest, baseSU, qI(arrows, 20), [doubleClawshot], 'Follow the clawshot target path, and clawshot the metal mesh above the platform with the chest to reach it.'),
             ],
             [ // 1F
+                new Check([-5819, 3835], chest, baseSU, qI(waterBombs, 15), [clawshot, [ironBoots, magicArmor]], 'Sink to the chest to open it.'),
+                new Check([-5819, 4039], chest, baseSU, redRupee, [clawshot, [ironBoots, magicArmor]], 'Sink to the chest to open it.'),
+                new Check([-4638, 2693], chest, baseSU, smallKeyCS, [clawshot, spinner], 'Clawshot the target on the ceiling above the chest and drop down to it.'),
+                new Check([-4638, 5442], chest, baseSU, dungeonMap, [clawshot, spinner, smallKeyCS], 'When you enter the room, the chest is on the right.'),
+                new Check([-4773, 5276], smallChest, baseSU, yellowRupee, [clawshot, spinner, smallKeyCS], 'Follow the platforms than take a left, defeating the Tile Worms on the way to reach the chest.'),
+                new Check([-4542, 2796], smallChest, baseSU, redRupee, [doubleClawshot], 'At the end of clawshot path, jump on the long platform with the chest to reach it.'),
+                new Check([-4432, 3028], smallChest, baseSU, qI(bombs, 10), [doubleClawshot], 'Jump across the plateforms while avoiding the Tile Worm to reach the chest.'),
+                new Check([-3902, 3938], chest, baseSU, purpleRupee, [doubleClawshot, shadowCrystal, ironBoots], 'Clawshot the mesh in front of the fan, then enter the hole in the mesh to find the chest.'),
 
+                new FakeCheck([-5780, 4471], ooccoo, ooccooSU, undefined, 'Speak to Ooccoo in the shop for her to join you one last time.'),
+                new FakeCheck([-4608, 4822], lockedDoor, lockedDoorSU, [smallKeyCS], 'Locked door.'),
+                new FakeCheck([-3741, 4041], orangeRupee, notaRupeesSU, [doubleClawshot, shadowCrystal, ironBoots], 'Defeat the Aeralfos to obtain an orange rupee.'),
+
+
+                new NonCheck([-4495, 3767], fairy, 'bottle'),
             ],
             [ // 2F
-
+                new Check([-4916, 5456], smallChest, baseSU, redRupee, [clawshot, spinner, smallKeyCS], 'Open the gate by clawshotting the switch near the entrance of the room, than use an Oocca and a draft to reach the chest.'),
+                new Check([-4902, 5081], chest, baseSU, purpleRupee, [clawshot, spinner, smallKeyCS], 'From the entrance of the room, fly through drafts with an Oocca to reach the chest.'),
+                new Check([-4151, 2867], smallChest, baseSU, qI(arrows, 20), [doubleClawshot], 'Follow the narrow path, the chest is on the left.'),
+                new Check([-4318, 2710], chest, baseSU, heartPiece, [doubleClawshot], 'At the end of the narrow path, hang on the ledge and move right until you reach the chest.'),
+                new Check([-4920, 2875], poeSoul, poesSU, undefined, [doubleClawshot, shadowCrystal], 'Clawshot the flying peahats until you reach the platform with the big tree where the poe awaits.'),
+                new Check([-4916, 2736], chest, baseSU, purpleRupee, [doubleClawshot], 'Clawshot the flying peahats until you reach the platform with the big tree where the chest lies.'),
+                new Check([-4523, 2864], smallChest, baseSU, qI(bombs, 5), [doubleClawshot], 'Upon traversing the small oval opening while hanging from the flying peahat, drop down and head west to the chest.'),
             ],
             [ // 3F
-
+                new Check([-4198, 2611], smallChest, baseSU, yellowRupee, [doubleClawshot], 'After climbing the vines from the first falling clawshot target turn around and jump on the platform with the chest.'),
+                new Check([-4676, 2604], smallChest, baseSU, redRupee, [doubleClawshot], 'Clawshot the flying peahats until you reach the chest.'),
+                new Check([-4772, 2952], chest, baseSU, heartPiece, [doubleClawshot], 'From the eastmost flying peahat, clawshot your way to the room entrance with the chest.'),
+                new Check([-4536, 3936], smallChest, baseSU, redRupee, [doubleClawshot], 'Enter the room from outside, then go around the blowing fan to reach the chest.')
             ],
             [ // 4F
+                new Check([-4703, 3949], smallChest, baseSU, redRupee, [doubleClawshot, shadowCrystal], 'Follow the clawshot and rope path, then climb the vines to reach the chest.'),
+                new Check([-4647, 4230], poeSoul, poesSU, undefined, [doubleClawshot, shadowCrystal], 'Follow the clawshot and rope path until you reach the platform with the poe.'),
+                new Check([-4601, 4286], chest, baseSU, purpleRupee, [doubleClawshot, shadowCrystal], 'Follow the clawshot and rope path until you reach the platform with the poe, where the chest is also located.'),
+                new Check([-4609, 3835], bossChest, baseSU, bossKeyCS, [doubleClawshot, shadowCrystal], 'Go around the blowing fan to reach the chest.'),
 
+                new NonCheck([-3776, 3738], blueChuJelly, 'bottle')
             ],
             [ // 5F
+                new Check([-3877, 3766], heartContainer, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS], 'Defeat Argorok to obtain the Heart Container in the boss fight area.'),
+                new Check([-3789, 3712], mirrorShard, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS],  'Defeat Argorok to obtain the Mirror Shard in the boss fight area.'),
 
+                new FakeCheck([-3902, 3938], lockedDoor, lockedDoorSU, [bossKeyCS], 'Boss Door.'),
+
+                new NonCheck([-3728, 4136], fairy, 'bottle'),
+                new NonCheck([-3674, 4127], blueChuJelly, 'bottle')
             ]
         ]),
         new Dungeon([-3636, 602], [-3800, 1472], mirror, 'Palace of Twilight', [0, 0], 3, [ 
