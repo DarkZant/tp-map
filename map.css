@@ -69,7 +69,7 @@ body {
     top: 0;
     font-size: 1.25vmax;
     font-family: "TPLocation", Arial, sans-serif;
-    color: #ff0000;
+    color: #9f2aff;
     background-color: #141414;
     padding: 0.5vh 0.4vw;
     border-radius: 6px;
@@ -77,10 +77,10 @@ body {
     z-index: 1000;
 }
 #dz {
-    color: #FF0000;
+    color: #9f2aff;
 }
 #dz:hover {
-    color: #fd4545;
+    color: #7713c9;
 }
 /* Dungeon Buttons and Name */
 #dun {
@@ -529,7 +529,7 @@ body {
 }
 .subcpt {   
     font-size: 12px;
-    background-color: rgb(56, 53, 46, 0.75);   
+    background-color: rgb(56, 53, 46, 0.85);   
 }
 .procpt {
     font-size: 20px;
