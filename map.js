@@ -226,7 +226,6 @@ var Submap = L.Marker.extend({
     initialize: function(latLng, icon, name, imageSize, checks) {
         this._latlng = L.latLng(latLng);
         L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000});
-        this.isSubmap = true;
         this.icon = icon;
         this.checks = checks; 
         this.name = name;
@@ -239,6 +238,7 @@ var Submap = L.Marker.extend({
         this.on('click', this.load);
         this.on('contextmenu', this.setAsMarked);
     }, 
+    isSubmap: true,
     setAsMarked: function() {
         this.setAllShownFlags('1');
         this.showAsMarked();
@@ -562,8 +562,7 @@ var Dungeon = Submap.extend({
             mapState == 2 ? removeAllLayers() : removeAllLayersExceptTL();
             this.resetActiveFloorButton();
             floor.style.filter = 'brightness(200%)';
-            floor.style.width = "15.4vw";
-            floor.style.marginLeft = "-0.4vw";
+            floor.style.transform = "scale(1.025)";
             this.activeFloor = floorindex;
             this.floors[floorindex].load();             
         });
@@ -589,8 +588,7 @@ var Dungeon = Submap.extend({
     resetActiveFloorButton: function() {
         let floor = document.getElementById('F' + (this.activeFloor + this.floorOffset));
         floor.style.filter = 'brightness(100%)';
-        floor.style.width = "14.6vw";
-        floor.style.marginLeft = "0";
+        floor.style.transform = "none";
     },
     controls: function(e) {
         if (!(e instanceof KeyboardEvent))
@@ -612,15 +610,18 @@ var Dungeon = Submap.extend({
             reloadIcons();
         }
         if (newFloor != prevFloor) 
-            document.getElementById('F' + (newFloor + this.floorOffset)).click();       
+            this.updateFloor(newFloor);
+    },
+    updateFloor: function(newFloor) {
+        document.getElementById('F' + (newFloor + this.floorOffset)).click();    
     }
+
 });
 
 var FlooredSubmap = Dungeon.extend({
     initialize: function(latLng, icon, name, imageSize, floors, floorOffset) {
         this._latlng = L.latLng(latLng);
         L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000});
-        this.isSubmap = true;
         this.icon = icon;
         this.name = name;
         if (imageSize[1] > 330) {
@@ -673,6 +674,197 @@ var FlooredSubmap = Dungeon.extend({
     },
 });
 
+var CaveOfOrdeals = FlooredSubmap.extend({
+    initialize: function(latLng, icon, floors) {
+        this._latlng = L.latLng(latLng);
+        L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000});
+        this.icon = icon;
+        this.name = 'Cave of Ordeals';
+        imageSize = [905, 695];
+        if (imageSize[1] > 330) {
+            imageSize[0] = 330 / imageSize[1] * imageSize[0];
+            imageSize[1] = 330;
+        }
+        let bounds = [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]];
+        let path = 'Submaps/' + this.name + '/';
+        floors[0] = new DungeonFloor(path + '/0.png', bounds, floors[0]);
+        for (let i = 1; i < floors.length - 1; ++i) {
+            floors[i] = new DungeonFloor(path + (((i - 1)  % 4) + 1) + '.png', bounds, floors[i]);
+        }
+        floors[49] = new DungeonFloor(path + '5.png', bounds, floors[49]);
+        this.floors = floors;
+        this.floorsText = this.getFloorsText();
+        this.setupButtons();
+        this.on('click', this.load);
+        this.on('contextmenu', this.setAsMarked);
+    }, 
+    getFloorsText: function() {
+        let gEL = (enemies) => { // Get Enemy List Formatting
+            let text = "<b>Enemies</b><ul>";
+            for(let i = 0; i < enemies.length; ++i)
+                text += "<li>" + enemies[i].slice(0, -2) + '&nbsp× &nbsp' + enemies[i].slice(-2) + '</li>'
+            return text + "</ul>"
+        }
+        let tip = (text) => "<u>Tip</u><br>" + text;
+        let gf = (text) => "<b>Great Fairy</b><br>" + text;
+        return [
+            gEL(['Blue / Red Bokoblin 1 ']),
+            gEL(['Keese 3 ', 'Rats 3 ']),
+            gEL(['Baba Serpents 4 ']) + tip('You can make the ceiling ones fall with either the ' +
+            'Slingshot, Clawshot, Boomerang or Bow.<br>There is also a Heart buried under the grounded Baba Serpent.'),
+            gEL(['Skulltulas 3 ']),
+            gEL(['Bulblin Archers 3 ']) + tip('Collect the arrows they miss to fill up your quiver.'),
+            gEL(['Torchs Slugs 9 ']) + tip('Defeating the ceiling ones with a long ranged weapon' +
+            ' makes the room a lot easier.'),
+            gEL(["Dodongos 2 ", 'Fire Keese 5 ']) + 'Three Hearts are buried next to the west wall.',
+            gEL(['Blue Tektites 2 ', 'Red Tektikes 5 ']),
+            gEL(['Bulblin Archers 2 ', 'Lizalfos 2 ']) + tip('The Bulblin Archers are hidden under ' +
+            'the ledge, take them out first.'),
+            gf('Releases fairies into the Ordon Spring.'),
+            gEL(['Helmasaurs 3 ', 'Rats 13']) + tip('The Spinner is required to go further.<br>You can defeat the rats easily with a Jump Attack ' +
+            'into Spin Attack from the ledge.'),
+            gEL(['Large Purple Chu 1 ']) + tip('Use a Bomb to instantly separate the Large Chu into Small Chus.'),
+            gEL(['Chu Worms 4 ']) + tip('Destroy their bubbles with Bombs or use the Clawshot to get them out of it.'),
+            gEL(['Bubbles 15']) + tip('Quickspin works well against Bubbles.'),
+            gEL(['Bulblins 10']),
+            gEL(['Rats 6 ', 'Keese 6 ']),
+            gEL(['Poe 1 ', 'Stalhounds 10']) + tip('Defeat the Stalhounds in human form and then defeat the Poe.'),
+            gEL(['Leevers 8 ']) + tip('Wait for them to get close then use a Spin Attack.<br> There is a Heart buried under the ledge.'),
+            gEL(['Purple Chus 36', 'Blue Chu 2 ', 'Red Chu 1 ', 'Rare / Yellow Chu 1 ']) + tip('The Purple Chus merge with Non-Purple ' +
+                'Chus first, so you have to be quick is you wanna collect Chu Jelly'),
+            gf('Releases fairies into the Faron Spring.'),
+            gEL(['Bokoblins 5 ', 'Ice Keese 5 ']) + tip("The Ball and Chain is required to go further."),
+            gEL(['Ghoul Rats 10', 'Keese 5 ', 'Rats 5 ']) + tip('Use Wolf Link and his senses to defeat the Ghoul Rats.<br>Three Hearts' +
+                ' are buried in the center of the room.'),
+            gEL(['Stalchildren 25']),
+            gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily'),
+            gEL(['Bulblin Archers 3 ', 'Bulblins 8 ']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
+                'as he can shoot you from the other floor.'),
+            gEL(['Stalfos 3 ']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
+            gEL(['Skulltulas 3 ', 'Bubbles 6 ']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a Heart' + 
+                ' buried near the west wall.'),
+            gEL(['Masked Lizalfos 2 ', 'Red Bokoblins 6 ']),
+            gEL(['Stalfos 2 ', 'Fire Bubbles 3 ', 'Stalchildren 12']),
+            gf('Releases fairies into the Eldin Spring.'),
+            gEL(['Beamos 5 ', 'Keese 8 ']) + tip('The Dominion Rod and the Bow are required to go further.<br>Eliminate the ' + 
+                'Beamos from the ledge to make the room easier.'),
+            gEL(['Fire Bubbles 6 ', 'Fire Keese 6 ', 'Torch Slugs 6 ', 'Dodongos 2 ']) + tip('Eliminate the Torch Slugs on the ceiling before ' + 
+                'going down to make the room easier.'),
+            gEL(['Poe 1 ', 'Gibdos 4 ']) + tip('Defeat the closest Gibdo, then the Poe, then the other Gibdos.'),
+            gEL(['Ghoul Rats 10', 'Purple Chus 7 ', 'Red Chu 1 ', 'Yellow Chu 1 ']) + tip('Defeat the Ghoul Rats as Wolf Link, then ' +
+                'transform back into human to defeat the Chus.<br>There is a Heart buried next to the south-west wall.'),
+            gEL(['Ice Keese 6 ', 'Freezard 1 ']),
+            gEL(['Chilfos 4 ']),
+            gEL(['Leevers 8 ', 'Bubbles 4 ', 'Ice Bubbles 4 ']),
+            gEL(['Freezards 2 ', 'Chilfos 4 ', 'Ice Keese 3 ',  'Ice Bubbles 4 ']) + tip('Take out the Chilfos with Bomb Arrows and the ' + 
+                'Ice Keese and Ice Bubbles with Arrows. Magic Armor is particulary good for this room'),
+            gEL(['Darknuts 2 ']) + tip('Try to fight them off one by one before they regroup. Hidden Skills like Helm Splitter and Back Slice ' +
+                'are effective against Darknuts. You can also use the running slice and get behind them for easy attacks.'),
+            gf('Releases fairies into the Lanayru Spring.'),    
+            gEL(['Armos 9 ']) + tip('The Double Clawshots are required to go further.<br>Use Bomb Arrows to defeat the Armos from afar, ' +
+                'or jump down and use Bomblings or Hidden Skills to defeat them easily.'),
+            gEL(['Baba Serpents 6 ', 'Red Bokoblins 6 ']) + tip('Try to lure the Bokoblins away from the Babas to make the room easier.'),
+            gEL(['Bulblin Archers 6 ', 'Masked Lizalfos 3 ']) + tip('Use the Bow from the ledge for the Bulblins that are further away. ' +
+                'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down'),
+            gEL(['Poe 1 ', 'Dynalfos 4 ']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
+            gEL(['Bulblin Archers 2 ', 'Gibdos 2 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
+                'they are on towers and can shoot you from the other room.<br>Three Hearts are buried under the ledge.'),
+            gEL(['Freezards 2 ', 'Chilfos 3 ', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
+                'avoid the Freezard under the ledge'),
+            gEL(['Rats 17', 'Stalchildren 9 ', 'Blue Bokoblin 1 ']) + tip('Be careful of the Rats that are under the ledge.'),
+            gEL(['Darknut 1 ', 'Aeralfos 2 ']) + tip('Take out the Aeralfos first, using the Boomerang then Clawshot technique.'),
+            gEL(['Darknut 3 ']) + tip('If you comeback to this floor after having cleared the Cave of Ordeals once, there will ' + 
+                'be 4 Darknuts. Try to pick them off one by one and use attacks that stun them all at the same time.'),
+            gf('Gives you Great Fairy Tears everytime you visit her. Also enables the ability to get Great Fairy Tears at ' +
+                'Spirit Springs if you do not have any.')  
+        ];
+    },
+    load: function() {
+        mapState = 4;
+        this.prepareMap(true);
+        map.dragging.enable();
+        loadedSubmap = this;
+        let bounds = this.floors[0].imageOverlay.getBounds();
+        let nwp = bounds.getNorthWest();
+        let sep = bounds.getSouthEast();
+        setTimeout(function() {
+            map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - 400], [sep.lat - 100, sep.lng + 400]]));
+        }, 200);  
+        document.getElementById('coo').style.display = 'inline'
+        this.exitE = () => { 
+            this.exit(); 
+            if (map.getZoom() == 0)
+                return;
+            window.removeEventListener('keydown', this.controlsE);
+            document.getElementById('coo').style.display = "none";
+        } 
+        map.on('zoomend', this.exitE);
+        this.controlsE = (e) => this.controls(e);
+        window.addEventListener('keydown', this.controlsE);
+        this.updateFloor(0);
+    },
+    updateFloor: function(newFloor) {
+        removeAllLayersExceptTL();
+        this.activeFloor = newFloor;
+        this.floors[newFloor].load();   
+        document.querySelector('#cooBut div').innerHTML = 'B' + (newFloor + 1);
+        document.getElementById('cooText').innerHTML = this.floorsText[newFloor];
+
+    },
+    setupButtons: function() {
+        let arrowUp = document.getElementById('cooUP');
+        let arrowDown = document.getElementById('cooDOWN');
+        this.wPress = () =>  {
+            window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'w'}));
+        };
+        this.sPress = () =>  {
+            window.dispatchEvent(new KeyboardEvent('keydown', {'key': 's'}));
+        };
+        arrowUp.addEventListener('click', this.wPress);
+        arrowUp.addEventListener('contextmenu', this.wPress);
+        arrowDown.addEventListener('click', this.sPress);
+        arrowDown.addEventListener('contextmenu', this.sPress);
+
+        let button = document.getElementById('cooBut');
+        this.ePress = () => {
+            window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'e'}));
+        };
+        button.addEventListener('click', this.ePress);
+        button.addEventListener('contextmenu', this.ePress);
+    },
+    controls: function(e) {
+        if (!(e instanceof KeyboardEvent))
+            return;
+        var key = e.key == undefined ? e.originalEvent.key : e.key;
+        let prevFloor = this.activeFloor;
+        let newFloor = this.activeFloor;
+        if (key == 'e' || key == "ArrowRight") {
+            if (this.floors[prevFloor].allShownChecksAreSet())
+                this.floors[prevFloor].setAsUnmarked();
+            else
+                this.floors[prevFloor].setAsMarked();
+            reloadIcons();
+            return;
+        }
+        let arrow;
+        if (key == "ArrowUp" || key == 'w') {
+            newFloor = prevFloor == 0 ? this.floors.length - 1 : prevFloor - 1;
+            arrow = document.getElementById('cooUP');
+        }
+        else if (key == 'ArrowDown' || key == 's') {
+            newFloor = prevFloor == this.floors.length - 1 ? 0 : prevFloor + 1;
+            arrow = document.getElementById('cooDOWN');
+        }      
+        arrow.style.filter = 'brightness(125%)';
+        arrow.style.transform = 'scale(1.1)';
+        setTimeout(function () {
+            arrow.style.filter = 'none';
+            arrow.style.transform = 'none';
+        }, 100);
+        if (newFloor != prevFloor) 
+            this.updateFloor(newFloor);
+    },
+});
 
 // Simple Classes
 class StorageUnit {
@@ -1147,12 +1339,12 @@ var hawkGrass = createIcon('Hawk Grass', 346, 248);
 var postman = createIcon('Postman', 493, 676);
 var nastySoup = createIcon('BottleNasty', 128, 205, 'Nasty Soup');
 var superbSoup = createIcon('BottleSoup', 128, 205, 'Superb Soup');
-var purplePotion = createIcon('BottlePurple', 128, 205, 'Purple Chu Jelly');
+var purpleChuJelly = createIcon('BottlePurple', 128, 205, 'Purple Chu Jelly');
 var redPotion = createIcon('BottleRed', 128, 205, 'Red Potion');
 var redChuJelly = renameIcon(redPotion, 'Red Chu Jelly');
 var bluePotion = createIcon('BottleBlue', 128, 205, 'Blue Potion');
 var blueChuJelly = renameIcon(bluePotion, 'Blue Chu Jelly')
-var rarePotion = createIcon('BottleRare', 128, 205, 'Rare Chu Jelly');
+var rareChuJelly = createIcon('BottleRare', 128, 205, 'Rare Chu Jelly');
 var tearsPotion = createIcon('BottleTears', 128, 205, "Great Fairy's Tears");
 var water = createIcon('BottleWater', 128, 205, 'Hot Spring Water');
 var milk = createIcon('BottleMilk', 128, 205, 'Milk');
@@ -1458,7 +1650,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ]),
             new Submap([-9523, 4765], grotto, g1.img, g1.imgSize, [
                 new Check([-9267, 4700], chest, baseSU, purpleRupee, [shadowCrystal, lantern], 'Light the 3 torches in front of the elevated platform to make the chest appear.'),
-                new NonFlag([-9435, 4759], rarePotion, 'bottle') 
+                new NonFlag([-9435, 4759], rareChuJelly, 'bottle') 
             ])
         ]),
         new Province([ // Faron
@@ -1512,7 +1704,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-6928, 5138], smallChest, baseSU, yellowRupee, [shadowCrystal], 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'),
                 new Check([-6533, 5308], smallChest, baseSU, redRupee, [shadowCrystal], 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'),
                 new Check([-6370, 5050], smallChest, baseSU, redRupee, [shadowCrystal], 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'),
-                new NonFlag([-6571, 5153], rarePotion, 'bottle') // Blue / Red
+                new NonFlag([-6571, 5153], rareChuJelly, 'bottle') // Blue / Red
                 //Rupees By Defeating enemies (25 rupees)
             ]),
             new Submap([-5652, 4644], grotto, g5.img, g5.imgSize, [
@@ -1589,7 +1781,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-5342, 6186], horseGrass, 'grass'),
             new NonFlag([-4108, 8225], hawkGrass, 'grass'),
             new NonFlag([-5507, 8125], beeLarva, 'bottle'),
-            new NonFlag([-4102, 8260], rarePotion, 'bottle'),
+            new NonFlag([-4102, 8260], rareChuJelly, 'bottle'),
             // Kak Goron Night Shop
             // Death Mountain Shop
             // Graveyard Crows (22 rupees)
@@ -1641,7 +1833,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new Submap([-3772, 6334], grotto, g1.img, g1.imgSize, [
                 new Check([-3527, 6279], chest, baseSU, purpleRupee, [shadowCrystal, lantern], 'Light the 2 torches to make the chest appear.'),
                 new Check([-3678, 6013], smallChest, baseSU, purpleRupee, [shadowCrystal], 'Hidden in the tall grass.'),
-                new NonFlag([-3676, 6313], rarePotion, 'bottle')
+                new NonFlag([-3676, 6313], rareChuJelly, 'bottle')
                 //8 Bombskits Worms.
                 
             ]),
@@ -1706,15 +1898,89 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5762, 2464], chest, baseSU, orangeRupee, [shadowCrystal], 'Defeat all the skulltulas to make the chest appear.')
             ]),
             new Submap([-5689, 638], grotto, g3.img, g3.imgSize, [
-                new NonFlag([-5579, 809], rarePotion, 'bottle'), // Rare / Blue / Red Chu (Really good odds)
+                new NonFlag([-5579, 809], rareChuJelly, 'bottle'), // Rare / Blue / Red Chu (Really good odds)
                 //Red and Purple Chus
             ]),
             new Submap([-5075, 1380], grotto, g3.img, g3.imgSize, [
                 new Check([-4986, 1168], poeSoul, poesSU, undefined, [clawshot, shadowCrystal], 'The poe can faze through the rocks to come attack you, just wait it out at the entrance.'),
                 new Check([-5034, 1627], poeSoul, poesSU, undefined, [clawshot, shadowCrystal], 'The poe can faze through the rocks to come attack you, just wait it out at the entrance.'),
                 new Check([-4812, 1381], chest, baseSU, orangeRupee, [clawshot, shadowCrystal, [bombBag, ballAndChain], lantern], 'Destroy the rocks blocking the way, then light 3 torches to make the chest appear.')
+            ]),
+            new CaveOfOrdeals([-6116, 503], cave, [
+                [], // B1
+                [], // B2
+                [], // B3
+                [], // B4
+                [], // B5
+                [], // B6
+                [], // B7
+                [], // B8
+                [], // B9
+                [], // B10
+                [], // B11
+                [new NonFlag([-6305, 273], purpleChuJelly, 'bottle')], // B12
+                [], // B13
+                [new NonCheck([-5934, 564], orangeRupee, notaRupeesSU, [spinner, clawshot, shadowCrystal], 'Buried in the ground, use sense to dig it up.')], // B14
+                [], // B15
+                [], // B16
+                [new Check([-6295, 742], poeSoul, poesSU, undefined, [spinner, shadowCrystal, clawshot], 'In the middle of the room.')], // B17
+                [], // B18
+                [   // B19
+                    new NonFlag([-5920, 251], rareChuJelly, 'bottle'),
+                    new NonFlag([-5980, 175], blueChuJelly, 'bottle'),
+                    new NonFlag([-5881, 175], redChuJelly, 'bottle'),
+                    new NonFlag([-5920, 330], purpleChuJelly, 'bottle')
+                ],
+                [], // B20
+                [], // B21
+                [], // B22
+                [], // B23
+                [], // B24
+                [], // B25
+                [], // B26
+                [], // B27
+                [], // B28
+                [], // B29
+                [], // B30
+                [], // B31
+                [], // B32
+                [   // B33
+                    new Check([-6294, 735], poeSoul, poesSU, undefined, [shadowCrystal, ballAndChain, dominionRod, bow, [clawshot, bombBag]], 
+                        'In the middle of the room.')
+                ], 
+                [ // B34
+                    new NonFlag([-5988, 684], yellowChuJelly, 'bottle'),
+                    new NonFlag([-5920, 732], purpleChuJelly, 'bottle'),
+                    new NonFlag([-5988, 780], redChuJelly, 'bottle')
+                ], 
+                [], // B35
+                [], // B36
+                [], // B37
+                [], // B38
+                [   // B39
+                    new NonCheck([-5933, 274], silverRupee, notaRupeesSU, [shadowCrystal, ballAndChain, dominionRod, bow, [clawshot, bombBag]],
+                     "Buried in the middle of the room, use Wolf Link's senses to dig it up.")
+                ],
+                [], // B40
+                [], // B41
+                [], // B42
+                [], // B43
+                [   // B44
+                    new Check([-6305, 272], poeSoul, poesSU, undefined, [shadowCrystal, ballAndChain, dominionRod, bow, doubleClawshot], 'In the middle of the room')
+                ], 
+                [   // B45
+                    new NonFlag([-6265, 807], blueChuJelly, 'bottle'),
+                    new NonFlag([-6335, 807], redChuJelly, 'bottle'),
+                    new NonFlag([-6300, 765], purpleChuJelly, 'bottle')
+                ], 
+                [], // B46
+                [], // B47
+                [], // B48
+                [], // B49
+                [   // B50
+                    new Check([-5928, 737], tearsPotion, giftsSU, undefined, [shadowCrystal, ballAndChain, dominionRod, bow, doubleClawshot], 'Talk to the Great Fairy to obtain Great Fairy Tears.')
+                ], 
             ])
-            //Cave of Ordeals
         ]),
         new Province([ // Peak
             [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
@@ -1737,7 +2003,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-265, 3631], chest, baseSU, orangeRupee, [shadowCrystal, ballAndChain], 'Defeat the furthest Freezard to reveal the chest.')
             ]),
             new Submap([-390, 3350], grotto, g3.img, g3.imgSize, [
-                new NonFlag([-416, 3048], rarePotion, 'bottle'), 
+                new NonFlag([-416, 3048], rareChuJelly, 'bottle'), 
             ])
         ]),   
         new Province([[ // Lanayru
@@ -1833,7 +2099,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-4901, 3895], hawkGrass, 'grass'),
             new NonFlag([-614, 5775], beeLarva, 'bottle'),
             new NonFlag([-5488, 3116], fairy, 'bottle'),
-            new NonFlag([-5353, 3456], rarePotion, 'bottle'),
+            new NonFlag([-5353, 3456], rareChuJelly, 'bottle'),
             //Zora's Domain Fishing
             //Lake Hylia Fishing
             //Howl Statue Lookout Crows (71 rupees)
@@ -1892,7 +2158,9 @@ document.addEventListener("DOMContentLoaded", function() {
             ]),
             new Submap([-4057, 4837], door, 'Jovani', [403, 259], [
                 new Check([-4193, 5102], poeSoul, poesSU, undefined, [shadowCrystal], 'Enter the house using the dig spot to get this poe'),
-                new Check([-3905, 4994], tearsPotion, giftsSU, undefined, [shadowCrystal, poeSouls20], 'Talk to Jovani after collecting 20 poe souls to receive this bottle with Great Fairy Tears'),
+                new Check([-3915, 4994], tearsPotion, giftsSU, undefined, [shadowCrystal, poeSouls20], 'Talk to Jovani after collecting 20 poe souls to receive this bottle with Great Fairy Tears'),
+                new Check([-3840, 4994], silverRupee, giftsSU, undefined, [shadowCrystal, poeSouls60], 'Talk to Jovani after collecting 60 poe souls to receive a Silver Rupee. You can also go see him at the' +
+                    'bar, then everytime you come back in his house, talk to his cat Gengle to receive a Silver Rupee (You must leave Castle Town to get another one).')
             ]),
             new Submap([-4035, 4573], door, 'STAR', [404, 304], [
                 new Check([-4113, 4433], bigQuiver, giftsSU, undefined, [clawshot, rI(10)], 'Pay 10 rupees to play the first STAR minigame and win it to receive the big quiver.'),

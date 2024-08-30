@@ -45,6 +45,7 @@ body {
     overflow: hidden;
     margin: 0;
     font-family: Arial, sans-serif;
+    color: #c0c0c0;
     background-color: #1d1a14;
 
     -webkit-user-select: none;
@@ -82,7 +83,7 @@ body {
 #dz:hover {
     color: #7713c9;
 }
-/* Dungeon Buttons and Name */
+/* Dungeon UI */
 #dun {
     display: none;  
     position: absolute;
@@ -95,7 +96,6 @@ body {
     z-index: 900;
 }
 .di {
-    display: none;
     border-style: solid;
     border-width: 0.2vmax;
     border-color: #38352e;
@@ -111,13 +111,87 @@ body {
     flex-direction: column;
     cursor: pointer;
 } 
+#dc img {
+    display: none;
+}
 .F {   
-    transition: filter 0.15s;
+    transition: filter 0.15s, transform 0.05s;
+    margin-top: 0.4vh;
 }
 .F:hover {
     filter: brightness(225%) !important;
-    width: 15.75vw !important;
-    margin-left: -0.5vw !important;
+    transform: scale(1.05) !important;
+}
+/* Cave of Ordeals UI */
+#coo {
+    display: none;
+    position: absolute;
+    top: 35dvh;
+    width: 100%;
+    z-index: 900;
+}
+#cooCont {
+    position: absolute;
+    left: 5vw;
+    font-size: 2.2vw;
+    text-align: center;
+    width: 15.75vw;
+}
+#cooBut {
+    filter: brightness(150%);
+    transition: filter 0.15s, transform 0.05s;
+    cursor: pointer;
+}
+#cooBut:hover {
+    filter: brightness(225%) !important;
+    transform: scale(1.05) !important;
+}
+#cooBut img {
+    max-width: 100%;
+}
+#cooBut div {
+    position: absolute;
+    color: #a4a192;
+    font-family: 'TPLocation', Arial, sans-serif;
+    right: 2vw;
+    top: 0;
+    z-index: 910;
+}
+.cooArrows {
+    margin: 0;
+    width: 5.5vw;
+    cursor: pointer;
+    transition: filter 0.1s, transform 0.1s;
+}
+.cooArrows:hover {
+    filter: brightness(125%) !important;
+    transform: scale(1.1) !important;
+}
+#cooUP {
+    margin-bottom: 10px;
+}
+#cooDOWN {
+    margin-top: 10px;
+}
+#cooText {
+    position: absolute;
+    right: 3%;    
+    width: 17vw;
+    font-size: 1vw;
+    background-color: rgb(56, 53, 46, 0.85);
+    text-align: center;
+    padding: 1vw 0.75vw;
+    border-radius: 10px;
+}
+#cooText ul {
+    padding-inline-start: 20px;
+}
+#cooText b {
+    text-decoration: underline;
+    font-size: 1.1vw;
+}
+#cooText u {
+    font-size: 1.05vw;
 }
 /* Top right menu icons */
 #menuicons {
@@ -161,7 +235,6 @@ body {
     border-radius: 2px;
     opacity: 0%;
     visibility: hidden;
-    color: #c0c0c0;
     height: 50%;
     align-self: center;
     font-size: 2vmin;
@@ -180,7 +253,6 @@ body {
     width: 0%;
     z-index: 1000;
     background-color: rgb(56, 53, 46, 0.85);
-    color: #c0c0c0;
     border-radius: 8px;
     transition: width 0.1s;
     overflow-y: scroll; 
@@ -512,7 +584,6 @@ body {
     bottom: 0;
     right: 0.3vw;
     font-size: 0.95vmax;
-    color: #c0c0c0;
     border-radius: 100vw;
     padding: 2.5px 5px;
     background-color: #38352e;
@@ -525,7 +596,6 @@ body {
     transform: translate(-50%, -50%); 
     border-radius: 100vw;
     padding: 1.25px 5px;
-    color:#c0c0c0;
 }
 .subcpt {   
     font-size: 12px;
