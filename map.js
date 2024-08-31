@@ -353,6 +353,9 @@ var Submap = L.Marker.extend({
                 map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - controlsOffset], [sep.lat - 100, sep.lng + 100]]));
             }, 200);  
         }
+        let subName = document.getElementById('subName');
+        subName.style.display = "inline";
+        subName.children[1].innerHTML = this.name;
         TL.setOpacity(0.2);
         removeAllLayersExceptTL();
     },  
@@ -365,6 +368,7 @@ var Submap = L.Marker.extend({
         setBoundsToTL();
         map.dragging.enable();
         mapState = 1;
+        document.getElementById('subName').style.display = "none";
         TL.setOpacity(1);
         loadTLIcons();
     },
@@ -610,12 +614,8 @@ var Dungeon = Submap.extend({
             reloadIcons();
         }
         if (newFloor != prevFloor) 
-            this.updateFloor(newFloor);
+            document.getElementById('F' + (newFloor + this.floorOffset)).click();    
     },
-    updateFloor: function(newFloor) {
-        document.getElementById('F' + (newFloor + this.floorOffset)).click();    
-    }
-
 });
 
 var FlooredSubmap = Dungeon.extend({
@@ -731,13 +731,13 @@ var CaveOfOrdeals = FlooredSubmap.extend({
             gEL(['Poe 1 ', 'Stalhounds 10']) + tip('Defeat the Stalhounds in human form and then defeat the Poe.'),
             gEL(['Leevers 8 ']) + tip('Wait for them to get close then use a Spin Attack.<br> There is a Heart buried under the ledge.'),
             gEL(['Purple Chus 36', 'Blue Chu 2 ', 'Red Chu 1 ', 'Rare / Yellow Chu 1 ']) + tip('The Purple Chus merge with Non-Purple ' +
-                'Chus first, so you have to be quick is you wanna collect Chu Jelly'),
+                'Chus first, so you have to be quick is you wanna collect Chu Jelly.'),
             gf('Releases fairies into the Faron Spring.'),
             gEL(['Bokoblins 5 ', 'Ice Keese 5 ']) + tip("The Ball and Chain is required to go further."),
             gEL(['Ghoul Rats 10', 'Keese 5 ', 'Rats 5 ']) + tip('Use Wolf Link and his senses to defeat the Ghoul Rats.<br>Three Hearts' +
                 ' are buried in the center of the room.'),
             gEL(['Stalchildren 25']),
-            gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily'),
+            gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily.'),
             gEL(['Bulblin Archers 3 ', 'Bulblins 8 ']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
                 'as he can shoot you from the other floor.'),
             gEL(['Stalfos 3 ']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
@@ -757,7 +757,7 @@ var CaveOfOrdeals = FlooredSubmap.extend({
             gEL(['Chilfos 4 ']),
             gEL(['Leevers 8 ', 'Bubbles 4 ', 'Ice Bubbles 4 ']),
             gEL(['Freezards 2 ', 'Chilfos 4 ', 'Ice Keese 3 ',  'Ice Bubbles 4 ']) + tip('Take out the Chilfos with Bomb Arrows and the ' + 
-                'Ice Keese and Ice Bubbles with Arrows. Magic Armor is particulary good for this room'),
+                'Ice Keese and Ice Bubbles with Arrows. Magic Armor is particulary good for this room.'),
             gEL(['Darknuts 2 ']) + tip('Try to fight them off one by one before they regroup. Hidden Skills like Helm Splitter and Back Slice ' +
                 'are effective against Darknuts. You can also use the running slice and get behind them for easy attacks.'),
             gf('Releases fairies into the Lanayru Spring.'),    
@@ -765,12 +765,12 @@ var CaveOfOrdeals = FlooredSubmap.extend({
                 'or jump down and use Bomblings or Hidden Skills to defeat them easily.'),
             gEL(['Baba Serpents 6 ', 'Red Bokoblins 6 ']) + tip('Try to lure the Bokoblins away from the Babas to make the room easier.'),
             gEL(['Bulblin Archers 6 ', 'Masked Lizalfos 3 ']) + tip('Use the Bow from the ledge for the Bulblins that are further away. ' +
-                'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down'),
+                'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down.'),
             gEL(['Poe 1 ', 'Dynalfos 4 ']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
             gEL(['Bulblin Archers 2 ', 'Gibdos 2 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
                 'they are on towers and can shoot you from the other room.<br>Three Hearts are buried under the ledge.'),
             gEL(['Freezards 2 ', 'Chilfos 3 ', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
-                'avoid the Freezard under the ledge'),
+                'avoid the Freezard under the ledge.'),
             gEL(['Rats 17', 'Stalchildren 9 ', 'Blue Bokoblin 1 ']) + tip('Be careful of the Rats that are under the ledge.'),
             gEL(['Darknut 1 ', 'Aeralfos 2 ']) + tip('Take out the Aeralfos first, using the Boomerang then Clawshot technique.'),
             gEL(['Darknut 3 ']) + tip('If you comeback to this floor after having cleared the Cave of Ordeals once, there will ' + 
@@ -790,7 +790,7 @@ var CaveOfOrdeals = FlooredSubmap.extend({
         setTimeout(function() {
             map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - 400], [sep.lat - 100, sep.lng + 400]]));
         }, 200);  
-        document.getElementById('coo').style.display = 'inline'
+        document.getElementById('coo').style.display = 'inline';
         this.exitE = () => { 
             this.exit(); 
             if (map.getZoom() == 0)
@@ -809,7 +809,6 @@ var CaveOfOrdeals = FlooredSubmap.extend({
         this.floors[newFloor].load();   
         document.querySelector('#cooBut div').innerHTML = 'B' + (newFloor + 1);
         document.getElementById('cooText').innerHTML = this.floorsText[newFloor];
-
     },
     setupButtons: function() {
         let arrowUp = document.getElementById('cooUP');
@@ -1118,9 +1117,9 @@ class TrackerItem {
             if (this.type == 1 || this.type == 2) //Change item to base
                 this.updateImage();
             else if (this.type >= 3) {
-                this.elem.childNodes[5].style.display = 'none'; //Hide counter
+                this.elem.children[2].style.display = 'none'; //Hide counter
                 if (this.maxState > 1) // Don't change color if item max is 1
-                    this.elem.childNodes[5].style.color = "#c0c0c0";
+                    this.elem.children[2].style.color = "#c0c0c0";
             }
             return;
         }
@@ -1129,20 +1128,20 @@ class TrackerItem {
         if (this.type == 1 || this.type == 2)  //Change item
             this.updateImage();           
         else if (this.type >= 3) {
-            this.elem.childNodes[5].innerHTML = this.state; // Update Counter
+            this.elem.children[2].innerHTML = this.state; // Update Counter
             switch (this.state) {
-                case 1: this.elem.childNodes[5].style.display = 'inline'; break; //Show Counter
-                case this.maxState - 1: this.elem.childNodes[5].style.color = "#c0c0c0"; break; // Change color off green
+                case 1: this.elem.children[2].style.display = 'inline'; break; //Show Counter
+                case this.maxState - 1: this.elem.children[2].style.color = "#c0c0c0"; break; // Change color off green
                 case this.maxState:
-                    this.elem.childNodes[5].style.display = 'inline'; //Show counter
-                    this.elem.childNodes[5].style.color = "#50C878"; // Change color to green
+                    this.elem.children[2].style.display = 'inline'; //Show counter
+                    this.elem.children[2].style.color = "#50C878"; // Change color to green
                     break;
             }  
         } 
     }
     updateImage() {
-        let imgSrc = this.elem.childNodes[3].src;
-        this.elem.childNodes[3].src = imgSrc.slice(0, -5) + 
+        let imgSrc = this.elem.children[1].src;
+        this.elem.children[1].src = imgSrc.slice(0, -5) + 
         (this.state == 0 ? 0 : this.state - 1) + imgSrc.slice(-4); 
     }
 }
@@ -1273,7 +1272,7 @@ class Setting {
 
 class Grotto {
     constructor(id, width, height) {
-        this.img = 'Grotto' + id;
+        this.img = 'Grotto ' + id;
         this.imgSize = [width, height];
     }
 }
@@ -1633,15 +1632,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 [new Check([-8615, 5082], chest, baseSU, purpleRupee, [lantern], 'Use the lantern to locate the chest and be able to open it.')],
                 [new Check([-8759, 5031], chest, baseSU, woodenSword, undefined, 'The chest is available after buying the slingshot.')]
             ], 2),
-            new Submap([-8964, 4938], door, 'SeraShop', [464, 491], [
+            new Submap([-8964, 4938], door, "Sera's Shop", [464, 491], [
                 new Check([-8790, 5034], slingshot, shopSU, undefined, [rI(30)], "After saving Sera's Cat, you can buy the slingshot."),
                 new Check([-8837, 4880], milkHalf, giftsSU, undefined, [fishingRod], 'Obtain the bottle by talking to Sera her cat has returned with a fish you gave him with the fishing rod.')
                 //Add Entire Shop
             ]),
-            new Submap([-9080, 4783], door, 'RuslHouse', [656, 449], [
+            new Submap([-9080, 4783], door, "Rusl's House", [656, 449], [
                 new Check([-9004, 4850], ordonSword, baseSU, undefined, undefined, 'Pick up the sword on the couch after entering by the front door or by the side of the house by digging as Wolf Link.'),
             ]),
-            new Submap([-9037, 5015], door, 'JaggleHouse', [661, 290], [
+            new Submap([-9037, 5015], door, "Jaggle's House", [661, 290], [
                 new Check([-9044, 4410], ordonShield, baseSU, undefined, [shadowCrystal], 'Use Midna to jump to the ledge where the shield is, then bonk on the wall twice to make it fall and obtain it.')
             ]),
             new FlooredSubmap([-9171, 4953], door, "Bo's House", [469, 780],  [
@@ -1694,7 +1693,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Faron spring fishing spot
 
 
-            new Submap([-7447, 4718], cave, 'FaronEntryCave', [455, 495], [
+            new Submap([-7447, 4718], cave, 'Faron Cave', [455, 495], [
                 new Check([-7340, 4450], smallChest, baseSU, yellowRupee, undefined, 'Use the lantern to be able to locate the chest more easily.')
             ]),
             new Submap([-7410, 4936], door, "Coro's House", [484, 369], [
@@ -1714,7 +1713,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new Submap([-7123, 3500], grotto, g2.img, g2.imgSize, [
                 new Check([-6868, 3472], chest, baseSU, heartPiece, [shadowCrystal, [bombBag, ballAndChain]], 'Defeat all the 8 Deku Serpents to make the chest appear.')
             ]),
-            new Submap([-7204, 3678], door, 'TimeDoor', [293, 575], [
+            new Submap([-7204, 3678], door, 'Past Sacred Grove', [293, 575], [
                 new Check([-7458, 3700], snailF, bugsSU, undefined, [[boomerang, clawshot]], 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.'),
                 new Check([-7470, 3618], poeSoul, poesSU, undefined, [redDominionRod, shadowCrystal], 'Move the Howl Statue to reveal the poe.'),
                 new Check([-7504, 3704], chest, baseSU, heartPiece, [redDominionRod], 'Move the Howl Statue and go to the end of the tunnel behind it to reach the chest.')
@@ -1790,21 +1789,21 @@ document.addEventListener("DOMContentLoaded", function() {
             //Graveyard fishing spot
 
 
-            new Submap([-5259, 7660], door, 'KakEmptyHouse', [399, 230], [
+            new Submap([-5259, 7660], door, 'Kakariko Empty House', [399, 230], [
                 new Check([-5239, 7705], antF, bugsSU, undefined, undefined, 'This ♀ Ant is walking around the floor of the house.')
             ]),
             new FlooredSubmap([-5283, 7580], door, 'Kakariko Inn', [655, 363], [
                 [new Check([-5452, 8068], smallChest, baseSU, redRupee, undefined, 'The chest is hidden under the staircase.')],
                 []
             ]),
-            new Submap([-5162, 7670], door, 'Barnes', [399, 249], [
+            new Submap([-5162, 7670], door, "Barnes' Shop", [399, 249], [
                 new Check([-5300, 7755], bombBag, shopSU, undefined, undefined, 'After clearing the Goron Mines, you buy this Bomb Bag from Barnes for 120 rupees.')
             ]),
             new FlooredSubmap([-5097, 7593], door, 'Kakariko Watchtower', [379, 300], [
                 [],
                 [new Check([-5181, 7310], chest, baseSU, purpleRupee, undefined, 'Climb the ladder to reach the chest.')]
             ], 2),
-            new Submap([-5382, 7565], door, 'KakMaloMart', [399, 286], [
+            new Submap([-5382, 7565], door, 'Malo Mart Kakariko Branch', [399, 286], [
                 new Check([-5445, 7250], hylianShield, shopSU, undefined, [rI(200)], 'You can buy it after saving Collin for 200 rupees.'),
                 new Check([-5445, 7325], woodenShield, shopSU, undefined, [rI(50)], 'You can buy it after saving Collin for 50 rupees.'),
                 new Check([-5445, 7400], redPotion, shopSU, undefined, [rI(30)], 'You can buy it after saving Collin for 30 rupees.'),
@@ -1820,7 +1819,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     new Check([-5669, 7336], horseCall, giftsSU, undefined, [iliasCharm], 'Show the charm to Ilia for it to be revealed as the horse call and receive it back. ' + neverRandomized),
                 ]
             ], 2),
-            new Submap([-5711, 6043], cave, 'EldinCave', [862, 780], [
+            new Submap([-5711, 6043], cave, 'Eldin Lantern Cave', [862, 780], [
                 new Check([-5810, 6372], chest, baseSU, purpleRupee, [[bombBag, ballAndChain]], 'Defeat the skulltula and open the chest.'),
                 new Check([-5469, 6199], poeSoul, poesSU, undefined, [[bombBag, ballAndChain], shadowCrystal], 'Use your senses to see the poe at the end of this branch.'),
                 new Check([-5399, 6319], chest, baseSU, heartPiece, [[bombBag, ballAndChain], lantern], 'Light the 2 torches to make the chest appear.'),
@@ -1856,7 +1855,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-1529, 6815], smallChest, baseSU, qI(bombs, 5), [spinner, shadowCrystal], 'Hidden in the west tall grass, cut it to make the chest easier to see.'),
                 new Check([-1566, 7150], smallChest, baseSU, qI(bombs, 5), [spinner, shadowCrystal], 'Hidden in the east tall grass, cut it to make the chest easier to see.')
             ]),
-            new Submap([-2211, 6585], door, 'Impaz', [276, 255], [
+            new Submap([-2211, 6585], door, "Impaz's House", [276, 255], [
                 new Check([-2180, 6604], ancientSkyBook, giftsSU, undefined, [woodenStatue, redDominionRod, [slingshot, bow]], 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the Ancient Sky Book.')
             ])
 
@@ -2111,7 +2110,7 @@ document.addEventListener("DOMContentLoaded", function() {
             //South Castle Town Crows (33 rupees)
             
             
-            new Submap([-5259, 3502], cave, 'LanSpring', [485, 491], [
+            new Submap([-5259, 3502], cave, 'Lanayru Spring', [485, 491], [
                 new Check([-5210, 3566], smallChest, baseSU, blueRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
                 new Check([-5197, 3360], smallChest, baseSU, yellowRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
                 new Check([-5558, 3491], smallChest, baseSU, blueRupee, [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the right.'),
@@ -2156,17 +2155,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 ],
                 []
             ]),
-            new Submap([-4057, 4837], door, 'Jovani', [403, 259], [
+            new Submap([-4057, 4837], door, "Jovani's House", [403, 259], [
                 new Check([-4193, 5102], poeSoul, poesSU, undefined, [shadowCrystal], 'Enter the house using the dig spot to get this poe'),
                 new Check([-3915, 4994], tearsPotion, giftsSU, undefined, [shadowCrystal, poeSouls20], 'Talk to Jovani after collecting 20 poe souls to receive this bottle with Great Fairy Tears'),
                 new Check([-3840, 4994], silverRupee, giftsSU, undefined, [shadowCrystal, poeSouls60], 'Talk to Jovani after collecting 60 poe souls to receive a Silver Rupee. You can also go see him at the' +
                     'bar, then everytime you come back in his house, talk to his cat Gengle to receive a Silver Rupee (You must leave Castle Town to get another one).')
             ]),
-            new Submap([-4035, 4573], door, 'STAR', [404, 304], [
+            new Submap([-4035, 4573], door, 'STAR Tent', [404, 304], [
                 new Check([-4113, 4433], bigQuiver, giftsSU, undefined, [clawshot, rI(10)], 'Pay 10 rupees to play the first STAR minigame and win it to receive the big quiver.'),
                 new Check([-4128, 4479], giantQuiver, giftsSU, undefined, [doubleClawshot, rI(15)], 'Pay 15 rupees to play the second STAR minigame and win it to receive the giant quiver.')
             ]), 
-            new Submap([-4060, 4759], door, 'CastleTownMaloMart', [266, 228], [
+            new Submap([-4060, 4759], door, 'Malo Mart Castle Branch', [266, 228], [
                 new Check([-4231, 4706], magicArmor, shopSU, undefined, [bigWallet, rI(598)], 'After repairing the Castle Town bridge for 1000 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
                     'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1798 rupees total (or 3598 rupees without GSR).'),
                 // Add Entire Shop
@@ -2178,10 +2177,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 ],
                 []
             ]),
-            new Submap([-3940, 4930], door, 'Doctor', [262, 225], [
+            new Submap([-3940, 4930], door, "Doctor's Office", [262, 225], [
 
             ]),
-            new FlooredSubmap([-4090, 4656], door, 'Goron Shops', [660, 293], [
+            new FlooredSubmap([-4090, 4656], door, 'Castle Goron Merchants', [660, 293], [
                 [
                     //Kid Shop 
                 ],
@@ -2224,7 +2223,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonFlag([-4238, 4905], beeLarva, 'bottle'),
                 //Fishing spot
             ]),
-            new Submap([-5546, 3134], cave, 'LakeLanternCave', [658, 585], [
+            new Submap([-5546, 3134], cave, 'Lake Lantern Cave', [658, 585], [
                 new Check([-5696, 3100], smallChest, baseSU, qI(bombs, 5), [[bombBag, ballAndChain]], 'Destroy the rock on the left to reveal the chest.'),
                 new Check([-5665, 3145], smallChest, baseSU, yellowRupee, [[bombBag, ballAndChain]], 'Destroy the rock in the back and defeat the Keese.'),
                 new Check([-5631, 3200], smallChest, baseSU, redRupee, [[bombBag, ballAndChain]], 'Destroy the rock on the left to reveal the chest.'),
@@ -2244,7 +2243,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5523, 3363], poeSoul, poesSU, undefined, [[bombBag, ballAndChain], shadowCrystal], 'At the entrance of the room.'),
                 new Check([-5555, 3364], chest, baseSU, heartPiece, [[bombBag, ballAndChain], lantern], 'Light the 2 torches to make the chest appear.')
             ]),
-            new Submap([-2025, 4818], cave, 'Ice Cave', [105, 369], [
+            new Submap([-2025, 4818], cave, 'Lanayru Ice Cave', [105, 369], [
                 new Check([-1725, 4818], chest, baseSU, heartPiece, [ballAndChain], 'Complete the 3 block puzzles to open all the gates and access the chest.')
             ])
         ]),    

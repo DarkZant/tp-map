@@ -55,6 +55,9 @@ body {
     -webkit-touch-callout: none;
     touch-action: none;
 }
+body img {
+    -webkit-user-drag: none;
+}
 #map { 
     touch-action: pinch-zoom;
     position: absolute;
@@ -91,7 +94,7 @@ body {
     margin-top: 1%;
 }
 #dn {
-    width: 30vw;
+    width: 35vw;
     position: relative;
     z-index: 900;
 }
@@ -99,22 +102,20 @@ body {
     border-style: solid;
     border-width: 0.2vmax;
     border-color: #38352e;
-    position: relative;
     z-index: 900;
 }
-#dc {    
+#dc {   
+    position: absolute; 
     width: 15vw;
     max-height: 100%;
-    margin-top: 20%;
-    margin-left: 2vw;
+    top: 20vh;
+    left: 2vw;
     display: flex;
     flex-direction: column;
     cursor: pointer;
-} 
-#dc img {
-    display: none;
-}
-.F {   
+}    
+.F {  
+    display: none; 
     transition: filter 0.15s, transform 0.05s;
     margin-top: 0.4vh;
 }
@@ -122,6 +123,31 @@ body {
     filter: brightness(225%) !important;
     transform: scale(1.05) !important;
 }
+
+/* Submap Names */
+#subName {
+    display: none;
+    position: absolute;
+    width: 35vw;
+    z-index: 900;
+    top: 1vh;
+    left: 0.5vw;
+}
+#subName img {
+    max-width: 100%;
+}
+#subName div {
+    position: absolute;
+    color: #c0bc72;
+    text-shadow: #060501 0px 3.5px 2px;
+    font-family: 'TPLocation', Arial, sans-serif;
+    top: 0;
+    left: 5vw;
+    z-index: 925;
+    font-size: 2.25vw;
+}
+
+
 /* Cave of Ordeals UI */
 #coo {
     display: none;
@@ -152,6 +178,7 @@ body {
 #cooBut div {
     position: absolute;
     color: #a4a192;
+    text-shadow: #101210 1px 3px 1px;
     font-family: 'TPLocation', Arial, sans-serif;
     right: 2vw;
     top: 0;
@@ -223,7 +250,6 @@ body {
 }
 .menuiconimg img {
     max-width: 100%;
-    -webkit-user-drag: none;
 }
 .menuiconimg:hover {
     background-color: #2c2c2c;
@@ -355,7 +381,6 @@ body {
 .ii {
     padding-right: 1vw;
     padding-left: 1vw;
-    -webkit-user-drag: none;
 }
 .iti { 
     max-width: 3.5vmax;
@@ -555,7 +580,6 @@ body {
     transform: translate(-50%, -50%);  
     max-width: 100%;
     max-height: 100%;
-    -webkit-user-drag: none;
 }
 .timage {
     max-width: 90%; 
