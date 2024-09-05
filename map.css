@@ -497,13 +497,13 @@ body img {
     right: 0;
     top: 0;  
     text-align: center;
+    font-size: 1.05vmax;
 }
 #controls h2 {
     font-size: 1.3vmax;
     text-decoration: underline;
 }
 #controls ul {
-    font-size: 1.05vmax;
     text-align: left;
     padding-left: 2vw;
     padding-right: 1vw;
