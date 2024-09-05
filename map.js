@@ -229,10 +229,9 @@ var Submap = L.Marker.extend({
         this.icon = icon;
         this.checks = checks; 
         this.name = name;
-        let maxHeight = (330 / 739) * window.innerHeight;
-        if (imageSize[1] > maxHeight) {
-            imageSize[0] = maxHeight / imageSize[1] * imageSize[0];
-            imageSize[1] = maxHeight;
+        if (imageSize[1] > 330) {
+            imageSize[0] = 330 / imageSize[1] * imageSize[0];
+            imageSize[1] = 330;
         }   
         this.image = L.imageOverlay('Submaps/' + name + '.png', 
             [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]]);
@@ -433,15 +432,13 @@ var Dungeon = Submap.extend({
         this.latLngImage = L.latLng(latLngImage);
         this.icon = icon;
         this.floorOffset = floorOffset;
-        let maxHeight = (1350 / 739) * window.innerHeight;
-        let maxWidth = (2300 / 1600) * window.innerWidth;
-        if (imgsSize[1] > maxHeight) {
-            imgsSize[0] = maxHeight / imgsSize[1] * imgsSize[0];
-            imgsSize[1] = maxHeight;
+        if (imgsSize[1] > 1350) {
+            imgsSize[0] = 1350 / imgsSize[1] * imgsSize[0];
+            imgsSize[1] = 1350;
         }
-        if (imgsSize[0] > maxWidth) {
-            imgsSize[1] = maxWidth / imgsSize[0] * imgsSize[1];
-            imgsSize[0] = maxWidth;
+        if (imgsSize[0] > 2300) {
+            imgsSize[1] = 2300 / imgsSize[0] * imgsSize[1];
+            imgsSize[0] = 2300;
         }
         for(let i = 0; i < floors.length; ++i) {
             floors[i] = new DungeonFloor('Dungeons/' + name + '/' + document.getElementById('F' + (i + floorOffset)).src.slice(-6), 
@@ -627,11 +624,10 @@ var FlooredSubmap = Dungeon.extend({
         L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000});
         this.icon = icon;
         this.name = name;
-        let maxHeight = (330 / 739) * window.innerHeight;
-        if (imageSize[1] > maxHeight) {
-            imageSize[0] = maxHeight / imageSize[1] * imageSize[0];
-            imageSize[1] = maxHeight;
-        }   
+        if (imageSize[1] > 330) {
+            imageSize[0] = 330 / imageSize[1] * imageSize[0];
+            imageSize[1] = 330;
+        }
         for(let i = 0; i < floors.length; ++i) {
             floors[i] = new DungeonFloor('Submaps/' + name + '/' + i + '.png', 
                 [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]],
@@ -684,8 +680,11 @@ var CaveOfOrdeals = FlooredSubmap.extend({
         L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000});
         this.icon = icon;
         this.name = 'Cave of Ordeals';
-        let maxHeight = (330 / 739) * window.innerHeight
-        imageSize = [maxHeight / 695 * 905, maxHeight];
+        imageSize = [905, 695];
+        if (imageSize[1] > 330) {
+            imageSize[0] = 330 / imageSize[1] * imageSize[0];
+            imageSize[1] = 330;
+        }
         let bounds = [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]];
         let path = 'Submaps/' + this.name + '/';
         floors[0] = new DungeonFloor(path + '/0.png', bounds, floors[0]);
