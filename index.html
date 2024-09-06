@@ -173,7 +173,7 @@
                 <label for="heartPieceS" class="bigSL">Show <b>Only</b> Heart Pieces</label>
 
                 <input type="checkbox" id="ncheckS" class="bigSC" 
-                    onload="new Setting(this, 0, 1, ['ooccooS', 'locdoorS', 'notRupeeS'])">
+                    onload="new Setting(this, 0, 1, ['ooccooS', 'locdoorS', 'notRupeeS', 'bossesS', 'ncItemsS'])">
                 <label for="ncheckS" class="bigSL">Show Non-Check Flags</label>
                 <input type="checkbox" id="ooccooS" class="SC" onload="new Setting(this, 22, 2, ['ooccoo', 'ncheckS'])">
                 <label for="ooccooS" class="SL">Show Ooccoo</label>
@@ -181,6 +181,10 @@
                 <label for="locdoorS" class="SL">Show Locked Doors</label>
                 <input type="checkbox" id="notRupeeS" class="SC" onload="new Setting(this, 24, 2, ['notaRupee', 'ncheckS'])">
                 <label for="notRupeeS" class="SL">Show Notable Rupees & Rupee Boulders</label>
+                <input type="checkbox" id="bossesS" class="SC" onload="new Setting(this, 31, 2, ['bosses', 'ncheckS'])">
+                <label for="bossesS" class="SL">Show Bosses</label>
+                <input type="checkbox" id="ncItemsS" class="SC" onload="new Setting(this, 32, 2, ['ncItems', 'ncheckS'])">
+                <label for="ncItemsS" class="SL">Show Non-Check Items</label>
 
                 <input type="checkbox" id="nflagS" class="bigSC"
                     onload="new Setting(this, 0, 1, ['bottleS', 'rshopS', 'grassS', 'monrupeeS', 'fishS'])">

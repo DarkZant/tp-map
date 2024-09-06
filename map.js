@@ -871,6 +871,7 @@ class StorageUnit {
         this.name = name;
         this.defaultConfig = defaultConfig;
         this.total = 0;
+        this.checkIfInitialized();
     }
     getLength() {
         return this.defaultConfig.length;
@@ -1513,6 +1514,7 @@ var blizzeta = createIcon('Blizzeta', 350, 355, 'Blizzeta Defeated');
 var armogohma = createIcon('Armogohma', 384, 298, 'Armogohma Defeated');
 var argorok = createIcon('Argorok', 397, 359, 'Argorok Defeated');
 var zant = createIcon('Zant', 586, 670, 'Zant Defeated');
+var ganondorf = createIcon('Ganondorf', 1080, 969);
 
 
 
@@ -1532,16 +1534,15 @@ var bugsSU = new StorageUnit('bugs', '000000000000000000000000'); // 24 checks
 var skillsSU = new StorageUnit('skills', '0000000000000'); // 7 + 6 = 13 checks (Skills + Stones)
 var skyCharsSU = new StorageUnit('skyChars', '000000'); // 6 checks
 var shopSU = new StorageUnit('shop', '0000000'); // 7 checks
+
 var ooccooSU = new StorageUnit('ooccoo', '0000000'); // 7 flags
-var lockedDoorSU = new StorageUnit('locked', '000000000000000000000000000000000000000000000000000000000000');  // 60 flags      
+var lockedDoorSU = new StorageUnit('locked', '000000000000000000000000000000000000000000000');  // 45 flags      
 var notaRupeesSU = new StorageUnit('notaRupee', '00000000000000000000000000000000000000000000000000000000000000000000000000000000'); // 80 flags
+var bossesSU = new StorageUnit('bosses', '000000000') // 9 flags
+var nonCheckItemsSU = new StorageUnit('ncItems', '00000000000000000000') // 20 flags
 
 var trackerSU = new StorageUnit('tracker', '00000000000000000000000100\0\0' + '000000000000000000000000000000000000000000000000000000000000000000000000'); // 100 flags
 var settingSU = new StorageUnit('settings', '101001100000000111111100000000000000000000000000000000000000'); // 60 flags
-
-var storUnits = [baseSU, poesSU, giftsSU, bugsSU, skillsSU, skyCharsSU, shopSU,
-     ooccooSU, lockedDoorSU, notaRupeesSU, trackerSU, settingSU];
-
 
 //Reusable Check Description   
 const agithaText = "Give this bug to Agitha to receive: Big Wallet (First Bug), Purple Rupee (Any Bug), Orange Rupee (Pair Completing Bug), Giant Wallet (Last Bug)."
@@ -1564,10 +1565,6 @@ var mapState = -1;
 
 document.addEventListener("DOMContentLoaded", function() {
     console.time('Start');
-
-    //Checking Local Storage
-    for (let i = 0; i < storUnits.length; ++i) 
-        storUnits[i].checkIfInitialized();
 
     // Loading Settings
     let settings = document.querySelectorAll('.SC, .bigSC');
@@ -1656,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", function() {
             [-5412, 5564], [-5374, 5998], [-5954, 6282], [-5944, 7028], [-6700, 7216], [-7144, 6960], [-8048, 5568], [-7844, 4680],
             [-7360, 4200], [-6640, 3464], [-6360, 3744], [-5944, 3776], [-5834, 4743], [-5630, 4883]
         ], false, [-6512, 5536], [
-            new Check([-7405, 4910], lantern, notaRupeesSU, undefined, undefined, 'Talk to Coro to obtain the lantern. This is not a Randomizer Check.'),
+            new Check([-7405, 4910], lantern, nonCheckItemsSU, undefined, undefined, 'Talk to Coro to obtain the lantern. This is not a Randomizer Check.'),
             new Check([-7023, 4805], smallChest, baseSU, smallKey, undefined, 'Walk into the cave and open the chest to obtain the key to the Faron Woods gate.'),
             new Check([-7023, 4834], chest, baseSU, heartPiece, [lantern], 'Light the 2 torches besides the small chest and climb the ledge to open the chest.'),
             new Check([-7121, 4136], smallChest, baseSU, yellowRupee, undefined, 'Defeat the Deku Baba and open the chest behind it.'),
@@ -1812,7 +1809,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ]),
             new FlooredSubmap([-5491, 7699], door, 'Kakariko Sanctuary', [585, 388], [
                 [
-                    new NonCheck([-5390, 7453], dominionRod, notaRupeesSU, [ancientSkyBook], 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod. This is not a Randomizer Check.'),
+                    new NonCheck([-5390, 7453], dominionRod, nonCheckItemsSU, [ancientSkyBook], 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod. This is not a Randomizer Check.'),
                 ],
                 [
                     new Check([-5640, 7377], renadosLetter, giftsSU, undefined, [armogohma], 'After clearing the Temple of Time, talk to Renado to obtain his letter. ' + neverRandomized),
@@ -2278,9 +2275,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-4510, 5206], chest, baseSU, redRupee, undefined, 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'),
                 new NonFlag([-3920, 4820], fairy, 'bottle'),
                 new NonCheck([-3858, 4868], lockedDoor, lockedDoorSU, [bossKeyFT], 'Locked door.'),
-                new Check([-3773, 4842], heartContainer, baseSU, undefined, [bossKeyFT, [woodenSword, bombBag, ballAndChain, bow], [boomerang, clawshot]], 'Defeat Diababa to obtain the heart container.'),
-                new Check([-3796, 4777], fusedShadow, baseSU, undefined, [bossKeyFT, [woodenSword, bombBag, ballAndChain, bow], [boomerang, clawshot]], 'Defeat Diababa to obtain the fused shadow.')
-
+                new Check([-3773, 4842], heartContainer, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the heart container.'),
+                new Check([-3796, 4777], fusedShadow, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the fused shadow.'),
+                new NonCheck([-3651, 4870], diababa, bossesSU, [bossKeyFT, [woodenSword, bombBag, ballAndChain, bow], [boomerang, clawshot]], 'Defeat Diababa to clear out the Forest Temple.')
             ]
         ]),
         new Dungeon([-3660, 8193], [-3920, 8752], dungeonStar, 'Goron Mines', [2787, 2791], 3, [
@@ -2313,14 +2310,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-3629, 4596], chest, baseSU, purpleRupee, [clawshot], 'Clawshot the vines from the door to the right of the room to reach the platform with the chest.'),
                 new NonFlag([-3644, 4560], fairy, 'bottle'),
                 new NonCheck([-4170, 3847], lockedDoor, lockedDoorSU, [bossKeyGM], 'Locked door.'),
-                new Check([-4252, 3815], heartContainer, baseSU, undefined, [bossKeyGM, bow], 'Defeat Fyrus to obtain the Heart Container.'),
-                new Check([-4276, 3884], fusedShadow, baseSU, undefined, [bossKeyGM, bow], 'Defeat Fyrus to obtain the second Fused Shadow.')
+                new Check([-4252, 3815], heartContainer, baseSU, undefined, [fyrus], 'Defeat Fyrus to obtain the Heart Container.'),
+                new Check([-4276, 3884], fusedShadow, baseSU, undefined, [fyrus], 'Defeat Fyrus to obtain the second Fused Shadow.'),
+                new NonCheck([-4332, 3840], fyrus, bossesSU, [bossKeyGM, bow], 'Defeat Fyrus to clear out the Goron Mines.'),
             ]
         ]),
         new Dungeon([-4741, 3415], [-4960, 4208], dungeonStar, 'Lakebed Temple', [2905, 1750], 1, [
             [ // B2
-                new Check([-4402, 5200], heartContainer, baseSU, undefined, [bossKeyLT, zoraArmor, bombBag, bow, clawshot, ironBoots, woodenSword], 'Defeat Morpheel to obtain the heart piece.'),
-                new Check([-4520, 5050], fusedShadow, baseSU, undefined, [bossKeyLT, zoraArmor, bombBag, bow, clawshot, ironBoots, woodenSword], 'Defeat Morpheel to obtain the third and last Fused Shadow.')
+                new Check([-4402, 5200], heartContainer, baseSU, undefined, [morpheel], 'Defeat Morpheel to obtain the heart piece.'),
+                new Check([-4520, 5050], fusedShadow, baseSU, undefined, [morpheel], 'Defeat Morpheel to obtain the third and last Fused Shadow.'),
+                new NonCheck([-4416, 4364], morpheel, bossesSU, [bossKeyLT, zoraArmor, bombBag, bow, clawshot, ironBoots, woodenSword], 'Defeat Morpheel to clear out the Lakebed Temple.')
             ],
             [ // B1
                 new Check([-4327, 4363], chest, baseSU, redRupee, [zoraArmor, bombBag, bow], 'Make the water level rise once by clearing the top of the east portion of the temple to access the chest.'),
@@ -2412,9 +2411,9 @@ document.addEventListener("DOMContentLoaded", function() {
             [ // 4F
                 new NonFlag([-3828, 4100], fairy, 'bottle'),
                 new NonCheck([-4276, 4326], lockedDoor, lockedDoorSU, [bossKeyAG], 'Locked door'),
-                new Check([-4928, 4384], heartContainer, baseSU, undefined, [bossKeyAG, spinner, [woodenSword, bow, bombBag, ballAndChain, shadowCrystal]], 'Defeat Stallord to obtain the Heart Container.'),
-                new Check([-4726, 4334], mirrorShard, baseSU, undefined, [bossKeyAG, spinner, [woodenSword, bow, bombBag, ballAndChain, shadowCrystal]], 'Defeat Stallord to obtain the Dungeon Reward.'),
-
+                new Check([-4928, 4384], heartContainer, baseSU, undefined, [stallord], 'Defeat Stallord to obtain the Heart Container.'),
+                new Check([-4726, 4334], mirrorShard, baseSU, undefined, [stallord], 'Defeat Stallord to obtain the Dungeon Reward.'),
+                new NonCheck([-4530, 4332], stallord, bossesSU, [bossKeyAG, spinner, [woodenSword, bow, bombBag, ballAndChain, shadowCrystal]], "Defeat Stallord to clear out the Arbiter's Grounds.")
             ],
         ]),
         new Dungeon([-2626, 1229], [-2960, 2112], dungeonStar, 'Snowpeak Ruins', [1431, 1733], 3, [
@@ -2454,8 +2453,9 @@ document.addEventListener("DOMContentLoaded", function() {
             ],
             [ // 3F
                 new NonCheck([-4350, 4268], lockedDoor, lockedDoorSU, [bedroomKey], 'Boss key door'),
-                new Check([-3963, 4358], heartContainer, baseSU, undefined, [bedroomKey, bombBag, ballAndChain], "Defeat Blizzeta to obtain the Heart Container."),
-                new Check([-4066, 4170], mirrorShard, baseSU, undefined, [bedroomKey, bombBag, ballAndChain], "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the Mirror Shard.")
+                new Check([-3963, 4358], heartContainer, baseSU, undefined, [blizzeta], "Defeat Blizzeta to obtain the Heart Container."),
+                new Check([-4066, 4170], mirrorShard, baseSU, undefined, [blizzeta], "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the Mirror Shard."),
+                new NonCheck([-4174, 4268], blizzeta, bossesSU, [bedroomKey, bombBag, ballAndChain], 'Defeat Blizzeta to clear out the Snowpeak Ruins.')
             ]
         ]), 
         new Dungeon([-6618, 3681], [-6580, 4425], dungeonStar, 'Temple of Time', [1169, 1587], 3, [
@@ -2463,8 +2463,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5497, 4635], chest, baseSU, smallkeyTT, [lantern], 'Light the 2 torches to make the chest appear.'),
                 new NonFlag([-4274, 4301], fairy, 'bottle'),
                 new NonCheck([-4197, 4350], lockedDoor, lockedDoorSU, [bossKeyTT], 'Boss Door.'),
-                new Check([-3880, 4480], heartContainer, baseSU, undefined, [bossKeyTT, redDominionRod, bow], 'Defeat Armogohma to obtain the Heart Container.'),
-                new Check([-3880, 4350], mirrorShard, baseSU, undefined, [bossKeyTT, redDominionRod, bow], 'Defeat Armogohma to obtain the Mirror Shard.'),
+                new Check([-3880, 4480], heartContainer, baseSU, undefined, [armogohma], 'Defeat Armogohma to obtain the Heart Container.'),
+                new Check([-3880, 4350], mirrorShard, baseSU, undefined, [armogohma], 'Defeat Armogohma to obtain the Mirror Shard.'),
+                new NonCheck([-3724, 4352], armogohma, bossesSU, [bossKeyTT, redDominionRod, bow], 'Defeat Armogohma to clear out the Temple of Time')
             ],
             [ // 2F
                 new NonCheck([-5725, 4352], ooccoo, ooccooSU, undefined, 'After opening the chest, Ooccoo will wait for you to join her at the top of the stairs.'),
@@ -2555,8 +2556,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonFlag([-3776, 3738], blueChuJelly, 'bottle')
             ],
             [ // 5F
-                new Check([-3877, 3766], heartContainer, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS, woodenSword], 'Defeat Argorok to obtain the Heart Container in the boss fight area.'),
-                new Check([-3789, 3712], mirrorShard, baseSU, undefined, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS, woodenSword],  'Defeat Argorok to obtain the Mirror Shard in the boss fight area.'),
+                new Check([-3877, 3766], heartContainer, baseSU, undefined, [argorok], 'Defeat Argorok to obtain the Heart Container in the boss fight area.'),
+                new Check([-3789, 3712], mirrorShard, baseSU, undefined, [argorok],  'Defeat Argorok to obtain the Mirror Shard in the boss fight area.'),
+                new NonCheck([-3923, 3841], argorok, bossesSU, [doubleClawshot, shadowCrystal, ironBoots, bossKeyCS, woodenSword], 'Defeat Argorok to clear out the City in the Sky.'),
 
                 new NonCheck([-3902, 3938], lockedDoor, lockedDoorSU, [bossKeyCS], 'Boss Door.'),
 
@@ -2603,27 +2605,76 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonFlag([-4656, 4439], fairy, 'bottle'),
             ],
             [ // 4F
-                new Check([-3620, 4324], heartContainer, baseSU, undefined, [bossKeyPT, lightMasterSword, boomerang, zoraArmor, [ironBoots, magicArmor], clawshot, ballAndChain], 'Defeat Zant to obtain the Heart Container.'),
+                new Check([-3620, 4324], heartContainer, baseSU, undefined, [zant], 'Defeat Zant to obtain the Heart Container.'),
 
+                new NonCheck([-3721, 4325], zant, bossesSU, [bossKeyPT, lightMasterSword, boomerang, zoraArmor, [ironBoots, magicArmor], clawshot, ballAndChain], 'Defeat Zant to clear out the Palace of Twilight.'),
                 new NonCheck([-4334, 4326], lockedDoor, lockedDoorSU, [smallKeyPT], 'Locked door.'),
                 new NonCheck([-3907, 4326], lockedDoor, lockedDoorSU, [bossKeyPT], 'Boss door.')
             ]
         ]),
         new Dungeon([-3250, 4712], [0, 0], castle, 'Hyrule Castle', [1600, 1278], 3, [
             [ // 1F
+                new Check([-4229, 3620], smallChest, baseSU, redRupee, undefined, 'Under the wooden roof, you can go around the platform if you do not wish to fight King Bulblin.'),
+                new Check([-4419, 3471], smallKeyHC, giftsSU, undefined, [woodenSword], 'Defeat King Bulblin for him to give you the small key.'),
+                new Check([-4887, 3598], smallChest, baseSU, redRupee, undefined, 'From the north area, climb up the balcony and drop down to the platform with the chest.'),
+                new Check([-4283, 4456], chest, baseSU, dungeonMap, [boomerang], "Boomerang the windmills in this order or it's inverse: Left, Middle Top, Middle Bottom, Right Middle to open the gate and reach the chest."),
+                new Check([-3923, 4748], chest, baseSU, orangeRupee, [shadowCrystal, [bombBag, ballAndChain]], 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'),
+                new Check([-3832, 4708], smallChest, baseSU, greenRupee, [shadowCrystal, [bombBag, ballAndChain]], 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'),
+                new Check([-3832, 4761], smallChest, baseSU, redRupee, [shadowCrystal, [bombBag, ballAndChain]], 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'),
+                new Check([-4297, 4310], chest, baseSU, smallKeyHC, [shadowCrystal, [bombBag, ballAndChain], lantern, dominionRod], 'In the room with the 3 chests, light the torch to stop the rain. Then, quickly make your way to the gate ' + 
+                    'blocking the Howl Statues, and light the 2 torches on both sides of the gate. Bring the 2 Howl Statues to their pedestal south of the area, then jump across them. Finally, pull the chain to open the gate and acces the chest.'),
+                new Check([-5205, 4834], smallChest, baseSU, yellowRupee, [boomerang], 'In the room with the chest, climb the ladder to reach the balcony. Then, go to the end of the balcony to reach the chest.'),
 
+                new NonCheck([-5304, 4320], lockedDoor, lockedDoorSU, [smallKeyHC], 'Locked door.'),
+
+                new NonFlag([-3890, 4791], lanternOil, 'bottle'),
             ],
             [ // 2F
+                new Check([-4809, 4576], chest, baseSU, compass, [clawshot], 'Defeat all the enemies in the room to make the chest appear, then clawshot the chandelier to reach the chest.'),
+                new Check([-4463, 4319], chest, baseSU, purpleRupee, [doubleClawshot, woodenSword, boomerang], 'Defeat the Darknut to make the chest appear. Then, put out the west torch with the boomerang while standing on the north-most platform to ' + 
+                    'make it rise and reach the chest.'),
+                new Check([-5054, 4180], chest, baseSU, purpleRupee, [doubleClawshot, woodenSword, boomerang, bow], 'Defeat the 2 Darknuts to unlock the door and gain access to the chest.'),
+                new Check([-4805, 4060], chest, baseSU, silverRupee, [doubleClawshot, woodenSword, boomerang, bow], 'Activate the pressure plate on the south-west platform to make the chest appear. Then, clawshot the lowest chandelier and from there ' +
+                    'the one above the chest to reach it.'),
+                new Check([-5628, 5316], chest, baseSU, smallKeyHC, [doubleClawshot, woodenSword, boomerang, [bow, lantern]], 'Defeat the Aeralfos to gain access to the chest.'),
+                new Check([-5634, 3319], bossChest, baseSU, bossKeyHC, [doubleClawshot, woodenSword, boomerang, [bow, lantern]], "Approach the chest to be saved by the Telma's bar crew and gain access to the chest."),
 
+
+                new NonFlag([-4615, 4172], lanternOil, 'bottle'),
+                new NonFlag([-4910, 3843], yellowChuJelly, 'bottle'),
+                new NonFlag([-4759, 3845], redChuJelly, 'bottle'),
+                new NonFlag([-4686, 3917], yellowChuJelly, 'bottle'),
             ],
             [ // 3F
-
+                new NonCheck([-5296, 4322], lockedDoor, lockedDoorSU, [smallKeyHC], 'Locked door.')
             ],
             [ // 4F
+                new Check([-5190, 4674], smallChest, baseSU, blueRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'First from the left of the south row.'),
+                new Check([-5173, 4695], smallChest, baseSU, yellowRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Second from the left of the south row.'),
+                new Check([-5156, 4716], smallChest, baseSU, redRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Third from the left of the south row.'),
+                new Check([-5139, 4737], smallChest, baseSU, qI(bombs, 20), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'First from the bottom of the east column.'),
+                new Check([-5120, 4737], smallChest, baseSU, qI(arrows, 20), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Second from the bottom of the east column.'),
+                new Check([-5090, 4737], smallChest, baseSU, qI(bombs, 20), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Third from the bottom of the east column.'),
+                new Check([-5065, 4737], smallChest, baseSU, greenRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Fourth from the bottom of the east column.'),
+                new Check([-5040, 4737], smallChest, baseSU, qI(arrows, 30), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Fifth from the bottom of the east column.'),
+                new Check([-5040, 4625], chest, baseSU, purpleRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Fifth from the left of the north row.'),
+                new Check([-5055, 4605], chest, baseSU, qI(bomblings, 10), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Fourth from the left of the north row.'),
+                new Check([-5070, 4585], chest, baseSU, silverRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Third from the left of the north row.'),
+                new Check([-5085, 4565], chest, baseSU, qI(seeds, 50), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Second from the left of the north row.'),
+                new Check([-5100, 4545], chest, baseSU, orangeRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'First from the left of the north row.'),
 
+
+
+
+                new NonCheck([-5169, 4319], orangeRupee, notaRupeesSU, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Defeat the Darknut and it will drop an orange rupee.'),
+                new NonCheck([-5153, 4525], lockedDoor, lockedDoorSU, [smallKeyHC], 'Locked door.'),
+                new NonCheck([-5237, 4323], lockedDoor, lockedDoorSU, [bossKeyHC], 'Boss door.'),
+
+                new NonFlag([-5030, 4760], fairy, 'bottle'),
             ],
             [ // 5F
-
+                new NonCheck([-4838, 4328], ganondorf, bossesSU, [masterSword, endingBlow, shadowCrystal, doubleClawshot, boomerang, [bow, lantern], spinner], 'Defeat Ganondorf to beat the game.'),
+                new NonFlag([-4957, 4179], fairy, 'bottle'),
             ]
         ])        
     ];
@@ -2632,11 +2683,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     loadImageMap(); 
 
-
-    function onMapClick(e) {
-        navigator.clipboard.writeText("[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]")
-    }
-    map.on('click', onMapClick);
+    map.on('click', getCoordsOnClick);
     
 });
 
@@ -2728,6 +2775,11 @@ function removeAllLayersExceptTL() {
             map.removeLayer(l);
     });
 }  
+function getCoordsOnClick(e) {
+    if (e.originalEvent.ctrlKey) {
+        navigator.clipboard.writeText("[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]");
+    }
+}
 
 // Menu Functions
 function hideDetails() {
