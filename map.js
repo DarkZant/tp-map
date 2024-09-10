@@ -1653,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", function() {
             [-5412, 5564], [-5374, 5998], [-5954, 6282], [-5944, 7028], [-6700, 7216], [-7144, 6960], [-8048, 5568], [-7844, 4680],
             [-7360, 4200], [-6640, 3464], [-6360, 3744], [-5944, 3776], [-5834, 4743], [-5630, 4883]
         ], false, [-6512, 5536], [
-            new Check([-7405, 4910], lantern, nonCheckItemsSU, undefined, undefined, 'Talk to Coro to obtain the lantern. This is not a Randomizer Check.'),
+            new NonCheck([-7405, 4910], lantern, nonCheckItemsSU, undefined, 'Talk to Coro to obtain the lantern. This is not a Randomizer Check.'),
             new Check([-7023, 4805], smallChest, baseSU, smallKey, undefined, 'Walk into the cave and open the chest to obtain the key to the Faron Woods gate.'),
             new Check([-7023, 4834], chest, baseSU, heartPiece, [lantern], 'Light the 2 torches besides the small chest and climb the ledge to open the chest.'),
             new Check([-7121, 4136], smallChest, baseSU, yellowRupee, undefined, 'Defeat the Deku Baba and open the chest behind it.'),
