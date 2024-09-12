@@ -1288,7 +1288,12 @@ var g5 = new Grotto(5, 351, 495); // 5
 //Icons
 //Icon generators
 function createIcon(img, width, height, name) {
-    let maxSize = 50;
+    let mult = window.innerWidth <= window.innerHeight ? window.innerWidth / 1600 : window.innerHeight / 739;
+    let maxSize = 50 * mult;
+    if (maxSize > 50)
+        maxSize = 50;
+    else if (maxSize < 30)
+        maxSize = 30;
     if (width >= height) {
         height = height / width * maxSize;
         width = maxSize;
@@ -1325,6 +1330,7 @@ var bossChest = createIcon('Boss Chest', 649, 541);
 var howlingStone = createIcon('Howling Stone', 528, 802);
 var goldenWolf = createIcon('Golden Wolf', 137, 161);
 var rupeeBoulder = createIcon('Rupee Boulder', 2209, 1702);
+var sign = createIcon('Sign', 348, 593);
 var grotto = createIcon('Grotto', 573, 572);
 var door = createIcon('Door', 982 , 1552);
 var cave = createIcon('Entrance', 1708, 1370);
@@ -1620,6 +1626,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-8940, 5001], hawkGrass, 'grass'),
             new NonFlag([-9169, 4934], hawkGrass, 'grass'),
             new NonFlag([-9035, 4848], beeLarva, 'bottle'),
+            new NonFlag([-8842, 4938], sign, 'hint'),
             //Monkey fishing spot
             //Cat fishing spot 
             //Uli House fishing spot
@@ -1687,6 +1694,10 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-6666, 4936], horseGrass, 'grass'),
             new NonFlag([-7325, 3569], hawkGrass, 'grass'),
             new NonFlag([-7318, 3518], beeLarva, 'bottle'),
+            new NonFlag([-7478, 4945], sign, 'hint'),
+            new NonFlag([-6202, 4889], sign, 'hint'),
+            new NonFlag([-7214, 3630], sign, 'hint'),
+
             // Faron spring fishing spot
 
 
@@ -1778,6 +1789,13 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-4108, 8225], hawkGrass, 'grass'),
             new NonFlag([-5507, 8125], beeLarva, 'bottle'),
             new NonFlag([-4102, 8260], rareChuJelly, 'bottle'),
+            new NonFlag([-3828, 8247], sign, 'hint'),
+            new NonFlag([-4282, 5928], sign, 'hint'),
+            new NonFlag([-1911, 7257], sign, 'hint'),
+            new NonFlag([-4979, 5876], sign, 'hint'),
+            new NonFlag([-5253, 7455], sign, 'hint'),
+            new NonFlag([-5476, 8270], sign, 'hint'),
+            new NonFlag([-2052, 6668], sign, 'hint'),
             // Kak Goron Night Shop
             // Death Mountain Shop
             // Graveyard Crows (22 rupees)
@@ -1890,6 +1908,9 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-6140, 1027], skyBookChar, skyCharsSU, undefined, [dominionRod], 'Move the Howl Statue between the climbable platform and the one with the sky character to obtain it.'),
             new Check([-6193, 1074], chest, baseSU, orangeRupee, [dominionRod], 'Move the Howl Statue in the intended places while staying on the platforms and make a few jumps to reach the chest.'),
 
+            new NonFlag([-5481, 1185], sign, 'hint'),
+            new NonFlag([-4151, 531], sign, 'hint'),
+
             new Submap([-6060, 2588], grotto, g4.img, g4.imgSize, [
                 new Check([-5762, 2464], chest, baseSU, orangeRupee, [shadowCrystal], 'Defeat all the skulltulas to make the chest appear.')
             ]),
@@ -1903,7 +1924,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-4812, 1381], chest, baseSU, orangeRupee, [clawshot, shadowCrystal, [bombBag, ballAndChain], lantern], 'Destroy the rocks blocking the way, then light 3 torches to make the chest appear.')
             ]),
             new CaveOfOrdeals([-6116, 503], cave, [
-                [], // B1
+                [new NonFlag([-6268, 581], sign, 'hint')], // B1
                 [], // B2
                 [], // B3
                 [], // B4
@@ -1993,6 +2014,8 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-675, 3275], chest, baseSU, orangeRupee, [ballAndChain, shadowCrystal, lantern], 'In the cave, break the 2 ice blocks to reveal torches. Light them up to make the chest appear.'),
 
             new NonCheck([-475, 3393], howlingStone, skillsSU, [shadowCrystal], 'Summons the Kakariko Graveyard Golden Wolf.'),
+
+            new NonFlag([-483, 3939], sign, 'hint'),
 
 
             new Submap([-405, 3690], grotto, g4.img, g4.imgSize, [
@@ -2096,6 +2119,14 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-614, 5775], beeLarva, 'bottle'),
             new NonFlag([-5488, 3116], fairy, 'bottle'),
             new NonFlag([-5353, 3456], rareChuJelly, 'bottle'),
+            new NonFlag([-3883, 4188], sign, 'hint'),
+            new NonFlag([-3994, 4707], sign, 'hint'),
+            new NonFlag([-4475, 4710], sign, 'hint'),
+            new NonFlag([-4250, 3381], sign, 'hint'),
+            new NonFlag([-4659, 2910], sign, 'hint'),
+            new NonFlag([-1891, 4860], sign, 'hint'),
+            new NonFlag([-748, 4751], sign, 'hint'),
+            new NonFlag([-590, 5780], sign, 'hint'),
             //Zora's Domain Fishing
             //Lake Hylia Fishing
             //Howl Statue Lookout Crows (71 rupees)
@@ -2107,19 +2138,6 @@ document.addEventListener("DOMContentLoaded", function() {
             //South Castle Town Crows (33 rupees)
             
             
-            new Submap([-5259, 3502], cave, 'Lanayru Spring', [485, 491], [
-                new Check([-5210, 3566], smallChest, baseSU, blueRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
-                new Check([-5197, 3360], smallChest, baseSU, yellowRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
-                new Check([-5558, 3491], smallChest, baseSU, blueRupee, [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the right.'),
-                new Check([-5538, 3542], smallChest, baseSU, qI(bombs, 5), [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the left.'),
-                new Check([-5559, 3526], chest, baseSU, heartPiece, [clawshot, lantern], 'Light the 2 torches in the room to make the chest appear.'),
-                new Check([-5128, 3232], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
-                new Check([-5145, 3773], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
-
-                new NonCheck([-5322, 3394], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
-                new NonCheck([-5171, 3447], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
-                //Fishing
-            ]),
             new FlooredSubmap([-4147, 4586], door, "Agitha's Castle", [255, 300], [
                 [
                     new Check([-3900, 4370], antM, giftsSU, undefined, [antM], agithaText),
@@ -2188,6 +2206,9 @@ document.addEventListener("DOMContentLoaded", function() {
             new Submap([-4147, 4643], door, "Fanadi's Palace", [247, 227], [
 
             ]),
+            new Submap([-612, 5828], door, "Hena's Shop", [495, 269], [
+
+            ]),
             new Submap([-3733, 3820], grotto, g1.img, g1.imgSize, [
                 new Check([-3718, 3801], chest, baseSU, orangeRupee, [clawshot, shadowCrystal], "Use the clawshot on the vines to reach the grotto entrance. Once inside, " + 
                     "defeat all the helmasaurs to make the chest appear.")
@@ -2220,6 +2241,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonFlag([-4238, 4905], beeLarva, 'bottle'),
                 //Fishing spot
             ]),
+            new Submap([-5259, 3502], cave, 'Lanayru Spring', [485, 491], [
+                new Check([-5210, 3566], smallChest, baseSU, blueRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
+                new Check([-5197, 3360], smallChest, baseSU, yellowRupee, [[ironBoots, magicArmor]], 'Sink down to get this underwater chest.'),
+                new Check([-5558, 3491], smallChest, baseSU, blueRupee, [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the right.'),
+                new Check([-5538, 3542], smallChest, baseSU, qI(bombs, 5), [clawshot], 'Clawshot the vines on either side, open the door and walk to the chest on the left.'),
+                new Check([-5559, 3526], chest, baseSU, heartPiece, [clawshot, lantern], 'Light the 2 torches in the room to make the chest appear.'),
+                new Check([-5128, 3232], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
+                new Check([-5145, 3773], chest, baseSU, orangeRupee, [doubleClawshot], 'Follow the clawshot target path, then take a left to reach the chest.'),
+
+                new NonCheck([-5322, 3394], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
+                new NonCheck([-5171, 3447], rupeeBoulder, notaRupeesSU, [bombBag, [ironBoots, magicArmor]], 'This rupee boulder is underwater.'),
+
+                new NonFlag([-5238, 3468], sign, 'hint'),
+                //Fishing
+            ]),
             new Submap([-5546, 3134], cave, 'Lake Lantern Cave', [658, 585], [
                 new Check([-5696, 3100], smallChest, baseSU, qI(bombs, 5), [[bombBag, ballAndChain]], 'Destroy the rock on the left to reveal the chest.'),
                 new Check([-5665, 3145], smallChest, baseSU, yellowRupee, [[bombBag, ballAndChain]], 'Destroy the rock in the back and defeat the Keese.'),
@@ -2238,7 +2274,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5303, 3268], smallChest, baseSU, qI(seeds, 50), [[bombBag, ballAndChain]], 'Destroy the rock on the left to reveal the chest.'),
                 new Check([-5333, 3426], chest, baseSU, orangeRupee, [[bombBag, ballAndChain]], 'Destroy the rock in the back to reveal the chest.'),
                 new Check([-5523, 3363], poeSoul, poesSU, undefined, [[bombBag, ballAndChain], shadowCrystal], 'At the entrance of the room.'),
-                new Check([-5555, 3364], chest, baseSU, heartPiece, [[bombBag, ballAndChain], lantern], 'Light the 2 torches to make the chest appear.')
+                new Check([-5555, 3364], chest, baseSU, heartPiece, [[bombBag, ballAndChain], lantern], 'Light the 2 torches to make the chest appear.'),
+
+                new NonFlag([-5335, 3018], sign, 'hint')
             ]),
             new Submap([-2025, 4818], cave, 'Lanayru Ice Cave', [105, 369], [
                 new Check([-1725, 4818], chest, baseSU, heartPiece, [ballAndChain], 'Complete the 3 block puzzles to open all the gates and access the chest.')
@@ -2254,51 +2292,53 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5281, 4240], smallChest, baseSU, redRupee, undefined, 'Use the Bombling on the right to blow up the rock blocking the chest.'),
                 new Check([-5260, 4294], chest, baseSU, dungeonMap, [[lantern, boomerang]], 'Use the lantern to light the 4 torches that make the platforms to the chest rise or take a long detour' +
                     'by the boomerang bridges to reach the chest.'),
-                new NonCheck([-5250, 4565], ooccoo, ooccooSU, undefined, 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'),
                 new Check([-4710, 4812], chest, baseSU, smallKeyFT, undefined, 'Make your way across the windy bridge and open the chest on the left of the entrance.'),
-                new NonCheck([-5224, 5140], lockedDoor, lockedDoorSU, [smallKeyFT], 'Locked door'),
                 new Check([-5445, 5129], chest, baseSU, yellowRupee, undefined, 'Swim to the opening and walk to the end to reach the chest.'),
                 new Check([-5155, 5218], smallChest, baseSU, yellowRupee, undefined, 'The chest is under the wooden structure.'),
                 new Check([-5624, 3749], smallKeyFT, baseSU, undefined, undefined, 'Defeat the Big Baba to obtain the key.'),
-                new NonCheck([-5869, 3747], lockedDoor, lockedDoorSU, [smallKeyFT], 'Locked door'),
                 new Check([-5467, 3901], chest, baseSU, heartPiece, undefined, 'Defeat the Deku Like that blocks the way to access the chest.'),
                 new Check([-5277, 3498], chest, baseSU, smallKeyFT, undefined, 'Bonk on the pillar to make the chest fall.'),
                 new Check([-5224, 3241], smallChest, baseSU, redRupee, undefined, 'Climb the vines to reach the chest.'),
-                new NonCheck([-5309, 2943], lockedDoor, lockedDoorSU, [lantern, smallKeyFT], 'Locked door'),
                 new Check([-4508, 4262], boomerang, baseSU, undefined, undefined, 'Defeat Ook to obtain the Gale Boomerang.'),
                 new Check([-5304, 3050], chest, baseSU, heartPiece, [boomerang], 'Blow out all the torches to retract the platform blocking the chest.'),
                 new Check([-5386, 4242], chest, baseSU, compass, [[boomerang, bow, clawshot]], 'Use a long ranged item to break the web holding the chest.'),
                 new Check([-5439, 5042], bossChest, baseSU, bossKeyFT, [boomerang], 'Use the boomerang on the windmill pillars in this pattern: Bottom Right, Bottom Left, Top Right and Top Left.' + 
                     'This opens the gate to the boss key chest.'),
                 new Check([-4322, 4342], chest, baseSU, smallKeyFT, [[boomerang, bombBag, clawshot]], 'Grab a bombling or use one of your own bombs to defeat the Deku Like and jump across the platforms.'),
-                new NonCheck([-4570, 5087], lockedDoor, lockedDoorSU, [boomerang, smallKeyFT], 'Locked door'),
-                new Check([-4510, 5206], chest, baseSU, redRupee, undefined, 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'),
-                new NonFlag([-3920, 4820], fairy, 'bottle'),
-                new NonCheck([-3858, 4868], lockedDoor, lockedDoorSU, [bossKeyFT], 'Locked door.'),
+                new Check([-4510, 5206], chest, baseSU, redRupee, undefined, 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'),    
                 new Check([-3773, 4842], heartContainer, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the heart container.'),
                 new Check([-3796, 4777], fusedShadow, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the fused shadow.'),
-                new NonCheck([-3651, 4870], diababa, bossesSU, [bossKeyFT, [woodenSword, bombBag, ballAndChain, bow], [boomerang, clawshot]], 'Defeat Diababa to clear out the Forest Temple.')
+                
+                new NonCheck([-5250, 4565], ooccoo, ooccooSU, undefined, 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'),
+                new NonCheck([-5224, 5140], lockedDoor, lockedDoorSU, [smallKeyFT], 'Locked door'),
+                new NonCheck([-5869, 3747], lockedDoor, lockedDoorSU, [smallKeyFT], 'Locked door'),
+                new NonCheck([-5309, 2943], lockedDoor, lockedDoorSU, [lantern, smallKeyFT], 'Locked door'),
+                new NonCheck([-4570, 5087], lockedDoor, lockedDoorSU, [boomerang, smallKeyFT], 'Locked door'),
+                new NonCheck([-3858, 4868], lockedDoor, lockedDoorSU, [bossKeyFT], 'Locked door.'),
+                new NonCheck([-3651, 4870], diababa, bossesSU, [bossKeyFT, [woodenSword, bombBag, ballAndChain, bow], [boomerang, clawshot]], 'Defeat Diababa to clear out the Forest Temple.'),
+
+                new NonFlag([-3920, 4820], fairy, 'bottle'),
+                new NonFlag([-5405, 4055], sign, 'hint'),
             ]
         ]),
         new Dungeon([-3660, 8193], [-3920, 8752], dungeonStar, 'Goron Mines', [2787, 2791], 3, [
             [ // 1F
                 new Check([-5791, 4465], smallChest, baseSU, redRupee, undefined, 'Defeat the Torch Slug to have access to the chest.'),
                 new Check([-5232, 4603], chest, baseSU, smallKeyGM, undefined, 'Defeat the Bulblins to easily reach the chest.'),
-                new NonCheck([-5052, 3966], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door'),
                 new Check([-5004, 3025], bossKeyGM0, giftsSU, undefined, undefined, 'Talk to goron elder Gor Amoto to obtain this part of the boss key.'),
                 new Check([-4971, 2973], chest, baseSU, dungeonMap, undefined, 'The chest is behind the goron elder.'),
                 new Check([-4971, 2941], smallChest, baseSU, redRupee, undefined, 'The small chest is behind the goron elder, on the platform.'),
-                new NonCheck([-5027, 3150], ooccoo, ooccooSU, undefined, 'Pick up the pot where Ooccoo is hiding for her to join you.'),
                 new Check([-4913, 3891], chest, baseSU, heartPiece, [ironBoots], 'Follow the left path when you get on the ceiling to reach the chest.'),
+
+                new NonCheck([-5027, 3150], ooccoo, ooccooSU, undefined, 'Pick up the pot where Ooccoo is hiding for her to join you.'),
+                new NonCheck([-5052, 3966], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door'),
             ],
             [ // 2F
                 new Check([-4591, 4459], chest, baseSU, smallKeyGM, [[ironBoots, magicArmor]], 'Use the iron boots or the depleted magic armor to sink down to the underwater chest.'),
                 new Check([-4526, 4441], smallChest, baseSU, redRupee, [ironBoots], 'Use the iron boots to follow the crystal path onto the platform where the chest lies.'),
                 new Check([-4471, 4242], chest, baseSU, heartPiece, [ironBoots], 'Follow the crystal path and take a left to reach the upper platform.'),
-                new NonCheck([-4200, 4363], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door'),
                 new Check([-3898, 4270], smallChest, baseSU, smallKeyGM, undefined, 'Follow the left barrier to not get noticed by the Beamos and reach the chest.'),
                 new Check([-3747, 4568], chest, baseSU, purpleRupee, [[ironBoots, magicArmor]], 'The chest is behind a breakable wooden barrier underwater. However, you can simply go above the barrier by swimming.'),
-                new NonCheck([-3833, 4669], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door.'),
                 new Check([-3736, 5491], bossKeyGM1, giftsSU, undefined, undefined, 'Talk to goron elder Gor Ebizo to obtain this part of the boss key.'),
                 new Check([-3764, 5566], smallChest, baseSU, yellowRupee, undefined, 'Go behind Gor Ebizo, to the right and use the stairs to climb the small platform.'),
                 new Check([-3896, 5243], smallChest, baseSU, yellowRupee, [ironBoots], 'Use the crystal path to reach the chest.'),
@@ -2308,17 +2348,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-4783, 5585], chest, baseSU, purpleRupee, [bow], 'Defeat the beamos and pull it to have access to the room where the chest is, behind the goron elder.'),
                 new Check([-5155, 4682], chest, baseSU, purpleRupee, [bow], 'Jump across to the platform to reach the chest.'),
                 new Check([-3629, 4596], chest, baseSU, purpleRupee, [clawshot], 'Clawshot the vines from the door to the right of the room to reach the platform with the chest.'),
-                new NonFlag([-3644, 4560], fairy, 'bottle'),
-                new NonCheck([-4170, 3847], lockedDoor, lockedDoorSU, [bossKeyGM], 'Locked door.'),
                 new Check([-4252, 3815], heartContainer, baseSU, undefined, [fyrus], 'Defeat Fyrus to obtain the Heart Container.'),
                 new Check([-4276, 3884], fusedShadow, baseSU, undefined, [fyrus], 'Defeat Fyrus to obtain the second Fused Shadow.'),
+
+                new NonCheck([-4200, 4363], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door'),
+                new NonCheck([-3833, 4669], lockedDoor, lockedDoorSU, [smallKeyGM], 'Locked door.'),
+                new NonCheck([-4170, 3847], lockedDoor, lockedDoorSU, [bossKeyGM], 'Locked door.'),
                 new NonCheck([-4332, 3840], fyrus, bossesSU, [bossKeyGM, bow], 'Defeat Fyrus to clear out the Goron Mines.'),
+
+                new NonFlag([-3644, 4560], fairy, 'bottle'),
+                new NonFlag([-3723, 5334], sign, 'hint'),
             ]
         ]),
         new Dungeon([-4741, 3415], [-4960, 4208], dungeonStar, 'Lakebed Temple', [2905, 1750], 1, [
             [ // B2
                 new Check([-4402, 5200], heartContainer, baseSU, undefined, [morpheel], 'Defeat Morpheel to obtain the heart piece.'),
                 new Check([-4520, 5050], fusedShadow, baseSU, undefined, [morpheel], 'Defeat Morpheel to obtain the third and last Fused Shadow.'),
+
                 new NonCheck([-4416, 4364], morpheel, bossesSU, [bossKeyLT, zoraArmor, bombBag, bow, clawshot, ironBoots, woodenSword], 'Defeat Morpheel to clear out the Lakebed Temple.')
             ],
             [ // B1
@@ -2326,38 +2372,45 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-4021, 5724], chest, baseSU, qI(bombs, 5), [zoraArmor, bombBag, bow, ironBoots], 'Walk through the jet stream with the iron boots and take a left to the chest.'),
                 new Check([-4186, 5665], chest, baseSU, redRupee, [zoraArmor, bombBag, bow, ironBoots], 'Walk away from the jet stream into the tunnel to reach the chest.'),
                 new Check([-4592, 2725], bossChest, baseSU, bossKeyLT, [zoraArmor, bombBag, bow, clawshot, ironBoots], 'In the room above, hang from the clawshot target and descend towards the chest.'),
-                //Fishing spot!
+                
                 new NonCheck([-4414, 4362], lockedDoor, lockedDoorSU, [bossKeyLT], 'Boss Door.'),
-                new NonFlag([-4365, 4362], fairy, 'bottle')
+                
+                new NonFlag([-4365, 4362], fairy, 'bottle'),
+                //Fishing spot!
+
             ],
             [ // 1F
                 new Check([-4518, 4517], smallChest, baseSU, qI(arrows, 20), [zoraArmor, bombBag, bow], 'The chest is accessible when you first get into the room, go down the stairs and take a left.'),
                 new Check([-4224, 4513], chest, baseSU, dungeonMap, [zoraArmor, bombBag, bow], 'The chest is accessible when you first get into the room, manipulate the stairs to reach it.'),
                 new Check([-4506, 5613], chest, baseSU, smallKeyLT, [zoraArmor, bombBag, bow], 'Knock down the stalactite with bomb arrows to make a platform to jump to the chest.'),
                 new Check([-4181, 5694], chest, baseSU, smallKeyLT, [zoraArmor, bombBag, bow], 'Defeat the Chus to have an easier time accessing the chest.'),
-                new NonCheck([-4331, 5867], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door'),
                 new Check([-3736, 5469], chest, baseSU, clawshot, [zoraArmor, bombBag, bow, [ironBoots, clawshot]], 'Defeat Deku Toad to make it spit out the chest.'),
                 new Check([-4299, 3311], smallChest, baseSU, qI(waterBombs, 10), [zoraArmor, bombBag, bow, clawshot], 'Jump on the hanging platform then shoot the clawshot at the target above the platform with the chest.'),
                 new Check([-4718, 5483], chest, baseSU, heartPiece, [zoraArmor, bombBag, bow, clawshot], 'Once the water level is elevated in the room, press on the switch to open the gate and clawshot the target on the ' + 
                     'back wall to reach the chest. Clawshot the target on the ceiling to get back out.'),
-                new Check([-4420, 2539], smallChest, baseSU, qI(bombs, 5), [zoraArmor, bombBag, bow, clawshot], 'In the section with the entrance to the long tunnel, swim up to find to chest.')
+                new Check([-4420, 2539], smallChest, baseSU, qI(bombs, 5), [zoraArmor, bombBag, bow, clawshot], 'In the section with the entrance to the long tunnel, swim up to find to chest.'),
+
+                new NonCheck([-4331, 5867], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door'),
+
+                new NonFlag([-4392, 3903], sign, 'hint'),
             ],
             [ // 2F
                 new Check([-5509, 4199], smallChest, baseSU, qI(arrows, 20), [zoraArmor], 'The chest is between the 2 rock pillars'),
                 new Check([-5601, 4339], smallChest, baseSU, qI(waterBombs, 10), [zoraArmor], 'The chest is on the right of the nearby rock pillar.'),
                 new Check([-4950, 4501], smallChest, baseSU, qI(waterBombs, 10), [zoraArmor, bombBag, bow], 'Knock down the stalactites with bomb arrows and climb to the chest.'),
-                new NonCheck([-4490, 4552], ooccoo, ooccooSU, [zoraArmor, bombBag, bow], 'Pick up or break the pot where Ooccoo is hiding.'),
-                new NonCheck([-4372, 4666], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door.'),
                 new Check([-4487, 5223], smallChest, baseSU, qI(bombs, 5), [zoraArmor, bombBag, bow], 'On the left when you enter the room from the lobby.'),
                 new Check([-4585, 5497], chest, baseSU, smallKeyLT, [zoraArmor, bombBag, bow], 'Go around the room and cross by the middle section to reach the chest.'),
-                new NonCheck([-4425, 6048], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door.'),
-                new NonFlag([-4533, 5253], fairy, 'bottle'),
                 new Check([-4373, 4363], chest, baseSU, heartPiece, [zoraArmor, bombBag, bow, clawshot], 'The chest is on the chandelier hanging from the ceiling, use the clawshot to get there.'),
                 new Check([-4223, 3363], smallChest, baseSU, redRupee, [zoraArmor, bombBag, bow, clawshot], 'Once on the highest vine platform, clawshot the target above the platform where the chest is.'),
                 new Check([-4212, 3451], chest, baseSU, qI(bombs, 20), [zoraArmor, bombBag, bow, clawshot], 'After activating the water, go back the way you came from through the waterwheel to find the chest.'),
                 new Check([-4583, 2965], chest, baseSU, redRupee, [zoraArmor, bombBag, bow, clawshot, ironBoots], 'Defeat the enemies underwater to have easier access to the chest.'),
                 new Check([-4561, 3301], smallChest, baseSU, redRupee, [zoraArmor, bombBag, bow, clawshot], 'Go through the middle room accross the spinning gears to get the chest.'),
 
+                new NonCheck([-4490, 4552], ooccoo, ooccooSU, [zoraArmor, bombBag, bow], 'Pick up or break the pot where Ooccoo is hiding.'),
+                new NonCheck([-4372, 4666], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door.'),
+                new NonCheck([-4425, 6048], lockedDoor, lockedDoorSU, [smallKeyLT], 'Locked door.'),
+
+                new NonFlag([-4533, 5253], fairy, 'bottle'),
             ],
             [], // 3F
             [ // 4F
@@ -2370,13 +2423,14 @@ document.addEventListener("DOMContentLoaded", function() {
         ]),
         new Dungeon([-3865, 605], [-4500, 1488], dungeonStar, "Arbiter's Grounds", [2009, 1691], 1, [
             [ // B2
-                new NonCheck([-4325, 4791], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
-                new NonCheck([-5201, 4240], ooccoo, ooccooSU, undefined, 'Pick up or break the pot where Ooccoo is hiding for her to join you.'),
                 new Check([-3598, 4239], chest, baseSU, spinner, [shadowCrystal, [clawshot, bow, boomerang]], 'Defeat Death Sword to obtain the Spinner.'),
                 new Check([-4490, 3311], smallChest, baseSU, qI(bombs, 10), [spinner], 'Use the spinner to float above the quicksand and reach the chest.'),
                 new Check([-4486, 3078], smallChest, baseSU, redRupee, [spinner], 'From the previous chest, use the spinner to float above the quicksand and reach the chest.'),
                 new Check([-4307, 2997], smallChest, baseSU, yellowRupee, [spinner], 'Hidden under the spinner ramp, use the spinner to float above the quicksand and reach the chest.'),
                 new Check([-4369, 3666], chest, baseSU, heartPiece, [spinner], 'Use the spinner ramp and defeat the Stalfos to reach this chest.'),
+
+                new NonCheck([-5201, 4240], ooccoo, ooccooSU, undefined, 'Pick up or break the pot where Ooccoo is hiding for her to join you.'),
+                new NonCheck([-4325, 4791], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
             ],
             [ // B1
                 new Check([-4626, 4836], smallChest, baseSU, smallKeyAG, [shadowCrystal], 'Dig the sand spot to reveal the lever, then pull it to access the stairs. then, spin the room to gain access to the chest.'),
@@ -2385,35 +2439,42 @@ document.addEventListener("DOMContentLoaded", function() {
             ],
             [ // 1F
                 new Check([-5336, 3974], chest, baseSU, smallKeyAG, [clawshot], 'Break the wooden barrier and jump across to the chest.'),
-                new NonFlag([-5341, 4446], lanternOil, 'bottle'),
-                new NonCheck([-5277, 4323], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
                 new Check([-4763, 4329], poeSoul, poesSU, undefined, [shadowCrystal], 'The first of the 4 poes, waits in the middle of the room after the cutscene.'),
                 new Check([-4562, 4481], chest, baseSU, heartPiece, undefined, 'Walk across the platforms or use the clawshot to have a way back.'),
                 new Check([-4561, 4171], chest, baseSU, dungeonMap, undefined, 'Walk across the quicksand using the sinking platform to reach the chest.'),
                 new Check([-4576, 3840], smallChest, baseSU, redRupee, undefined, 'Upon entering the room, follow the path to the right to reach the chest.'),
                 new Check([-4337, 4831], poeSoul, poesSU, undefined, [shadowCrystal, clawshot], 'When the room below is spun, clawshot up through the opening, then go in the poe room to defeat it.'),
-                new NonCheck([-4766, 5081], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
                 new Check([-4920, 3766], chest, baseSU, redRupee, undefined, 'Pull the chain to raise the chandelier, then cross under it to reach the chest.'),
                 new Check([-4707, 3322], smallChest, baseSU, qI(bombs, 5), undefined, 'Break the wooden barrier and go to the north-east to reach the chest.'),
                 new Check([-4767, 3108], smallChest, baseSU, qI(bombs, 5), undefined, 'Break the wooden barrier and go to the west area to reach the chest.'),
                 new Check([-4156, 3911], bossChest, baseSU, bossKeyAG, [spinner], 'After clearing the room with the spinner ramps, access to the chest is granted upon entering the next room.'),
+
+                new NonCheck([-5277, 4323], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
+                new NonCheck([-4766, 5081], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
+               
+                new NonFlag([-5341, 4446], lanternOil, 'bottle'),
+                new NonFlag([-4491, 4314], sign, 'hint'),
             ],
             [ // 2F
                 new Check([-5358, 5475], chest, baseSU, compass, undefined, 'Walk up the stairs to find the chest in the area behind the statue.'),
                 new Check([-5241, 5831], chest, baseSU, smallKeyAG, undefined, 'Break the wooden barrier then defeat the Gibdo to easily open the chest.'),
-                new NonCheck([-5240, 5251], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
                 new Check([-5240, 5021], poeSoul, poesSU, undefined, [shadowCrystal], 'Dig to reveal a lever, then pull it to gain access to the room where the poe awaits.'),
                 new Check([-4883, 4834], smallChest, baseSU, smallKeyAG, [smallKeyAG], 'The chest is below the ring platform.'),
-                new NonCheck([-4767, 4551], lockedDoor, lockedDoorSU, undefined, 'Locked door'),
                 new Check([-5186, 3780], poeSoul, poesSU, undefined, [shadowCrystal], 'Defeat the poe easily by using the Midna attack.'),
+
+                new NonCheck([-5240, 5251], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
+                new NonCheck([-4767, 4551], lockedDoor, lockedDoorSU, [smallKeyAG], 'Locked door'),
             ],
             [], // 3F 
             [ // 4F
-                new NonFlag([-3828, 4100], fairy, 'bottle'),
-                new NonCheck([-4276, 4326], lockedDoor, lockedDoorSU, [bossKeyAG], 'Locked door'),
                 new Check([-4928, 4384], heartContainer, baseSU, undefined, [stallord], 'Defeat Stallord to obtain the Heart Container.'),
                 new Check([-4726, 4334], mirrorShard, baseSU, undefined, [stallord], 'Defeat Stallord to obtain the Dungeon Reward.'),
-                new NonCheck([-4530, 4332], stallord, bossesSU, [bossKeyAG, spinner, [woodenSword, bow, bombBag, ballAndChain, shadowCrystal]], "Defeat Stallord to clear out the Arbiter's Grounds.")
+
+                new NonCheck([-4276, 4326], lockedDoor, lockedDoorSU, [bossKeyAG], 'Locked door'),
+                new NonCheck([-4530, 4332], stallord, bossesSU, [bossKeyAG, spinner, [woodenSword, bow, bombBag, ballAndChain, shadowCrystal]], "Defeat Stallord to clear out the Arbiter's Grounds."),
+
+                new NonFlag([-3828, 4100], fairy, 'bottle'),
+
             ],
         ]),
         new Dungeon([-2626, 1229], [-2960, 2112], dungeonStar, 'Snowpeak Ruins', [1431, 1733], 3, [
@@ -2425,53 +2486,62 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-3611, 4265], chest, baseSU, cheese, [ballAndChain], "Break the ice blocks to gain access to the chest."),
                 new Check([-4072, 4270], ballAndChain, baseSU, undefined, [[bombBag, ballAndChain]], "Defeat Darkhammer to obtain the Ball and Chain."),
                 new Check([-4495, 4530], smallChest, baseSU, smallKeySR, [shadowCrystal], "Dig the spot where the chest is poking out of."),
-                new NonCheck([-4239, 4797], lockedDoor, lockedDoorSU, [smallKeySR], 'Locked door.'),
                 new Check([-4015, 3896], smallChest, baseSU, qI(bombs, 5), [[bombBag, ballAndChain]], "Use the cannon or the ball and chain to break the ice that is blocking the chest."),
                 new Check([-4814, 3397], smallChest, baseSU, redRupee, undefined, "Jump across the wooden planks to reach the chest."),
                 new Check([-4926, 3578], chest, baseSU, compass, undefined, "Jump across the wooden planks to reach the chest."),
                 new Check([-4462, 3961], smallChest, baseSU, smallKeySR, [shadowCrystal], "Dig twice on the shiny spot to reveal the chest. The shiny spot is not visible without the compass."),
                 new Check([-4943, 4269], smallChest, baseSU, qI(bombs, 5), [[bombBag, ballAndChain]], "Use the cannon or the ball and chain to break the ice that is blocking the chest."),
-                new NonCheck([-5381, 5064], ooccoo, ooccooSU, undefined, "Pick up the pot where Ooccoo is hiding."),
                 new Check([-5373, 3541], chest, baseSU, heartPiece, [ballAndChain], "Break the damaged floor and jump down to chest.<br>Glitch: LJA from the other entrance of the room to the chest."),
                 new Check([-5576, 4264], poeSoul, poesSU, undefined, [shadowCrystal], "The poe is above the ice in the open."),
                 new Check([-4157, 3214], smallChest, baseSU, redRupee, [ballAndChain], "Break the ice in front of the chest to reveal it."),
                 new Check([-6017, 4420], poeSoul, poesSU, undefined, [ballAndChain, shadowCrystal], "Break the armor with the Ball and Chain to reveal the poe."),
                 new Check([-5072, 4316], dungeonMap, giftsSU, undefined, undefined, "Talk to Yeta to obtain the dungeon map."),
+
+                new NonCheck([-5381, 5064], ooccoo, ooccooSU, undefined, "Pick up the pot where Ooccoo is hiding."),
+                new NonCheck([-4239, 4797], lockedDoor, lockedDoorSU, [smallKeySR], 'Locked door.'),
                 new NonCheck([-4611, 3842], lockedDoor, lockedDoorSU, [smallKeySR], "Locked door"),
                 new NonCheck([-5883, 4119], orangeRupee, notaRupeesSU, [ballAndChain], 'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'),
                 new NonCheck([-3767, 4348], orangeRupee, notaRupeesSU, [ballAndChain],  'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'),
-                new NonFlag([-5141, 4911], superbSoup, 'bottle')
+
+                new NonFlag([-5141, 4911], superbSoup, 'bottle'),
+                new NonFlag([-5035, 4186], sign, 'hint')
             ],
             [ // 2F
                 new Check([-4563, 3408], chest, baseSU, smallKeySR, [ballAndChain], "Swing the chandelier with the Ball and Chain to reach the chest."),
-                new NonCheck([-5366, 3839], lockedDoor, lockedDoorSU, [smallKeySR], 'Locked door'),
                 new Check([-5833, 4268], chest, baseSU, heartPiece, [ballAndChain], "Swing from chandelier to chandelier to reach the chest.<br>Tip: Hit the last chandelier when yours is almost at the furthest from the chest."),
                 new Check([-3854, 3400], chest, baseSU, bedroomKey, [ballAndChain, bombBag], "Defeat all the Chilfos to unlock the door and access the chest."),
                 new Check([-5198, 5214], poeSoul, poesSU, undefined, [ballAndChain, shadowCrystal], "Break the ice blocks with the Ball and Chain to reveal the poe."),
                 new Check([-4392, 5147], smallChest, baseSU, smallKeySR, [clawshot, ballAndChain], "Swing from the chandeliers to reach the chest."),
+
+                new NonCheck([-5366, 3839], lockedDoor, lockedDoorSU, [smallKeySR], 'Locked door'),
                 new NonCheck([-5148, 4597], lockedDoor, lockedDoorSU, [smallKeySR], 'Locked door.')
             ],
             [ // 3F
-                new NonCheck([-4350, 4268], lockedDoor, lockedDoorSU, [bedroomKey], 'Boss key door'),
                 new Check([-3963, 4358], heartContainer, baseSU, undefined, [blizzeta], "Defeat Blizzeta to obtain the Heart Container."),
                 new Check([-4066, 4170], mirrorShard, baseSU, undefined, [blizzeta], "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the Mirror Shard."),
+
+                new NonCheck([-4350, 4268], lockedDoor, lockedDoorSU, [bedroomKey], 'Boss key door'),
                 new NonCheck([-4174, 4268], blizzeta, bossesSU, [bedroomKey, bombBag, ballAndChain], 'Defeat Blizzeta to clear out the Snowpeak Ruins.')
             ]
         ]), 
         new Dungeon([-6618, 3681], [-6580, 4425], dungeonStar, 'Temple of Time', [1169, 1587], 3, [
             [ // 1F
                 new Check([-5497, 4635], chest, baseSU, smallkeyTT, [lantern], 'Light the 2 torches to make the chest appear.'),
-                new NonFlag([-4274, 4301], fairy, 'bottle'),
-                new NonCheck([-4197, 4350], lockedDoor, lockedDoorSU, [bossKeyTT], 'Boss Door.'),
                 new Check([-3880, 4480], heartContainer, baseSU, undefined, [armogohma], 'Defeat Armogohma to obtain the Heart Container.'),
                 new Check([-3880, 4350], mirrorShard, baseSU, undefined, [armogohma], 'Defeat Armogohma to obtain the Mirror Shard.'),
-                new NonCheck([-3724, 4352], armogohma, bossesSU, [bossKeyTT, redDominionRod, bow], 'Defeat Armogohma to clear out the Temple of Time')
+
+                new NonCheck([-4197, 4350], lockedDoor, lockedDoorSU, [bossKeyTT], 'Boss Door.'),
+                new NonCheck([-3724, 4352], armogohma, bossesSU, [bossKeyTT, redDominionRod, bow], 'Defeat Armogohma to clear out the Temple of Time'),
+
+                new NonFlag([-4274, 4301], fairy, 'bottle'),
             ],
             [ // 2F
-                new NonCheck([-5725, 4352], ooccoo, ooccooSU, undefined, 'After opening the chest, Ooccoo will wait for you to join her at the top of the stairs.'),
-                new NonCheck([-5842, 4352], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
                 new Check([-6173, 4351], smallChest, baseSU, qI(arrows, 30), undefined, 'Put a pot on the pressure plate in the middle of the room to open the gate and gain access to the chest.'),
 
+                new NonCheck([-5725, 4352], ooccoo, ooccooSU, undefined, 'After opening the chest, Ooccoo will wait for you to join her at the top of the stairs.'),
+                new NonCheck([-5842, 4352], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
+
+                new NonFlag([-5721, 4278], sign, 'hint'),
             ],
             [ // 3F
                 new Check([-5750, 5148], chest, baseSU, dungeonMap, undefined, 'Defeat the Armos to make the chest appear.'),
@@ -2482,10 +2552,13 @@ document.addEventListener("DOMContentLoaded", function() {
             [ // 5F
                 new Check([-5956, 4149], chest, baseSU, smallkeyTT, [spinner], 'Defeat the 2 Armos to make the chest appear.'),
                 new Check([-6244, 4351], smallChest, baseSU, redRupee, [spinner], 'You will find this chest in the back of the room, on the elevated ledge.'),
-                new NonCheck([-5147, 4350], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
                 new Check([-4977, 3945], chest, baseSU, compass, [spinner, [bow, clawshot, ballAndChain]], 'Hit the crystal twice to reach the chest: Once when you are at sword range, the other when you are halfway across the room.'),
                 new Check([-5054, 3343], chest, baseSU, heartPiece, [spinner, bow, redDominionRod], 'Use the Dominion Rod on the Iron Pot to make it step on the pressure plate, disabling the electricity and granting access to the chest.'),
-                new Check([-5956, 4566], chest, baseSU, heartPiece, [spinner, redDominionRod], 'Throw 2 Iron Pots into the railings in the back of the room, and make them fall onto the 2 pressure plates to make the chest appear.')
+                new Check([-5956, 4566], chest, baseSU, heartPiece, [spinner, redDominionRod], 'Throw 2 Iron Pots into the railings in the back of the room, and make them fall onto the 2 pressure plates to make the chest appear.'),
+
+                new NonCheck([-5147, 4350], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
+
+                new NonFlag([-4928, 3970], sign, 'hint')
             ],
             [ // 6F
                 new Check([-5319, 4374], chest, baseSU, purpleRupee, [spinner, bow], 'Defeat All the spiders in the room (Baby Gohmas and Young Gohmas) to make the chest appear.'),
@@ -2500,8 +2573,9 @@ document.addEventListener("DOMContentLoaded", function() {
             ],
             [ // 8F
                 new Check([-5383, 4976], chest, baseSU, purpleRupee, [spinner, bow], 'Defeat all the Baby Gohmas to make the chest appear.'),
+                new Check([-5511, 3804], chest, baseSU, redDominionRod, [spinner, bow, woodenSword],'Defeat the Darknut to open the gate that is blocking access to the chest.' ),
+
                 new NonCheck([-5511, 4545], lockedDoor, lockedDoorSU, [smallkeyTT], 'Locked door.'),
-                new Check([-5511, 3804], chest, baseSU, redDominionRod, [spinner, bow, woodenSword],'Defeat the Darknut to open the gate that is blocking access to the chest.' )
             ]
         ]),
         new Dungeon([-5306, 3144], [-5472, 3840], dungeonStar, 'City in the Sky', [2228, 1745], 0, [
@@ -2529,8 +2603,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonCheck([-4608, 4822], lockedDoor, lockedDoorSU, [smallKeyCS], 'Locked door.'),
                 new NonCheck([-3741, 4041], orangeRupee, notaRupeesSU, [doubleClawshot, shadowCrystal, ironBoots], 'Defeat the Aeralfos to obtain an orange rupee.'),
 
-
                 new NonFlag([-4495, 3767], fairy, 'bottle'),
+                new NonFlag([-4589, 4220], sign, 'hint'),
             ],
             [ // 2F
                 new Check([-4916, 5456], smallChest, baseSU, redRupee, [clawshot, spinner, smallKeyCS], 'Open the gate by clawshotting the switch near the entrance of the room, than use an Oocca and a draft to reach the chest.'),
@@ -2589,7 +2663,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonCheck([-4676, 4773], lockedDoor, lockedDoorSU, [smallKeyPT], 'Locked door.'),
 
                 new NonFlag([-5106, 3727], fairy, 'bottle'),
-
+                new NonFlag([-5914, 4479], sign, 'hint'),
             ],
             [ // 2F
                 new Check([-4994, 4469], chest, baseSU, smallKeyPT, [lightMasterSword], 'Defeat all the Zant Masks to make the chest appear.'),
@@ -2607,9 +2681,9 @@ document.addEventListener("DOMContentLoaded", function() {
             [ // 4F
                 new Check([-3620, 4324], heartContainer, baseSU, undefined, [zant], 'Defeat Zant to obtain the Heart Container.'),
 
-                new NonCheck([-3721, 4325], zant, bossesSU, [bossKeyPT, lightMasterSword, boomerang, zoraArmor, [ironBoots, magicArmor], clawshot, ballAndChain], 'Defeat Zant to clear out the Palace of Twilight.'),
                 new NonCheck([-4334, 4326], lockedDoor, lockedDoorSU, [smallKeyPT], 'Locked door.'),
-                new NonCheck([-3907, 4326], lockedDoor, lockedDoorSU, [bossKeyPT], 'Boss door.')
+                new NonCheck([-3907, 4326], lockedDoor, lockedDoorSU, [bossKeyPT], 'Boss door.'),
+                new NonCheck([-3721, 4325], zant, bossesSU, [bossKeyPT, lightMasterSword, boomerang, zoraArmor, [ironBoots, magicArmor], clawshot, ballAndChain], 'Defeat Zant to clear out the Palace of Twilight.'),
             ]
         ]),
         new Dungeon([-3250, 4712], [0, 0], castle, 'Hyrule Castle', [1600, 1278], 3, [
@@ -2628,6 +2702,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new NonCheck([-5304, 4320], lockedDoor, lockedDoorSU, [smallKeyHC], 'Locked door.'),
 
                 new NonFlag([-3890, 4791], lanternOil, 'bottle'),
+                new NonFlag([-5856, 4318], sign, 'hint'),
             ],
             [ // 2F
                 new Check([-4809, 4576], chest, baseSU, compass, [clawshot], 'Defeat all the enemies in the room to make the chest appear, then clawshot the chandelier to reach the chest.'),
@@ -2663,9 +2738,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5085, 4565], chest, baseSU, qI(seeds, 50), [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Second from the left of the north row.'),
                 new Check([-5100, 4545], chest, baseSU, orangeRupee, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'First from the left of the north row.'),
 
-
-
-
                 new NonCheck([-5169, 4319], orangeRupee, notaRupeesSU, [doubleClawshot, woodenSword, boomerang, [bow, lantern], spinner], 'Defeat the Darknut and it will drop an orange rupee.'),
                 new NonCheck([-5153, 4525], lockedDoor, lockedDoorSU, [smallKeyHC], 'Locked door.'),
                 new NonCheck([-5237, 4323], lockedDoor, lockedDoorSU, [bossKeyHC], 'Boss door.'),
@@ -2674,6 +2746,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ],
             [ // 5F
                 new NonCheck([-4838, 4328], ganondorf, bossesSU, [masterSword, endingBlow, shadowCrystal, doubleClawshot, boomerang, [bow, lantern], spinner], 'Defeat Ganondorf to beat the game.'),
+
                 new NonFlag([-4957, 4179], fairy, 'bottle'),
             ]
         ])        
