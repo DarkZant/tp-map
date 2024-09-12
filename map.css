@@ -19,7 +19,7 @@
     filter: brightness(100%);
 }
 .unobtainable {
-    filter: grayscale(1) contrast(125%);
+    filter: grayscale(1) contrast(150%);
 }
 .brightHover {
     filter: brightness(130%);
