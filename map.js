@@ -2290,8 +2290,7 @@ document.addEventListener("DOMContentLoaded", function() {
             [ // 1F
                 new Check([-5935, 4317], smallChest, baseSU, yellowRupee, [[slingshot, bow, clawshot, boomerang]], 'Use a long ranged item to defeat the spiders and climb to the chest.'),
                 new Check([-5281, 4240], smallChest, baseSU, redRupee, undefined, 'Use the Bombling on the right to blow up the rock blocking the chest.'),
-                new Check([-5260, 4294], chest, baseSU, dungeonMap, [[lantern, boomerang]], 'Use the lantern to light the 4 torches that make the platforms to the chest rise or take a long detour' +
-                    'by the boomerang bridges to reach the chest.'),
+                new Check([-5260, 4294], chest, baseSU, dungeonMap, [[lantern, boomerang]], 'Use the lantern to light the 4 torches that make the platforms leading to the chest rise.'),
                 new Check([-4710, 4812], chest, baseSU, smallKeyFT, undefined, 'Make your way across the windy bridge and open the chest on the left of the entrance.'),
                 new Check([-5445, 5129], chest, baseSU, yellowRupee, undefined, 'Swim to the opening and walk to the end to reach the chest.'),
                 new Check([-5155, 5218], smallChest, baseSU, yellowRupee, undefined, 'The chest is under the wooden structure.'),
@@ -2305,7 +2304,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 new Check([-5439, 5042], bossChest, baseSU, bossKeyFT, [boomerang], 'Use the boomerang on the windmill pillars in this pattern: Bottom Right, Bottom Left, Top Right and Top Left.' + 
                     'This opens the gate to the boss key chest.'),
                 new Check([-4322, 4342], chest, baseSU, smallKeyFT, [[boomerang, bombBag, clawshot]], 'Grab a bombling or use one of your own bombs to defeat the Deku Like and jump across the platforms.'),
-                new Check([-4510, 5206], chest, baseSU, redRupee, undefined, 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'),    
+                new Check([-4510, 5206], chest, baseSU, redRupee, [boomerang], 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'),    
                 new Check([-3773, 4842], heartContainer, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the heart container.'),
                 new Check([-3796, 4777], fusedShadow, baseSU, undefined, [diababa], 'Defeat Diababa to obtain the fused shadow.'),
                 
