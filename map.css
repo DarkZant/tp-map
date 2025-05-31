@@ -553,6 +553,12 @@ body img {
     height: 16vh;
     column-gap: 1.2vw;
 }
+#truins, #tkeys {
+    right: 6vw;
+    width: 17vw;
+    height: 14vh;
+    column-gap: 1.2vw;
+}
 .tsubmenuO {
     position: relative;
     width: 3.75vmax;

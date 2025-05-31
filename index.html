@@ -394,9 +394,9 @@
                 <div class="tcpt">0</div>
             </div>
             <!-- <div style=" width: 3.75vmax; position: relative; aspect-ratio: 1;"></div> -->
-            <div class="titem" onload="new TrackerItem(this, 32, 0, 1, gateKeys)">
+            <div class="tsubmenuO" onclick="showTrackerSubmenu('tkeys')">
                 <img src="Icons/ItemBox.png" class="tbox">
-                <img src="Icons/Small KeyG.png" class="timage">
+                <img src="Icons/Small Key.png" class="timage">
             </div>
             <div class="titem" onload="new TrackerItem(this, 33, 3, 3, smallKeyHC)">
                 <img src="Icons/ItemBox.png" class="tbox">
@@ -478,8 +478,8 @@
                     <img src="Icons/Small Key.png" class="timage">
                     <div class="tcpt">0</div>
                 </div>
-                <div class="titem tdkey" onload="new TrackerItem(this, 49, 0, 1, bedroomKey)">
-                    <img src="Icons/ItemBox.png" class="tbox">
+                <div class="tsubmenuO" style="width: 3vmax;" onclick="showTrackerSubmenu('truins')">
+                    <img src="Icons/MenuBox.png" class="tbox">
                     <img src="Icons/Bedroom Key.png" class="timage">
                 </div>
             </div>
@@ -637,17 +637,49 @@
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Renado's Letter.png" class="timage">
             </div>
-            <div class="titem" onload="new TrackerItem(this, 82, 0, 1, invoice)">
+            <div class="titem" onload="new TrackerItem(this, 83, 0, 1, invoice)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Invoice.png" class="timage">
             </div>
-            <div class="titem" onload="new TrackerItem(this, 83, 0, 1, woodenStatue)">
+            <div class="titem" onload="new TrackerItem(this, 84, 0, 1, woodenStatue)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Wooden Statue.png" class="timage">
             </div>
-            <div class="titem" onload="new TrackerItem(this, 84, 0, 1, iliasCharm)">
+            <div class="titem" onload="new TrackerItem(this, 85, 0, 1, iliasCharm)">
                 <img src="Icons/ItemBox.png" class="tbox">
                 <img src="Icons/Ilia's Charm.png" class="timage">
             </div>
+        </div>
+         <div id="tkeys" class="tsubmenu menu tcontainer">
+            <div id="keysX" class="menuX tsubmenuX" onclick="hideTrackerSubmenu('tkeys')">×</div>
+            <div class="titem" onload="new TrackerItem(this, 89, 0, 1, coroKey)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Small KeyC.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 90, 0, 1, bulblinKey)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Small KeyB.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 91, 0, 1, gateKeys)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Small KeyG.png" class="timage">
+            </div>
+        </div>
+    </body>
+        <div id="truins" class="tsubmenu menu tcontainer">
+            <div id="ruinsX" class="menuX tsubmenuX" onclick="hideTrackerSubmenu('truins')">×</div>
+            <div class="titem" onload="new TrackerItem(this, 86, 0, 1, pumpkin)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Ordon Pumpkin.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 87, 0, 1, cheese)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Ordon Goat Cheese.png" class="timage">
+            </div>
+            <div class="titem" onload="new TrackerItem(this, 88, 0, 1, bedroomKey)">
+                <img src="Icons/ItemBox.png" class="tbox">
+                <img src="Icons/Bedroom Key.png" class="timage">
+            </div>
+        </div>
     </body>
 </html>

@@ -1442,6 +1442,8 @@ var poeScent = createIcon('Scent2', 114, 114, 'Poe Scent');
 var reekfishScent = createIcon('Scent3', 114, 114, "Reekfish Scent");
 var medecineScent = createIcon('Scent4', 114, 114, 'Medecine Scent');
 var gateKeys = createIcon('Small KeyG', 128, 128, 'Gate Keys');
+var coroKey = createIcon('Small KeyC', 128, 128, "Faron Gate Key");
+var bulblinKey = createIcon('Small KeyB', 128, 128, "Bulblin Camp Key");
 var smallKeyFT = renameIcon(smallKey, 'Forest Temple Small Key');
 var bossKeyFT = renameIcon(bossKey, 'Forest Temple Boss Key');
 var smallKeyGM = renameIcon(smallKey, 'Goron Mines Small Key');
@@ -2965,8 +2967,8 @@ function resetButtonsFeedback(button, text) {
 // Util Functions
 function removeFromArray(array, item) {
     let i = array.indexOf(item);
-        if (i > -1)
-            array.splice(i, 1);   
+    if (i > -1)
+        array.splice(i, 1);   
 }
 function getCounterIcon(icon, num) {
     return L.divIcon({ 
