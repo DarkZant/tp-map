@@ -517,7 +517,7 @@ body img {
 }
 /* Tracker menu */
 #tracker {
-    transition: none;
+    /* transition: none; */
     width: 29vw;
     right: 0;
     top: 0;

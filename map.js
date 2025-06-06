@@ -866,45 +866,7 @@ var CaveOfOrdeals = FlooredSubmap.extend({
 });
 
 // Simple Classes
-class StorageUnit {
-    constructor(name, defaultConfig) {
-        this.name = name;
-        this.defaultConfig = defaultConfig;
-        this.total = 0;
-        this.checkIfInitialized();
-    }
-    getLength() {
-        return this.defaultConfig.length;
-    }
-    resetFlags() {
-        localStorage.setItem(this.name, this.defaultConfig);
-    }
-    getAllFlags() {
-        return localStorage.getItem(this.name);
-    }
-    getFlag(index) {
-        return this.getAllFlags()[index] == '1';
-    }
-    getFlagAsNumber(index) {
-        return parseInt(this.getAllFlags()[index]);
-    }
-    getFlagAsCharCode(index) {
-        return this.getAllFlags()[index].charCodeAt(0);
-    }
-    setFlag(index, value) {
-        var flags = this.getAllFlags();
-        flags = flags.substring(0, index) + value + flags.substring(index + 1);
-        localStorage.setItem(this.name, flags);
-    }
-    assignIndex() {
-        return this.total++;
-    }
-    checkIfInitialized() {
-        let flags = this.getAllFlags();
-        if (flags == null || flags.length != this.getLength())
-            this.resetFlags();
-    }
-}
+
 
 class Province {
     constructor(polyPoints, isCastle, counterPos, markers) {
@@ -966,186 +928,47 @@ class Province {
     }
 }
 
-class TrackerItem {
-    constructor(elem, id, type, maxState, items, minState) {
-        this.elem = elem;
-        this.id = id;
-        //Type Legend:
-        // On / Off
-        // 0 : One of a kind Items
-        // Image Changing
-        // 1 : Non Progressive Items (Ex. Bow)
-        // 2 : Progressive Items (Ex. Clawshot, Dominion Rod)
-        // Counters
-        // 3 : Unlock 1 Unlock All Items (Ex. Bottles, Bomb Bags)
-        // 4 : Specific amount required Items (Ex. Poe Soul Rewards, Hidden Skills)
-        this.type = type;
-        this.maxState = maxState;
-        this.items = items;
-        this.itemIndex = 0; // Used only for type 4
-        this.prevState = 0;
-        this.state = 0;
-        this.shouldReloadIcons = false;
-        this.minState = minState == undefined ? 0 : minState;
-        elem.addEventListener('click', () => { this.increaseState() });
-        elem.addEventListener('contextmenu', () => { this.decreaseState() });
-        elem.addEventListener('auxclick', (e) => { 
-            if (e.button == 1) {
-                e.preventDefault();
-                this.resetState();
-            }
-        });
-        this.initialize();
-    } 
-    resetState() {
-        if (this.state == this.minState)
-            return;
-        this.shouldReloadIcons = false;
-        let state = this.state;
-        if (state > this.minState) {
-            if (state < this.maxState / 2) {
-                for (let _ = state; _ > this.minState; --_)
-                    this.decreaseState();
-            }
-            else {
-                for (let _ = state; _ < this.maxState + 1; ++_)
-                    this.increaseState();
-            }
-        }
-        this.shouldReloadIcons = true;
-        this.setFlag();
-        if (settingIsChecked('trackerS') && this.elem.reload)
-            reloadIcons();
 
+class OldStorageUnit {
+    constructor(name, defaultConfig) {
+        this.name = name;
+        this.defaultConfig = defaultConfig;
+        this.total = 0;
+        this.checkIfInitialized();
     }
-    setFlag() {
-        trackerSU.setFlag(this.id, this.maxState >= 10 ? String.fromCharCode(this.state) : this.state.toString());
+    getLength() {
+        return this.defaultConfig.length;
     }
-    getFlag() {
-        return this.maxState >= 10 ? trackerSU.getFlagAsCharCode(this.id) : trackerSU.getFlagAsNumber(this.id);     
+    resetFlags() {
+        localStorage.setItem(this.name, this.defaultConfig);
     }
-    initialize() {
-        if (this.minState > 0) {
-            for (let i = 0; i < this.minState; ++i)
-                this.increaseState();
-        }
-        let state = this.getFlag();
-        if (state < this.maxState / 2) {
-            for (let _ = this.minState; _ < state; ++_)
-                this.increaseState();
-        }
-        else {
-            for (let _ = this.maxState; _ >= state; --_)
-                this.decreaseState();
-        }
-        this.elem.reload = true;
-        this.shouldReloadIcons = true;
+    getAllFlags() {
+        return localStorage.getItem(this.name);
     }
-    increaseState() {
-        this.prevState = this.state;
-        ++this.state;
-        if (this.state > this.maxState)
-            this.state = this.minState;
-        this.update();
+    getFlag(index) {
+        return this.getAllFlags()[index] == '1';
     }
-    decreaseState() {
-        this.prevState = this.state;
-        --this.state;
-        if (this.state < this.minState)
-            this.state = this.maxState;
-        this.update();
+    getFlagAsNumber(index) {
+        return parseInt(this.getAllFlags()[index]);
     }
-    update() {
-        this.changedItems = false;
-        if (this.shouldReloadIcons)
-            this.setFlag();
-        this.updateObtainedItems();
-        this.updateHTMLElement();
-        if(settingIsChecked('trackerS') && this.changedItems && this.elem.reload && this.shouldReloadIcons)
-            reloadIcons();
+    getFlagAsCharCode(index) {
+        return this.getAllFlags()[index].charCodeAt(0);
     }
-    addItem(item) {
-        obtainedItems.push(item);
-        this.setChangedItems();
+    setFlag(index, value) {
+        var flags = this.getAllFlags();
+        flags = flags.substring(0, index) + value + flags.substring(index + 1);
+        localStorage.setItem(this.name, flags);
     }
-    removeItem(item) {
-        removeFromArray(obtainedItems, item);
-        this.setChangedItems();
+    assignIndex() {
+        return this.total++;
     }
-    setChangedItems() {
-        if (!this.changedItems)
-            this.changedItems = true;
-    }
-    updateObtainedItems() {
-        if (this.items == undefined)
-            return;
-        if (this.type == 0 || this.items.length == undefined) {
-            if (this.state == this.minState) // Remove on unmark
-                this.removeItem(this.items);
-            else if (this.prevState == this.minState) // Put on mark from start
-                this.addItem(this.items)
-            return;
-        }
-        if (this.state == this.minState) {
-            if (this.type == 1) //Remove last added item if not progressive
-                this.removeItem(this.items[this.prevState - 1]);
-            else {
-                for(let i = this.minState; i < this.items.length; ++i) // Remove all items
-                    this.removeItem(this.items[i]);  
-                this.itemIndex = 0;
-            }
-            return;
-        }
-        if (this.type == 1 || this.prevState > this.state && this.type != 4)  //Remove previous item if we decreased and not progressive
-            this.removeItem(this.items[this.prevState - 1]);
-        if (this.type == 1 && this.prevState > this.state) //Push previous item if we decreased and not progressive
-            this.addItem(this.items[this.state - 1]);     
-        else if (this.type != 1 && this.state == this.maxState && this.prevState == this.minState) { // Add all from min to max except type 1
-            for(let i = this.minState; i < this.items.length; ++i) //Add all items
-                this.addItem(this.items[i]);  
-            this.itemIndex = this.items.length;
-        }
-        else if (this.prevState < this.state && this.type != 4) // Add next item for all types except 4 if we increased
-            this.addItem(this.items[this.state - 1]);
-        else if (this.prevState < this.state && this.state == this.items[this.itemIndex].req) //Check if state meets requirement for next item
-            this.addItem(this.items[this.itemIndex++]);
-        else if (this.prevState > this.state && this.itemIndex > 0 && this.state < this.items[this.itemIndex - 1].req) //Remove item if exist and requirement is met and we are decreasing
-            this.removeItem(this.items[this.itemIndex-- -1]);    
-    }
-    updateHTMLElement() {
-        if (this.state == 0) {
-            this.elem.style.filter = "brightness(50%)"; // Unmark item     
-            if (this.type == 1 || this.type == 2) //Change item to base
-                this.updateImage();
-            else if (this.type >= 3) {
-                this.elem.children[2].style.display = 'none'; //Hide counter
-                if (this.maxState > 1) // Don't change color if item max is 1
-                    this.elem.children[2].style.color = "#c0c0c0";
-            }
-            return;
-        }
-        if (this.state == 1 || this.state == this.maxState) //Mark item
-            this.elem.style.filter = "none"; 
-        if (this.type == 1 || this.type == 2)  //Change item
-            this.updateImage();           
-        else if (this.type >= 3) {
-            this.elem.children[2].innerHTML = this.state; // Update Counter
-            switch (this.state) {
-                case 1: this.elem.children[2].style.display = 'inline'; break; //Show Counter
-                case this.maxState - 1: this.elem.children[2].style.color = "#c0c0c0"; break; // Change color off green
-                case this.maxState:
-                    this.elem.children[2].style.display = 'inline'; //Show counter
-                    this.elem.children[2].style.color = "#50C878"; // Change color to green
-                    break;
-            }  
-        } 
-    }
-    updateImage() {
-        let imgSrc = this.elem.children[1].src;
-        this.elem.children[1].src = imgSrc.slice(0, -5) + 
-        (this.state == 0 ? 0 : this.state - 1) + imgSrc.slice(-4); 
+    checkIfInitialized() {
+        let flags = this.getAllFlags();
+        if (flags == null || flags.length != this.getLength())
+            this.resetFlags();
     }
 }
+
 
 class Setting {
     constructor(elem, id, type, params) {
@@ -1323,7 +1146,7 @@ function reqIcon(icon, name, req, isQuantity) {
     return i;
 }
 
-//General Map
+// General Map
 var chest = createIcon('Chest', 505, 462);
 var smallChest = createIcon('Small Chest', 508, 463);
 var bossChest = createIcon('Boss Chest', 649, 541);
@@ -1339,7 +1162,7 @@ var dungeonStar = createIcon('Dungeon Star', 165, 167);
 var mirror = createIcon('Mirror', 128, 128);
 var castle = createIcon('Castle', 511, 570);
 
-//Non Checks
+// Non Checks
 var horseGrass = createIcon('Horse Grass', 100, 159);
 var hawkGrass = createIcon('Hawk Grass', 346, 248);
 var postman = createIcon('Postman', 493, 676);
@@ -1363,7 +1186,7 @@ var worms = createIcon('BottleWorm', 128, 205, 'Worm');
 var multiRupees = createIcon('Rupees', 1947, 1437);
 
 
-//Obtainables
+// Obtainables
 var heartPiece = createIcon('Heart Piece', 157, 125);
 var heartContainer = createIcon('Heart Container', 157, 125);
 var skyBookChar = createIcon('Sky Book Character', 117, 102);
@@ -1398,7 +1221,7 @@ var bombs = createIcon('Bombs', 128, 140);
 var waterBombs = createIcon('Water Bombs', 128, 120);
 var bomblings = createIcon('Bomblings', 128, 103);
 
-//Tracker Item Icons
+// Tracker Item Icons
 var fishingRod = createIcon('Fishing Rod0', 79, 181, 'Fishing Rod');
 var fishingRodCE = createIcon('Fishing Rod1', 80, 181, 'Fishing Rod & Coral Earring');
 var slingshot = createIcon('Slingshot', 97, 150); 
@@ -1527,7 +1350,7 @@ var ganondorf = createIcon('Ganondorf', 1080, 969);
 
 
 //Storage Units
-var baseSU = new StorageUnit('base' , // 400 checks
+var baseSU = new OldStorageUnit('base' , // 400 checks
     "00000000000000000000000000000000000000000000000000" + 
     "00000000000000000000000000000000000000000000000000" +
     "00000000000000000000000000000000000000000000000000" +
@@ -1536,21 +1359,21 @@ var baseSU = new StorageUnit('base' , // 400 checks
     "00000000000000000000000000000000000000000000000000" +
     "00000000000000000000000000000000000000000000000000" +
     "00000000000000000000000000000000000000000000000000");
-var poesSU = new StorageUnit('poes', '000000000000000000000000000000000000000000000000000000000000'); // 60 checks
-var giftsSU = new StorageUnit('gifts', '000000000000000000000000000000000000000000000000000000000'); // 57 checks
-var bugsSU = new StorageUnit('bugs', '000000000000000000000000'); // 24 checks
-var skillsSU = new StorageUnit('skills', '0000000000000'); // 7 + 6 = 13 checks (Skills + Stones)
-var skyCharsSU = new StorageUnit('skyChars', '000000'); // 6 checks
-var shopSU = new StorageUnit('shop', '0000000'); // 7 checks
+var poesSU = new OldStorageUnit('poes', '000000000000000000000000000000000000000000000000000000000000'); // 60 checks
+var giftsSU = new OldStorageUnit('gifts', '000000000000000000000000000000000000000000000000000000000'); // 57 checks
+var bugsSU = new OldStorageUnit('bugs', '000000000000000000000000'); // 24 checks
+var skillsSU = new OldStorageUnit('skills', '0000000000000'); // 7 + 6 = 13 checks (Skills + Stones)
+var skyCharsSU = new OldStorageUnit('skyChars', '000000'); // 6 checks
+var shopSU = new OldStorageUnit('shop', '0000000'); // 7 checks
 
-var ooccooSU = new StorageUnit('ooccoo', '0000000'); // 7 flags
-var lockedDoorSU = new StorageUnit('locked', '000000000000000000000000000000000000000000000');  // 45 flags      
-var notaRupeesSU = new StorageUnit('notaRupee', '00000000000000000000000000000000000000000000000000000000000000000000000000000000'); // 80 flags
-var bossesSU = new StorageUnit('bosses', '000000000') // 9 flags
-var nonCheckItemsSU = new StorageUnit('ncItems', '00000000000000000000') // 20 flags
+var ooccooSU = new OldStorageUnit('ooccoo', '0000000'); // 7 flags
+var lockedDoorSU = new OldStorageUnit('locked', '000000000000000000000000000000000000000000000');  // 45 flags      
+var notaRupeesSU = new OldStorageUnit('notaRupee', '00000000000000000000000000000000000000000000000000000000000000000000000000000000'); // 80 flags
+var bossesSU = new OldStorageUnit('bosses', '000000000') // 9 flags
+var nonCheckItemsSU = new OldStorageUnit('ncItems', '00000000000000000000') // 20 flags
 
-var trackerSU = new StorageUnit('tracker', '00000000000000000000000100\0\0' + '000000000000000000000000000000000000000000000000000000000000000000000000'); // 100 flags
-var settingSU = new StorageUnit('settings', '101001100000000111111100000000000000000000000000000000000000'); // 60 flags
+// var trackerSU = new StorageUnit('tracker', '00000000000000000000000100\0\0' + '000000000000000000000000000000000000000000000000000000000000000000000000'); // 100 flags
+var settingSU = new OldStorageUnit('settings', '101001100000000111111100000000000000000000000000000000000000'); // 60 flags
 
 //Reusable Check Description   
 const agithaText = "Give this bug to Agitha to receive: Big Wallet (First Bug), Purple Rupee (Any Bug), Orange Rupee (Pair Completing Bug), Giant Wallet (Last Bug)."
@@ -1578,11 +1401,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let settings = document.querySelectorAll('.SC, .bigSC');
     for(var i = 0; i < settings.length; i++)
         settings[i].onload.call(settings[i]);
-
-    //Loading Tracker
-    let trackerItems = document.getElementsByClassName('titem');
-    for (let i = 0; i < trackerItems.length; ++i)
-        trackerItems[i].onload.call(trackerItems[i]);
 
     map = L.map('map', {
         zoom: -5,
@@ -2893,36 +2711,7 @@ function hideRightMenu(menuID) {
         menu.style.visibility = "hidden";  
     }, 100);  
 }
-function showTrackerSubmenu(submenuID) {
-    let menu = document.getElementById(submenuID);
-    menu.style.display = "flex";
-    menu.style.visibility = "visible";
-    let tracker = document.getElementById('tracker');
-    tracker.style.filter = "brightness(25%)";
-    tracker.submenuID = submenuID;
-    document.getElementById('traX').style.right = "0";
-    let children = tracker.children;
-    for (let i = 0; i < children.length; ++i) 
-        children[i].classList.add('disabled');
-    setTimeout(function () {
-        tracker.addEventListener('click', hideTrackerSubmenuHandler); 
-    }, 100);  
-}   
-function hideTrackerSubmenu(submenuID) {
-    let menu = document.getElementById(submenuID);
-    menu.style.display = "none";
-    menu.style.visibility = "hidden";
-    let tracker = document.getElementById('tracker');
-    tracker.style.filter = "none";
-    document.getElementById('traX').style.right = null;
-    let children = tracker.children;
-    for (let i = 0; i < children.length; ++i) 
-        children[i].classList.remove('disabled');
-    tracker.removeEventListener('click', hideTrackerSubmenuHandler);
-}
-function hideTrackerSubmenuHandler() {
-    hideTrackerSubmenu(this.submenuID)
-}
+
 
 // Settings Functions
 function settingIsChecked(name) {
@@ -2938,14 +2727,9 @@ function resetMap(button) {
     reloadIcons();  
     resetButtonsFeedback(button, 'Map');
 }
-function resetTracker(button) {
-    button.innerHTML = "Resetting...";
-    let trackerItems = document.getElementsByClassName('titem'); 
-    for (let i = 0; i < trackerItems.length; ++i) {
-        trackerItems[i].reload = false;
-        trackerItems[i].dispatchEvent(new MouseEvent('auxclick', { button: 1 }));
-        trackerItems[i].reload = true;
-    }
+function trackerButton(button) {
+    // button.innerHTML = "Resetting...";
+    resetTracker();
     if(settingIsChecked('trackerS'))
         reloadIcons();  
     resetButtonsFeedback(button, 'Tracker'); 
@@ -2979,6 +2763,6 @@ function getCounterIcon(icon, num) {
     });
 }
 function updateMapSize(width) {
-    map.getContainer().style.width = width;
-    map.invalidateSize();
+    // map.getContainer().style.width = width;
+    // map.invalidateSize();
 }

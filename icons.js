@@ -1,4 +1,4 @@
-[
+var iconNames = [
   "Argorok.png",
   "Armogohma.png",
   "Arrows.png",
