@@ -45,9 +45,15 @@ class StorageUnit {
         localStorage.setItem(this.name, flags);
     }
     checkIfInitialized() {
-        let flags = this.getAllFlags();
-        if (flags == null || flags.length != this.getLength())
+        let oldDefault = this.getAllFlags();
+        let currentDefault = this.defaultConfig;
+        if (oldDefault == null || oldDefault.length > currentDefault.length)
             this.resetFlags();
+        else if (oldDefault.length < currentDefault.length) {
+            for (let i = oldDefault.length; i < currentDefault.length; i++)
+                oldDefault += currentDefault[i];
+            localStorage.setItem(this.name, oldDefault);
+        }
     }
 }
 

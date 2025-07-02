@@ -3,8 +3,8 @@ var trackedItems = [
     bombBag, giantBombBag,  clawshots, aurusMemo, spinner, asheisSketch, 
     ballAndChain, dominionRods, horseCall, iliasCharm, renadosLetter, invoice,
     woodenStatue, bottle, skybook, swords, shields, zoraArmor, magicArmor,
-    heartPiece, heartContainer, wallets, scents, hiddenSkills, poes,
-    fusedShadows, mirrorShards, shadowCrystal, coroKey, bulblinKey, gateKey,
+    heartPiece, heartContainer, wallets, scents, hiddenSkills, poeSoul,
+    fusedShadow, mirrorShard, shadowCrystal, coroKey, bulblinKey, gateKey,
     antM, antF, dayflyM, dayflyF, beetleM, beetleF, mantisM, mantisF, 
     stagBeetleM, stagBeetleF, pillbugM, pillbugF, butterflyM, butterflyF,
     ladybugM, ladybugF, snailM, snailF, phasmidM, phasmidF, grasshopperM,
@@ -12,7 +12,7 @@ var trackedItems = [
     minesBK, fyrus, lakebedSK, lakebedBK, morpheel, arbiterSK, arbiterBK, 
     stallord, snowpeakSK, snowpeakBK, pumpkin, cheese, blizzeta, templeSK, 
     templeBK, armogohma, citySK, cityBK, argorok, palaceSK, palaceBK, zant,
-    castleSK, castleBK 
+    castleSK, castleBK, faronKey
 ]; // Always add items at the end to preserve storage IDs
 
 
@@ -118,8 +118,8 @@ var trackerItems = new Map();
 for (let item of trackedItems) {
     let imageSrc = item.getBaseImageSrc();
     // Harcoded exceptions for items with duplicate images
-    // Should used item names for all but lazy to put data-item on all .titem Divs
-    if (imageSrc.includes('Small%20Key.png') || imageSrc.includes('Boss%20Key.png'))
+    // Should use item names for all but too lazy to put data-item on all .titem Divs
+    if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png'))
         trackerItems.set(item.name, new TrackerItem(item));   
     else
         trackerItems.set(imageSrc, new TrackerItem(item));       
@@ -129,8 +129,9 @@ for (let titemDiv of document.querySelectorAll('.titem')) {
     // Check if titemDiv has assigned item
     if ("item" in titemDiv.dataset) 
         trackerItems.get(titemDiv.dataset.item).setElem(titemDiv);
-    else
-        trackerItems.get(titemDiv.children[1].src).setElem(titemDiv);
+    else {
+        trackerItems.get("Icons/" + titemDiv.children[1].src.split("Icons/")[1]).setElem(titemDiv);
+    }
 }
 // Create StorageUnit for TrackerItems
 var trackerSU = new StorageUnit("tracker", trackerItems.values());

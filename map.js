@@ -152,7 +152,7 @@ var Check = L.Marker.extend({
         else 
             document.getElementById('reqs').style.display = "none";
         document.getElementById('cinfo').style.visibility = "visible";
-        document.getElementById('cinfodiv').innerHTML = this.info;
+        document.getElementById('cinfodiv').innerHTML = this.info + '\n' + this.latLng; // Remove LATLNG
         map.on('click', hideDetails);
     },
     iconToImg: function(icon, imgClass) {
@@ -233,7 +233,7 @@ var Submap = L.Marker.extend({
             imageSize[0] = 330 / imageSize[1] * imageSize[0];
             imageSize[1] = 330;
         }   
-        this.image = L.imageOverlay('Submaps/' + name + '.png', 
+        this.image = L.imageOverlay('Submaps/' + name.replace(/ /g, "_") + '.png', 
             [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]]);
         this.on('click', this.load);
         this.on('contextmenu', this.setAsMarked);
@@ -441,7 +441,7 @@ var Dungeon = Submap.extend({
             imgsSize[0] = 2300;
         }
         for(let i = 0; i < floors.length; ++i) {
-            floors[i] = new DungeonFloor('Dungeons/' + name + '/' + document.getElementById('F' + (i + floorOffset)).src.slice(-6), 
+            floors[i] = new DungeonFloor('Dungeons/' + name.replace(/ /g, "_") + '/' + document.getElementById('F' + (i + floorOffset)).src.slice(-6), 
                 [[-4913 + imgsSize[1], 4258 - imgsSize[0]], [-4913 - imgsSize[1], 4258 + imgsSize[0]]],
                 floors[i]);
         }
@@ -514,7 +514,7 @@ var Dungeon = Submap.extend({
         }
         loadedSubmap = this;
         let dn = document.getElementById("dn");
-        dn.src = "Dungeons/" + this.name + "/Name.png";
+        dn.src = "Dungeons/" + this.name.replace(/ /g, "_") + "/Name.png";
         setTimeout(function() { 
             document.getElementById('dun').style.display = 'inline'
             dn.style.display = 'flex';          
@@ -629,7 +629,7 @@ var FlooredSubmap = Dungeon.extend({
             imageSize[1] = 330;
         }
         for(let i = 0; i < floors.length; ++i) {
-            floors[i] = new DungeonFloor('Submaps/' + name + '/' + i + '.png', 
+            floors[i] = new DungeonFloor('Submaps/' + name.replace(/ /g, "_") + '/' + i + '.png', 
                 [[latLng[0] + imageSize[1], latLng[1] - imageSize[0]], [latLng[0] - imageSize[1], latLng[1] + imageSize[0]]],
                 floors[i]);
         }
@@ -1125,7 +1125,7 @@ function createIcon(img, width, height, name) {
         width = width / height * maxSize;
         height = maxSize;
     }
-     return L.icon({iconUrl: 'Icons/' + img + '.png', iconSize: [width, height],
+     return L.icon({iconUrl: 'Icons/' + img.replace(/ /g, "_") + '.png', iconSize: [width, height],
                    className: name}); 
 }
 function qI(icon, quantity) { // Create item icon with quantity
@@ -1372,7 +1372,6 @@ var notaRupeesSU = new OldStorageUnit('notaRupee', '0000000000000000000000000000
 var bossesSU = new OldStorageUnit('bosses', '000000000') // 9 flags
 var nonCheckItemsSU = new OldStorageUnit('ncItems', '00000000000000000000') // 20 flags
 
-// var trackerSU = new StorageUnit('tracker', '00000000000000000000000100\0\0' + '000000000000000000000000000000000000000000000000000000000000000000000000'); // 100 flags
 var settingSU = new OldStorageUnit('settings', '101001100000000111111100000000000000000000000000000000000000'); // 60 flags
 
 //Reusable Check Description   
@@ -1488,7 +1487,7 @@ document.addEventListener("DOMContentLoaded", function() {
             new Check([-7104, 4184], goldenWolf, skillsSU, undefined, undefined, 'Meet the golden wolf after clearing the Faron Twilight to learn the Ending Blow.'),
             new Check([-7235, 4518], smallChest, baseSU, redRupee, [lantern], 'Clear out the purple fog with the lantern and climb the ledge to reach the chest.'),
             new Check([-7010, 4567], smallChest, baseSU, yellowRupee, [lantern], 'Clear out the purple fog with the lantern and go to the left of the cave entrance to find the chest.'),
-            new Check([-7351, 4513], chest, baseSU, purpleRupee, [lantern], 'Clearn out the purple fog with the lantern and from the exit of the mist, go right to find the chest.'),
+            new Check([-7351, 4513], chest, baseSU, purpleRupee, [lantern], 'Clear out the purple fog with the lantern and from the exit of the mist, go right to find the chest.'),
             new Check([-6278, 4930], heartPiece, baseSU, undefined, [[boomerang, clawshot]], 'The heart piece is on the leaves of a tree and can be grabbed with a long ranged item.'),
             new Check([-6344, 4764], beetleM, bugsSU, undefined, undefined, 'This ♂ Beetle is on a tree trunk, simply pick it up.'),
             new Check([-5985, 5151], beetleF, bugsSU, undefined, [[boomerang, clawshot]], 'This ♀ Beetle is on an elevated tree trunk, use the boomerang or the clawshot to bring it closer.'),
@@ -1554,7 +1553,7 @@ document.addEventListener("DOMContentLoaded", function() {
             [-4419, 6316], [-4680, 6260], [-5060, 5972], [-5332, 6004],
         ], false, [-4096, 7904], [
             new Check([-5504, 8095], chest, baseSU, purpleRupee, [lantern], 'Light the 2 torches to make it appear the chest appear.'),
-            new Check([-5448, 8123], antM, bugsSU, undefined, undefined, 'This ♂ Ant is a the base of the tree.'),
+            new Check([-5448, 8123], antM, bugsSU, undefined, undefined, 'This ♂ Ant is at the base of the tree.'),
             new Check([-4064, 6973], grasshopperM, bugsSU, undefined, undefined, 'This ♂ Grasshopper is particulary hard to get. Use the boomerang or clawshot if necessary.'),
             new Check([-3372, 5952], grasshopperF, bugsSU, undefined, undefined, 'This ♀ Grasshopper is just lying on the ground.'),
             new Check([-3158, 7408], phasmidM, bugsSU, undefined, [[boomerang, clawshot]], "This ♂ Phasmid is too high to reach, so you'll need to use the clawshot or the boomerang to make it come down."),
@@ -1949,6 +1948,8 @@ document.addEventListener("DOMContentLoaded", function() {
             new NonFlag([-590, 5780], sign, 'hint'),
             //Zora's Domain Fishing
             //Lake Hylia Fishing
+            //Upper Zora's River Fishing
+            //Fishing Hole Fishing
             //Howl Statue Lookout Crows (71 rupees)
             //Hyrule Field Tree East of bridge (28 rupees)
             //Hyrule Field Bug Tree Crows (32 rupees)

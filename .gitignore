@@ -1,3 +1,4 @@
 *.xcf
 *.txt
 generateImageMap.js
+renameImages.js

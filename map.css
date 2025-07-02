@@ -547,13 +547,13 @@ body img {
     top: 0;
     z-index: 1600;
 }
-#tquest {
+#tquest, #tkeys {
     right: 4vw;
     width: 21vw;
     height: 16vh;
     column-gap: 1.2vw;
 }
-#truins, #tkeys {
+#truins {
     right: 6vw;
     width: 17vw;
     height: 14vh;
