@@ -189,9 +189,14 @@ let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
 let invoiceReq = Requirement.fromBoolItem(invoice);
 let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
 let horseCallReq = Requirement.fromBoolItem(horseCall);
+let diababaReq = Requirement.fromBoolItem(diababa);
 let fyrusReq = Requirement.fromBoolItem(fyrus);
+let morpheelReq = Requirement.fromBoolItem(morpheel);
 let stallordReq = Requirement.fromBoolItem(stallord);
 let blizzetaReq = Requirement.fromBoolItem(blizzeta);
+let armogohmaReq = Requirement.fromBoolItem(armogohma);
+let argorokReq = Requirement.fromBoolItem(argorok);
+let zantReq = Requirement.fromBoolItem(zant);
 let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
 reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
 let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
@@ -243,6 +248,7 @@ let bombs = new Obtainable("Bombs", null, {category: Categories.Ammo});
 let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo});
 let bomblings = new Obtainable("Bomblings", null, {category: Categories.Ammo});
 let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
+let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
 let coralEarring = new Obtainable("Coral Earring", fishingRods);
 let bigQuiver = new Obtainable("Quiver1", bow, {name: "Big Quiver"});
@@ -1171,7 +1177,7 @@ var flags = new Map([
     })],
     ["Lake Hylia Bridge Vines Chest", new Flag(chest.with(Rupees.Orange), [-4574, 3388], {
         baseReqs: [clawshotReq],
-        baseDesc: "Use the clawshot on the vines and climb up completely on the platform. Then, grab the ledge to the left of the vines " +
+        baseDesc: "Use the clawshot on the vines and climb up completely on the platform. Then, grab the ledge to the right of the vines " +
                 "and slide right until you reach the platform with the chest."
     })],
     ["Isle of Riches Poe", new Flag(nightPoe, [-4920, 3065], {
@@ -1499,7 +1505,220 @@ var flags = new Map([
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Defeat all the Tektites to make the chest appear.',
     })],
-    []
+    ["Lanayru Spring Underwater Left Chest", new Flag(smallChest.with(Rupees.Blue), [-5210, 3566], {
+        baseReqs: [[ironBootsReq, magicArmorReq]],
+        baseDesc: "Sink down to get this underwater chest on the left side."
+    })],
+    ["Lanayru Spring Underwater Right Chest", new Flag(smallChest.with(Rupees.Yellow), [-5197, 3360], {
+        baseReqs: [[ironBootsReq, magicArmorReq]],
+        baseDesc: "Sink down to get this underwater chest on the right side."
+    })],
+    ["Lanayru Spring Back Room Left Chest", new Flag(smallChest.with(waterBombs, 5), [-5538, 3542], {
+        baseReqs: [clawshotReq],
+        baseDesc: 'Clawshot the vines on either side, open the door and walk to the chest on the left.'
+    })],
+    ["Lanayru Spring Back Room Right Chest", new Flag(smallChest.with(Rupees.Blue), [-5558, 3491], {
+        baseReqs: [clawshotReq],
+        baseDesc: 'Clawshot the vines on either side, open the door and walk to the chest on the right.'
+    })],
+    ["Lanayru Spring Back Room Lantern Chest", new Flag(chest.with(heartPiece), [-5559, 3526], {
+        baseReqs: [clawshotReq, lanternReq],
+        baseDesc: 'Light the 2 torches in the room to make the chest appear.'
+    })],
+    ["Lanayru Spring West Double Clawshot Chest", new Flag(chest.with(Rupees.Orange), [-5128, 3232], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Follow the clawshot target path, then take a left to reach the chest.'
+    })],
+    ["Lanayru Spring East Double Clawshot Chest", new Flag(chest.with(Rupees.Orange), [-5145, 3773], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Follow the clawshot target path, then take a right to reach the chest.'
+    })],
+    ["Lanayru Spring Underwater North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 37), [-5171, 3447], {
+        baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater, near the entrance."
+    })],
+    ["Lanayru Spring Underwater South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 41), [-5322, 3394], {
+        baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater, in the back."
+    })],
+    ["Lake Lantern Cave First Chest", new Flag(smallChest.with(bombs, 5), [-5696, 3100], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the left to reveal the chest.'
+    })], // TODO Verify if not switched
+    ["Lake Lantern Cave Second Chest", new Flag(smallChest.with(Rupees.Yellow), [-5665, 3145], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back and defeat the Keese.'
+    })],
+    ["Lake Lantern Cave Third Chest", new Flag(smallChest.with(Rupees.Red), [-5631, 3200], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the left to reveal the chest.'
+    })],
+    ["Lake Lantern Cave First Poe", new Flag(poeSoul, [-5632, 3440], {
+        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseDesc: 'Near the torch in the middle of the room.'
+    })]
+    ["Lake Lantern Cave Fourth Chest", new Flag(smallChest.with(arrows, 10), [-5631, 3487], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Fifth Chest", new Flag(smallChest.with(Rupees.Red), [-5381, 3422], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Sixth Chest", new Flag(chest.with(Rupees.Orange), [-5418, 3185], {
+        baseReqs: [[bombBagReq, ballAndChainReq], lanternReq],
+        baseDesc: 'Light the 2 torches to make the chest appear.'
+    })], // TODO Verify if not switched
+    ["Lake Lantern Cave Seventh Chest", new Flag(smallChest.with(Rupees.Red), [-5386, 3183], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the right to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Eighth Chest", new Flag(smallChest.with(bombs, 5), [-5308, 3098], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back and defeat the Tektites.'
+    })],
+    ["Lake Lantern Cave Ninth Chest", new Flag(smallChest.with(arrows, 10), [-5375, 2828], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the left and defeat the Keese.'
+    })], // TODO Verify if not switched
+    ["Lake Lantern Cave Tenth Chest", new Flag(chest.with(Rupees.Purple), [-5341, 2779], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Second Poe", new Flag(poeSoul, [-5260, 3181], {
+        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseDesc: 'Near the torch in the middle of the room.'
+    })],
+    ["Lake Lantern Cave Eleventh Chest", new Flag(chest.with(Rupees.Purple), [-5229, 3182], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the left to reveal the chest.'
+    })], // TODO Verify if not switched
+    ["Lake Lantern Cave Twelfth Chest", new Flag(smallChest.with(bombs, 10), [-5262, 3231], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Thirteenth Chest", new Flag(smallChest.with(seeds, 50), [-5303, 3268], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the left to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Fourteenth Chest", new Flag(chest.with(Rupees.Orange), [-5333, 3426], {
+        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock in the back to reveal the chest.'
+    })],
+    ["Lake Lantern Cave Final Poe", new Flag(poeSoul, [-5523, 3363], {
+        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseDesc: 'At the entrance of the room.'
+    })],
+    ["Lake Lantern Cave End Lantern Chest", new Flag(chest.with(heartPiece), [-5555, 3364], {
+        baseReqs: [[bombBagReq, ballAndChainReq], lanternReq],
+        baseDesc: 'Light the 2 torches to make the chest appear.'
+    })],
+    ["Lanayru Ice Block Puzzle Cave Chest", new Flag(chest.with(heartPiece), [-1725, 4818], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: 'Complete the 3 block puzzles to open all the gates to access the chest.'
+    })],
+    // Forest Temple
+    ["Forest Temple Entrance Vines Chest", new Flag(smallChest.with(Rupees.Yellow), [-5935, 4317], {
+        baseReqs: [[slingshotReq, boomerangReq, bowReq, clawshotReq]],
+        baseDesc: 'Use a long ranged item to defeat the spiders and climb to the chest.'
+    })]
+    ["Forest Temple Central Chest Behind Stairs", new Flag(smallChest.with(Rupees.Red), [-5281, 4240], {
+        baseDesc: 'Use the Bombling on the right to blow up the rock blocking the chest.'
+    })],
+    ["Forest Temple Central North Chest", new Flag(chest.with(forestMap), [-5260, 4294], {
+        baseReqs: [lanternReq],
+        baseDesc: 'Use the lantern to light the 4 torches that make the stairs leading to the chest rise.'
+    })],
+    ["Forest Temple Windless Bridge Chest", new Flag(chest.with(forestSK), [-4710, 4812], {
+        baseDesc: 'Left of the entrance of the room.'
+    })],
+    ["Forest Temple East Water Cave Chest", new Flag(chest.with(Rupees.Yellow), [-5445, 5129], {
+        baseDesc: 'Swim to the opening and walk to the end to reach the chest.'
+    })],
+    ["Forest Temple Second Monkey Under Bridge Chest", new Flag(smallChest.with(Rupees.Yellow), [-5155, 5218], {
+        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseDesc: 'The chest is under the wooden structure.'
+    })],
+    ["Forest Temple Big Baba Key", new Flag(forestSK, [-5624, 3749], {
+        baseDesc: 'Defeat the Big Baba to obtain the key. Use the Bomblings if you do not have any weapons.'
+    })],
+    [ "Forest Temple West Deku Like Chest", new Flag(chest.with(heartPiece), [-5467, 3901], {
+        baseDesc: 'Defeat the Deku Like that blocks the way to access the chest.'
+    })],
+    ["Forest Temple Totem Pole Chest", new Flag(chest.with(forestSK), [-5277, 3498], {
+        baseDesc: 'Roll into the pillar to make the chest fall.'
+    })],
+    ["Forest Temple West Tile Worm Room Vines Chest", new Flag(smallChest.with(Rupees.Red), [-5224, 3241], {
+        baseDesc: 'Climb the vines to reach the chest.'
+    })],
+    ["Forest Temple Gale Boomerang", new Flag(boomerang, [-4508, 4262], {
+        baseReqs: [[woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
+        baseDesc: 'Defeat Ook to obtain the Gale Boomerang.'
+    })],
+    ["Forest Temple West Tile Worm Chest Behind Stairs", new Flag(chest.with(heartPiece), [-5304, 3050], {
+        baseReqs: [boomerangReq],
+        baseDesc: 'Extinguish all the torches to retract the stairs blocking the chest.'
+    })],
+    ["Forest Temple Central Chest Hanging From Web", new Flag(chest.with(forestCompass), [-5386, 4242], {
+        baseReqs: [[boomerangReq, bowReq, clawshotReq, ballAndChainReq]],
+        baseDesc: 'Use a long ranged item to break the web holding the chest.'
+    })],
+    ["Forest Temple Big Key Chest", new Flag(bossChest.with(forestBK), [-5439, 5042], {
+        baseReqs: [boomerangReq],
+        baseDesc: 'Use the boomerang on the windmill pillars in this pattern: Bottom Right, Bottom Left, Top Right and Top Left.' + 
+                    'This opens the gate to the boss key chest.'
+    })],
+    ["Forest Temple North Deku Like Chest", new Flag(chest.with(forestSK), [-4322, 4342], {
+        baseReqs: [boomerangReq],
+        baseDesc: 'Grab a bombling or use one of your own bombs to defeat the Deku Like and jump across the platforms.'
+    })],
+    ["Forest Temple East Tile Worm Chest", new Flag(chest.with(Rupees.Red), [-4510, 5206], {
+        baseReqs: [boomerangReq, Requirement.fromCountItem(forestSK)],
+        baseDesc: 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'
+    })],
+    ["Forest Temple Diababa Heart Container", new Flag(heartContainer, [-3773, 4842], {
+        baseReqs: [diababaReq],
+        baseDesc: 'Defeat Diababa to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Diababa to obtain the item.'
+    })],
+    ["Forest Temple Dungeon Reward", new Flag(fusedShadow, [-3796, 4777], {
+        baseReqs: [diababaReq],
+        baseDesc: 'Defeat Diababa to obtain the Fused Shadow.',
+        randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
+    })],
+    ["Forest Temple Diababa", new Flag(diababa, [-3651, 4870], {
+        baseReqs: [Requirement.fromBoolItem(forestBK), boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
+        baseDesc: 'Defeat Diababa to clear out the Forest Temple.'
+    })],
+    ["Forest Temple Ooccoo", new Flag(ooccoo, [-5250, 4565], {
+        baseDesc: 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'
+    })],
+    ["Forest Temple Tile Worm Monkey Lock", new Flag(lock, [-5309, 2943], {
+        baseReqs: [Requirement.fromCountItem(forestSK), lanternReq],
+        baseDesc: 'Unlock this door to free the west wing monkey.'
+    })],
+    ["Forest Temple Big Baba Monkey Lock", new Flag(lock, [-5869, 3747], {
+        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseDesc: 'Unlock this door to free the Big Baba Monkey'
+    })],
+    ["Forest Temple Totem Pole Monkey Lock", new Flag(lock, [-5224, 5140], {
+        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseDesc: "Unlock this door to reach the room with the totem pole Monkey."
+    })],
+    ["Forest Temple Windless Bridge Lock", new Flag(lock, [-4570, 5087], {
+        baseReqs: [Requirement.fromCountItem(forestSK), boomerangReq],
+        baseDesc: "Unlock this door to reach the Northeastern Tile Worm Room."
+    })],
+    ["Forest Temple Boss Lock", new Flag(bossLock, [-3858, 4868], {
+        baseReqs: [Requirement.fromCountItem(forestBK)],
+        baseDesc: "Unlock this door to reach Diababa.",
+    })],
+    // Goron Mines
+
+
+
+
 
 
 

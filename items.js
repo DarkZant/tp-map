@@ -39,6 +39,7 @@ const Categories = Object.freeze({
     Shops: "Shops",
     Grass: "Horse & Hawk Grass",
     Fishing: "Fishing Spots",
+    Minigames: "Minigames",
     // Randomizer Categories
     Gifts: "Gifts from NPCs",
     ShopItems: "Shop Items",
