@@ -1,18 +1,3 @@
-class Obtainable {
-    constructor(imageInfo, item, {name=imageInfo, category}={}) {
-        if (imageInfo instanceof ImageWrapper) 
-            this.image = imageInfo;
-        else    
-            this.image = getIconImage(imageInfo);
-        this.item = item;
-        this.name = item === null ? name : item.name;
-        this.category = item === null ? category : item.getCategory();
-    }
-    getCategory() {
-        return this.category;
-    }
-}
-
 class Requirement {
     constructor(imageInfo, text, condition) {
         if (imageInfo instanceof ImageWrapper) 
@@ -184,15 +169,32 @@ let coralEarringReq = Requirement.fromBoolItem(fishingRods.getItemByIndex(1));
 let pastDomRodReq = Requirement.fromBoolItem(dominionRods.getItemByIndex(0));
 let domRodReq = Requirement.fromBoolItem(dominionRods.getItemByIndex(1));
 let woodenSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(0));
+let ordonSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(1));
 let masterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(2));
 let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
 let invoiceReq = Requirement.fromBoolItem(invoice);
 let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
 let horseCallReq = Requirement.fromBoolItem(horseCall);
+let forest1SKReq = Requirement.fromCountItem(forestSK);
 let diababaReq = Requirement.fromBoolItem(diababa);
 let fyrusReq = Requirement.fromBoolItem(fyrus);
+let mines1SKReq = Requirement.fromCountItem(minesSK);
+let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
+let mines3SKReq = Requirement.fromCountItem(minesSK, 3);
+let dangoroReq = [woodenSwordReq, ballAndChainReq, bombBagReq];
+let minesBKReq = Requirement.fromBoolItem(minesBK.getItemByReq(3));
 let morpheelReq = Requirement.fromBoolItem(morpheel);
+let lakebed1SKReq = Requirement.fromCountItem(lakebedSK);
+let lakebed2SKReq = Requirement.fromCountItem(lakebedSK, 2);
+let lakebed3SKReq = Requirement.fromCountItem(lakebedSK, 3);
+let lakebedBKReq = Requirement.fromBoolItem(lakebedBK);
 let stallordReq = Requirement.fromBoolItem(stallord);
+let arbiter1SKReq = Requirement.fromCountItem(arbiterSK);
+let arbiter2SKReq = Requirement.fromCountItem(arbiterSK, 2);
+let arbiter3SKReq = Requirement.fromCountItem(arbiterSK, 3);
+let arbiter4SKReq = Requirement.fromCountItem(arbiterSK, 4);
+let arbiter5SKReq = Requirement.fromCountItem(arbiterSK, 5);
+let arbiterBKReq = Requirement.fromBoolItem(arbiterBK);
 let blizzetaReq = Requirement.fromBoolItem(blizzeta);
 let armogohmaReq = Requirement.fromBoolItem(armogohma);
 let argorokReq = Requirement.fromBoolItem(argorok);
@@ -200,59 +202,9 @@ let zantReq = Requirement.fromBoolItem(zant);
 let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
 reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
 let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
-medecineScentReq.condition = () => true; // To avoid items being hidden by scents
+medicineScentReq.condition = () => true; // To avoid items being hidden by scents
 let nightReq = new Requirement('Moon', 'Night Time', () => true);
 let randoSettingReq = new Requirement('Settings', 'Rando Setting', () => true) //TODO Apply rando setting requirements
-
-// Rupees Enum
-const Rupees = Object.freeze({
-    Green  : new Obtainable("Green Rupee", rupees),
-    Blue   : new Obtainable("Blue Rupee", rupees),
-    Yellow : new Obtainable("Yellow Rupee", rupees),
-    Red    : new Obtainable("Red Rupee", rupees),
-    Purple : new Obtainable("Purple Rupee", rupees),
-    Orange : new Obtainable("Orange Rupee", rupees),
-    Silver : new Obtainable("Silver Rupee", rupees)
-});
-// Bottled Items Enum
-const Bottle = Object.freeze({
-    BeeLarva : new Obtainable("BottleBee", null, {name:"Bee Larva", category: Categories.Bottle}),
-    Worm : new Obtainable("BottleWorm", null, {name: "Worm", category: Categories.Bottle}),
-    Oil : new Obtainable("BottleYellow", null, {name: "Lantern Oil", category: Categories.Bottle}),
-    HotSpringWater : new Obtainable("BottleWater", null, {name: "Hot Spring Water", category: Categories.Bottle}),
-    RedPotion : new Obtainable("BottleRed", null, {name: "Red Potion", category: Categories.Bottle}),
-    BluePotion : new Obtainable("BottleBlue", null, {name: "Blue Potion", category: Categories.Bottle}),
-    Fairy : new Obtainable('BottleFairy', null, {name: "Fairy", category: Categories.Bottle}),
-    Tears : new Obtainable('BottleTears', null, {name: "Great Fairy's Tears", category: Categories.Bottle}),
-    Milk : new Obtainable('BottleMilk', null, {name: 'Milk', category: Categories.Bottle}),
-    HalfMilk : new Obtainable('BottleMilkH', null, {name: "1/2 Milk", category: Categories.Bottle}),
-    Nasty : new Obtainable('BottleNasty', null, {name: 'Nasty Soup', category: Categories.Bottle}),
-    Soup : new Obtainable('BottleSoup', null, {name: "Superb Soup", category: Categories.Bottle}),
-    PurpleChu: new Obtainable('BottlePurple', null, {name: "Purple Chu Jelly", category: Categories.Bottle}),
-    RedChu : new Obtainable('BottleRed', null, {name: "Red Chu Jelly", category: Categories.Bottle}),
-    BlueChu : new Obtainable("BottleBlue", null, {name: "Blue Chu Jelly", category: Categories.Bottle}),
-    YellowChu : new Obtainable("BottleYellow", null, {name: "Yellow Chu Jelly", category: Categories.Bottle}),
-    RareChu : new Obtainable("BottleRare", null, {name: "Rare Chu Jelly", category: Categories.Bottle}),
-    Coro : new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"}),
-    Sera : new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"}),
-    Jovani : new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"})
-});
-
-let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
-let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.Skills});
-let nightPoe = new Obtainable("Night Poe Soul", poeSoul);
-let lock = new Obtainable("Lock", null, {category: Categories.Locks});
-let bossLock = new Obtainable("Boss Door", null, {category: Categories.Locks});
-let skybookChar = new Obtainable("Sky Book Character", skybook);
-let bombs = new Obtainable("Bombs", null, {category: Categories.Ammo});
-let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo});
-let bomblings = new Obtainable("Bomblings", null, {category: Categories.Ammo});
-let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
-let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
-let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
-let coralEarring = new Obtainable("Coral Earring", fishingRods);
-let bigQuiver = new Obtainable("Quiver1", bow, {name: "Big Quiver"});
-let giantQuiver = new Obtainable("Quiver2", bow, {name: "Giant Quiver"});
 
 
 let agithaBugCoupleRewards = Object.freeze({
@@ -292,7 +244,7 @@ let agithaRewards = new FlagGroup([
     new FlagGroup([
         makeAgithaRewardFlag(pillbugM, [-4025, 4730]),
         makeAgithaRewardFlag(pillbugF, [-4025, 4790]),
-    ]),
+    ], agithaBugCoupleRewards),
     new FlagGroup([
         makeAgithaRewardFlag(butterflyM, [-4150, 4370]),
         makeAgithaRewardFlag(butterflyF, [-4150, 4430]),
@@ -424,7 +376,7 @@ var flags = new Map([
     // Faron
     ["Coro Gate Key", new Flag(coroKey, [7385, 4898], {
         baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave."
-    })]
+    })],
     ["Coro Lantern", new Flag(lantern, [-7405, 4910], {
         baseDesc: 'While chasing Talo and the monkey, talk to Coro to obtain the lantern.',
         randoCategory: Categories.NonChecks,
@@ -610,7 +562,7 @@ var flags = new Map([
     ["Kakariko Gorge Female Pill Bug", new Flag(pillbugF, [-5584, 6316], {
         baseDesc: 'This ♀ Pill Bug is hidden in the tall grass.',
         randoDesc: "The item is hidden in the tall grass"
-    })]
+    })],
     ["Kakariko Gorge Male Pill Bug", new Flag(pillbugM, [-5431, 6004], {
         baseDesc: 'This ♂ Pill Bug is just lying on the ground.',
         randoDesc: 'The item is hidden on the ground where the bug usually is.'
@@ -673,7 +625,7 @@ var flags = new Map([
     ["Death Mountain Trail Poe", new Flag(nightPoe, [-4331, 8118], {
         baseReqs: [shadowCrystalReq, nightReq],
         baseDesc: "Up on the ledge, use a goron or the clawshot to get up."
-    })]
+    })],
     ["Death Mountain Alcove Chest", new Flag(chest.with(heartPiece), [-4049, 8169], {
         baseReqs: [clawshotReq],
         baseDesc: 'Clawshot the vines hanging from the stone bridge and jump down the alcove to the chest.'
@@ -698,7 +650,7 @@ var flags = new Map([
     ["Kakariko Graveyard Grave Poe", new Flag(nightPoe, [-5493, 7987], {
         baseReqs: [shadowCrystalReq, nightReq],
         baseDesc: 'Push the south-west grave to reveal the poe.'
-    })]
+    })],
     ["Ilia Charm", new Flag(iliasCharm, [-2155, 6620], {
         baseReqs: [woodenStatueReq, [bowReq, slingshotReq]],
         baseDesc: 'Defeat all the Bulblins, then talk to Impaz in front of her house to receive the charm.',
@@ -922,7 +874,7 @@ var flags = new Map([
     })],
     ["Gerudo Desert Northwest Chest Behind Gates", new Flag(smallChest.with(Rupees.Red), [-4936, 356], {
         baseDesc: 'Destroy the western wooden gate with a boar to gain access to the chest.'
-    })]
+    })],
     ["Gerudo Desert Northeast Chest Behind Gates", new Flag(smallChest.with(Rupees.Red), [-4831, 856], {
         baseDesc: 'Destroy the eastern wooden gate with a boar to gain access to the chest.'
     })],
@@ -1014,7 +966,7 @@ var flags = new Map([
         baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
         baseDesc: "Talk to the Great Fairy to obtain Great Fairy's Tears.",
         randoCategory: Categories.Gifts
-    })]
+    })],
     // Peak
     ["Ashei Sketch", new Flag(asheisSketch, [-606, 4446], {
         baseReqs: [stallordReq],
@@ -1119,7 +1071,7 @@ var flags = new Map([
     ["Zoras Domain Male Dragonfly", new Flag(dragonflyM, [-741, 4977], {
         baseDesc: 'This ♂ Dragonfly is hiding in the tall grass.',
         randoDesc: 'The item is hiding in the tall grass.'
-    })]
+    })],
     ["Upper Zoras River Female Dragonfly", new Flag(dragonflyF, [-879, 6022], {
         baseDesc: 'This ♀ Dragonfly is on the side of the floating bridge. Drop down from the bridge to get it.',
         randoDesc: 'The item is on the side of the floating bridge. Drop down from the bridge to get it.'
@@ -1321,7 +1273,7 @@ var flags = new Map([
     ["Outside South Castle Town Double Clawshot Chasm Chest", new Flag(chest.with(Rupees.Orange), [-4550, 4505], {
         baseReqs: [doubleClawshotReq],
         baseDesc: 'Follow the clawshot target path down the chasm to reach the chest.'
-    })]
+    })],
     ["Upper Zoras River Howling Stone", riverHS],
     ["Lake Hylia Howling Stone", lakeHS],
     ["Lake Hylia Bridge South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
@@ -1367,7 +1319,7 @@ var flags = new Map([
     ["Upper Zoras River Trench Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 31), [-876, 5882], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
         baseDesc: "Underwater, in the trench."
-    })]
+    })],
     ["Upper Zoras River Gate Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 32), [-1037, 5965], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
         baseDesc: "Underwater, before the wooden gate."
@@ -1387,7 +1339,7 @@ var flags = new Map([
     ["Lanayru Field Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 30), [-2601, 3974], {
         baseReqs: [[bombBagReq, ballAndChainReq]],
         baseDesc: 'These boulders are blocking the north entrance to the spinner area.'
-    })]
+    })],
     ["Lake Hylia Bridge Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-3816, 3385], {
         baseReqs: [[bombBagReq, ballAndChainReq]],
         baseDesc: 'These boulders are blocking the south entrance to the spinner area.'
@@ -1437,12 +1389,12 @@ var flags = new Map([
         baseDesc: 'Enter the house using the dig spot to obtain this poe soul.'
     })],
     ["Jovani 20 Poe Soul Reward", new Flag(Bottle.Jovani, [-3915, 4994], {
-        baseReqs: [shadowCrystalReq, Requirement.fromCountItem(poeSouls, 20)],
+        baseReqs: [shadowCrystalReq, Requirement.fromCountItem(poeSoul, 20)],
         baseDesc: "Talk to Jovani after collecting 20 poe souls to receive this reward.",
         randoCategory: Categories.Gifts
     })],
     ["Jovani 60 Poe Soul Reward", new Flag(Rupees.Silver, [-3840, 4994], {
-        baseReqs: [shadowCrystalReq, Requirement.fromCountItem(poeSouls, 60)],
+        baseReqs: [shadowCrystalReq, Requirement.fromCountItem(poeSoul, 60)],
         baseDesc: 'Talk to Jovani after collecting 60 poe souls to receive a Silver Rupee. You can also go see him at the' +
                     'bar, then everytime you come back in his house, talk to his cat Gengle to receive a Silver Rupee (You must leave Castle Town to get another one).',
         randoCategory: Categories.Gifts,
@@ -1556,7 +1508,7 @@ var flags = new Map([
     ["Lake Lantern Cave First Poe", new Flag(poeSoul, [-5632, 3440], {
         baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
         baseDesc: 'Near the torch in the middle of the room.'
-    })]
+    })],
     ["Lake Lantern Cave Fourth Chest", new Flag(smallChest.with(arrows, 10), [-5631, 3487], {
         baseReqs: [[bombBagReq, ballAndChainReq]],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
@@ -1621,7 +1573,7 @@ var flags = new Map([
     ["Forest Temple Entrance Vines Chest", new Flag(smallChest.with(Rupees.Yellow), [-5935, 4317], {
         baseReqs: [[slingshotReq, boomerangReq, bowReq, clawshotReq]],
         baseDesc: 'Use a long ranged item to defeat the spiders and climb to the chest.'
-    })]
+    })],
     ["Forest Temple Central Chest Behind Stairs", new Flag(smallChest.with(Rupees.Red), [-5281, 4240], {
         baseDesc: 'Use the Bombling on the right to blow up the rock blocking the chest.'
     })],
@@ -1636,7 +1588,7 @@ var flags = new Map([
         baseDesc: 'Swim to the opening and walk to the end to reach the chest.'
     })],
     ["Forest Temple Second Monkey Under Bridge Chest", new Flag(smallChest.with(Rupees.Yellow), [-5155, 5218], {
-        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseReqs: [forest1SKReq],
         baseDesc: 'The chest is under the wooden structure.'
     })],
     ["Forest Temple Big Baba Key", new Flag(forestSK, [-5624, 3749], {
@@ -1673,7 +1625,7 @@ var flags = new Map([
         baseDesc: 'Grab a bombling or use one of your own bombs to defeat the Deku Like and jump across the platforms.'
     })],
     ["Forest Temple East Tile Worm Chest", new Flag(chest.with(Rupees.Red), [-4510, 5206], {
-        baseReqs: [boomerangReq, Requirement.fromCountItem(forestSK)],
+        baseReqs: [boomerangReq, forest1SKReq],
         baseDesc: 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'
     })],
     ["Forest Temple Diababa Heart Container", new Flag(heartContainer, [-3773, 4842], {
@@ -1695,27 +1647,421 @@ var flags = new Map([
         baseDesc: 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'
     })],
     ["Forest Temple Tile Worm Monkey Lock", new Flag(lock, [-5309, 2943], {
-        baseReqs: [Requirement.fromCountItem(forestSK), lanternReq],
+        baseReqs: [forest1SKReq, lanternReq],
         baseDesc: 'Unlock this door to free the west wing monkey.'
     })],
     ["Forest Temple Big Baba Monkey Lock", new Flag(lock, [-5869, 3747], {
-        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseReqs: [forest1SKReq],
         baseDesc: 'Unlock this door to free the Big Baba Monkey'
     })],
     ["Forest Temple Totem Pole Monkey Lock", new Flag(lock, [-5224, 5140], {
-        baseReqs: [Requirement.fromCountItem(forestSK)],
+        baseReqs: [forest1SKReq],
         baseDesc: "Unlock this door to reach the room with the totem pole Monkey."
     })],
     ["Forest Temple Windless Bridge Lock", new Flag(lock, [-4570, 5087], {
-        baseReqs: [Requirement.fromCountItem(forestSK), boomerangReq],
+        baseReqs: [forest1SKReq, boomerangReq],
         baseDesc: "Unlock this door to reach the Northeastern Tile Worm Room."
     })],
     ["Forest Temple Boss Lock", new Flag(bossLock, [-3858, 4868], {
-        baseReqs: [Requirement.fromCountItem(forestBK)],
+        baseReqs: [Requirement.fromBoolItem(forestBK)],
         baseDesc: "Unlock this door to reach Diababa.",
     })],
     // Goron Mines
-
+    ["Goron Mines Entrance Chest", new Flag(smallChest.with(Rupees.Red), [-5791, 4465], {
+        baseReqs: [ironBootsReq],
+        baseDesc: 'Defeat the Torch Slug to access to the chest.'
+    })],
+    ["Goron Mines Main Magnet Room Bottom Chest", new Flag(chest.with(minesSK), [-5232, 4603], {
+        baseReqs: [ironBootsReq],
+        baseDesc:  'Defeat the Bulblins to easily reach the chest.'
+    })],
+    ["Goron Mines Gor Amato Key Shard", new Flag(minesBKAmoto, [-5004, 3025], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Talk to goron elder Gor Amoto to obtain this part of the boss key.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Talk to Gor Amoto to obtain the item.'
+    })],
+    ["Goron Mines Gor Amato Chest", new Flag(chest.with(minesMap), [-4971, 2973], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'The chest is behind the goron elder.'
+    })],
+    ["Goron Mines Gor Amato Small Chest", new Flag(smallChest.with(Rupees.Red), [-4971, 2941], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'The small chest is behind the goron elder, on the platform.'
+    })],
+    ["Goron Mines Magnet Maze Chest", new Flag(chest.with(heartPiece), [-4913, 3891], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Follow the left path when you get on the ceiling to reach the chest.'
+    })],
+    ["Goron Mines Ooccoo", new Flag(ooccoo, [-5027, 3150], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Pick up the pot where Ooccoo is hiding for her to join you.'
+    })],
+    ["Goron Mines First Floor Lock", new Flag(lock, [-5052, 3966], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: "Unlock this door to reach Gor Amoto."
+    })],
+    ["Goron Mines Crystal Switch Room Underwater Chest", new Flag(chest.with(minesSK), [-4591, 4459], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Use the Iron Boots to sink down to the underwater chest.'
+    })],
+    ["Goron Mines Crystal Switch Room Small Chest", new Flag(smallChest.with(Rupees.Red), [-4526, 4441], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Use the Iron Boots to follow the magnet path onto the platform where the chest is.'
+    })],
+    ["Goron Mines After Crystal Switch Room Magnet Wall Chest", new Flag(chest.with(heartPiece), [-4471, 4242], {
+        baseReqs: [ironBootsReq, mines1SKReq],
+        baseDesc: 'Follow the magnet path on the wall and take a left to reach the upper platform.'
+    })],
+    ["Goron Mines Double Beamos Lock", new Flag(lock, [-4200, 4363], {
+        baseReqs: [ironBootsReq, mines2SKReq],
+        baseDesc: "Unlock this door to reach the huge outdoor area."
+    })],
+    ["Goron Mines Outside Beamos Chest", new Flag(smallChest.with(minesSK), [-3898, 4270], {
+        baseReqs: [ironBootsReq, mines2SKReq],
+        baseDesc: 'Follow the left barrier to not get noticed by the Beamos and reach the chest.'
+    })],
+    ["Goron Mines Outside Underwater Chest", new Flag(chest.with(Rupees.Purple), [-3747, 4568], {
+        baseReqs: [ironBootsReq, mines2SKReq],
+        baseDesc: 'The chest is behind a breakable wooden barrier underwater. However, you can simply go above the barrier by swimming.'
+    })],
+    ["Goron Mines Outside Clawshot Chest", new Flag(chest.with(Rupees.Purple), [-3629, 4596], {
+        baseReqs: [ironBootsReq, clawshotReq, mines2SKReq],
+        baseDesc: 'Clawshot the vines from the door to the right of the room to reach the platform with the chest.'
+    })],
+    ["Goron Mines Outside Lock", new Flag(lock, [-3833, 4669], {
+        baseReqs: [ironBootsReq, mines3SKReq],
+    })],
+    ["Goron Mines Gor Ebizo Key Shard", new Flag(minesBKEbizo, [-3736, 5491], {
+        baseReqs: [ironBootsReq, mines3SKReq],
+        baseDesc: 'Talk to goron elder Gor Ebizo to obtain this part of the boss key.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Talk to Gor Ebizo to obtain the item.'
+    })],
+    ["Goron Mines Gor Ebizo Chest", new Flag(smallChest.with(Rupees.Yellow), [-3764, 5566], {
+        baseReqs: [ironBootsReq, mines3SKReq],
+        baseDesc: 'Use the stairs to the right of Gor Ebizo to reach the chest.'
+    })],
+    ["Goron Mines Chest Before Dangoro", new Flag(smallChest.with(Rupees.Yellow), [-3896, 5243], {
+        baseReqs: [ironBootsReq, mines3SKReq],
+        baseDesc: 'Use the magnet path to reach the chest.'
+    })],
+    ["Goron Mines Dangoro Chest", new Flag(chest.with(bow.getItemByIndex(0)), [-4550, 5060], {
+        baseReqs: [ironBootsReq, mines3SKReq, dangoroReq],
+        baseDesc: 'Defeat Dangoro to gain access to the chest.'
+    })],
+    ["Goron Mines Beamos Room Chest", new Flag(chest.with(minesCompass), [-4786, 4930], {
+        baseReqs: [ironBootsReq, mines3SKReq, dangoroReq, bowReq],
+        baseDesc: 'Defeat the Beamos and pull it to access the chest.'
+    })],
+    ["Goron Mines Gor Liggs Key Shard", new Flag(minesBKLiggs, [-4787, 5495], {
+        baseReqs: [ironBootsReq, mines3SKReq, dangoroReq, bowReq],
+        baseDesc: 'Defeat the Beamos and pull it to have access to the room where Gor Liggs gives you a part of the boss key.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Defeat the Beamos and pull it to have access to the room where Gor Liggs gives you the item.'
+    })],
+    ["Goron Mines Gor Liggs Chest", new Flag(chest.with(Rupees.Purple), [-4783, 5585], {
+        baseReqs: [ironBootsReq, mines3SKReq, dangoroReq, bowReq],
+        baseDesc: 'Defeat the beamos and pull it to have access to the room where the chest is, behind the goron elder.'
+    })],
+    ["Goron Mines Main Magnet Room Top Chest", new Flag(chest.with(Rupees.Purple), [-5155, 4682], {
+        baseReqs: [ironBootsReq, mines3SKReq, dangoroReq, bowReq],
+        baseDesc: 'Jump across to the platform with the chest to reach it.'
+    })],
+    ["Goron Mines Boss Lock", new Flag(minesBossLock, [-4170, 3847], {
+        baseReqs: [ironBootsReq, mines2SKReq, minesBKReq],
+        baseDesc: "Unlock this door to reach Fyrus.",
+    })],
+    ["Goron Mines Fyrus", new Flag(fyrus, [-4332, 3840], {
+        baseReqs: [ironBootsReq, mines2SKReq, minesBKReq, bowReq],
+        baseDesc: 'Defeat Fyrus to clear out the Goron Mines.'
+    })],
+    ["Goron Mines Fyrus Heart Container", new Flag(heartContainer, [-4252, 3815], {
+        baseReqs: [fyrusReq],
+        baseDesc: 'Defeat Fyrus to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Fyrus to obtain the item.'
+    })],
+    ["Goron Mines Dungeon Reward", new Flag(fusedShadow, [-4276, 3884], {
+        baseReqs: [fyrusReq],
+        baseDesc: 'Defeat Fyrus to obtain the Fused Shadow.',
+        randoDesc: 'Defeat Fyrus to obtain the dungeon reward.'
+    })],
+    // Lakebed Temple
+    ["Lakebed Temple Lobby Rear Chest", new Flag(smallChest.with(waterBombs, 10), [-5601, 4339], {
+        baseDesc: 'The chest is on the right of the nearby rock pillar.'
+    })],
+    ["Lakebed Temple Lobby Left Chest", new Flag(smallChest.with(arrows, 20), [-5509, 4199], {
+        baseDesc: 'The chest is between the two rock pillars.'
+    })],
+    ["Lakebed Temple Stalactite Room Chest", new Flag(smallChest.with(waterBombs, 10), [-4950, 4501], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]],
+        baseDesc: 'Knock down the stalactites with bombs and climb to the chest.'
+    })],
+    ["Lakebed Temple East Second Floor Southwest Chest", new Flag(smallChest.with(bombs, 5), [-4487, 5223], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed1SKReq],
+        baseDesc: 'On the left when you enter the room from the lobby.'
+    })],
+    ["Lakebed Temple East Second Floor Southeast Chest", new Flag(chest.with(lakebedSK), [-4585, 5497], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed1SKReq],
+        baseDesc: 'Go around the room and cross by the middle section to reach the chest.'
+    })],
+    ["Lakebed Temple Chandelier Chest", new Flag(chest.with(heartPiece), [-4373, 4363], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq],
+        baseDesc: 'The chest is on the chandelier hanging from the ceiling, use the clawshot to get there.'
+    })],
+    ["Lakebed Temple West Second Floor Central Small Chest", new Flag(smallChest.with(Rupees.Red), [-4223, 3363], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'Once on the highest vine platform, clawshot the target above the platform where the chest is.'
+    })],
+    ["Lakebed Temple West Second Floor Northeast Chest", new Flag(chest.with(bombs, 20), [-4212, 3451], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'After activating the water, go back the way you came from through the waterwheel to find the chest.' 
+    })], 
+    ["Lakebed Temple West Second Floor Southwest Underwater Chest", new Flag(chest.with(Rupees.Red), [-4583, 2965], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq, ironBootsReq],
+        baseDesc: 'Defeat the enemies underwater to have easier access to the chest.'
+    })],
+    ["Lakebed Temple West Second Floor Southeast Chest", new Flag(smallChest.with(Rupees.Red), [-4561, 3301], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'Go through the middle room accross the spinning gears to get the chest.'
+    })],
+    ["Lakebed Temple Ooccoo", new Flag(ooccoo, [-4490, 4552], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]],
+        baseReqs: 'Pick up or break the pot where Ooccoo is hiding.'
+    })],
+    ["Lakebed Temple Main Room Lock", new Flag(lock, [-4372, 4666], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed1SKReq],
+        baseDesc: "Unlock this door to reach the second floor of the east wing."
+    })],
+    ["Lakebed Temple East Water Supply Lock", new Flag(lock, [-4425, 6048], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq],
+        baseDesc: "Unlock this door to reach the east water supply."
+    })],
+    ["Lakebed Temple Central Room Small Chest", new Flag(smallChest.with(arrows, 20), [-4518, 4517], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]],
+        baseDesc: 'The chest is accessible when you first get into the room, go down the stairs and take a left.'
+    })],
+    ["Lakebed Temple Central Room Chest", new Flag(chest.with(lakebedMap), [-4224, 4513], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]],
+        baseDesc: 'The chest is accessible when you first get into the room, manipulate the stairs to reach it.'
+    })],
+    ["Lakebed Temple East Lower Waterwheel Stalactite Chest", new Flag(chest.with(lakebedSK), [-4506, 5613], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]],
+        baseDesc: 'Knock down the stalactite with bombs to make a platform to jump to the chest.'
+    })],
+    ["Lakebed Temple Before Deku Toad Alcove Chest", new Flag(chest.with(lakebedSK), [-4181, 5694], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq],
+        baseDesc: 'Defeat the Chus to have an easier time accessing the chest.'
+    })],
+    ["Lakebed Temple Deku Toad Chest", new Flag(chest.with(clawshots.getItemByIndex(0)), [-3736, 5469], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed3SKReq, ironBootsReq],
+        baseDesc: 'Defeat Deku Toad to make it spit out the chest.'
+    })],
+    ["Lakebed Temple West Lower Small Chest", new Flag(smallChest.with(waterBombs, 10), [-4299, 3311], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'Jump on the hanging platform then shoot the clawshot at the target above the platform with the chest to reach it.'
+    })],
+    ["Lakebed Temple East Lower Waterwheel Bridge Chest", new Flag(chest.with(heartPiece), [-4718, 5483], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'Once the water level is elevated in the room, press on the switch to open the gate and clawshot the target on the ' + 
+                  'back wall to reach the chest. Clawshot the target on the ceiling to get back out.'
+    })],
+    ["Lakebed Temple Underwater Maze Small Chest", new Flag(smallChest.with(bombs, 5), [-4420, 2539], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
+        baseDesc: 'In the section with the entrance to the long tunnel, swim up to find to chest.'
+    })],
+    ["Lakebed Temple Before Deku Toad Lock", new Flag(lock, [-4331, 5867], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed3SKReq],
+        baseDesc: "Unlock this door to reach the tunnel to Deku Toad."
+    })],
+    ["Lakebed Temple East Water Supply Small Chest", new Flag(smallChest.with(bombs, 10), [-4330, 6166], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq],
+        baseDesc: 'Go to the top of the room to reach the chest.'
+    })],
+    ["Lakebed Temple East Water Supply Clawshot Chest", new Flag(chest.with(Rupees.Purple), [-4378, 6427], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq],
+        baseDesc: 'Clawshot the target on the wall behind the chest to reach it.'
+    })],
+    ["Lakebed Temple West Water Supply Small Chest", new Flag(smallChest.with(bombs, 10), [-4410, 2359], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq],
+        baseDesc: 'Go to the top of the room using the clawshot targets to reach the chest.'
+    })],
+    ["Lakebed Temple West Water Supply Chest", new Flag(chest.with(lakebedCompass), [-4362, 2108], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq],
+        baseDesc: 'Clawshot the target on the wall behind the chest to reach it.'
+    })],
+    ["Lakebed Temple Central Room Spire Chest", new Flag(chest.with(Rupees.Red), {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq],
+        baseDesc: 'Make the water level rise once by activated the east water supply to access the chest.'
+    })],
+    ["Lakebed Temple Before Deku Toad Underwater Right Chest", new Flag(chest.with(bombs, 5), [-4021, 5724], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed3SKReq, ironBootsReq],
+        baseDesc: 'Walk through the jet stream with the iron boots and take a left to the chest.'
+    })],
+    ["Lakebed Temple Before Deku Toad Underwater Left Chest", new Flag(chest.with(Rupees.Red), [-4186, 5665], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed3SKReq, ironBootsReq],
+        baseDesc: 'Walk away from the jet stream into the tunnel to reach the chest.'
+    })],
+    ["Lakebed Temple Big Key Chest", new Flag(bossChest.with(lakebedBK), [-4592, 2725], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq],
+        baseDesc: 'In the room above, hang from the clawshot target and descend towards the chest.'
+    })],
+    ["Lakebed Temple Boss Lock", new Flag(lakebedBossLock, [-4414, 4362], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq, lakebedBKReq],
+        baseDesc: "Unlock this door to reach Morpheel."
+    })],
+    ["Lakebed Temple Morpheel", new Flag(morpheel, [-4416, 4364], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, lakebedBKReq],
+        baseDesc: 'Defeat Morpheel to clear out the Lakebed Temple.'
+    })],
+    ["Lakebed Temple Morpheel Heart Container", new Flag(heartContainer, [-4402, 5200], {
+        baseReqs: [morpheelReq],
+        baseDesc: 'Defeat Morpheel to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Morpheel to obtain the item.'
+    })],
+    ["Lakebed Temple Dungeon Reward", new Flag(fusedShadow, [-4520, 5050], {
+        baseReqs: [morpheelReq],
+        baseDesc: 'Defeat Morpheel to obtain the third and last Fused Shadow.',
+        randoDesc: 'Defeat Morpheel to obtain the dungeon reward.'
+    })],
+    // Arbiter's Grounds
+    ["Arbiters Grounds Entrance Chest", new Flag(chest.with(arbiterSK), [-5336, 3974], {
+        baseReqs: [clawshotReq],
+        baseDesc: 'Break the wooden barrier and jump across to the chest.'
+    })],
+    ["Arbiters Grounds Entrance Lock", new Flag(lock, [-5277, 4323], {
+        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseDesc: "Unlock this door to reach the main room of the dungeon."
+    })],
+    ["Arbiters Grounds Torch Room Poe", new Flag(poeSoul, [-4763, 4329], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseDesc: 'The first of the 4 poes, waits in the middle of the room after the cutscene.'
+    })],
+    ["Arbiters Grounds Torch Room East Chest", new Flag(chest.with(heartPiece), [-4562, 4481], {
+        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseDesc: 'Walk across the platforms or use the clawshot to have a way back.'
+    })],
+    ["Arbiters Grounds Torch Room West Chest", new Flag(chest.with(arbiterMap), [-4561, 4171], {
+        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseDesc: 'Walk across the quicksand using the sinking platform to reach the chest.'
+    })],
+    ["Arbiters Grounds West Small Chest Behind Block", new Flag(smallChest.with(Rupees.Red), [-4576, 3840], {
+        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseDesc: 'Upon entering the room, follow the path to the right to reach the chest.'
+    })],
+    ["Arbiters Grounds East Turning Room Poe", new Flag(poeSoul, [-4337, 4831], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseDesc: 'When the room below is spun, clawshot up through the opening, then go in the poe room to defeat it.'
+    })],
+    ["Arbiters Grounds West Chandelier Chest", new Flag(chest.with(Rupees.Red), [-4920, 3766], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseDesc: 'Pull the chain to raise the chandelier, then cross under it to reach the chest.'
+    })],
+    ["Arbiters Grounds West Stalfos Northeast Chest", new Flag(smallChest.with(bombs, 5), [-4707, 3322], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseDesc: 'Break the wooden barrier and go to the north-east area to reach the chest.'
+    })],
+    ["Arbiters Grounds West Stalfos West Chest", new Flag(smallChest.with(bombs, 5), [-4767, 3108], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseDesc: 'Break the wooden barrier and go to the west area to reach the chest.'
+    })],
+    ["Arbiters Grounds Big Key Chest", new Flag(bossChest.with(arbiterBK), [-4156, 3911], {
+        baseReqs: [clawshotReq, shadowCrystalReq, spinnerReq, arbiter5SKReq],
+        baseDesc: 'After clearing the room with the spinner ramps, access to the chest is granted upon entering the next room.'
+    })],
+    ["Arbiters Grounds East Turning Room Lock", new Flag(lock, [-4766, 5081], {
+        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseDesc: "Unlock this door to reach the eastern wing."
+    })],
+    ["Arbiters Grounds East Lower Turnable Redead Chest", new Flag(smallChest.with(arbiterSK), [-4626, 4836], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseDesc: 'Dig the sand spot to reveal the lever, then pull it to access the stairs. then, spin the room to gain access to the chest.'
+    })],
+    ["Arbiters Grounds East Upper Turnable Chest", new Flag(chest.with(arbiterCompass), [-5358, 5475], {
+        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseDesc: 'Walk up the stairs to find the chest in the area behind the statue.'
+    })],
+    ["Arbiters Grounds East Upper Turnable Redead Chest", new Flag(chest.with(arbiterSK), [-5241, 5831], {
+        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseDesc: 'Break the wooden barrier then defeat the Redead to easily open the chest.'
+    })],
+    ["Arbiters Grounds East Upper Turnable Lock", new Flag(lock, [-5240, 5251], {
+        baseReqs: [clawshotReq, arbiter3SKReq],
+        baseDesc: "Unlock this door to reach the 3rd poe."
+    })],
+    ["Arbiters Grounds Hidden Wall Poe", new Flag(poeSoul, [-5240, 5021], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter3SKReq],
+        baseDesc: 'Dig to reveal a lever, then pull it to gain access to the room where the poe awaits.'
+    })],
+    ["Arbiters Grounds Ghoul Rat Room Chest", new Flag(smallChest.with(arbiterSK), [-4883, 4834], {
+        baseReqs: [clawshotReq, arbiter3SKReq],
+        baseDesc: 'The chest is below the ring platform.'
+    })],
+    ["Arbiters Grounds Ghoul Rat Room Lock", new Flag(lock, [-4767, 4551], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseDesc: "Unlock this door to reach the chandelier in the torch room."
+    })],
+    ["Arbiters Grounds West Poe", new Flag(poeSoul, [-5186, 3780], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: "Defeat the poe easily by using Midna's charge attack."
+    })],
+    ["Arbiters Grounds North Turning Room Chest", new Flag(chest.with(arbiterSK), [-4257, 4786], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Enter the tunnel from the entrance with no spikes, then go to the end of it to find the chest.'
+    })],
+    ["Arbiters Grounds North Turning Room Lock", new Flag(lock, [-4325, 4791], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: "Unlock this door to reach the spikes room."
+    })],
+    ["Arbiters Grounds Ooccoo", new Flag(ooccoo, [-5201, 4240], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Pick up or break the pot where Ooccoo is hiding for her to join you.'
+    })],
+    ["Arbiters Grounds Death Sword Chest", new Flag(chest.with(spinner), [-3598, 4239], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Defeat Death Sword to obtain the Spinner.'
+    })],
+    ["Arbiters Grounds Spinner Room First Small Chest", new Flag(smallChest.with(bombs, 10), [-4490, 3311], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseDesc: 'Use the spinner to float above the quicksand and reach the chest.'
+    })],
+    ["Arbiters Grounds Spinner Room Second Small Chest", new Flag(smallChest.with(Rupees.Red), [-4486, 3078], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseDesc: 'From the previous chest, use the spinner to float above the quicksand and reach the chest.'
+    })],
+    ["Arbiters Grounds Spinner Room Lower Central Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-4307, 2997], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseDesc: 'Hidden under the spinner ramp, use the spinner to float above the quicksand and reach the chest.'
+    })],
+    ["Arbiters Grounds Spinner Room Stalfos Alcove Chest", new Flag(chest.with(heartPiece), [-4369, 3666], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseDesc: 'Use the spinner ramp and defeat the Stalfos to reach this chest.'
+    })],
+    ["Arbiters Grounds Spinner Room Lower North Chest", new Flag(smallChest.with(Rupees.Yellow), [-4156, 3605], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseDesc: 'Use the spinner ramp and defeat the 2 stalfos that are guarding the chest to open it.'
+    })],
+    ["Arbiters Grounds Boss Lock", new Flag(bossLock, [-4276, 4326], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq],
+        baseDesc: "Unlock this door to reach Stallord."
+    })],
+    ["Arbiters Grounds Stallord", new Flag(stallord, [-4530, 4332], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq],
+        baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
+    })],
+    ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
+        baseDesc: [stallordReq],
+        baseDesc: 'Defeat Stallord to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Stallord to obtain the item.'
+    })],
+    ["Arbiters Grounds Dungeon Reward", new Flag(mirrorShard, [-4726, 4334], {
+        baseReqs: [stallordReq],
+        baseDesc: 'Defeat Stallord to obtain the dungeon reward.'
+    })],
+    // Snowpeak Ruins
 
 
 

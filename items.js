@@ -47,15 +47,20 @@ const Categories = Object.freeze({
     NonChecks: "Non-Check Items"
 });
 
-class Item {
-    increase() {}
-    decrease() {}
-    reset() {}
-    getState() {}
-    getMaxState() {}
-    getMinState() {}
-    getBaseImageSrc() {}
-} 
+class Obtainable {
+    constructor(imageInfo, item, {name=imageInfo, category}={}) {
+        if (imageInfo instanceof ImageWrapper) 
+            this.image = imageInfo;
+        else    
+            this.image = getIconImage(imageInfo);
+        this.item = item;
+        this.name = item === null ? name : item.name;
+        this.category = item === null ? category : item.getCategory();
+    }
+    getCategory() {
+        return this.category;
+    }
+}
 
 class BoolItem {
     constructor(imageName, {name=imageName, category=Categories.Main}={}) {
@@ -225,7 +230,8 @@ class CountRequiredItem {
             if (typeof def === 'string') {
                 name = def;
                 itemImageName = imageName;
-            } else {
+            } 
+            else {
                 name = def.name;
                 itemImageName = def.imageName;
             }
@@ -238,7 +244,7 @@ class CountRequiredItem {
         this.min = min;
     }
     getItemByReq(req) {
-        return this.items.get(req);
+        return this.items.get(req.toString());
     }
     getItemByIndex(index) {
         return Array.from(this.items.values())[index];
@@ -448,3 +454,63 @@ var castleMap = new BoolItem('Dungeon Map', {name: "Hyrule Castle Map"});
 var castleCompass = new BoolItem("Compass", {name: "Hyrule Castle Compass"});
 var castleBK = new BoolItem("Boss KeyHC", {name: "Hyrule Castle Boss Key"});
 var ganondorf = new BoolItem('Ganondorf', {name: 'Ganondorf Defeated', category: Categories.Bosses});
+
+// Rupees Enum
+const Rupees = Object.freeze({
+    Green  : new Obtainable("Green Rupee", rupees),
+    Blue   : new Obtainable("Blue Rupee", rupees),
+    Yellow : new Obtainable("Yellow Rupee", rupees),
+    Red    : new Obtainable("Red Rupee", rupees),
+    Purple : new Obtainable("Purple Rupee", rupees),
+    Orange : new Obtainable("Orange Rupee", rupees),
+    Silver : new Obtainable("Silver Rupee", rupees)
+});
+// Bottled Items Enum
+const Bottle = Object.freeze({
+    BeeLarva : new Obtainable("BottleBee", null, {name:"Bee Larva", category: Categories.Bottle}),
+    Worm : new Obtainable("BottleWorm", null, {name: "Worm", category: Categories.Bottle}),
+    Oil : new Obtainable("BottleYellow", null, {name: "Lantern Oil", category: Categories.Bottle}),
+    HotSpringWater : new Obtainable("BottleWater", null, {name: "Hot Spring Water", category: Categories.Bottle}),
+    RedPotion : new Obtainable("BottleRed", null, {name: "Red Potion", category: Categories.Bottle}),
+    BluePotion : new Obtainable("BottleBlue", null, {name: "Blue Potion", category: Categories.Bottle}),
+    Fairy : new Obtainable('BottleFairy', null, {name: "Fairy", category: Categories.Bottle}),
+    Tears : new Obtainable('BottleTears', null, {name: "Great Fairy's Tears", category: Categories.Bottle}),
+    Milk : new Obtainable('BottleMilk', null, {name: 'Milk', category: Categories.Bottle}),
+    HalfMilk : new Obtainable('BottleMilkH', null, {name: "1/2 Milk", category: Categories.Bottle}),
+    Nasty : new Obtainable('BottleNasty', null, {name: 'Nasty Soup', category: Categories.Bottle}),
+    Soup : new Obtainable('BottleSoup', null, {name: "Superb Soup", category: Categories.Bottle}),
+    PurpleChu: new Obtainable('BottlePurple', null, {name: "Purple Chu Jelly", category: Categories.Bottle}),
+    RedChu : new Obtainable('BottleRed', null, {name: "Red Chu Jelly", category: Categories.Bottle}),
+    BlueChu : new Obtainable("BottleBlue", null, {name: "Blue Chu Jelly", category: Categories.Bottle}),
+    YellowChu : new Obtainable("BottleYellow", null, {name: "Yellow Chu Jelly", category: Categories.Bottle}),
+    RareChu : new Obtainable("BottleRare", null, {name: "Rare Chu Jelly", category: Categories.Bottle}),
+    Coro : new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"}),
+    Sera : new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"}),
+    Jovani : new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"})
+});
+
+let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
+let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.Skills});
+let skybookChar = new Obtainable("Sky Book Character", skybook);
+let coralEarring = new Obtainable("Coral Earring", fishingRods);
+let bigQuiver = new Obtainable("Quiver1", bow, {name: "Big Quiver"});
+let giantQuiver = new Obtainable("Quiver2", bow, {name: "Giant Quiver"});
+let minesBKAmoto = new Obtainable("GBK0", minesBK, {name: "Gor Amato Key Shard"});
+let minesBKEbizo = new Obtainable("GBK1", minesBK, {name: "Gor Ebizo Key Shard"});
+let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"});
+let nightPoe = new Obtainable("Night Poe Soul", poeSoul);
+
+let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
+
+let lock = new Obtainable("Lock", null, {category: Categories.Locks});
+let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks});
+let bossLock = new Obtainable("Boss Door", null, {category: Categories.Locks});
+let minesBossLock = new Obtainable("Boss LockG", null, {category: Categories.Locks});
+let lakebedBossLock = new Obtainable("Boss LockL", null, {category: Categories.Locks});
+let snowpeakBossLock = new Obtainable("Boss LockS", null, {category: Categories.Locks});
+
+let bombs = new Obtainable("Bombs", null, {category: Categories.Ammo});
+let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo});
+let bomblings = new Obtainable("Bomblings", null, {category: Categories.Ammo});
+let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
+let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
