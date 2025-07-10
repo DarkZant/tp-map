@@ -33,6 +33,19 @@ class Requirement {
     }
 }
 
+class AndRequirements {
+    constructor(requirements) {
+        this.requirements = requirements;
+    }
+    isMet() {
+        for(let req of this.requirements) {
+            if (!req.isMet())
+                return false;
+        }
+        return true;
+    }
+}
+
 class Container {
     constructor(imageInfo, content=null, amount=1) {
         if (imageInfo instanceof ImageWrapper) 
@@ -196,6 +209,13 @@ let arbiter4SKReq = Requirement.fromCountItem(arbiterSK, 4);
 let arbiter5SKReq = Requirement.fromCountItem(arbiterSK, 5);
 let arbiterBKReq = Requirement.fromBoolItem(arbiterBK);
 let blizzetaReq = Requirement.fromBoolItem(blizzeta);
+let snowpeak1SKReq = Requirement.fromCountItem(snowpeakSK);
+let snowpeak2SKReq = Requirement.fromCountItem(snowpeakSK, 2);
+let snowpeak3SKReq = Requirement.fromCountItem(snowpeakSK, 3);
+let snowpeak4SKReq = Requirement.fromCountItem(snowpeakSK, 4);
+let bedroomKeyReq = Requirement.fromBoolItem(bedroomKey);
+let pumpkinReq = Requirement.fromBoolItem(pumpkin);
+let cheeseReq = Requirement.fromBoolItem(cheese);
 let armogohmaReq = Requirement.fromBoolItem(armogohma);
 let argorokReq = Requirement.fromBoolItem(argorok);
 let zantReq = Requirement.fromBoolItem(zant);
@@ -614,7 +634,7 @@ var flags = new Map([
         baseDesc: "At the base of the watchtower."
     })],
     ["Kakariko Village Bomb Rock Spire Heart Piece", new Flag(heartPiece, [-5610, 7578], {
-        baseReqs: [bombBagReq, [boomerangReq, bowReq]], // TODO Make proper requirements for this
+        baseReqs: [bombBagReq, [boomerangReq, new AndRequirements([bowReq, clawshotReq])]],
         baseDesc: "Use the bomb arrows to blow up the rocks up on the ledge, then use the boomerang or the clawshot to obtain the heart piece.",
         randoCategory: Categories.Main
     })],
@@ -2062,7 +2082,146 @@ var flags = new Map([
         baseDesc: 'Defeat Stallord to obtain the dungeon reward.'
     })],
     // Snowpeak Ruins
+    ["Snowpeak Ruins Lobby West Armor Chest", new Flag(smallChest.with(Rupees.Red), [-6017, 4105], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: "Break the armor with the Ball and Chain to reveal the chest."
+    })],
+    ["Snowpeak Ruins Lobby Armor Poe", new Flag(poeSoul, [-6017, 4420], {
+        baseReqs: [ballAndChainReq, shadowCrystalReq],
+        baseDesc: "Break the armor with the Ball and Chain to reveal the poe."
+    })],
+    ["Snowpeak Ruins Lobby East Armor Chest", new Flag(smallChest.with(Rupees.Yellow), [-5883, 4428], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: "Break the armor with the Ball and Chain to reveal the chest."
+    })],
+    ["Snowpeak Ruins Lobby Armor Bubble Rupee", new Flag(Rupees.Orange, [-5883, 4119], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: 'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'
+    })],
+    ["Snowpeak Ruins Lobby Poe", new Flag(poeSoul, [-5576, 4264], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: "The poe is above the ice in the open."
+    })],
+    ["Snowpeak Ruins Mansion Map", new Flag(snowpeakMap, [-5072, 4316], {
+        baseDesc: "Talk to Yeta to obtain the dungeon map.",
+        randoCategory: Categories.Gifts
+    })],
+    ["Snowpeak Ruins Ooccoo", new Flag(ooccoo, [-5381, 5064], {
+        baseDesc: "Pick up the pot where Ooccoo is hiding."
+    })],
+    ["Snowpeak Ruins East Courtyard Chest", new Flag(smallChest.with(Rupees.Red), [-4942, 4533], {
+        baseDesc: "Near the wall, defeat the Wolfos for easier access."
+    })],
+    ["Snowpeak Ruins East Courtyard Buried Chest", new Flag(smallChest.with(snowpeakSK), [-4495, 4530], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: "Dig the spot where the chest is poking out of."
+    })],
+    ["Snowpeak Ruins East Corrider Lock", new Flag(snowpeakLock, [-4239, 4797], {
+        baseReqs: [snowpeak1SKReq],
+        baseDesc: "Unlock this door to reach the north-eastern section of the first floor."
+    })],
+    ["Snowpeak Ruins Ordon Pumpkin Chest", new Flag(chest.with(pumpkin), [-4369, 5305], {
+        baseReqs: [snowpeak1SKReq],
+        baseDesc: "Defeat the 2 Chilfos to unlock the door and gain access to the chest."
+    })],
+    ["Snowpeak Ruins West Courtyard Buried Chest", new Flag(smallChest.with(snowpeakSK), [-4462, 3961], {
+        baseReqs: [shadowCrystalReq, [ballAndChainReq, pumpkinReq]],
+        baseDesc: "Dig twice on the elevated snow to reveal the chest."
+    })],
+    ["Snowpeak Ruins Courtyard Central Chest", new Flag(smallChest.with(bombs, 5), [-4943, 4269], {
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, snowpeak1SKReq, bombBagReq])]],
+        baseDesc: "Use the cannon or the ball and chain to break the ice that is blocking the chest."
+    })],
+    ["Snowpeak Ruins Courtyard West Lock", new Flag(snowpeakLock, [-4611, 3842], {
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, snowpeak1SKReq])]],
+        baseDesc: "Unlock this door to reach the cannonballs of the western corridor."
+    })],
+    ["Snowpeak Ruins West Cannon Room Central Chest", new Flag(smallChest.with(Rupees.Red), [-4157, 3214], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: "Break the ice in front of the chest to reveal it."
+    })],
+    ["Snowpeak Ruins West Cannon Room Corner Chest", new Flag(smallChest.with(bombs, 5), [-4015, 3896], {
+        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseDesc: "Use the cannon or the ball and chain to break the ice that is blocking the chest."
+    })],
+    ["Snowpeak Ruins Wooden Beam Central Chest", new Flag(smallChest.with(Rupees.Red), [-4814, 3397], {
+        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseDesc: "Jump across the wooden planks to reach the chest."
+    })],
+    ["Snowpeak Ruins Wooden Beam Northwest Chest", new Flag(chest.with(snowpeakCompass), [-4926, 3578], {
+        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseDesc: "Jump across the wooden planks to reach the chest."
+    })],
+    ["Snowpeak Ruins Broken Floor Chest", new Flag(chest.with(heartPiece), [-5373, 3541], {
+        baseReqs: [cheeseReq, ballAndChainReq],
+        baseDesc: "Break the damaged floor and jump down to chest.",
+        glitchedReqs: [[new AndRequirements([cheeseReq, ballAndChainReq]), boomerangReq]],
+        glitchedDesc: "Break the damaged floor and jump down to chest or LJA from the other entrance of the room to the chest.",
+    })],
+    ["Snowpeak Ruins Ball and Chain", new Flag(ballAndChain, [-4072, 4270], {
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, snowpeak1SKReq, bombBagReq])]],
+        baseDesc: "Defeat Darkhammer to obtain the Ball and Chain.",
+        randoDesc: "Pick up the Ball and Chain to receive the item."
+    })],
+    ["Snowpeak Ruins Chest After Darkhammer", new Flag(chest.with(cheese), [-3611, 4265], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: "Break the ice blocks to gain access to the chest."
+    })],
+    ["Snowpeak Ruins Armor Bubble Rupee After Darkhammer", new Flag(Rupees.Orange, [-3767, 4348], {
+        baseReqs: [ballAndChainReq],
+        baseDesc: 'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'
+    })],
+    ["Snowpeak Ruins Chapel Chest", new Flag(chest.with(bedroomKey), [-3854, 3400], {
+        baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq],
+        baseDesc: "Defeat all the Chilfos to unlock the door and access the chest."
+    })],
+    ["Snowpeak Ruins Ice Room Poe", new Flag(poeSoul, [-5198, 5214], {
+        baseReqs: [cheeseReq, ballAndChainReq, snowpeak1SKReq, shadowCrystalReq],
+        baseDesc: "Break the ice blocks with the Ball and Chain to reveal the poe."
+    })],
+    ["Snowpeak Ruins Lobby Chandelier Chest", new Flag(chest.with(heartPiece), [-5833, 4268], {
+        baseReqs: [cheeseReq, ballAndChainReq, snowpeak1SKReq],
+        baseDesc: "Swing from chandelier to chandelier to reach the chest.<br>Tip: Hit the last chandelier when yours is almost at the furthest from the chest."
+    })],
+    ["Snowpeak Ruins Northeast Chandelier Chest", new Flag(smallChest.with(snowpeakSK), [-4392, 5147], {
+        baseReqs: [cheeseReq, ballAndChainReq, snowpeak1SKReq, clawshotReq],
+        baseDesc:  "Swing from the chandeliers to reach the chest."
+    })],
+    ["Snowpeak Ruins Wooden Beam Chandelier Chest", new Flag(chest.with(snowpeakSK), [-4563, 3408], {
+        baseReqs: [cheeseReq, ballAndChainReq],
+        baseDesc: "Swing the chandelier with the Ball and Chain to reach the chest."
+    })],
+    ["Snowpeak Ruins Lobby Lock", new Flag(snowpeakLock, [-5366, 3839], {
+        baseReqs: [cheeseReq, ballAndChainReq, snowpeak1SKReq],
+        baseDesc: "Unlock this door to reach the second floor of the lobby."
+    })],
+    ["Snowpeak Ruins Ice Room Lock", new Flag(snowpeakLock, [-5148, 4597], {
+        baseReqs: [cheeseReq, ballAndChainReq, snowpeak2SKReq],
+        baseDesc: "Unlock this door to reach the central courtyard cannon."
+    })],
+    ["Snowpeak Ruins Boss Lock", new Flag(snowpeakBossLock, [-4350, 4268], {
+        baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq, bedroomKeyReq],
+        baseDesc: "Unlock this door to reach Blizzeta."
+    })],
+    ["Snowpeak Ruins Blizzeta", new Flag(blizzeta, [-4174, 4268], {
+        baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq, bedroomKeyReq],
+        baseDesc: 'Defeat Blizzeta to clear out the Snowpeak Ruins.'
+    })],
+    ["Snowpeak Ruins Blizzeta Heart Container", new Flag(heartContainer, [-3963, 4358], {
+        baseReqs: [blizzetaReq],
+        baseDesc: "Defeat Blizzeta to obtain the Heart Container.",
+        randoCategory: Categories.Main,
+        randoDesc: "Defeat Blizzeta to obtain the item."
+    })],
+    ["Snowpeak Ruins Dungeon Reward", new Flag(mirrorShard, [-4066, 4170], {
+        baseReqs: [blizzetaReq],
+        baseDesc: "Defeat Blizzeta to obtain the Mirror Shard.",
+        randoDesc: "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the item."
+    })],
+    // Temple of Time
+    []
 
+    
 
 
 
