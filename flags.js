@@ -188,8 +188,9 @@ let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
 let invoiceReq = Requirement.fromBoolItem(invoice);
 let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
 let horseCallReq = Requirement.fromBoolItem(horseCall);
-let forest1SKReq = Requirement.fromCountItem(forestSK);
 let diababaReq = Requirement.fromBoolItem(diababa);
+let forest1SKReq = Requirement.fromCountItem(forestSK);
+let forestBKReq = Requirement.fromBoolItem(forestBK);
 let fyrusReq = Requirement.fromBoolItem(fyrus);
 let mines1SKReq = Requirement.fromCountItem(minesSK);
 let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
@@ -217,7 +218,13 @@ let bedroomKeyReq = Requirement.fromBoolItem(bedroomKey);
 let pumpkinReq = Requirement.fromBoolItem(pumpkin);
 let cheeseReq = Requirement.fromBoolItem(cheese);
 let armogohmaReq = Requirement.fromBoolItem(armogohma);
+let temple1SKReq = Requirement.fromCountItem(templeSK);
+let temple2SKReq = Requirement.fromCountItem(templeSK, 2);
+let temple3SKReq = Requirement.fromCountItem(templeSK, 3);
+let templeBKReq = Requirement.fromBoolItem(templeBK);
 let argorokReq = Requirement.fromBoolItem(argorok);
+let city1SKReq = Requirement.fromCountItem(citySK);
+let cityBKReq = Requirement.fromBoolItem(cityBK);
 let zantReq = Requirement.fromBoolItem(zant);
 let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
 reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
@@ -1660,7 +1667,7 @@ var flags = new Map([
         randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
     })],
     ["Forest Temple Diababa", new Flag(diababa, [-3651, 4870], {
-        baseReqs: [Requirement.fromBoolItem(forestBK), boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
+        baseReqs: [forestBKReq, boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
         baseDesc: 'Defeat Diababa to clear out the Forest Temple.'
     })],
     ["Forest Temple Ooccoo", new Flag(ooccoo, [-5250, 4565], {
@@ -1683,7 +1690,7 @@ var flags = new Map([
         baseDesc: "Unlock this door to reach the Northeastern Tile Worm Room."
     })],
     ["Forest Temple Boss Lock", new Flag(bossLock, [-3858, 4868], {
-        baseReqs: [Requirement.fromBoolItem(forestBK)],
+        baseReqs: [forestBKReq, boomerangReq],
         baseDesc: "Unlock this door to reach Diababa.",
     })],
     // Goron Mines
@@ -2219,7 +2226,248 @@ var flags = new Map([
         randoDesc: "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the item."
     })],
     // Temple of Time
-    []
+    ["Temple of Time Lobby Lantern Chest", new Flag(chest.with(templeSK), [-5497, 4635], {
+        baseReqs: [lanternReq],
+        baseDesc: 'Light the 2 torches to make the chest appear.'
+    })],
+    ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
+        baseReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
+        baseDesc: "Unlock this door to reach Armogohma"
+    })],
+    ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
+        baseReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
+        baseDesc: 'Defeat Armogohma to clear out the Temple of Time.'
+    })],
+    ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
+        baseReqs: [armogohmaReq],
+        baseDesc: 'Defeat Armogohma to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Armogohma to obtain the item.'
+    })],
+    ["Temple of Time Dungeon Reward", new Flag(mirrorShard, [-3880, 4350], {
+        baseReqs: [armogohmaReq],
+        baseDesc: 'Defeat Armogohma to obtain the Mirror Shard.',
+        randoDesc: "Defeat Armogohma to obtain the dungeon reward."
+    })],
+    ["Temple of Time First Staircase Gohma Gate Chest", new Flag(smallChest.with(arrows, 30), [-6173, 4351], {
+        baseReqs: [temple1SKReq],
+        baseDesc: 'Put a pot on the pressure plate in the middle of the room to open the gate and gain access to the chest.'
+    })],
+    ["Temple of Time Ooccoo", new Flag(ooccoo, [-5725, 4352], {
+        baseDesc: 'After opening the chest, Ooccoo will wait for you to join her at the top of the stairs.'
+    })],
+    ["Temple of Time Lobby Lock", new Flag(lock, [-5842, 4352], {
+        baseReqs: [temple1SKReq],
+        baseDesc: "Unlock this door to reach the first staircase."
+    })],
+    ["Temple of Time First Staircase Armos Chest", new Flag(chest.with(templeMap), [-5750, 5148], {
+        baseReqs: [temple1SKReq, [woodenSwordReq, bowReq, bombBagReq, spinnerReq, clawshotReq, ballAndChainReq]],
+        baseDesc: 'Defeat the Armos to make the chest appear.'
+    })],
+    ["Temple of Time First Staircase Window Chest", new Flag(smallChest.with(Rupees.Red), [-5818, 5015], {
+        baseReqs: [temple1SKReq],
+        baseDesc: 'Climb up to reach the ledge where the chest is to reach it.'
+    })],
+    ["Temple of Time Poe Behind Gate", new Flag(poeSoul, [-5453, 3966], {
+        baseReqs: [pastDomRodReq, shadowCrystalReq],
+        baseDesc: 'Break the barrier with the Hammer Statue or put an Iron Pot on the pressure plate behind the gate to get the poe.'
+    })],
+    ["Temple of Time Armos Antechamber East Chest", new Flag(chest.with(templeSK), [-5956, 4149], {
+        baseReqs: [temple1SKReq, spinnerReq],
+        baseDesc: 'Defeat the 2 Armos to make the chest appear.',
+    })],
+    ["Temple of Time Armos Antechamber North Chest", new Flag(smallChest.with(Rupees.Red), [-6244, 4351], {
+        baseReqs: [temple1SKReq, spinnerReq],
+        baseDesc: 'You will find this chest in the back of the room, on the elevated ledge.'
+    })],
+    ["Temple of Time Armos Antechamber Statue Chest", new Flag(chest.with(heartPiece), [-5956, 4566], {
+        baseReqs: [temple1SKReq, spinnerReq, pastDomRodReq],
+        baseDesc: 'Throw two Iron Pots into the railings in the back of the room, and make them fall onto the two pressure plates to make the chest appear.'
+    })],
+    ["Temple of Time Second Staircase Lock", new Flag(lock, [-5147, 4350], {
+        baseReqs: [temple2SKReq, spinnerReq],
+        baseDesc: "Unlock this door to reach the second staircase."
+    })],
+    ["Temple of Time Moving Wall Beamos Room Chest", new Flag(chest.with(templeCompass), [-4977, 3945], {
+        baseReqs: [temple2SKReq, spinnerReq, [bowReq, clawshotReq, ballAndChainReq]],
+        baseDesc: 'Hit the crystal twice to reach the chest: Once when you are at sword range, the other when you are halfway across the room.'
+    })],
+    ["Temple of Time Moving Wall Dinalfos Room Chest", new Flag(chest.with(heartPiece), [-5054, 3343], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq, pastDomRodReq],
+        baseDesc: 'Use the Dominion Rod on the Iron Pot to make it step on the pressure plate, disabling the electricity and granting access to the chest.'
+    })],
+    ["Temple of Time Scales Gohma Chest", new Flag(chest.with(Rupees.Purple), [-5319, 4374], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq],
+        baseDesc: 'Defeat all the Gohmas in the room (Baby Gohmas and Young Gohmas) to make the chest appear.'
+    })],
+    ["Temple of Time Scales Upper Chest", new Flag(smallChest.with(Rupees.Red), [-5654, 4496], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq, clawshotReq],
+        baseDesc: 'Follow the right edge until you reach the chest.'
+    })],
+    ["Temple of Time Poe Above Scales", new Flag(poeSoul, [-5386, 4591], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq, clawshotReq, shadowCrystalReq],
+    })],
+    ["Temple of Time Big Key Chest", new Flag(bossChest.with(templeBK), [-5451, 4960], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq, clawshotReq],
+        baseDesc: 'Use the two Iron Pots and the two Helmasaur Shells on the four elevated pressure plates to open the gate that is blocking the chest.'
+    })],
+    ["Temple of Time Floor Switch Puzzle Room Upper Chest", new Flag(smallChest.with(Rupees.Red), [-5452, 5081], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq, clawshotReq],
+        baseDesc: 'Clawshot the target on the ceiling to reach the chest.'
+    })],
+    ["Temple of Time Gilloutine Chest", new Flag(chest.with(templeSK), [-6178, 4981], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq],
+        baseDesc: 'Avoid the traps and go behind the sharp pendulum to reach the chest.'
+    })],
+    ["Temple of Time Chest Before Darknut", new Flag(chest.with(Rupees.Purple), [-5383, 4976], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq],
+        baseDesc: 'Defeat all the Baby Gohmas to make the chest appear.'
+    })],
+    ["Temple of Time Darknut Lock", new Flag(lock, [-5511, 4545], {
+        baseReqs: [temple3SKReq, spinnerReq, bowReq],
+        baseDesc: 'Unlock this door to reach the Darknut miniboss.'
+    })],
+    ["Temple of Time Darknut Chest", new Flag(chest.with(dominionRods.getItemByIndex(0)), [-5511, 3804], {
+        baseReqs: [temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseDesc: 'Defeat the Darknut to open the gate that is blocking access to the chest.'
+    })],
+    // City in the Sky
+    ["City in The Sky Aeralfos Chest", new Flag(chest.with(clawshots.getItemByIndex(1)), [-4586, 5765], {
+        baseReqs: [clawshotReq, spinnerReq, ironBootsReq, city1SKReq],
+        baseDesc: 'After defeating the Aeralfos, clawshot the target above the chest to reach it.'
+    })],
+    ["City in The Sky East Wing Lower Level Chest", new Flag(chest.with(cityCompass), [-4641, 4857], {
+        baseReqs: [doubleClawshot, spinner, city1SKReq],
+        baseDesc: 'From the east entrance, follow the falling clawshot target path to reach the chest.'
+    })],
+    ["City in The Sky West Wing Baba Balcony Chest", new Flag(smallChest.with(arrows, 20), [-4404, 2998], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Follow the clawshot target path, and clawshot the metal mesh above the platform with the chest to reach it.'
+    })],
+    ["City in The Sky Underwater West Chest", new Flag(chest.with(waterBombs, 15), [-5819, 3835], {
+        baseReqs: [[ironBootsReq, magicArmorReq]],
+        baseDesc: 'Sink to the chest to open it.'
+    })],
+    ["City in The Sky Underwater East Chest", new Flag(chest.with(Rupees.Red), [-5819, 4039], {
+        baseReqs: [[ironBootsReq, magicArmorReq]],
+        baseDesc: 'Sink to the chest to open it.'
+    })],
+    ["City in The Sky Ooccoo", new Flag(ooccoo, [-5780, 4471], {
+        baseDesc: 'Speak to Ooccoo in the shop for her to join you one last time.'
+    })],
+    ["City in The Sky Lock", new Flag(lock, [-4608, 4822], {
+        baseReqs: [city1SKReq],
+        baseDesc: "Unlock this door to reach the east wing."
+    })],
+    ["City in The Sky East First Wing Chest After Fans", new Flag(chest.with(cityMap), [-4638, 5442], {
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq],
+        baseDesc: 'When you enter the room, the chest is on the right.'
+    })],
+    ["City in The Sky East Tile Worm Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-4773, 5276], {
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq],
+        baseDesc: 'Follow the platforms than take a left, avoiding the Tile Worms on the way to reach the chest.'
+    })],
+    ["City in The Sky West Wing First Chest", new Flag(chest.with(citySK), [-4638, 2693], {
+        baseReqs: [clawshotReq, spinnerReq],
+        baseDesc: 'Clawshot the target on the ceiling above the chest and drop down to it.'
+    })],
+    ["City in The Sky West Wing Narrow Ledge Chest", new Flag(smallChest.with(Rupees.Red), [-4542, 2796], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'At the end of clawshot path, jump on the narrow platform with the chest to reach it.'
+    })],
+    ["City in The Sky West Wing Tile Worm Chest", new Flag(smallChest.with(bombs, 10), [-4432, 3028], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Jump across the plateforms while avoiding the Tile Worm to reach the chest.'
+    })],
+    ["City in The Sky Chest Behind North Fan", new Flag(chest.with(Rupees.Purple), [-3902, 3938], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq],
+        baseDesc: 'Clawshot the mesh in front of the fan, then enter the hole in the mesh to find the chest.'
+    })],
+    ["City in The Sky North Aeralfos Rupee", new Flag(Rupees.Orange, [-3741, 4041], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq],
+        baseDesc: 'Defeat the Aeralfos to obtain an Orange Rupee.'
+    })],
+    ["City in The Sky East Wing After Dinalfos Alcove Chest", new Flag(smallChest.with(Rupees.Red), [-4916, 5456], {
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq, boomerangReq],
+        baseDesc: 'Open the gate by clawshotting the switch near the entrance of the room, then use an Oocca and a draft to reach the chest.'
+    })],
+    ["City in The Sky East Wing After Dinalfos Ledge Chest", new Flag(chest.with(Rupees.Purple), [-4902, 5081], {
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq, boomerangReq],
+        baseDesc: 'From the entrance of the room, fly through drafts with an Oocca to reach the chest.'
+    })],
+    ["City in The Sky West Garden Lone Island Chest", new Flag(chest.with(Rupees.Purple), [-4916, 2736], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Clawshot the flying Peahats until you reach the platform with the big tree where the chest lies.'
+    })],
+    ["City in The Sky Garden Island Poe", new Flag(poeSoul, [-4920, 2875], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq],
+        baseDesc: 'Clawshot the flying Peahats until you reach the platform with the big tree where the poe awaits.'
+    })],
+    ["City in The Sky West Garden Lower Chest", new Flag(smallChest.with(bombs, 5), [-4523, 2864], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Upon traversing the small oval opening while hanging from the flying Peahat, drop down and head west to the chest.'
+    })],
+    ["City in The Sky Baba Tower Alcove Chest", new Flag(chest.with(heartPiece), [-4318, 2710], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'At the end of the narrow path, hang on the ledge and move right until you reach the chest.'
+    })],
+    ["City in The Sky Baba Tower Narrow Ledge Chest", new Flag(smallChest.with(arrows, 20), [-4151, 2867], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Follow the narrow path, the chest is on the left.'
+    })],
+    ["City in The Sky Chest Below Big Key Chest", new Flag(smallChest.with(Rupees.Red), [-4536, 3936], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Enter the room from outside, then go around the blowing fan to reach the chest.'
+    })],
+    ["City in The Sky West Garden Corner Chest", new Flag(smallChest.with(Rupees.Red), [-4676, 2604], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'Clawshot the flying Peahats until you reach the chest.'
+    })],
+    ["City in The Sky West Garden Ledge Chest", new Flag(chest.with(heartPiece), [-4772, 2952], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'From the eastmost flying Peahat, clawshot your way to the room entrance with the chest.'
+    })],
+    ["City in The Sky Baba Tower Top Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-4198, 2611], {
+        baseReqs: [doubleClawshotReq],
+        baseDesc: 'After climbing the vines from the first falling clawshot target, turn around and jump on the platform with the chest.'
+    })],
+    ["City in The Sky Central Outside Ledge Chest", new Flag(smallChest.with(Rupees.Red), [-4703, 3949], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq],
+        baseDesc: 'Follow the clawshot and rope path, then climb the vines to reach the chest.'
+    })],
+    ["City in The Sky Central Outside Poe Island Chest", new Flag(chest.with(Rupees.Purple), [-4601, 4286], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq],
+        baseDesc: 'Follow the clawshot and rope path until you reach the platform with the poe, where the chest is also located.'
+    })],
+    ["City in The Sky Big Key Chest", new Flag(bossChest.with(cityBK), [-4609, 3835], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq],
+        baseDesc: 'Go around the blowing fan to reach the chest.'
+    })],
+    ["City in The Sky Poe Above Central Fan", new Flag(poeSoul, [-4647, 4230], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq],
+        baseDesc: 'Follow the clawshot and rope path until you reach the platform with the poe.'
+    })],
+    ["City in The Sky Boss Lock", new Flag(bossLock, [-3902, 3938], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, cityBKReq],
+        baseDesc: "Unlock this door to reach Argorok."
+    })],
+    ["City in The Sky Argorok", new Flag(argorok, [-3923, 3841], {
+        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, cityBKReq, woodenSwordReq],
+        baseDesc: 'Defeat Argorok to clear out the City in the Sky.'
+    })],
+    ["City in The Sky Argorok Heart Container", new Flag(heartContainer, [-3877, 3766], {
+        baseReqs: [argorokReq],
+        baseDesc: 'Defeat Argorok to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Argorok to obtain the item.',
+    })],
+    ["City in The Sky Dungeon Reward", new Flag(mirrorShard, [-3789, 3712], {
+        baseReqs: [argorokReq],
+        baseDesc: "Defeat Argorok to obtain the Mirror Shard.",
+        randoDesc: "Defeat Argorok to obtain the dungeon reward."
+    })],
+    // Palace of Twilight
+
 
     
 
