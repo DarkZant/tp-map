@@ -514,3 +514,5 @@ let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo}
 let bomblings = new Obtainable("Bomblings", null, {category: Categories.Ammo});
 let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
+
+let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});

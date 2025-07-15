@@ -184,6 +184,7 @@ var NonFlag = Check.extend({
         this._latlng = this.latLng;
         L.setOptions(this, {icon: icon, riseOnHover: true, riseOffset: 2000, keyboard: false, zIndexOffset: -1100});
         this.cat = cat;
+        this.on('click', this.showDetails);
     },
     loadIcon: function() {
         if (!this.isShown())

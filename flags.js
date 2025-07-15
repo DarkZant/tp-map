@@ -71,7 +71,7 @@ var rupeeBoulder = new Container('Rupee Boulder');
 
 class Flag {
     constructor(item, position, { 
-            itemCategory=item.getCategory(), baseReqs=[], baseDesc, 
+            itemCategory=item.getCategory(), baseReqs=[], baseDesc="", 
             randoCategory=itemCategory, randoReqs=baseReqs, randoDesc=baseDesc,
             glitchedReqs=randoReqs, glitchedDesc=randoDesc 
         } = {}
@@ -184,10 +184,14 @@ let domRodReq = Requirement.fromBoolItem(dominionRods.getItemByIndex(1));
 let woodenSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(0));
 let ordonSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(1));
 let masterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(2));
+let lightMasterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(3));
 let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
 let invoiceReq = Requirement.fromBoolItem(invoice);
 let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
 let horseCallReq = Requirement.fromBoolItem(horseCall);
+let endingBlowReq = Requirement.fromBoolItem(hiddenSkills.getItemByReq(1));
+let bulblinKeyReq = Requirement.fromBoolItem(bulblinKey);
+
 let diababaReq = Requirement.fromBoolItem(diababa);
 let forest1SKReq = Requirement.fromCountItem(forestSK);
 let forestBKReq = Requirement.fromBoolItem(forestBK);
@@ -214,7 +218,7 @@ let snowpeak1SKReq = Requirement.fromCountItem(snowpeakSK);
 let snowpeak2SKReq = Requirement.fromCountItem(snowpeakSK, 2);
 let snowpeak3SKReq = Requirement.fromCountItem(snowpeakSK, 3);
 let snowpeak4SKReq = Requirement.fromCountItem(snowpeakSK, 4);
-let bedroomKeyReq = Requirement.fromBoolItem(bedroomKey);
+let bedroomKeyReq = Requirement.fromBoolItem(snowpeakBK);
 let pumpkinReq = Requirement.fromBoolItem(pumpkin);
 let cheeseReq = Requirement.fromBoolItem(cheese);
 let armogohmaReq = Requirement.fromBoolItem(armogohma);
@@ -226,6 +230,19 @@ let argorokReq = Requirement.fromBoolItem(argorok);
 let city1SKReq = Requirement.fromCountItem(citySK);
 let cityBKReq = Requirement.fromBoolItem(cityBK);
 let zantReq = Requirement.fromBoolItem(zant);
+let palace1SKReq = Requirement.fromCountItem(palaceSK);
+let palace2SKReq = Requirement.fromCountItem(palaceSK, 2);
+let palace3SKReq = Requirement.fromCountItem(palaceSK, 3);
+let palace4SKReq = Requirement.fromCountItem(palaceSK, 4);
+let palace5SKReq = Requirement.fromCountItem(palaceSK, 5);
+let palace6SKReq = Requirement.fromCountItem(palaceSK, 6);
+let palace7SKReq = Requirement.fromCountItem(palaceSK, 7);
+let palaceBKReq = Requirement.fromBoolItem(palaceBK);
+let castle1SKReq = Requirement.fromCountItem(castleSK);
+let castle2SKReq = Requirement.fromCountItem(castleSK, 2);
+let castle3SKReq = Requirement.fromCountItem(castleSK, 3);
+let castleBKReq = Requirement.fromBoolItem(castleBK);
+
 let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
 reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
 let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
@@ -930,15 +947,15 @@ var flags = new Map([
         randoDesc: 'The item is on the ground behind the roasting boar.'
     })],
     ["Outside Arbiters Grounds Poe", new Flag(nightPoe, [-3892, 557], {
-        baseReqs: [shadowCrystalReq, nightReq],
+        baseReqs: [bulblinKeyReq, shadowCrystalReq, nightReq],
         baseDesc: "On the left of the entrance to Arbiter's Grounds."
     })],
     ["Outside Arbiters Grounds Lantern Chest", new Flag(chest.with(Rupees.Purple), [-3889, 654], {
-        baseReqs: [lanternReq],
+        baseReqs: [bulblinKeyReq, lanternReq],
         baseDesc: "Light the 2 torches on the right of the entrance to Arbiter's Grounds to make the chest appear."
     })],
     ["Bulblin Camp Poe", new Flag(nightPoe, [-4292, 604], {
-        baseReqs: [shadowCrystalReq, nightReq],
+        baseReqs: [bulblinKeyReq, shadowCrystalReq, nightReq],
         baseDesc: 'After defeating King Bulblin, return to the area of the fight to find the poe.'
     })],
     ["Outside Bulblin Camp Poe", new Flag(nightPoe, [-4623, 470], {
@@ -1959,123 +1976,123 @@ var flags = new Map([
         baseDesc: 'Break the wooden barrier and jump across to the chest.'
     })],
     ["Arbiters Grounds Entrance Lock", new Flag(lock, [-5277, 4323], {
-        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the main room of the dungeon."
     })],
     ["Arbiters Grounds Torch Room Poe", new Flag(poeSoul, [-4763, 4329], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: 'The first of the 4 poes, waits in the middle of the room after the cutscene.'
     })],
     ["Arbiters Grounds Torch Room East Chest", new Flag(chest.with(heartPiece), [-4562, 4481], {
-        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Walk across the platforms or use the clawshot to have a way back.'
     })],
     ["Arbiters Grounds Torch Room West Chest", new Flag(chest.with(arbiterMap), [-4561, 4171], {
-        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Walk across the quicksand using the sinking platform to reach the chest.'
     })],
     ["Arbiters Grounds West Small Chest Behind Block", new Flag(smallChest.with(Rupees.Red), [-4576, 3840], {
-        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Upon entering the room, follow the path to the right to reach the chest.'
     })],
     ["Arbiters Grounds East Turning Room Poe", new Flag(poeSoul, [-4337, 4831], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: 'When the room below is spun, clawshot up through the opening, then go in the poe room to defeat it.'
     })],
     ["Arbiters Grounds West Chandelier Chest", new Flag(chest.with(Rupees.Red), [-4920, 3766], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Pull the chain to raise the chandelier, then cross under it to reach the chest.'
     })],
     ["Arbiters Grounds West Stalfos Northeast Chest", new Flag(smallChest.with(bombs, 5), [-4707, 3322], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier and go to the north-east area to reach the chest.'
     })],
     ["Arbiters Grounds West Stalfos West Chest", new Flag(smallChest.with(bombs, 5), [-4767, 3108], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier and go to the west area to reach the chest.'
     })],
     ["Arbiters Grounds Big Key Chest", new Flag(bossChest.with(arbiterBK), [-4156, 3911], {
-        baseReqs: [clawshotReq, shadowCrystalReq, spinnerReq, arbiter5SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, spinnerReq, arbiter5SKReq, lanternReq],
         baseDesc: 'After clearing the room with the spinner ramps, access to the chest is granted upon entering the next room.'
     })],
     ["Arbiters Grounds East Turning Room Lock", new Flag(lock, [-4766, 5081], {
-        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the eastern wing."
     })],
     ["Arbiters Grounds East Lower Turnable Redead Chest", new Flag(smallChest.with(arbiterSK), [-4626, 4836], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Dig the sand spot to reveal the lever, then pull it to access the stairs. then, spin the room to gain access to the chest.'
     })],
     ["Arbiters Grounds East Upper Turnable Chest", new Flag(chest.with(arbiterCompass), [-5358, 5475], {
-        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
         baseDesc: 'Walk up the stairs to find the chest in the area behind the statue.'
     })],
     ["Arbiters Grounds East Upper Turnable Redead Chest", new Flag(chest.with(arbiterSK), [-5241, 5831], {
-        baseReqs: [clawshotReq, arbiter2SKReq],
+        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier then defeat the Redead to easily open the chest.'
     })],
     ["Arbiters Grounds East Upper Turnable Lock", new Flag(lock, [-5240, 5251], {
-        baseReqs: [clawshotReq, arbiter3SKReq],
+        baseReqs: [clawshotReq, arbiter3SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the 3rd poe."
     })],
     ["Arbiters Grounds Hidden Wall Poe", new Flag(poeSoul, [-5240, 5021], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter3SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter3SKReq, lanternReq],
         baseDesc: 'Dig to reveal a lever, then pull it to gain access to the room where the poe awaits.'
     })],
     ["Arbiters Grounds Ghoul Rat Room Chest", new Flag(smallChest.with(arbiterSK), [-4883, 4834], {
-        baseReqs: [clawshotReq, arbiter3SKReq],
+        baseReqs: [clawshotReq, arbiter3SKReq, lanternReq],
         baseDesc: 'The chest is below the ring platform.'
     })],
     ["Arbiters Grounds Ghoul Rat Room Lock", new Flag(lock, [-4767, 4551], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the chandelier in the torch room."
     })],
     ["Arbiters Grounds West Poe", new Flag(poeSoul, [-5186, 3780], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: "Defeat the poe easily by using Midna's charge attack."
     })],
     ["Arbiters Grounds North Turning Room Chest", new Flag(chest.with(arbiterSK), [-4257, 4786], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: 'Enter the tunnel from the entrance with no spikes, then go to the end of it to find the chest.'
     })],
     ["Arbiters Grounds North Turning Room Lock", new Flag(lock, [-4325, 4791], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: "Unlock this door to reach the spikes room."
     })],
     ["Arbiters Grounds Ooccoo", new Flag(ooccoo, [-5201, 4240], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: 'Pick up or break the pot where Ooccoo is hiding for her to join you.'
     })],
     ["Arbiters Grounds Death Sword Chest", new Flag(chest.with(spinner), [-3598, 4239], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: 'Defeat Death Sword to obtain the Spinner.'
     })],
     ["Arbiters Grounds Spinner Room First Small Chest", new Flag(smallChest.with(bombs, 10), [-4490, 3311], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
         baseDesc: 'Use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Second Small Chest", new Flag(smallChest.with(Rupees.Red), [-4486, 3078], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
         baseDesc: 'From the previous chest, use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Lower Central Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-4307, 2997], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
         baseDesc: 'Hidden under the spinner ramp, use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Stalfos Alcove Chest", new Flag(chest.with(heartPiece), [-4369, 3666], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
         baseDesc: 'Use the spinner ramp and defeat the Stalfos to reach this chest.'
     })],
     ["Arbiters Grounds Spinner Room Lower North Chest", new Flag(smallChest.with(Rupees.Yellow), [-4156, 3605], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
         baseDesc: 'Use the spinner ramp and defeat the 2 stalfos that are guarding the chest to open it.'
     })],
     ["Arbiters Grounds Boss Lock", new Flag(bossLock, [-4276, 4326], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq, lanternReq],
         baseDesc: "Unlock this door to reach Stallord."
     })],
     ["Arbiters Grounds Stallord", new Flag(stallord, [-4530, 4332], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq, lanternReq],
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
@@ -2148,15 +2165,15 @@ var flags = new Map([
         baseDesc: "Break the ice in front of the chest to reveal it."
     })],
     ["Snowpeak Ruins West Cannon Room Corner Chest", new Flag(smallChest.with(bombs, 5), [-4015, 3896], {
-        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, bombBagReq])]],
         baseDesc: "Use the cannon or the ball and chain to break the ice that is blocking the chest."
     })],
     ["Snowpeak Ruins Wooden Beam Central Chest", new Flag(smallChest.with(Rupees.Red), [-4814, 3397], {
-        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, bombBagReq])]],
         baseDesc: "Jump across the wooden planks to reach the chest."
     })],
     ["Snowpeak Ruins Wooden Beam Northwest Chest", new Flag(chest.with(snowpeakCompass), [-4926, 3578], {
-        baseReqs: [[ballAndChainReq, AndRequirements([pumpkinReq, bombBagReq])]],
+        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, bombBagReq])]],
         baseDesc: "Jump across the wooden planks to reach the chest."
     })],
     ["Snowpeak Ruins Broken Floor Chest", new Flag(chest.with(heartPiece), [-5373, 3541], {
@@ -2178,7 +2195,7 @@ var flags = new Map([
         baseReqs: [ballAndChainReq],
         baseDesc: 'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'
     })],
-    ["Snowpeak Ruins Chapel Chest", new Flag(chest.with(bedroomKey), [-3854, 3400], {
+    ["Snowpeak Ruins Chapel Chest", new Flag(chest.with(snowpeakBK), [-3854, 3400], {
         baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq],
         baseDesc: "Defeat all the Chilfos to unlock the door and access the chest."
     })],
@@ -2231,12 +2248,14 @@ var flags = new Map([
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
     ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
-        baseReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
-        baseDesc: "Unlock this door to reach Armogohma"
+        baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseDesc: "Unlock this door to reach Armogohma.",
+        randoReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
-        baseReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
-        baseDesc: 'Defeat Armogohma to clear out the Temple of Time.'
+        baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
+        randoReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],
@@ -2337,7 +2356,7 @@ var flags = new Map([
         baseDesc: 'After defeating the Aeralfos, clawshot the target above the chest to reach it.'
     })],
     ["City in The Sky East Wing Lower Level Chest", new Flag(chest.with(cityCompass), [-4641, 4857], {
-        baseReqs: [doubleClawshot, spinner, city1SKReq],
+        baseReqs: [doubleClawshotReq, spinner, city1SKReq],
         baseDesc: 'From the east entrance, follow the falling clawshot target path to reach the chest.'
     })],
     ["City in The Sky West Wing Baba Balcony Chest", new Flag(smallChest.with(arrows, 20), [-4404, 2998], {
@@ -2467,12 +2486,314 @@ var flags = new Map([
         randoDesc: "Defeat Argorok to obtain the dungeon reward."
     })],
     // Palace of Twilight
-
-
-    
-
-
-
-
-
+    ["Palace of Twilight Collect Both Sols", new Flag(swords.getItemByIndex(3), [-5877, 4329], {
+        baseReqs: [clawshotReq, palace4SKReq, [shadowCrystalReq, woodenSwordReq]],
+        baseDesc: 'Bring both Sols to their pedestal to obtain the Light Filled Master Sword.'
+    })],
+    ["Palace of Twilight West Wing Chest Behind Wall of Darkness", new Flag(chest.with(heartPiece), [-5400, 3585], {
+        baseReqs: [clawshotReq, [lightMasterSwordReq, new AndRequirements([palace2SKReq, [shadowCrystalReq, woodenSwordReq]])]],
+        baseDesc: 'Disperse the fog with a Sol or the Light Filled Master Sword, then clawshot the target behind the chest to reach it.'
+    })],
+    ["Palace of Twilight West Wing First Room Central Chest", new Flag(chest.with(palaceSK), [-5285, 3867], {
+        baseReqs: [[woodenSwordReq, shadowCrystalReq]],
+        baseDesc: 'Defeat the Zant Mask to make the chest appear.'
+    })],
+    ["Palace of Twilight West Wing First Lock", new Flag(lock, [-5209, 3867], {
+        baseReqs: [clawshotReq, palace1SKReq],
+        baseDesc: "Unlock this door to reach the second room of the west wing."
+    })],
+    ["Palace of Twilight West Wing Second Room Central Chest", new Flag(chest.with(palaceSK), [-4837, 3868], {
+        baseReqs: [clawshotReq, palace1SKReq],
+        baseDesc: 'Defeat the Zant Mask in the fog to make the chest appear.'
+    })],
+    ["Palace of Twilight West Wing Second Room Lower South Chest", new Flag(chest.with(palaceCompass), [-5060, 3956], {
+        baseReqs: [clawshotReq, palace1SKReq],
+        baseDesc: 'Defeat the Zant Mask in the fog to make the chest appear.'
+    })],
+    ["Palace of Twilight West Wing Second Room Southeast Chest", new Flag(chest.with(Rupees.Orange), [-5072, 4018], {
+        baseReqs: [doubleClawshotReq, palace1SKReq],
+        baseDesc: 'Use a Sol or the double clawshot to reach the chest.'
+    })],
+    ["Palace of Twilight West Wing Second Lock", new Flag(lock, [-4676, 3867], {
+        baseReqs: [clawshotReq, palace2SKReq],
+        baseDesc: "Unlock this door to reach the west Sol."
+    })],
+    ["Palace of Twilight East Wing First Room Zant Head Chest", new Flag(chest.with(palaceSK), [-5268, 4846], {
+        baseReqs: [clawshotReq, [woodenSwordReq, shadowCrystalReq]],
+        baseDesc: 'Defeat the Zant Mask to make the chest appear.'
+    })],
+    ["Palace of Twilight East Wing First Room North Small Chest", new Flag(smallChest.with(Rupees.Purple), [-5266, 4704], {
+        baseReqs: [clawshotReq],
+        baseDesc: 'Make your way across the moving platforms to reach the chest.'
+    })],
+    ["Palace of Twilight East Wing First Room West Alcove", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
+        baseReqs: [[lightMasterSwordReq, new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        baseDesc: 'Use the Sol or the Light Filled Master Sword to activate the evelator with the switch in the fog, then simply ride it until it brings you to the chest.'
+    })],
+    ["Palace of Twilight East Wing First Room East Alcove", new Flag(chest.with(heartPiece), [-5420, 4902], {
+        baseReqs: [[lightMasterSwordReq, new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        baseDesc: 'Use the Sol or the Light Filled Master Sword to activate the evelator with the switch in the fog, then simply ride it until it brings you to the chest.'
+    })],
+    ["Palace of Twilight East Wing First Lock", new Flag(lock, [-5209, 4773], {
+        baseReqs: [clawshotReq, palace1SKReq],
+        baseDesc: "Unlock this door to reach the second room of the east wing."
+    })],
+    ["Palace of Twilight East Wing Second Room Southwest Chest", new Flag(chest.with(palaceMap), [-4944, 4606], {
+        baseReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        baseDesc: 'Use the Double Clawshot or the Sol to reach the chest.'
+    })],
+    ["Palace of Twilight East Wing Second Room Northwest Chest", new Flag(smallChest.with(Rupees.Purple), [-4822, 4606], {
+        baseReqs: [clawshotReq, palace1SKReq],
+        baseDesc: 'Clawshot the wall target from the platform with the northern door to reach the chest.'
+    })],
+    ["Palace of Twilight East Wing Second Room Northeast Chest", new Flag(smallChest.with(Rupees.Purple), [-4873, 4940], {
+        baseReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        baseDesc: 'Use the Double Clawshot or the Sol to reach the chest.'
+    })],
+    ["Palace of Twilight East Wing Second Room Southeast Chest", new Flag(chest.with(palaceSK), [-4944, 4940], {
+        baseReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        baseDesc: 'Use the Double Clawshot or the Sol to reach the chest.'
+    })],
+    ["Palace of Twilight East Wing Second Lock", new Flag(lock, [-4676, 4773], {
+        baseReqs: [clawshotReq, palace2SKReq],
+        baseDesc: "Unlock this door to reach the east Sol."
+    })],
+    ["Palace of Twilight Central First Room Chest", new Flag(chest.with(palaceSK), [-4994, 4469], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace4SKReq],
+        baseDesc: 'Defeat all the Zant Masks to make the chest appear.'
+    })],
+    ["Palace of Twilight Big Key Chest", new Flag(bossChest.with(palaceBK), [-4762, 4101], {
+        baseReqs: [lightMasterSwordReq, palace5SKReq, doubleClawshotReq],
+        baseDesc: 'Clear out the fog cascade, then clawshot your way up to the chest.'
+    })],
+    ["Palace of Twilight Central Outdoor Chest", new Flag(chest.with(palaceSK), [-4562, 4007], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace5SKReq],
+        baseDesc: 'Defeat all the Zant Masks (the first one is on the isolated south platform) to make the chest appear.'
+    })],
+    ["Palace of Twilight Central Tower Chest", new Flag(chest.with(palaceSK), [-4640, 4251], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace6SKReq],
+        baseDesc: 'Defeat the two Zant Masks on both sides of the room to make the chest appear.'
+    })],
+    ["Palace of Twilight Central First Room Lock", new Flag(lock, [-4886, 4108], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace5SKReq],
+        baseDesc: "Unlock this door to reach the central outdoor area."
+    })],
+    ["Palace of Twilight Central Outdoor Lock", new Flag(lock, [-4627, 4116], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace6SKReq],
+        baseDesc: "Unlock this door to reach the tower climbing room."
+    })],
+    ["Palace of Twilight Before Zant Lock", new Flag(lock, [-4334, 4326], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq],
+        baseDesc: "Unlock this door to reach the Twilit Messenger fight before Zant."
+    })],
+    ["Palace of Twilight Boss Lock", new Flag(bossLock, [-3907, 4326], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq, palaceBKReq],
+        baseDesc: "Unlock this door to reach Zant."
+    })],
+    ["Palace of Twilight Zant", new Flag(zant, [-3721, 4325], {
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq, palaceBKReq, boomerangReq, zoraArmorReq, [ironBootsReq, magicArmorReq], ballAndChainReq],
+        baseDesc: 'Defeat Zant to clear out the Palace of Twilight.'
+    })],
+    ["Palace of Twilight Zant Heart Container", new Flag(heartContainer, [-3620, 4324], {
+        baseReqs: [zantReq],
+        baseDesc: 'Defeat Zant to obtain the Heart Container.',
+        randoCategory: Categories.Main,
+        randoDesc: 'Defeat Zant to obtain the item.'
+    })],
+    // Hyrule Castle
+    ["Hyrule Castle Outside Lock", new Flag(lock, [-5304, 4320], {
+        baseReqs: [castle1SKReq],
+        baseDesc: "Unlock this door to reach the main hall of the castle."
+    })],
+    ["Hyrule Castle West Courtyard Central Small Chest", new Flag(smallChest.with(Rupees.Red), [-4887, 3598], {
+        baseReqs: [[woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: 'From the north area, climb up the balcony and drop down to the platform with the chest.'
+    })],
+    ["Hyrule Castle King Bulblin Key", new Flag(castleSK, [-4419, 3471], {
+        baseReqs: [[woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: 'Defeat King Bulblin for him to give you the small key.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Defeat King Bulblin for him to give you the item.'
+    })],
+    ["Hyrule Castle West Courtyard North Small Chest", new Flag(smallChest.with(Rupees.Red), [-4229, 3620], {
+        baseReqs: [[woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: 'Under the wooden roof, you can go around the platform if you do not wish to fight King Bulblin.'
+    })],
+    ["Hyrule Castle East Wing Balcony Chest", new Flag(smallChest.with(Rupees.Yellow), [-5205, 4834], {
+        baseReqs: [boomerangReq, [woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: 'In the room with the chest, climb the ladder to reach the balcony. Then, go to the end of the balcony to reach the chest.'
+    })],
+    ["Hyrule Castle East Wing Boomerang Puzzle Chest", new Flag(chest.with(castleMap), [-4283, 4456], {
+        baseReqs: [boomerangReq, [woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: "Boomerang the windmills in this order or it's inverse: Left, Middle Top, Middle Bottom, Right Middle to open the gate and reach the chest."
+    })],
+    ["Hyrule Castle Graveyard Grave Switch Room Front Left Chest", new Flag(smallChest.with(Rupees.Green), [-3832, 4708], {
+        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
+    })],
+    ["Hyrule Castle Graveyard Grave Switch Room Back Left Chest", new Flag(smallChest.with(Rupees.Red), [-3832, 4761], {
+        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
+    })],
+    ["Hyrule Castle Graveyard Grave Switch Room Right Chest", new Flag(chest.with(Rupees.Orange), [-3923, 4748], {
+        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
+    })],
+    ["Hyrule Castle Graveyard Owl Statue Chest", new Flag(chest.with(castleSK), [-4297, 4310], {
+        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq], lanternReq, domRodReq],
+        baseDesc: 'In the room with the 3 chests, light the torch to stop the rain. Then, quickly make your way to the gate ' + 
+                  'blocking the Howl Statues, and light the 2 torches on both sides of the gate. Bring the 2 Howl Statues to ' +
+                  'their pedestal south of the area, then jump across them. Finally, pull the chain to open the gate and acces the chest.'
+    })],
+    ["Hyrule Castle Main Hall Northeast Chest", new Flag(chest.with(castleCompass), [-4809, 4576], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
+        baseDesc: 'Defeat all the enemies in the room to make the chest appear, then clawshot the chandelier to reach the chest.'
+    })],
+    ["Hyrule Castle Main Hall Northwest Chest", new Flag(chest.with(Rupees.Silver), [-4805, 4060], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, bowReq],
+        baseDesc: 'Activate the pressure plate on the south-west platform to make the chest appear. Then, clawshot the lowest chandelier and, from there, ' +
+                  'the one above the chest to reach it.'
+    })],
+    ["Hyrule Castle Main Hall Southwest Chest", new Flag(chest.with(Rupees.Purple), [-5054, 4180], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, bowReq],
+        baseDesc: 'Defeat the 2 Darknuts to unlock the door and gain access to the chest.'
+    })],
+    ["Hyrule Castle Lantern Staircase Chest", new Flag(chest.with(Rupees.Purple), [-4463, 4319], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq],
+        baseDesc: 'Defeat the Darknut to make the chest appear. Then, put out the west torch with the boomerang while standing on the north-most platform to ' + 
+                    'make it rise and reach the chest.'
+    })],
+    ["Hyrule Castle Southeast Balcony Tower Chest", new Flag(chest.with(castleSK), [-5628, 5316], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq]],
+        baseDesc: 'Defeat the Aeralfos to gain access to the chest.'
+    })],
+    ["Hyrule Castle Big Key Chest", new Flag(bossChest.with(castleBK), [-5634, 3319], {
+        baseReqs: [castle1SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq]],
+        baseDesc: "Approach the chest to be saved and gain access to the chest."
+    })],
+    ['Hyrule Castle Balcony Lock', new Flag(lock, [-5296, 4322], {
+        baseReqs: [castle2SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq]],
+        baseDesc: 'Unlock this door to reach the main tower of the castle.'
+    })],
+    ['Hyrule Castle Darknut Before Boss Rupee', new Flag(Rupees.Orange, [-5169, 4319], {
+        baseReqs: [castle2SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Defeat the Darknut and it will drop an Orange Rupee.'
+    })],
+    ["Hyrule Castle Boss Lock", new Flag(bossLock, [-5237, 4323], {
+        baseReqs: [castleBKReq, castle2SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: "Unlock this door to reach Ganondorf."
+    })],
+    ["Hyrule Castle Treasure Room Lock", new Flag(lock, [-5153, 4525], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: "Unlock this door to reach the treasure chest room."
+    })],
+    ["Hyrule Castle Treasure Room First Chest", new Flag(chest.with(Rupees.Orange), [-5100, 4545], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc:'First from the left of the north row.'
+    })],
+    ["Hyrule Castle Treasure Room Second Chest", new Flag(chest.with(seeds, 50), [-5085, 4565], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Second from the left of the north row.'
+    })],
+    ["Hyrule Castle Treasure Room Third Chest", new Flag(chest.with(Rupees.Silver), [-5070, 4585], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Third from the left of the north row.'
+    })],
+    ["Hyrule Castle Treasure Room Fourth Chest", new Flag(chest.with(bomblings, 10), [-5055, 4605], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Fourth from the left of the north row.'
+    })],
+    ["Hyrule Castle Treasure Room Fifth Chest", new Flag(chest.with(Rupees.Purple), [-5040, 4625], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Fifth from the left of the north row.'
+    })],
+    ["Hyrule Castle Treasure Room First Small Chest", new Flag(smallChest.with(Rupees.Blue), [-5190, 4674], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'First from the left of the south row.'
+    })],
+    ["Hyrule Castle Treasure Room Second Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-5173, 4695], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Second from the left of the south row.'
+    })],
+    ["Hyrule Castle Treasure Room Third Small Chest", new Flag(smallChest.with(Rupees.Red), [-5156, 4716], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Third from the left of the south row.'
+    })],
+    ["Hyrule Castle Treasure Room Fourth Small Chest", new Flag(smallChest.with(bombs, 20), [-5139, 4737], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'First from the bottom of the east column.'
+    })],
+    ["Hyrule Castle Treasure Room Fifth Small Chest", new Flag(smallChest.with(arrows, 20), [-5120, 4737], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Second from the bottom of the east column.'
+    })],
+    ["Hyrule Castle Treasure Room Sixth Small Chest", new Flag(smallChest.with(bombs, 20), [-5090, 4737], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Third from the bottom of the east column.'
+    })],
+    ["Hyrule Castle Treasure Room Seventh Small Chest", new Flag(smallChest.with(Rupees.Green), [-5065, 4737], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Fourth from the bottom of the east column.'
+    })],
+    ["Hyrule Castle Treasure Room Eighth Small Chest", new Flag(smallChest.with(arrows, 30), [-5040, 4737], {
+        baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Fifth from the bottom of the east column.'
+    })],
+    ["Hyrule Castle Ganondorf", new Flag(ganondorf, [-4838, 4328], {
+        baseReqs: [castle2SKReq, castleBKReq, masterSwordReq, endingBlowReq, doubleClawshotReq, boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseDesc: 'Defeat Ganondorf to save Hyrule!'
+    })],
+    // Rando Hints
+    ["Agithas_Castle_Sign", new Flag(randoHint, [-4155, 4551])],
+    ["Arbiters_Grounds_Sign", new Flag(randoHint,  [-4491, 4314], {
+        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+    })],
+    ["Beside_Castle_Town_Sign", new Flag(randoHint, [-3883, 4188])],
+    ["Bulblin_Camp_Sign", new Flag(randoHint, [-4151, 531])],
+    ["Castle_Town_Sign", new Flag(randoHint, [-3994, 4707])],
+    ["City_in_the_Sky_Sign", new Flag(randoHint, [-4589, 4220], {
+        baseReqs: [clawshotReq]
+    })],
+    ["Death_Mountain_Sign", new Flag(randoHint, [-3828, 8247])],
+    ["Eldin_Field_Sign", new Flag(randoHint, [-4282, 5928])],
+    ["Faron_Field_Sign", new Flag(randoHint, [-6202, 4889])],
+    ["Faron_Woods_Sign", new Flag(randoHint, [-7478, 4945])],
+    ["Forest_Temple_Sign", new Flag(randoHint, [-5405, 4055])],
+    ["Gerudo_Desert_Sign", new Flag(randoHint, [-5481, 1185])],
+    ["Goron_Mines_Sign", new Flag(randoHint, [-3723, 5334], {
+        baseReqs: [ironBootsReq, mines3SKReq]
+    })],
+    ["Great_Bridge_of_Hylia_Sign", new Flag(randoHint, [-4250, 3381])],
+    ["Hidden_Village_Sign", new Flag(randoHint, [-2052, 6668], {
+        baseReqs: [woodenStatueReq]
+    })],
+    ["Hyrule_Castle_Sign", new Flag(randoHint, [-5856, 4318])],
+    ["Jovani_House_Sign", new Flag(randoHint, [-4110, 4837])],
+    ["Kakariko_Gorge_Sign", new Flag(randoHint, [-4979, 5876])],
+    ["Kakariko_Graveyard_Sign", new Flag(randoHint, [-5475, 8300])],
+    ["Kakariko_Village_Sign", new Flag(randoHint, [-5253, 7455])],
+    ["Lake_Hylia_Sign", new Flag(randoHint, [-4659, 2920])],
+    ["Lake_Lantern_Cave_Sign", new Flag(randoHint, [-5335, 3018], {
+        baseReqs: [[bombBagReq, ballAndChainReq]]
+    })],
+    ["Lakebed_Temple_Sign", new Flag(randoHint, [-4392, 3903], {
+        baseReqs: [bombBagReq, [bowReq, boomerangReq]]
+    })],
+    ["Lanayru_Field_Sign", new Flag(randoHint, [-1891, 4860])],
+    ["Lanayru_Spring_Sign", new Flag(randoHint, [-5238, 3468], {
+        baseReqs: [[ironBootsReq, magicArmorReq]],
+    })],
+    ["North_Eldin_Sign", new Flag(randoHint, [-1911, 7257])],
+    ["Ordon_Sign", new Flag(randoHint, [-8842, 4938])],
+    ["Palace_of_Twilight_Sign", new Flag(randoHint, [-5914, 4479])],
+    ["Sacred_Grove_Sign", new Flag(randoHint, [-7214, 3630])],
+    ["Snowpeak_Mountain_Sign", new Flag(randoHint, [-483, 3939])],
+    ["Snowpeak_Ruins_Sign", new Flag(randoHint, [-5035, 4186])],
+    ["South_of_Castle_Town_Sign", new Flag(randoHint, [-4475, 4710])],
+    ["Temple_of_Time_Beyond_Point_Sign", new Flag(randoHint, [-4928, 3970], {
+        baseReqs: [temple2SKReq, spinnerReq, bowReq]
+    })],
+    ["Temple_of_Time_Sign", new Flag(randoHint, [-5721, 4278])],
+    ["Upper_Zoras_River_Sign", new Flag(randoHint, [-590, 5780])],
+    ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
 ]);
