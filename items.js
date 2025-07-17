@@ -13,13 +13,17 @@ const images = new Map();
 for (let [src, size] of imageSizes) 
     images.set(src, new ImageWrapper(src, size));
 
-function getIconImage(imageName) {
-    return images.get('Icons/' + imageName.replace(/ /g, "_") + '.png');
-}
-
 function spaceToUnderscore(str) {
     return str.replace(/ /g, "_");
 }
+
+function getIconImage(imageName) {
+    if (imageName instanceof ImageWrapper)
+        return imageName;
+    return images.get('Icons/' + spaceToUnderscore(imageName) + '.png');
+}
+
+
 
 // Item & Obtainables Categories Enum
 const Categories = Object.freeze({
@@ -40,6 +44,7 @@ const Categories = Object.freeze({
     Grass: "Horse & Hawk Grass",
     Fishing: "Fishing Spots",
     Minigames: "Minigames",
+    Postman: 'Postman',
     // Randomizer Categories
     Gifts: "Gifts from NPCs",
     ShopItems: "Shop Items",
@@ -49,10 +54,7 @@ const Categories = Object.freeze({
 
 class Obtainable {
     constructor(imageInfo, item, {name=imageInfo, category}={}) {
-        if (imageInfo instanceof ImageWrapper) 
-            this.image = imageInfo;
-        else    
-            this.image = getIconImage(imageInfo);
+        this.image = getIconImage(imageInfo);
         this.item = item;
         this.name = item === null ? name : item.name;
         this.category = item === null ? category : item.getCategory();
@@ -465,29 +467,6 @@ const Rupees = Object.freeze({
     Orange : new Obtainable("Orange Rupee", rupees),
     Silver : new Obtainable("Silver Rupee", rupees)
 });
-// Bottled Items Enum
-const Bottle = Object.freeze({
-    BeeLarva : new Obtainable("BottleBee", null, {name:"Bee Larva", category: Categories.Bottle}),
-    Worm : new Obtainable("BottleWorm", null, {name: "Worm", category: Categories.Bottle}),
-    Oil : new Obtainable("BottleYellow", null, {name: "Lantern Oil", category: Categories.Bottle}),
-    HotSpringWater : new Obtainable("BottleWater", null, {name: "Hot Spring Water", category: Categories.Bottle}),
-    RedPotion : new Obtainable("BottleRed", null, {name: "Red Potion", category: Categories.Bottle}),
-    BluePotion : new Obtainable("BottleBlue", null, {name: "Blue Potion", category: Categories.Bottle}),
-    Fairy : new Obtainable('BottleFairy', null, {name: "Fairy", category: Categories.Bottle}),
-    Tears : new Obtainable('BottleTears', null, {name: "Great Fairy's Tears", category: Categories.Bottle}),
-    Milk : new Obtainable('BottleMilk', null, {name: 'Milk', category: Categories.Bottle}),
-    HalfMilk : new Obtainable('BottleMilkH', null, {name: "1/2 Milk", category: Categories.Bottle}),
-    Nasty : new Obtainable('BottleNasty', null, {name: 'Nasty Soup', category: Categories.Bottle}),
-    Soup : new Obtainable('BottleSoup', null, {name: "Superb Soup", category: Categories.Bottle}),
-    PurpleChu: new Obtainable('BottlePurple', null, {name: "Purple Chu Jelly", category: Categories.Bottle}),
-    RedChu : new Obtainable('BottleRed', null, {name: "Red Chu Jelly", category: Categories.Bottle}),
-    BlueChu : new Obtainable("BottleBlue", null, {name: "Blue Chu Jelly", category: Categories.Bottle}),
-    YellowChu : new Obtainable("BottleYellow", null, {name: "Yellow Chu Jelly", category: Categories.Bottle}),
-    RareChu : new Obtainable("BottleRare", null, {name: "Rare Chu Jelly", category: Categories.Bottle}),
-    Coro : new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"}),
-    Sera : new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"}),
-    Jovani : new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"})
-});
 
 let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
 let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.Skills});
@@ -516,3 +495,44 @@ let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
+
+class NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        this.image = getIconImage(image);
+        this.name = name;
+        this.category = category;
+        this.position = position;
+    }
+    new(position) {
+        return new NonFlag(this.image, this.category, this.name, position);
+    }
+}
+
+let horseGrass = new NonFlag('Horse Grass', Categories.Grass);
+let hawkGrass = new NonFlag('Hawk Grass', Categories.Grass);
+let postman = new NonFlag('Postman', Categories.Postman);
+
+// Bottled Items Enum
+const Bottle = Object.freeze({
+    BeeLarva : new NonFlag("BottleBee", Categories.Bottle, "Bee Larva"),
+    Worm : new NonFlag("BottleWorm", Categories.Bottle, "Worm"),
+    Oil : new NonFlag("BottleYellow", Categories.Bottle, "Lantern Oil"),
+    HotSpringWater : new NonFlag("BottleWater", Categories.Bottle, "Hot Spring Water"),
+    RedPotion : new NonFlag("BottleRed", Categories.Bottle, "Red Potion"),
+    BluePotion : new NonFlag("BottleBlue", Categories.Bottle, "Blue Potion"),
+    Fairy : new NonFlag('BottleFairy', Categories.Bottle, "Fairy"),
+    Tears : new NonFlag('BottleTears', Categories.Bottle, "Great Fairy's Tears"),
+    Milk : new NonFlag('BottleMilk', Categories.Bottle, 'Milk'),
+    HalfMilk : new NonFlag('BottleMilkH', Categories.Bottle, "1/2 Milk"),
+    Nasty : new NonFlag('BottleNasty', Categories.Bottle, 'Nasty Soup'),
+    Soup : new NonFlag('BottleSoup', Categories.Bottle, "Superb Soup"),
+    PurpleChu: new NonFlag('BottlePurple', Categories.Bottle,"Purple Chu Jelly"),
+    RedChu : new NonFlag('BottleRed', Categories.Bottle, "Red Chu Jelly"),
+    BlueChu : new NonFlag("BottleBlue", Categories.Bottle, "Blue Chu Jelly"),
+    YellowChu : new NonFlag("BottleYellow", Categories.Bottle, "Yellow Chu Jelly"),
+    RareChu : new NonFlag("BottleRare", Categories.Bottle, "Rare Chu Jelly"),
+
+    Coro : new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"}),
+    Sera : new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"}),
+    Jovani : new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"})
+});

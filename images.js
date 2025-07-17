@@ -99,6 +99,7 @@ const imageSizes = new Map([
   ["Icons/BottleWater.png", [128, 205]],
   ["Icons/BottleWorm.png", [128, 205]],
   ["Icons/BottleYellow.png", [128, 205]],
+  ["Icons/Boulder.png", [2209, 1702]],
   ["Icons/Bow0.png", [138, 138]],
   ["Icons/Bow1.png", [138, 138]],
   ["Icons/Bow2.png", [138, 138]],

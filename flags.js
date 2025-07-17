@@ -1,9 +1,6 @@
 class Requirement {
     constructor(imageInfo, text, condition) {
-        if (imageInfo instanceof ImageWrapper) 
-            this.image = imageInfo;
-        else    
-            this.image = getIconImage(imageInfo);
+        this.image = getIconImage(imageInfo);
         this.text = text;
         this.condition = condition;
     }
@@ -48,10 +45,7 @@ class AndRequirements {
 
 class Container {
     constructor(imageInfo, content=null, amount=1) {
-        if (imageInfo instanceof ImageWrapper) 
-            this.image = imageInfo;
-        else    
-            this.image = getIconImage(imageInfo);
+        this.image = getIconImage(imageInfo);
         this.content = content;
         if (content !== null)
             this.displayText = amount > 1 ? content.name + "&nbsp × &nbsp" + amount : content.name;
@@ -83,7 +77,7 @@ class Flag {
         this.baseReqs = baseReqs;   
         this.baseDesc = baseDesc;
         // Default category if it's a chest for Rando
-        if (this.item instanceof Container && this.item.image.src.includes('Chest'))
+        if (this.item instanceof Container && this.item.image.src.includes('Chest') && randoCategory === itemCategory)
             randoCategory = Categories.Main;
         this.randoCategory = randoCategory;
         this.randoReqs = randoReqs;
@@ -103,17 +97,21 @@ class Flag {
         return this.base instanceof Container;
     }
     set() {
+        if (this.isSet())
+            return;
         this.set = true;
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
-    reset() {
+    unset() {
+        if (!this.isSet())
+            return;
         this.set = false;
-         if (this.parentGroup) 
+        if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }
     isSet() {
-        return this.obtained;
+        return this.set;
     }
 }
 
@@ -415,11 +413,11 @@ var flags = new Map([
     ["Ordon Ranch Grotto Lantern Chest", new Flag(chest.with(Rupees.Purple), [-9267, 4700], {
         baseReqs: [shadowCrystalReq, lanternReq],
         baseDesc: 'Light the 3 torches in front of the elevated platform to make the chest appear.',
-        randoCategory: Categories.Main
     })],
     // Faron
     ["Coro Gate Key", new Flag(coroKey, [7385, 4898], {
-        baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave."
+        baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave.",
+        randoCategory: Categories.NonChecks,
     })],
     ["Coro Lantern", new Flag(lantern, [-7405, 4910], {
         baseDesc: 'While chasing Talo and the monkey, talk to Coro to obtain the lantern.',
@@ -560,18 +558,18 @@ var flags = new Map([
         baseDesc: 'Defeat all the 8 Deku Serpents to make the chest appear.'
     })],
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
-        baseReqs: [masterSwordReq, [boomerangReq, clawshotReq]],
+        baseReqs: [masterSwordReq, blizzetaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.',
         randoReqs: [[masterSwordReq, randoSettingReq], [boomerangReq, clawshotReq]],
         randoDesc: 'The item is high up where the snail usually is, use a long ranged item to get it.'
     })],
     ["Sacred Grove Temple of Time Owl Statue Poe", new Flag(poeSoul, [-7470, 3618], {
-        baseReqs: [masterSwordReq, pastDomRodReq, shadowCrystalReq],
+        baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq, shadowCrystalReq],
         baseDesc: 'Move the Owl Statue to reveal the poe.',
         randoReqs: [[masterSwordReq, randoSettingReq], pastDomRodReq, shadowCrystalReq]
     })],
     ["Sacred Grove Past Owl Statue Chest", new Flag(chest.with(heartPiece), [-7504, 3704], {
-        baseReqs: [masterSwordReq, pastDomRodReq],
+        baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq],
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
         randoReq: [[masterSwordReq, randoSettingReq], pastDomRodReq]
     })],
@@ -677,6 +675,7 @@ var flags = new Map([
     ["Goron Springwater Rush", new Flag(heartPiece, [-3944, 5550], {
         baseReqs: [Requirement.fromCountItem(rupees, 1000), fyrusReq],
         baseDesc: 'After repairing the bridge for 1000 rupees, talk to the Goron Elder in front of the Malo Mart in Kakariko and bring the springwater to the goron.',
+        randoCategory: Categories.Gifts,
         randoReqs: [Requirement.fromCountItem(rupees, 1000)]
     })],
     ["Kakariko Gorge Poe", new Flag(nightPoe, [-5347, 5978], {
@@ -685,7 +684,9 @@ var flags = new Map([
     })],
     ["Gift From Ralis", new Flag(coralEarring, [-5473, 8235], {
         baseReqs: [Requirement.fromBoolItem(asheisSketch)],
-        baseDesc: 'Show the sketch to Ralis to obtain the coral earring.'
+        baseDesc: 'Show the sketch to Ralis to obtain the coral earring.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Show the sketch to Ralis to obtain theitem.'
     })],
     ["Kakariko Graveyard Golden Wolf", new Flag(goldenWolf, [-5479, 8140], {
         baseReqs: [Requirement.fromFlag(snowpeakHS)],
@@ -866,7 +867,9 @@ var flags = new Map([
     })],
     ["Skybook From Impaz", new Flag(skybook.getItemByReq(1), [-2180, 6604], {
         baseReqs: [woodenStatueReq, [slingshotReq, bowReq], pastDomRodReq],
-        baseDesc: 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the Ancient Sky Book.'
+        baseDesc: 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the Ancient Sky Book.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the item.'
     })],
     ["Death Mountain Howling Stone", mountainHS],
     ["Hidden Village Howling Stone", hiddenHS],
@@ -1638,7 +1641,7 @@ var flags = new Map([
     ["Forest Temple Big Baba Key", new Flag(forestSK, [-5624, 3749], {
         baseDesc: 'Defeat the Big Baba to obtain the key. Use the Bomblings if you do not have any weapons.'
     })],
-    [ "Forest Temple West Deku Like Chest", new Flag(chest.with(heartPiece), [-5467, 3901], {
+    ["Forest Temple West Deku Like Chest", new Flag(chest.with(heartPiece), [-5467, 3901], {
         baseDesc: 'Defeat the Deku Like that blocks the way to access the chest.'
     })],
     ["Forest Temple Totem Pole Chest", new Flag(chest.with(forestSK), [-5277, 3498], {
@@ -1976,7 +1979,7 @@ var flags = new Map([
         baseDesc: 'Break the wooden barrier and jump across to the chest.'
     })],
     ["Arbiters Grounds Entrance Lock", new Flag(lock, [-5277, 4323], {
-        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+        baseReqs: [clawshotReq, arbiter1SKReq],
         baseDesc: "Unlock this door to reach the main room of the dungeon."
     })],
     ["Arbiters Grounds Torch Room Poe", new Flag(poeSoul, [-4763, 4329], {
@@ -2128,7 +2131,8 @@ var flags = new Map([
     })],
     ["Snowpeak Ruins Mansion Map", new Flag(snowpeakMap, [-5072, 4316], {
         baseDesc: "Talk to Yeta to obtain the dungeon map.",
-        randoCategory: Categories.Gifts
+        randoCategory: Categories.Gifts,
+        randoDes: "Talk to Yeta to obtain the item.",
     })],
     ["Snowpeak Ruins Ooccoo", new Flag(ooccoo, [-5381, 5064], {
         baseDesc: "Pick up the pot where Ooccoo is hiding."
@@ -2745,12 +2749,13 @@ var flags = new Map([
     })],
     // Rando Hints
     ["Agithas_Castle_Sign", new Flag(randoHint, [-4155, 4551])],
-    ["Arbiters_Grounds_Sign", new Flag(randoHint,  [-4491, 4314], {
+    ["Arbiters_Grounds_Sign", new Flag(randoHint, [-4491, 4314], {
         baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
     })],
     ["Beside_Castle_Town_Sign", new Flag(randoHint, [-3883, 4188])],
     ["Bulblin_Camp_Sign", new Flag(randoHint, [-4151, 531])],
     ["Castle_Town_Sign", new Flag(randoHint, [-3994, 4707])],
+    ["Cave_of_Ordeals_Sign", new Flag(randoHint, [-6268, 581])],
     ["City_in_the_Sky_Sign", new Flag(randoHint, [-4589, 4220], {
         baseReqs: [clawshotReq]
     })],
@@ -2797,3 +2802,6 @@ var flags = new Map([
     ["Upper_Zoras_River_Sign", new Flag(randoHint, [-590, 5780])],
     ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
 ]);
+
+for (let [name, flag] of flags.entries()) 
+    flag.setName(name);
