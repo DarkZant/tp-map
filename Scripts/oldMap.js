@@ -121,19 +121,19 @@ var Check = L.Marker.extend({
             this.showAsUnmarked();       
     },
     showDetails: function() {
-        var box = document.getElementById('check');
+        let box = document.getElementById('flagDetails');
         box.style.visibility = "visible";
         box.style.width = "25%";
         box.style.height = "100%";
-        setTimeout(function() {document.getElementById('checkX').style.visibility = "visible";}, 100);        
+        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);        
         if (this.van != undefined) {
-            document.getElementById('van').style.display = "block";
-            document.getElementById('vandiv').innerHTML = this.iconToImg(this.van, "iti");
+            document.getElementById('containerContent').style.display = "block";
+            document.getElementById('containerContentDiv').innerHTML = this.iconToImg(this.van, "iti");
         }
         else 
-            document.getElementById('van').style.display = "none";
+            document.getElementById('containerContent').style.display = "none";
         if (this.reqs != undefined) {
-            document.getElementById('reqs').style.display = "block";
+            document.getElementById('flagRequirements').style.display = "block";
             let rdHtml = "";
             for (let i = 0; i < this.reqs.length; ++i) {
                 if (this.reqs[i].length != undefined) {
@@ -147,12 +147,12 @@ var Check = L.Marker.extend({
                     rdHtml += '<div class="item"><p class="idot">•</p>' + this.iconToImg(this.reqs[i], "iti") + '</div>';
                 }
             }
-            document.getElementById('reqsdiv').innerHTML = rdHtml;
+            document.getElementById('flagRequirementsDiv').innerHTML = rdHtml;
         }
         else 
-            document.getElementById('reqs').style.display = "none";
-        document.getElementById('cinfo').style.visibility = "visible";
-        document.getElementById('cinfodiv').innerHTML = this.info + '\n' + this.latLng; // Remove LATLNG
+            document.getElementById('flagRequirements').style.display = "none";
+        document.getElementById('flagDescription').style.visibility = "visible";
+        document.getElementById('flagDescriptionDiv').innerHTML = this.info + '\n' + this.latLng; // Remove LATLNG
         map.on('click', hideDetails);
     },
     iconToImg: function(icon, imgClass) {
@@ -2596,7 +2596,7 @@ function loadImageMap() {
     map.off('zoomend', loadImageMap);    
     map.on("zoomend", loadTilemapFromImageMap);
     loadImageIcons(); 
-    if (document.getElementById('check').style.visibility == 'visible')
+    if (document.getElementById('flagDetails').style.visibility == 'visible')
         hideDetails(); 
 }
 function loadTilemapFromImageMap() {
@@ -2677,15 +2677,15 @@ function getCoordsOnClick(e) {
 
 // Menu Functions
 function hideDetails() {
-    document.getElementById('checkX').style.visibility = "hidden";
-    document.getElementById('cinfo').style.visibility = "hidden";
-    document.getElementById('van').style.display = "none"; 
-    document.getElementById('reqs').style.display = "none";   
-    var checkdiv = document.getElementById('check'); 
-    checkdiv.style.width = "0%";
+    document.getElementById('flagDetailsX').style.visibility = "hidden";
+    document.getElementById('flagDescription').style.visibility = "hidden";
+    document.getElementById('containerContent').style.display = "none"; 
+    document.getElementById('flagRequirements').style.display = "none";   
+    let flagDetails = document.getElementById('flagDetails'); 
+    flagDetails.style.width = "0%";
     setTimeout(function() {
-        checkdiv.style.height = "0%";
-        checkdiv.style.visibility = "hidden";
+        flagDetails.style.height = "0%";
+        flagDetails.style.visibility = "hidden";
     }, 100);
     
     map.off('click', hideDetails);

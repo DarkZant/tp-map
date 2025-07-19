@@ -41,7 +41,7 @@ class TrackerItem extends Storable {
         }); 
     }
     initialize() {
-        let storedValue = trackerSU.getFlagAsNumber(this);
+        let storedValue = this.storageUnit.getFlagAsNumber(this);
         let maxValue = this.item.getMaxState();
         if (storedValue < maxValue / 2) {
             for (let _ = 0; _ < storedValue; ++_)
@@ -60,7 +60,7 @@ class TrackerItem extends Storable {
         else if (this.item instanceof CountItem || this.item instanceof CountRequiredItem)
             this.updateElementCounter();
         if (this.initialized) 
-            trackerSU.setFlag(this);
+            this.storageUnit.setFlag(this);
         document.dispatchEvent(new CustomEvent('trackerUpdated'));
     }
     updateElementBrightness() {
@@ -172,7 +172,6 @@ function hideTrackerSubmenuHandler() {
 }
 
 function resetTracker() {
-    let trackerItems = document.getElementsByClassName('titem'); 
-    for (let i = 0; i < trackerItems.length; ++i)
-        trackerItems[i].dispatchEvent(new MouseEvent('auxclick', { button: 1 }));
+    for (let titem of document.getElementsByClassName('titem'))
+        titem.dispatchEvent(new MouseEvent('auxclick', { button: 1 }));
 }

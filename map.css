@@ -326,36 +326,36 @@ body img {
     }
 }
 
-/* Check details menu */
-#check {
+/* Flag Details menu */
+#flagDetails {
     top: 0;
     left: 0;
 }
-#checkX {
+#flagDetailsX {
     left: 23.5vw;
 }
-#reqs, #van {  
+#flagRequirements, #containerContent {  
     font-size: 1.3vmax;
     display: none;
 }
-#van {
+#containerContent {
     text-align: center;
 }
-#cinfo {
+#flagDescription {
     font-size: 1vmax;
     text-align: center;
     visibility: hidden;
     padding: 0 5%;
 }
-#vandiv {
+#containerContentDiv {
     justify-content: center;
     margin: 0;
     padding: 0;
 }
-#vandiv .iti {
+#containerContentDiv .iti {
     padding-left: 0;
 }
-.ctitle {
+.flagDetailsTitle {
     text-decoration: underline;
     text-align: center;
     margin-top: 0;

@@ -27,17 +27,17 @@ class SubmapFloor {
         }
         this.contents = flagContents;
     }
-    setFlags() {
-        for (let c of this.contents) {
+    set() {
+        for (let c of contents) {
             if (c instanceof Flag)
                 c.set();
         }
     }
-    unsetFlags() {
-        for (let c of this.contents) {
+    unset() {
+        for (let c of contents) {
             if (c instanceof Flag)
                 c.unset();
-        }       
+        }
     }
 }
 
@@ -46,39 +46,65 @@ class SimpleSubmap extends Submap {
         {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
         super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
-        this.floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name) + '.png', contents);
+        this.floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name) + '.png', "1F", contents);
+    }
+    set() {
+        this.floor.set();
+    }
+    unset() {
+        this.floor.unset();
     }
 }
 
 const floorLabels = ["B3", "B2", "B1", "1F", "2F", "3F", "4F", "5F", "6F", "7F", "8F"];
 
 class FlooredSubmap extends Submap {
+    constructor(position, iconImage, name, floors,
+        {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
+    ) {
+        super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.floors = floors;
+    }
+    set() {
+        for (let floor of this.floors)
+            floor.set();
+    }
+    unset() {
+        for (let floor of this.floors)
+            floor.unset();
+    }
+}
+
+class SimpleFlooredSubmap extends FlooredSubmap {
     constructor(position, iconImage, name, contents,
         {floorOffset=3, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
-        super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
-        this.floorOffset = floorOffset;
-        this.floors = [];
+        let floors = [];
         for (let i = 0; i < contents.length; ++i) {
-            this.floors.push(new SubmapFloor(
+            floors.push(new SubmapFloor(
                 'Submaps/' + spaceToUnderscore(name) + '/' + i + '.png', 
                 floorLabels[i + floorOffset], 
                 contents[i]
             ));
         }
+        super(position, iconImage, name, floors, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.floorOffset = floorOffset;
+        
     }
 }
 
-class CaveOfOrdeals extends Submap {
+class CaveOfOrdeals extends FlooredSubmap {
     constructor(position, iconImage, contents) {
         let name = "Cave of Ordeals";
-        super(position, iconImage, name);
-        let path = 'Submaps/' + this.name + '/';
-        this.floors = [];
-        this.floors.push(new SubmapFloor(path + '0.png', "B1", contents[0]));
+        let path = 'Submaps/' + spaceToUnderscore(name) + '/';
+        let floors = [];
+        floors.push(new SubmapFloor(path + '0.png', "B1", contents[0]));
         for(let i = 1; i < contents.length - 1; ++i)
-            this.floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1) + '.png', "B" + (i+1), contents[i]));
-        this.floors.push(path + '5.png', "B" + (contents.length), contents[contents.length - 1]);
+            floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1) + '.png', "B" + (i+1), contents[i]));
+        floors.push(new SubmapFloor(path + '5.png', "B" + (contents.length), contents[contents.length - 1]));
+        super(position, iconImage, name, floors);
+
+
         let gEL = (enemies) => { // Get Enemy List Formatting
             let text = "<b>Enemies</b><ul>";
             for(let i = 0; i < enemies.length; ++i)
@@ -163,30 +189,31 @@ class CaveOfOrdeals extends Submap {
     }
 }
 
-class Dungeon extends Submap {
+class Dungeon extends FlooredSubmap {
     constructor(position, imagedPosition, iconImage, name, contents,
         {floorOffset=3, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
-        super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
-        this.floorOffset = floorOffset;
-        this.imagedPosition = imagedPosition;
-        this.floors = [];
+        let floors = [];
         for (let i = 0; i < contents.length; ++i) {
             let floorLabel = floorLabels[i + floorOffset];
-            this.floors.push(new SubmapFloor(
+            floors.push(new SubmapFloor(
                 'Dungeons/' + spaceToUnderscore(name) + '/' + floorLabel, + '.png', 
                 floorLabel, 
                 contents[i]
             ));
         }
+        super(position, iconImage, name, floors, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.floorOffset = floorOffset;
+        this.imagedPosition = imagedPosition;
     }
 }
 
 class Province {
-    constructor(counterPosition, 
+    constructor(name, counterPosition, 
         {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}, 
         polygonPoints, contents, 
     ) {
+        this.name = name;
         this.polygonPoints = polygonPoints;
         this.counterPosition = counterPosition;
         this.baseReqs = baseReqs;
@@ -200,6 +227,18 @@ class Province {
                 flagContents.push(c);
         }
         this.contents = flagContents;
+    }
+    set() {
+        for (let c of this.contents) {
+            if (c instanceof Flag || c instanceof Submap)
+                c.set();
+        }
+    }
+    unset() {
+        for (let c of this.contents) {
+            if (c instanceof Flag || c instanceof Submap)
+                c.unset();
+        }
     }
 }
 
@@ -221,8 +260,8 @@ let castlePoints = [
     [-3558, 5242], [-3552, 5158], [-3218, 5266], [-3360, 5325], [-3359, 5348], [-3184, 5345], [-3180, 5304], [-2936, 5440]
 ];
 
-const provinces = new Map([
-    ['Ordona', new Province([-8816, 5664], {}, [
+const provinces = Object.freeze({
+    Ordona: new Province('Ordona', [-8816, 5664], {}, [
             [-8053, 5568], [-7628, 6232], [-8208, 6872], [-8776, 7160], [-9752, 6952], [-9876, 6564], [-9976, 5776], [-9924, 5088], 
             [-9750, 4672], [-8792, 4338], [-7853, 4693]
         ], [
@@ -232,7 +271,7 @@ const provinces = new Map([
             "Rusl's House Orange Rupee",
             "Jaggle House's Purple Rupee",
             "Ordon_Sign",
-            new FlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
+            new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
                 ["Wooden Sword Chest"],
             ], {floorOffset: 2}),
@@ -246,7 +285,7 @@ const provinces = new Map([
             new SimpleSubmap([-9037, 5015], doorIconImage, "Jaggle's House", [
                 "Ordon Shield"
             ]),
-            new FlooredSubmap([-9171, 4953], doorIconImage, "Bo's House", [
+            new SimpleFlooredSubmap([-9171, 4953], doorIconImage, "Bo's House", [
                 "Wrestling With Bo"
             ]),
             newGrotto(1, [-9523, 4765], "Ordon Ranch Grotto", [
@@ -258,10 +297,9 @@ const provinces = new Map([
             hawkGrass.new([-8940, 5001]),
             hawkGrass.new([-9169, 4934]),
             Bottle.BeeLarva.new([-9035, 4848]),
+    ]),
 
-
-    ])],
-    ['Faron', new Province([-6512, 5536], {}, [
+    Faron: new Province('Faron', [-6512, 5536], {}, [
             [-5412, 5564], [-5374, 5998], [-5954, 6282], [-5944, 7028], [-6700, 7216], [-7144, 6960], [-8048, 5568], [-7844, 4680],
             [-7360, 4200], [-6640, 3464], [-6360, 3744], [-5944, 3776], [-5834, 4743], [-5630, 4883]
         ], [
@@ -324,8 +362,9 @@ const provinces = new Map([
                 "Sacred Grove Temple of Time Owl Statue Poe",
                 "Sacred Grove Past Owl Statue Chest",
             ])
-    ])],
-    ["Eldin", new Province([-4096, 7904], {baseReqs: [diababaReq], randoReqs: []}, [
+    ]),
+
+    Eldin: new Province("Eldin", [-4096, 7904], {baseReqs: [diababaReq], randoReqs: []}, [
             [-5952, 6280], [-5936, 7020], [-5904, 7676], [-6044, 8248], [-5952, 8836], [-5612, 9452], [-5212, 9544], [-4584, 9492], 
             [-3932, 9572], [-3340, 9472], [-2956, 9196], [-2460, 9040], [-1972, 8608], [-1404, 8006], [-1228, 7352], [-2164, 7080], 
             [-2772, 7060], [-2989, 7110], [-3281, 6985], [-3432, 6760], [-3580, 6472], [-3748, 6372], [-3932, 6324], [-4276, 6340], 
@@ -389,14 +428,14 @@ const provinces = new Map([
             new SimpleSubmap([-5259, 7660], doorIconImage, 'Kakariko Empty House', [
                 "Kakariko Village Female Ant"
             ]),
-            new FlooredSubmap([-5283, 7580], doorIconImage, 'Kakariko Inn', [
+            new SimpleFlooredSubmap([-5283, 7580], doorIconImage, 'Kakariko Inn', [
                 ["Kakariko Inn Chest"],
                 []
             ]),
             new SimpleSubmap([-5162, 7670], doorIconImage, "Barnes' Shop", [
                 "Barnes Bomb Bag"
             ]),
-            new FlooredSubmap([-5097, 7593], doorIconImage, 'Kakariko Watchtower', [
+            new SimpleFlooredSubmap([-5097, 7593], doorIconImage, 'Kakariko Watchtower', [
                 [],
                 ["Kakariko Watchtower Chest"]
             ], {floorOffset: 2}),
@@ -406,7 +445,7 @@ const provinces = new Map([
                 "Kakariko Village Malo Mart Red Potion",
                 "Kakariko Village Malo Mart Hawkeye"
             ]),
-            new FlooredSubmap([-5491, 7699], doorIconImage, 'Kakariko Sanctuary', [
+            new SimpleFlooredSubmap([-5491, 7699], doorIconImage, 'Kakariko Sanctuary', [
                 ["Shad Dominion Rod"],
                 [
                    "Renados Letter",
@@ -433,7 +472,7 @@ const provinces = new Map([
                 "Eldin Field Bomskit Grotto Lantern Chest",
                 Bottle.BeeLarva.new([-2941, 7190])
             ]),
-            new FlooredSubmap([-2400, 7597], entranceIconImage, "Eldin Stockcave", [
+            new SimpleFlooredSubmap([-2400, 7597], entranceIconImage, "Eldin Stockcave", [
                 [
                     "Eldin Stockcave Lantern Chest",
                     "Eldin Stockcave Lowest Chest"
@@ -450,8 +489,8 @@ const provinces = new Map([
             new SimpleSubmap([-2211, 6585], doorIconImage, "Impaz's House", [
                 "Skybook From Impaz"
             ]),
-    ])],
-    ["Desert", new Province([-5440, 2224], {baseReqs: [Requirement.fromBoolItem(aurusMemo)]}, [
+    ]),
+    Desert: new Province("Desert", [-5440, 2224], {baseReqs: [Requirement.fromBoolItem(aurusMemo)]}, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
             [-3804, 2924], [-3840, 3154], [-4984, 3264], [-5116, 3148], [-5280, 3184], [-5472, 3256], [-5640, 3424], [-5953, 3742],
             [-6336, 3736]
@@ -561,8 +600,9 @@ const provinces = new Map([
                 [], // B49
                 ["Cave of Ordeals Great Fairy Reward"], // B50  
             ])
-    ])],
-    ['Peak', new Province([-1744, 3488], {baseReqs: [stallordReq], randoReqs:[]}, [
+    ]),
+
+    Peak: new Province('Peak', [-1744, 3488], {baseReqs: [stallordReq], randoReqs:[]}, [
         [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
             [-2704, 4220], [-3036, 4080], [-3624, 3880], [-3812, 3184], [-3636, 2272], [-3436, 1720], [-2668, 1568], [-2092, 1804], 
             [-1696, 2288], [-852, 2616], [-620, 3676], [-584, 4612]
@@ -583,8 +623,8 @@ const provinces = new Map([
         newGrotto(3, [-390, 3350], "Snowpeak Chu Grotto", [
             Bottle.RareChu.new([-416, 3048])
         ]),
-    ])],
-    ['Lanayru', new Province([-2192, 5984], {baseReqs: [fyrusReq, bombBagReq], randoReqs: []}, [[
+    ]),
+    Lanayru: new Province('Lanayru', [-2192, 5984], {baseReqs: [fyrusReq, bombBagReq], randoReqs: []}, [[
         [-5400, 5584], [-5360, 6000], [-5056, 5968], [-4640, 6248], [-4312, 6336], [-3696, 6344], [-3528, 6472], [-3424, 6728], 
         [-3280, 6968], [-2992, 7104], [-2760, 7048], [-2096, 7072], [-1248, 7328], [-800, 7216], [-584, 6768], [-480, 6368], 
         [-504, 5832], [-606, 5444], [-722, 5358], [-1104, 5408], [-1288, 5376], [-1554, 5161], [-1704, 4896], [-1894, 4812], 
@@ -689,7 +729,7 @@ const provinces = new Map([
         Bottle.BeeLarva.new([-614, 5775]),
         Bottle.Fairy.new([-5488, 3116]),
         Bottle.RareChu.new([-5353, 3456]),
-        new FlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle", [
+        new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle", [
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
             "Agitha Male Dayfly Reward",
@@ -729,14 +769,17 @@ const provinces = new Map([
         new SimpleSubmap([-4060, 4759], doorIconImage, 'Malo Mart Castle Branch', [
             "Castle Town Malo Mart Magic Armor",
         ]),
-        new FlooredSubmap([-4141, 4795], doorIconImage, "Telma's Bar", [
-            "Telma Invoice",
-            postman.new([-4282, 4523])
+        new SimpleFlooredSubmap([-4141, 4795], doorIconImage, "Telma's Bar", [
+            [
+                "Telma Invoice",
+                postman.new([-4282, 4523])
+            ],
+            []
         ]),
         new SimpleSubmap([-3940, 4930], doorIconImage, "Doctor's Office", [
 
         ]),
-        new FlooredSubmap([-4090, 4656], doorIconImage, 'Castle Goron Merchants', [
+        new SimpleFlooredSubmap([-4090, 4656], doorIconImage, 'Castle Goron Merchants', [
             [],
             []
         ]),
@@ -809,12 +852,13 @@ const provinces = new Map([
         new SimpleSubmap([-2025, 4818], entranceIconImage, 'Lanayru Ice Cave', [
             "Lanayru Ice Block Puzzle Cave Chest"
         ]),
-    ])],
-    ['Hyrule Castle', new Province([-3584, 5440], {}, castlePoints, [])]
-]);
+    ]),
+    Castle: new Province('Hyrule Castle', [-3584, 5440], {}, castlePoints, [])
+});
 
 const dungeons = Object.freeze({
     Forest: new Dungeon([-6915, 4098], [-6950, 4900], dungeonIconImage, 'Forest Temple', [
+        [   // 1F
         "Forest Temple Entrance Vines Chest",
         "Forest Temple Central Chest Behind Stairs",
         "Forest Temple Central North Chest",
@@ -842,7 +886,7 @@ const dungeons = Object.freeze({
         "Forest Temple Boss Lock",
         "Forest_Temple_Sign",
         Bottle.Fairy.new([-3920, 4820]),
-    ], {baseReqs: [], randoReqs: []}),
+    ]], {baseReqs: [], randoReqs: []}),
     
     Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
         [   // 1F

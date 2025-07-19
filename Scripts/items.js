@@ -23,7 +23,11 @@ function getIconImage(imageName) {
     return images.get('Icons/' + spaceToUnderscore(imageName) + '.png');
 }
 
-
+const Gamemodes = Object.freeze({
+    Base: "Base Game",
+    Glitchless: "Glitchless Randomizer",
+    Glitched: "Glitched Randomizer"
+})
 
 // Item & Obtainables Categories Enum
 const Categories = Object.freeze({
@@ -61,6 +65,18 @@ class Obtainable {
     }
     getCategory() {
         return this.category;
+    }
+}
+
+class NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        this.image = getIconImage(image);
+        this.name = name;
+        this.category = category;
+        this.position = position;
+    }
+    new(position) {
+        return new NonFlag(this.image, this.category, this.name, position);
     }
 }
 
@@ -495,18 +511,6 @@ let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
-
-class NonFlag {
-    constructor(image, category, name=image, position=[]) {
-        this.image = getIconImage(image);
-        this.name = name;
-        this.category = category;
-        this.position = position;
-    }
-    new(position) {
-        return new NonFlag(this.image, this.category, this.name, position);
-    }
-}
 
 let horseGrass = new NonFlag('Horse Grass', Categories.Grass);
 let hawkGrass = new NonFlag('Hawk Grass', Categories.Grass);

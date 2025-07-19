@@ -7,6 +7,7 @@ class StorageUnit {
             let defaultValue = this.convertStoreValue(storable.getDefaultStoreValue(), storable.getMaxStoreValue());
             defaultConfig += defaultValue;
             storable.index = index++;
+            storable.storageUnit = this;
         }
         this.defaultConfig = defaultConfig;
         this.checkIfInitialized();
@@ -29,7 +30,6 @@ class StorageUnit {
             return value.charCodeAt(0);
         else 
             return parseInt(value);
-
     }
     convertStoreValue(value, maxValue) {
         if (maxValue >= 10) 

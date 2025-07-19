@@ -63,7 +63,7 @@ var smallChest = new Container('Small Chest');
 var bossChest = new Container('Boss Chest');
 var rupeeBoulder = new Container('Rupee Boulder');
 
-class Flag {
+class Flag extends Storable{
     constructor(item, position, { 
             itemCategory=item.getCategory(), baseReqs=[], baseDesc="", 
             randoCategory=itemCategory, randoReqs=baseReqs, randoDesc=baseDesc,
@@ -100,6 +100,7 @@ class Flag {
         if (this.isSet())
             return;
         this.set = true;
+        this.storageUnit.setFlag(this);
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
@@ -107,11 +108,18 @@ class Flag {
         if (!this.isSet())
             return;
         this.set = false;
+        this.storageUnit.setFlag(this);
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }
     isSet() {
         return this.set;
+    }
+    getCurrentStoreValue() {
+        return this.set ? 1 : 0;
+    }
+    initialize() {
+        this.set = this.storageUnit.getFlagAsBool(this);
     }
 }
 
@@ -1009,7 +1017,7 @@ var flags = new Map([
         baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
         baseDesc: 'In the middle of the room'
     })],
-    ["Cave of Ordeals Great Fairy Reward", new Flag(Bottle.Tears, [-5928, 737], {
+    ["Cave of Ordeals Great Fairy Reward", new Flag(Bottle.Jovani, [-5928, 737], {
         baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
         baseDesc: "Talk to the Great Fairy to obtain Great Fairy's Tears.",
         randoCategory: Categories.Gifts
