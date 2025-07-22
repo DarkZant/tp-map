@@ -975,7 +975,7 @@ var flags = new Map([
     })],
     ["Gerudo Desert Owl Statue Sky Character", new Flag(skybookChar, [-6140, 1027], {
         baseReqs: [domRodReq],
-        baseDesc:  'Move the Owl Statue between the climbable platform and the one with the sky character to obtain it.'
+        baseDesc: 'Move the Owl Statue between the climbable platform and the one with the sky character to obtain it.'
     })],
     ["Gerudo Desert Owl Statue Chest", new Flag(chest.with(Rupees.Orange), [-6193, 1074], {
         baseReqs: [domRodReq],
@@ -2811,5 +2811,10 @@ var flags = new Map([
     ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
 ]);
 
-for (let [name, flag] of flags.entries()) 
+const flagsSU = new StorageUnit('Flags', flags.values());
+for (let [name, flag] of flags.entries()) {
     flag.setName(name);
+    flag.initialize();
+}
+
+

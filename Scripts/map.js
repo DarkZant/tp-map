@@ -41,7 +41,6 @@ function isVisible(marker) {
 }
 
 function initializeFlag(flag) {
-    flag.initialize();
     flag.marker = L.marker(flag.position, {
         icon: getIcon(flag.image),
         riseOnHover: true, 
@@ -140,7 +139,6 @@ function initializeFloor(floor) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const flagsSU = new StorageUnit('Flags', flags.values());
     const map = L.map('map', {
         zoom: -5,
         minZoom: -5,

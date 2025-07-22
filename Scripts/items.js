@@ -27,7 +27,7 @@ const Gamemodes = Object.freeze({
     Base: "Base Game",
     Glitchless: "Glitchless Randomizer",
     Glitched: "Glitched Randomizer"
-})
+});
 
 // Item & Obtainables Categories Enum
 const Categories = Object.freeze({

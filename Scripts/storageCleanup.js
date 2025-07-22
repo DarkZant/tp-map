@@ -1,0 +1,15 @@
+localStorage.removeItem('base');
+localStorage.removeItem('bosses');
+localStorage.removeItem('bugs');
+localStorage.removeItem('fake');
+localStorage.removeItem('gifts');
+localStorage.removeItem('locked');
+localStorage.removeItem('ncItems');
+localStorage.removeItem('notaRupee');
+localStorage.removeItem('ooccoo');
+localStorage.removeItem('poes');
+localStorage.removeItem('ruprock');
+localStorage.removeItem('shop');
+localStorage.removeItem('skills');
+localStorage.removeItem('skyChars');
+localStorage.removeItem('skyc');

@@ -1,17 +1,34 @@
-// const visibleCategories = [];
 let selectedGamemode = Gamemodes.Base;
+document.getElementById('Gamemodes').addEventListener('change', function () {
+    selectedGamemode = this.value;
+    if (selectedGamemode === Gamemodes.Base) {
+        document.getElementById('baseFlagsVisibility').style.display = "inline";
+        document.getElementById('baseFlagCounters').style.display = "inline";
+        document.getElementById('randoVisibility').style.display = "none";
+        document.getElementById('randoFlagCounters').style.display = "none";
+    }
+    else {
+        document.getElementById('baseFlagsVisibility').style.display = "none";
+        document.getElementById('baseFlagCounters').style.display = "none";
+        document.getElementById('randoVisibility').style.display = "inline";
+        document.getElementById('randoFlagCounters').style.display = "inline";
+    }
+});
 
 
 class Setting extends Storable {
     constructor(name, defaultValue=0) {
+        super();
         this.name = name;
         this.element = document.getElementById(this.name);
         this.defaultValue = defaultValue;
-        this.activationFunction = activationFunction;
         this.active = false;
-        this.element.onclick(() => {
+        this.element.addEventListener('click', () => {
             this.active = this.element.checked;
-        })
+            if (this.parent)
+                this.parent.update(this.active);
+            this.storageUnit.setFlag(this);
+        });
     }
     getDefaultStoreValue() {
         return this.defaultValue;
@@ -36,11 +53,11 @@ class CategoryVisibilitySetting extends Setting {
 class ParentSetting {
     constructor(name, children) {
         this.name = name;
-        this.element = document.getElementById(this.name);
+        this.element = document.getElementById(spaceToUnderscore(this.name));
         this.children = children;
         for (let child of children)
             child.parent = this;
-        this.element.onclick(() => {
+        this.element.addEventListener('click', () => {
             if (this.element.checked) {
                 for (let child of children) 
                     child.element.click();
@@ -51,7 +68,7 @@ class ParentSetting {
                         child.element.click();
                 }
             }
-        })
+        });
     }
     update(childIsChecked) {
         if (childIsChecked) {
@@ -73,48 +90,51 @@ class ParentSetting {
         }
         return null;
     }
+    getChildByIndex(index) {
+        return this.children[index];
+    }
 }
 
-let baseVisibilityParent = new ParentSetting('Base Visibility Parent', [
-    new CategoryVisibilitySetting('Base Main Visibility', Categories.Main),
-    new CategoryVisibilitySetting('Base Souls Visibility', Categories.Souls),
-    new CategoryVisibilitySetting('Base Characters Visibility', Categories.SkyCharacters),
-    new CategoryVisibilitySetting('Base Bugs Visibility', Categories.Bugs),
-    new CategoryVisibilitySetting('Base Skills Visibility', Categories.HiddenSkills),
-    new CategoryVisibilitySetting('Base Rupees Visibility', Categories.Rupees),
-    new CategoryVisibilitySetting('Base Hearts Visibility', Categories.Hearts),
-    new CategoryVisibilitySetting('Base Ammunition Visibility', Categories.Ammo),
-    new CategoryVisibilitySetting('Base Locks Visibility', Categories.Locks),
-    new CategoryVisibilitySetting('Base Ooccoo Visibility', Categories.Ooccoo),
-    new CategoryVisibilitySetting('Base Bosses Visibility', Categories.Ooccoo)
+let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
+    new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main),
+    new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.Souls),
+    new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters),
+    new CategoryVisibilitySetting('Base_Bugs_Visibility', Categories.Bugs),
+    new CategoryVisibilitySetting('Base_Skills_Visibility', Categories.HiddenSkills),
+    new CategoryVisibilitySetting('Base_Rupees_Visibility', Categories.Rupees),
+    new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts),
+    new CategoryVisibilitySetting('Base_Ammunition_Visibility', Categories.Ammo),
+    new CategoryVisibilitySetting('Base_Locks_Visibility', Categories.Locks),
+    new CategoryVisibilitySetting('Base_Ooccoo_Visibility', Categories.Ooccoo),
+    new CategoryVisibilitySetting('Base_Bosses_Visibility', Categories.Bosses)
 ]);
 
-let randoCheckVisibilityParent = new ParentSetting('Rando Check Visibility Parent', [
-    new CategoryVisibilitySetting('Rando Main Visibility', Categories.Main),
-    new CategoryVisibilitySetting('Rando Souls Visibility', Categories.Souls),
-    new CategoryVisibilitySetting('Rando Characters Visibility', Categories.SkyCharacters),
-    new CategoryVisibilitySetting('Rando Bugs Visibility', Categories.Bugs),
-    new CategoryVisibilitySetting('Rando Skills Visibility', Categories.HiddenSkills),
-    new CategoryVisibilitySetting('Rando Gifts Visibility', Categories.Gifts),
-    new CategoryVisibilitySetting('Rando Shop Visibility', Categories.ShopItems)
+let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Parent', [ // 7
+    new CategoryVisibilitySetting('Rando_Main_Visibility', Categories.Main),
+    new CategoryVisibilitySetting('Rando_Souls_Visibility', Categories.Souls),
+    new CategoryVisibilitySetting('Rando_Characters_Visibility', Categories.SkyCharacters),
+    new CategoryVisibilitySetting('Rando_Bugs_Visibility', Categories.Bugs),
+    new CategoryVisibilitySetting('Rando_Skills_Visibility', Categories.HiddenSkills),
+    new CategoryVisibilitySetting('Rando_Gifts_Visibility', Categories.Gifts),
+    new CategoryVisibilitySetting('Rando_Shop_Visibility', Categories.ShopItems)
 ]);
 
-let randoNonCheckVisibilityParent = new ParentSetting('Rando Non Check Visibility Parent', [
-    new CategoryVisibilitySetting('Rando Hint Visibility', Categories.Hints),
-    new CategoryVisibilitySetting('Rando Bosses Visibility', Categories.Bosses),
-    new CategoryVisibilitySetting('Rando Rupees Category', Categories.Rupees),
-    new CategoryVisibilitySetting('Rando Locks Visibility', Categories.Locks),
-    new CategoryVisibilitySetting('Rando Ooccoo Visibility', Categories.Ooccoo),
-    new CategoryVisibilitySetting('Rando Non-Check Visibility', Categories.NonChecks)
+let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibility_Parent', [ // 6
+    new CategoryVisibilitySetting('Rando_Hints_Visibility', Categories.Hints),
+    new CategoryVisibilitySetting('Rando_Bosses_Visibility', Categories.Bosses),
+    new CategoryVisibilitySetting('Rando_Rupees_Visibility', Categories.Rupees),
+    new CategoryVisibilitySetting('Rando_Locks_Visibility', Categories.Locks),
+    new CategoryVisibilitySetting('Rando_Ooccoo_Visibility', Categories.Ooccoo),
+    new CategoryVisibilitySetting('Rando_Non-Check_Visibility', Categories.NonChecks)
 ]);
 
-let nonFlagVisibilityParent = new ParentSetting('Non Flag Visibility Parent', [
-    new CategoryVisibilitySetting('Shop Visibility', Categories.Shops),
-    new CategoryVisibilitySetting('Bottle Visibility', Categories.Bottle),
-    new CategoryVisibilitySetting('Grass Visibility', Categories.Grass),
-    new CategoryVisibilitySetting('Postman Visibility', Categories.Postman),
-    new CategoryVisibilitySetting('Fishing Visibility', Categories.Fishing),
-    new CategoryVisibilitySetting('Minigames Visibility', Categories.Minigames)
+let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [ // 6
+    new CategoryVisibilitySetting('Shop_Visibility', Categories.Shops),
+    new CategoryVisibilitySetting('Bottle_Visibility', Categories.Bottle),
+    new CategoryVisibilitySetting('Grass_Visibility', Categories.Grass),
+    new CategoryVisibilitySetting('Postman_Visibility', Categories.Postman),
+    new CategoryVisibilitySetting('Fishing_Visibility', Categories.Fishing),
+    new CategoryVisibilitySetting('Minigames_Visibility', Categories.Minigames)
 ]); 
 
 function addChildrenToMap(parent, map) {
@@ -138,16 +158,68 @@ function verifyCategoryVisibility(category) {
         return randoVisibilitySettings.get(category).active;
 }
 
-const Settings = Object.freeze({
-    TrackerLogic: new Setting('Tracker Logic'),
-    HideNoReqs: new Setting('Hide Flag Without Requirement'),
-    AutocompleteTracker: new Setting('Tracker Autocompletion'),
-    EmptySubmaps: new Setting('Empty Submaps Visibility'),
-    SubmapAsMarker: new Setting('Submap As One Marker'),
-    ChestsContent: new Setting('Show Chests As Content'),
-    TrackerOverlay: new Setting('Tracker Position'),
-    CountFlags: new Setting('Count Flags'),
-    CountChecks: new Setting('Count Checks'),
-    CountNonChecks: new Setting('Count Non Checks'),
-    CountNonFlags: new Setting('Count Non Flags')
+const Settings = Object.freeze({ // 12
+    TrackerLogic: new Setting('Tracker_Logic'),
+    HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),
+    AutocompleteTracker: new Setting('Tracker_Autocompletion'),
+    EmptySubmaps: new Setting('Empty_Submaps_Visibility'),
+    SubmapAsMarker: new Setting('Submap_As_One_Marker'),
+    ChestsContent: new Setting('Show_Chests_As_Content'),
+    TrackerOverlay: new Setting('Tracker_Position'),
+    CountersVisibility: new Setting('Show_Counters'),
+    CountFlags: new Setting('Count_Flags'),
+    CountChecks: new Setting('Count_Checks'),
+    CountNonChecks: new Setting('Count_Non_Checks'),
+    CountNonFlags: new Setting('Count_Non_Flags')
 });
+
+let settingsArray = Object.values(Settings);
+let storableArray =  [
+    baseVisibilityParent.getChildByIndex(0),
+    baseVisibilityParent.getChildByIndex(1),
+    baseVisibilityParent.getChildByIndex(2),
+    baseVisibilityParent.getChildByIndex(3),
+    baseVisibilityParent.getChildByIndex(4),
+    baseVisibilityParent.getChildByIndex(5),
+    baseVisibilityParent.getChildByIndex(6),
+    baseVisibilityParent.getChildByIndex(7),
+    baseVisibilityParent.getChildByIndex(8),
+    baseVisibilityParent.getChildByIndex(9),
+    baseVisibilityParent.getChildByIndex(10),
+    randoCheckVisibilityParent.getChildByIndex(0),
+    randoCheckVisibilityParent.getChildByIndex(1),
+    randoCheckVisibilityParent.getChildByIndex(2),
+    randoCheckVisibilityParent.getChildByIndex(3),
+    randoCheckVisibilityParent.getChildByIndex(4),
+    randoCheckVisibilityParent.getChildByIndex(5),
+    randoCheckVisibilityParent.getChildByIndex(6),
+    randoNonCheckVisibilityParent.getChildByIndex(0),
+    randoNonCheckVisibilityParent.getChildByIndex(1),
+    randoNonCheckVisibilityParent.getChildByIndex(2),
+    randoNonCheckVisibilityParent.getChildByIndex(3),
+    randoNonCheckVisibilityParent.getChildByIndex(4),
+    randoNonCheckVisibilityParent.getChildByIndex(5),
+    nonFlagVisibilityParent.getChildByIndex(0),
+    nonFlagVisibilityParent.getChildByIndex(1),
+    nonFlagVisibilityParent.getChildByIndex(2),
+    nonFlagVisibilityParent.getChildByIndex(3),
+    nonFlagVisibilityParent.getChildByIndex(4),
+    nonFlagVisibilityParent.getChildByIndex(5),
+    settingsArray[0],
+    settingsArray[1],
+    settingsArray[2],
+    settingsArray[3],
+    settingsArray[4],
+    settingsArray[5],
+    settingsArray[6],
+    settingsArray[7],
+    settingsArray[8],
+    settingsArray[9],
+    settingsArray[10],
+    settingsArray[11],
+];
+
+const settingsSU = new StorageUnit('settings', storableArray);
+
+for (let setting of storableArray)
+    setting.initialize();

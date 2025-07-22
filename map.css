@@ -223,8 +223,10 @@ body img {
 /* Top right menu icons */
 #menuicons {
     position: absolute;
-    display: inline;
+    display: flex;
+    flex-direction: column;
     text-align: right;
+    row-gap: 0.5dvh;
     line-height: 0.812vh;
     top: 0;
     right: 0;
@@ -427,19 +429,22 @@ body img {
     right: 0;
     top: 0;  
     text-align: center;
+    /* visibility: visible; */
+    display: none;
+    /* width: 25%; */
 }
-#settitle {
+#settings h2 {
     text-decoration: underline; 
     font-size: 1.3vmax;
     margin: 2vh 0;
 }
-#setButtons {
+#settingsButtons {
     display: flex;
     justify-content: center;
     column-gap: 2vw;
     font-family: Courier;
 }
-.setb {
+#settingsButtons button {
     width: 8vmax;
     max-width: 8vmax;
     height: 5.5vmin;
@@ -454,43 +459,61 @@ body img {
     margin-bottom: 1vh;
     font-family: Arial, sans-serif;
 }
-.setbh:hover {
+#settingsButtons button:hover {
     background-color: #272727;
 }
-#setche {
+#gamemodeSelection {
+    padding-top: 2.5dvh;
+    padding-bottom: 0.5dvh;
+    text-align: center;
+}
+#gamemodesLabel {
+    font-size: 1.2vmax;
+    font-weight: bold;
+    padding-bottom: 0.75dvh;
+    cursor: auto;
+}
+#Gamemodes {
+    background-color: #1d1a14;
+    color:#c0c0c0;
+    height: 4dvh;
+    font-size: 1.05vmax;
+
+}
+#settingsCheckboxes {
     text-align: left;
     margin-left: 5%;
 }
-.seth {
+#settings h3 {
     font-size: 1.05vmax; 
     margin-bottom: 0.5%;
+    text-align: center;
+    text-decoration: underline;
 }
-.bigSC {
-    height: 0.95vmax;
-    aspect-ratio: 1;
-    margin-top: 2.5%;
-    cursor: pointer;
-}
-.bigSL {
-    font-size: 1.025vmax;
-    cursor: pointer;
-    line-break: strict;
-    width: 25vw;
-}
-.SC {
+input[type="checkbox"] {
     height: 0.85vmax;
     aspect-ratio: 1;
     margin-left: 3%;
     margin-top: 2%;
     cursor: pointer;
 }
-.SL {
+label {
+    display: block;
     font-size: 0.9vmax;
     cursor: pointer;
 }
-.bigSL::after, .SL::after{
-    content: "\a";
-    white-space: pre;
+.bigSettingCheckbox[type="checkbox"] {
+    height: 0.95vmax;
+    aspect-ratio: 1;
+    margin-top: 2.5%;
+    cursor: pointer;
+    margin-left: 0;
+}
+.bigSettingCheckboxLabel {
+    font-size: 1.025vmax;
+    cursor: pointer;
+    line-break: strict;
+    width: 25vw;
 }
 /* Controls Menu */
 #controls {

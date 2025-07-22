@@ -89,14 +89,12 @@
                     <img src="Icons/Settings.png">  
                 </div>
             </div>              
-            <br>
             <div class="menuicon">
                 <div class="tt" id="contTT">Controls</div>
                 <div class="menuiconimg" id="contIcon" onclick="showRightMenu('controls', 25)">
                     <img src="Icons/Controller.png">  
                 </div>
             </div>
-            <br>
             <div class="menuicon">
                 <div class="tt" id="trackerTT">Tracker</div>
                 <div class="menuiconimg" id="trackerIcon" onclick="showRightMenu('tracker', 29)">
@@ -108,97 +106,87 @@
         
         <div id="settings" class="menu">
             <div id="setX" class="menuX" onclick="hideRightMenu('settings')">×</div>
-            <h2 id="settitle">Settings</h2>
-            <div id="setButtons">
-                <button class="setb setbh" onclick="resetMap(this)">Reset Map</button>
-                <button class="setb setbh" onclick="trackerButton(this)">Reset Tracker</button>
+            <h2>Settings</h2>
+            <div id="settingsButtons">
+                <button onclick="resetMap(this)">Reset Map</button>
+                <button onclick="trackerButton(this)">Reset Tracker</button>
             </div>      
-            <div id="setche">
-                <h3 class="seth">General Settings</h3>
-                <input type="checkbox" id="trackerS" class="bigSC" onload="new Setting(this, 0, 0, true)">
-                <label for="trackerS" class="bigSL">Enable Tracker Logic</label>
-                <input type="checkbox" id="hideTrackerS" class="SC" onload="new Setting(this, 1, 0, true);">
-                <label for="hideTrackerS" class="SL">Hide Checks without Requirements</label>
-                <input type="checkbox" id="emptysubS" class="bigSC" onload="new Setting(this, 2, 0, true);">
-                <label for="emptysubS" class="bigSL">Show Empty Submaps</label>
-                <input type="checkbox" id="1checksubS" class="bigSC" onload="new Setting(this, 3, 0, true);">
-                <label for="1checksubS" class="bigSL">Show Submaps with 1 Visible Check as Check</label>
-                <input type="checkbox" id="chestS" class="bigSC"onload="new Setting(this, 4, 0, true);">
-                <label for="chestS" class="bigSL">Show Chests as their Base Game Content</label>
-                <input type="checkbox" id="trackerOverlapS" class="bigSC" onload="new Setting(this, 5, 0, true);">
-                <label for="trackerOverlapS" class="bigSL">Overlay Tracker on Map</label>
+            <div id="gamemodeSelection">
+                <label id="gamemodesLabel" for="Gamemodes">Gamemode</label>
+                    <select name="Gamemodes" id="Gamemodes">
+                    <option>Base Game</option>
+                    <option>Glitchless Randomizer</option>
+                    <option>Glitched Randomizer</option>
+                </select>
+            </div>
+            <div id="settingsCheckboxes">
                 
-                <h3 class="seth">Submap Counters</h3>
-                <input type="checkbox" id="subCounterS" class="bigSC" onload="new Setting(this, 6, 0, true);">
-                <label for="subCounterS" class="bigSL">Show Check Counters for Submaps</label>
-                <input type="checkbox" id="poescptS" class="SC" onload="new Setting(this, 7, 3, 'poes');">
-                <label for="poescptS" class="SL">Count Poes</label>
-                <input type="checkbox" id="bugscptS" class="SC" onload="new Setting(this, 8, 3, 'bugs');">
-                <label for="bugscptS" class="SL">Count Golden Bugs</label>
-                <input type="checkbox" id="giftscptS" class="SC" onload="new Setting(this, 9, 3, 'gifts');">
-                <label for="giftscptS" class="SL">Count Gifts from NPCs</label>
-                <input type="checkbox" id="skycptS" class="SC" onload="new Setting(this, 10, 3, 'skyChars');">
-                <label for="skycptS" class="SL">Count Sky Characters</label>
-                <input type="checkbox" id="skillscptS" class="SC" onload="new Setting(this, 11, 3, 'skills');">
-                <label for="skillscptS" class="SL">Count Hidden Skills</label>
-                <input type="checkbox" id="shopcptS" class="SC" onload="new Setting(this, 12, 3, 'shop');">
-                <label for="shopcptS" class="SL">Count Shop Items</label>
-                <input type="checkbox" id="flagscptS" class="SC" onload="new Setting(this, 13, 0, true);">
-                <label for="flagscptS" class="SL">Count Non-Check Flags</label>
-                <input type="checkbox" id="nflagscptS" class="SC" onload="new Setting(this, 14, 0, true);">
-                <label for="nflagscptS" class="SL">Count Non-Flags</label>
+                <h3>General Settings</h3>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Logic" class="bigSettingCheckbox">Enable Tracker Logic</label>
+                <label><input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Tracker Autocompletion</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Empty_Submaps_Visibility" class="bigSettingCheckbox">Show Empty Submaps</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Submap_As_One_Marker" class="bigSettingCheckbox">Single-Marker Submap Shows That Marker</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Show_Chests_As_Content" class="bigSettingCheckbox">Show Chests as their Content</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Position" class="bigSettingCheckbox">Overlay Tracker on Map</label>
                 
-                <h3 class="seth">Markers Visibility</h3>
-                <input type="checkbox" id="checkS" class="bigSC" 
-                    onload="new Setting(this, 0, 1, ['baseS', 'poesS', 'bugsS', 'giftsS', 'skyS', 'skillS', 'shopS'])">
-                <label for="checkS" class="bigSL">Show Checks</label>
-                <input type="checkbox" id="baseS" class="SC" onload="new Setting(this, 15, 2, ['base', 'checkS'])">
-                <label for="baseS" class="SL">Show Base Checks</label>
-                <input type="checkbox" id="poesS" class="SC" onload="new Setting(this, 16, 2, ['poes', 'checkS'])">
-                <label for="poesS" class="SL">Show Poe Souls</label>
-                <input type="checkbox" id="bugsS" class="SC" onload="new Setting(this, 17, 2, ['bugs', 'checkS'])">
-                <label for="bugsS" class="SL">Show Golden Bugs</label>
-                <input type="checkbox" id="giftsS" class="SC" onload="new Setting(this, 18, 2, ['gifts', 'checkS'])">
-                <label for="giftsS" class="SL">Show Gifts from NPCs</label>
-                <input type="checkbox" id="skyS" class="SC" onload="new Setting(this, 19, 2, ['skyChars', 'checkS'])">
-                <label for="skyS" class="SL">Show Sky Characters</label>
-                <input type="checkbox" id="skillS" class="SC" onload="new Setting(this, 20, 2, ['skills', 'checkS'])">
-                <label for="skillS" class="SL">Show Hidden Skills</label>
-                <input type="checkbox" id="shopS" class="SC" onload="new Setting(this, 21, 2, ['shop', 'checkS'])">
-                <label for="shopS" class="SL">Show Shop Items</label>
-                <input type="checkbox" id="heartPieceS" class="bigSC" onload="new Setting(this, 30, 4, 'checkS')">
-                <label for="heartPieceS" class="bigSL">Show <b>Only</b> Heart Pieces</label>
-
-                <input type="checkbox" id="ncheckS" class="bigSC" 
-                    onload="new Setting(this, 0, 1, ['ooccooS', 'locdoorS', 'notRupeeS', 'bossesS', 'ncItemsS'])">
-                <label for="ncheckS" class="bigSL">Show Non-Check Flags</label>
-                <input type="checkbox" id="ooccooS" class="SC" onload="new Setting(this, 22, 2, ['ooccoo', 'ncheckS'])">
-                <label for="ooccooS" class="SL">Show Ooccoo</label>
-                <input type="checkbox" id="locdoorS" class="SC" onload="new Setting(this, 23, 2, ['locked', 'ncheckS'])">
-                <label for="locdoorS" class="SL">Show Locked Doors</label>
-                <input type="checkbox" id="notRupeeS" class="SC" onload="new Setting(this, 24, 2, ['notaRupee', 'ncheckS'])">
-                <label for="notRupeeS" class="SL">Show Notable Rupees & Rupee Boulders</label>
-                <input type="checkbox" id="bossesS" class="SC" onload="new Setting(this, 31, 2, ['bosses', 'ncheckS'])">
-                <label for="bossesS" class="SL">Show Bosses</label>
-                <input type="checkbox" id="ncItemsS" class="SC" onload="new Setting(this, 32, 2, ['ncItems', 'ncheckS'])">
-                <label for="ncItemsS" class="SL">Show Non-Check Items</label>
-
-                <input type="checkbox" id="nflagS" class="bigSC"
-                    onload="new Setting(this, 0, 1, ['hintS', 'bottleS', 'rshopS', 'grassS', 'monrupeeS', 'fishS'])">
-                <label for="nflagS" class="bigSL">Show Non-Flags</label>
-                <input type="checkbox" id="hintS" class="SC"  onload="new Setting(this, 33, 2, ['hint', 'nflagS'])">
-                <label for="hintS" class="SL">Show Randomizer Hints</label>
-                <input type="checkbox" id="bottleS" class="SC"  onload="new Setting(this, 25, 2, ['bottle', 'nflagS'])">
-                <label for="bottleS" class="SL">Show Bottled Items</label>
-                <input type="checkbox" id="rshopS" class="SC" onload="new Setting(this, 26, 2, ['rshop', 'nflagS'])">
-                <label for="rshopS" class="SL">Show Entire Shops</label>
-                <input type="checkbox" id="grassS" class="SC" onload="new Setting(this, 27, 2, ['grass', 'nflagS'])">
-                <label for="grassS" class="SL">Show Horse & Hawk Grass</label>
-                <input type="checkbox" id="monrupeeS" class="SC" onload="new Setting(this, 28, 2, ['monrup', 'nflagS'])">
-                <label for="monrupeeS" class="SL">Show Monster + Rupee Groups</label>
-                <input type="checkbox" id="fishS" class="SC" onload="new Setting(this, 29, 2, ['fish', 'nflagS'])">
-                <label for="fishS" class="SL">Show Fishing Spots</label>
-                
+                <h3>Marker Visibility</h3>
+                <div id="baseFlagsVisibility">
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Base_Visibility_Parent" class="bigSettingCheckbox">Show Flags</label>
+                    <label><input type="checkbox" id="Base_Main_Visibility">Show Main Items</label>
+                    <label><input type="checkbox" id="Base_Hearts_Visibility">Show Heart Pieces & Containers</label>
+                    <label><input type="checkbox" id="Base_Souls_Visibility">Show Poe Souls</label>
+                    <label><input type="checkbox" id="Base_Bugs_Visibility">Show Golden Bugs</label>
+                    <label><input type="checkbox" id="Base_Skills_Visibility">Show Hidden Skills</label>
+                    <label><input type="checkbox" id="Base_Characters_Visibility">Show Sky Characters</label>
+                    <label><input type="checkbox" id="Base_Rupees_Visibility">Show Rupees</label>
+                    <label><input type="checkbox" id="Base_Ammunition_Visibility">Show Arrows, Bombs & Seeds</label>
+                    <label><input type="checkbox" id="Base_Bosses_Visibility">Show Bosses</label>
+                    <label><input type="checkbox" id="Base_Ooccoo_Visibility">Show Ooccoo</label>
+                    <label><input type="checkbox" id="Base_Locks_Visibility">Show Locks</label>
+                </div>
+                <div id="randoVisibility" style="display: none;">
+                    <div id="randoChecksVisibility">
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Check_Visibility_Parent" class="bigSettingCheckbox">Show Checks</label>
+                        <label><input type="checkbox" id="Rando_Main_Visibility">Show Main Checks</label>
+                        <label><input type="checkbox" id="Rando_Souls_Visibility">Show Poe Souls</label>
+                        <label><input type="checkbox" id="Rando_Bugs_Visibility">Show Golden Bugs</label>
+                        <label><input type="checkbox" id="Rando_Skills_Visibility">Show Hidden Skills</label>
+                        <label><input type="checkbox" id="Rando_Characters_Visibility">Show Sky Characters</label>
+                        <label><input type="checkbox" id="Rando_Gifts_Visibility">Show Gifts from NPCs</label>
+                        <label><input type="checkbox" id="Rando_Shop_Visibility">Show Shop Items</label>
+                    </div>
+                    <div id="randoNonChecksVisibility">
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Non_Check_Visibility_Parent" class="bigSettingCheckbox">Show Non-Checks</label>
+                        <label><input type="checkbox" id="Rando_Hints_Visibility">Show Hints</label>
+                        <label><input type="checkbox" id="Rando_Bosses_Visibility">Show Bosses</label>
+                        <label><input type="checkbox" id="Rando_Rupees_Visibility">Show Rupees</label>
+                        <label><input type="checkbox" id="Rando_Locks_Visibility">Show Locks</label>
+                        <label><input type="checkbox" id="Rando_Ooccoo_Visibility">Show Ooccoo</label>
+                        <label style="display: none;"><input type="checkbox" id="Rando_Non-Check_Visibility">Show Non-Check Items</label>
+                    </div>
+                </div>
+                <div id="nonFlagsVisibility">
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Non_Flag_Visibility_Parent" class="bigSettingCheckbox">Show Non-Flags</label>
+                    <label><input type="checkbox" id="Shop_Visibility">Show Shops</label>
+                    <label><input type="checkbox" id="Bottle_Visibility">Show Bottle Contents</label>
+                    <label><input type="checkbox" id="Grass_Visibility">Show Horse & Hawk Grass</label>
+                    <label><input type="checkbox" id="Postman_Visibility">Show Postman</label>
+                    <label><input type="checkbox" id="Fishing_Visibility">Show Fishing Spots</label>
+                    <label><input type="checkbox" id="Minigames_Visibility">Show Minigames</label>
+                </div>
+                <h3>Marker Counters</h3>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" class="bigSettingCheckbox" id="Show_Counters">Show Counters</label>
+                <div id="baseFlagCounters">
+                    <label><input type="checkbox" id="Count_Flags">Count Flags</label>
+                </div>
+                <div id="randoFlagCounters" style="display: none;">
+                    <label><input type="checkbox" id="Count_Checks">Count Checks</label>
+                    <label><input type="checkbox" id="Count_Non_Checks">Count Non-Checks</label>
+                </div>
+                <div id="nonFlagCounters">
+                    <label><input type="checkbox" id="Count_Non_Flags">Count Non Flags</label>
+                </div>
                 <br>
             </div>               
         </div>
@@ -681,16 +669,17 @@
             </div>
         </div>
     <!-- Scripts -->
-    <!-- <script src="Scripts/images.js"></script>
+    <script src="Scripts/images.js"></script>
     <script src="Scripts/items.js"></script>
     <script src="Scripts/storage.js"></script>
-    <script src="Scripts/tracker.js"></script>
-    <script src="Scripts/flags.js"></script>
-    <script src="Scripts/submaps.js"></script> -->
-    <!-- <script src="Scripts/settings.js"></script> -->
+    <!-- <script src="Scripts/tracker.js"></script> -->
+    <!-- <script src="Scripts/flags.js"></script> -->
+    <!-- <script src="Scripts/submaps.js"></script> -->
+    <script src="Scripts/settings.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- <script src="Scripts/map.js"></script> -->
-    <script src="Scripts/oldMap.js"></script> 
+    <!-- <script src="Scripts/oldMap.js"></script>  -->
+    <script src="Scripts/storageCleanup.js"></script>
 
     </body>
 </html>
