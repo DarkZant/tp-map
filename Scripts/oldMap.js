@@ -371,7 +371,7 @@ var Submap = L.Marker.extend({
         mapState = 1;
         document.getElementById('subName').style.display = "none";
         TL.setOpacity(1);
-        loadTLIcons();
+        loadTileMapMarkers();
     },
     loadCounterIcon: function(amount) {
         this.remove();
@@ -542,7 +542,7 @@ var Dungeon = Submap.extend({
         mapState = 1;
         TL.addTo(map);
         setBoundsToTL(); 
-        loadTLIcons();
+        loadTileMapMarkers();
     },
     hideUI: function() {
         for (let i = this.floorOffset; i < this.floors.length + this.floorOffset; ++i) {
@@ -812,8 +812,8 @@ var CaveOfOrdeals = FlooredSubmap.extend({
         document.getElementById('cooText').innerHTML = this.floorsText[newFloor];
     },
     setupButtons: function() {
-        let arrowUp = document.getElementById('cooUP');
-        let arrowDown = document.getElementById('cooDOWN');
+        let arrowUp = document.getElementById('caveofOrdealsUpArrow');
+        let arrowDown = document.getElementById('caveofOrdealsDownArrow');
         this.wPress = () =>  {
             window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'w'}));
         };
@@ -2587,7 +2587,7 @@ function loadImageMap() {
     if (map.getZoom() != -5)
         return;
     mapState = 0;
-    document.getElementById('made').style.display = 'block';   
+    document.getElementById('credit').style.display = 'block';   
     map.setView([0, 0], -4);
     map.setMinZoom(-4);
     if (window.innerWidth >= 1000 && window.innerHeight >= 700)
@@ -2603,7 +2603,7 @@ function loadTilemapFromImageMap() {
     if (map.getZoom() <= -4)
         return;
     mapState = 1;
-    document.getElementById('made').style.display = 'none'; 
+    document.getElementById('credit').style.display = 'none'; 
     map.dragging.enable();             
     map.setMinZoom(-5);
     setBoundsToTL();
@@ -2611,7 +2611,7 @@ function loadTilemapFromImageMap() {
     map.on('zoomend', loadImageMap); 
     removeAllLayers();  
     TL.addTo(map); 
-    loadTLIcons(); 
+    loadTileMapMarkers(); 
 
     let cpt = 0;
     map.eachLayer(function(_){
@@ -2627,7 +2627,7 @@ function loadImageIcons() {
     for (let i = 0; i < dungeons.length - 1; ++i)
         dungeons[i].loadIcon();
 }
-function loadTLIcons() {
+function loadTileMapMarkers() {
     for (let i = 0; i < provinces.length; ++i)
         provinces[i].loadIcons();
     for (let i = 0; i < dungeons.length; ++i) 
@@ -2648,13 +2648,13 @@ function exitSubmap() {
     map.dragging.enable();
     mapState = 1;
     TL.setOpacity(1);
-    loadTLIcons();
+    loadTileMapMarkers();
 }
 function reloadIcons() {
     switch (mapState) {
         case -1 : break;
         case 0 : loadImageIcons(); break;
-        case 1 : removeAllLayersExceptTL(); loadTLIcons(); break;
+        case 1 : removeAllLayersExceptTL(); loadTileMapMarkers(); break;
         default : loadedSubmap.reload(); break;
     }
 }

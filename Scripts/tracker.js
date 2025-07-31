@@ -20,6 +20,7 @@ class TrackerItem extends Storable {
     constructor(item) {
         super();
         this.item = item;
+        this.item.tracker = this;
         this.initialized = false;
     }
     setElem(elem) {
@@ -32,13 +33,27 @@ class TrackerItem extends Storable {
             this.item.decrease(); 
             this.update();
         });
-        elem.addEventListener('auxclick', (e) => { 
-            if (e.button == 1) {
-                e.preventDefault();
-                this.item.reset();
-                this.update();
-            }
-        }); 
+        if (elem.classList.contains('tboss')) {
+            elem.addEventListener('auxclick', (e) => { 
+                if (e.button == 1) {
+                    e.preventDefault();
+                    let requiredElem = elem.parentElement.getElementsByTagName('span')[0];
+                    if (requiredElem.style.display === 'inline')
+                        requiredElem.style.display = 'none';
+                    else 
+                        requiredElem.style.display = 'inline';
+                }
+            }); 
+        }
+        else {
+            elem.addEventListener('auxclick', (e) => { 
+                if (e.button == 1) {
+                    e.preventDefault();
+                    this.item.reset();
+                    this.update();
+                }
+            }); 
+        }
     }
     initialize() {
         let storedValue = this.storageUnit.getFlagAsNumber(this);
@@ -102,6 +117,18 @@ class TrackerItem extends Storable {
         imgElem.src = imgSrc.slice(0, -5) + 
         (itemState == 0 ? 0 : itemState - 1) + imgSrc.slice(-4); 
     }
+    increase() {
+        if (this.item instanceof BoolItem && this.item.hasParentItem())
+            this.item.parentItem.tracker.increase();
+        else
+            this.elem.click();
+    }
+    decrease() {
+        if (this.item instanceof BoolItem && this.item.hasParentItem())
+            this.item.parentItem.tracker.decrease();
+        else
+            this.elem.dispatchEvent(new MouseEvent('contextmenu'));
+    }
     getDefaultStoreValue() {
         return this.item.getMinState();
     }
@@ -130,7 +157,7 @@ for (let titemDiv of document.querySelectorAll('.titem')) {
     if ("item" in titemDiv.dataset) 
         trackerItems.get(titemDiv.dataset.item).setElem(titemDiv);
     else {
-        trackerItems.get("Icons/" + titemDiv.children[1].src.split("Icons/")[1]).setElem(titemDiv);
+        trackerItems.get("Icons/" + titemDiv.getElementsByClassName('timage')[0].src.split("Icons/")[1]).setElem(titemDiv);
     }
 }
 // Create StorageUnit for TrackerItems

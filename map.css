@@ -68,7 +68,7 @@ body img {
     background-color: #1d1a14; 
 }
 /* Made by DarkZant */
-#made {
+#credit {
     position: absolute;
     top: 0;
     font-size: 1.25vmax;
@@ -80,31 +80,50 @@ body img {
     margin: 1.2vh 0 0 0.5vw;
     z-index: 1000;
 }
-#dz {
+#credit a {
     color: #9f2aff;
 }
-#dz:hover {
+#credit a:hover {
     color: #7713c9;
 }
-/* Dungeon UI */
-#dun {
-    display: none;  
+/* Submap UI */
+#submap {
     position: absolute;
     margin-left: 1%;
     margin-top: 1%;
 }
-#dn {
+#dungeonName {
+    display: none;
+    /* display: grid; */
+    place-items: center;
+    position: absolute;
+    top: 1vh;
+    left: 0.5vw;
     width: 35vw;
-    position: relative;
+    max-height: 100%;
     z-index: 900;
 }
-.di {
+#dungeonName img {
+    max-width: 100%;
+    grid-area: 1 / 1;
+}
+#dungeonName div {
+    grid-area: 1 / 1;
+    text-align: center;
+    color: #c7c4b2;
+    text-shadow: #060501 0px 3.5px 2px;
+    font-family: 'TPLocation', Arial, sans-serif;
+    font-size: 2.1vw;
+    letter-spacing: 0.2vw;
+    z-index: 925;
+}
+/* Floor buttons */
+.dungeonImg, .floorButton img {
     border-style: solid;
     border-width: 0.2vmax;
     border-color: #38352e;
-    z-index: 900;
 }
-#dc {   
+#floors {   
     position: absolute; 
     width: 15vw;
     max-height: 100%;
@@ -112,20 +131,34 @@ body img {
     left: 2vw;
     display: flex;
     flex-direction: column;
+    row-gap: 2px;
     cursor: pointer;
+    z-index: 900;
 }    
-.F {  
+.floorButton {  
     display: none; 
+    filter: brightness(150%);
     transition: filter 0.15s, transform 0.05s;
-    margin-top: 0.4vh;
+    cursor: pointer;
 }
-.F:hover {
+.floorButton:hover {
     filter: brightness(225%) !important;
     transform: scale(1.05) !important;
 }
+.floorButton img {
+    max-width: 100%;
+}
+.floorButton div {
+    position: relative;
+    right: 37%;
+    color: #a4a192;
+    font-size: 2.2vw;
+    text-shadow: #101210 1px 3px 1px;
+    font-family: 'TPLocation', Arial, sans-serif;
+}
 
 /* Submap Names */
-#subName {
+#submapName {
     display: none;
     position: absolute;
     width: 35vw;
@@ -133,10 +166,11 @@ body img {
     top: 1vh;
     left: 0.5vw;
 }
-#subName img {
+#submapName img {
     max-width: 100%;
+    height: 53.5px;
 }
-#subName div {
+#submapName div {
     position: absolute;
     color: #c0bc72;
     text-shadow: #060501 0px 3.5px 2px;
@@ -149,33 +183,36 @@ body img {
 
 
 /* Cave of Ordeals UI */
-#coo {
+#caveofOrdeals {
     display: none;
-    position: absolute;
+    position: relative;
     top: 35dvh;
-    width: 100%;
     z-index: 900;
 }
-#cooCont {
+#caveofOrdealsControls {
     position: absolute;
     left: 5vw;
-    font-size: 2.2vw;
     text-align: center;
     width: 15.75vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 20px;
 }
-#cooBut {
+#caveofOrdealsButton {
+    display: flex;
     filter: brightness(150%);
     transition: filter 0.15s, transform 0.05s;
     cursor: pointer;
 }
-#cooBut:hover {
+#caveofOrdealsButton:hover {
     filter: brightness(225%) !important;
     transform: scale(1.05) !important;
 }
-#cooBut img {
+#caveofOrdealsButton img {
     max-width: 100%;
 }
-#cooBut div {
+#caveofOrdealsButton div {
     position: absolute;
     color: #a4a192;
     text-shadow: #101210 1px 3px 1px;
@@ -184,25 +221,18 @@ body img {
     top: 0;
     z-index: 910;
 }
-.cooArrows {
-    margin: 0;
+.caveofOrdealsArrows {
     width: 5.5vw;
     cursor: pointer;
     transition: filter 0.1s, transform 0.1s;
 }
-.cooArrows:hover {
+.caveofOrdealsArrows:hover {
     filter: brightness(125%) !important;
     transform: scale(1.1) !important;
 }
-#cooUP {
-    margin-bottom: 10px;
-}
-#cooDOWN {
-    margin-top: 10px;
-}
-#cooText {
+#caveofOrdealsFloorText {
     position: absolute;
-    right: 3%;    
+    left: 75dvw;
     width: 17vw;
     font-size: 1vw;
     background-color: rgb(56, 53, 46, 0.85);
@@ -210,14 +240,14 @@ body img {
     padding: 1vw 0.75vw;
     border-radius: 10px;
 }
-#cooText ul {
+#caveofOrdealsFloorText ul {
     padding-inline-start: 20px;
 }
-#cooText b {
+#caveofOrdealsFloorText b {
     text-decoration: underline;
     font-size: 1.1vw;
 }
-#cooText u {
+#caveofOrdealsFloorText u {
     font-size: 1.05vw;
 }
 /* Top right menu icons */
@@ -429,9 +459,6 @@ body img {
     right: 0;
     top: 0;  
     text-align: center;
-    /* visibility: visible; */
-    display: none;
-    /* width: 25%; */
 }
 #settings h2 {
     text-decoration: underline; 
@@ -478,7 +505,7 @@ body img {
     color:#c0c0c0;
     height: 4dvh;
     font-size: 1.05vmax;
-
+    cursor: pointer;
 }
 #settingsCheckboxes {
     text-align: left;
@@ -487,6 +514,7 @@ body img {
 #settings h3 {
     font-size: 1.05vmax; 
     margin-bottom: 0.5%;
+    margin-left: -1.5dvw;
     text-align: center;
     text-decoration: underline;
 }
@@ -623,6 +651,17 @@ label {
     flex-wrap: wrap;
     column-gap: 0.1vw;
     row-gap: 0.5vh;
+}
+.tdungeon span {
+    position: absolute;
+    bottom: 98%;
+    z-index: 1500;
+    color: #c0c0c0;
+    display: none;
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 0.94dvw;
 }
 .tboss {
     width: 4.5vmax;

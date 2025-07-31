@@ -1,83 +1,19 @@
-class Requirement {
-    constructor(imageInfo, text, condition) {
-        this.image = getIconImage(imageInfo);
-        this.text = text;
-        this.condition = condition;
-    }
-    static fromBoolItem(item) {
-        return new Requirement(
-            item.image, 
-            item.name, 
-            () => item.isObtained()
-        );
-    }
-    static fromCountItem(item, amount=1) {
-        return new Requirement(
-            item.image, 
-            amount > 1 ? item.name + "&nbsp × &nbsp" + amount : item.name, 
-            () => item.amountIsObtained(amount)
-        );
-    }
-    static fromFlag(flag) {
-        return new Requirement(
-            flag.getImage(),
-            flag.name,
-            () => flag.isObtained()
-        );
-    }
-    isMet() {
-        return this.condition();
-    }
-}
-
-class AndRequirements {
-    constructor(requirements) {
-        this.requirements = requirements;
-    }
-    isMet() {
-        for(let req of this.requirements) {
-            if (!req.isMet())
-                return false;
-        }
-        return true;
-    }
-}
-
-class Container {
-    constructor(imageInfo, content=null, amount=1) {
-        this.image = getIconImage(imageInfo);
-        this.content = content;
-        if (content !== null)
-            this.displayText = amount > 1 ? content.name + "&nbsp × &nbsp" + amount : content.name;
-    }
-    with(content, amount=1) {
-        return new Container(this.image, content, amount);
-    }
-    getCategory() {
-        return this.content.getCategory();
-    }
-}
-
-var chest = new Container('Chest'); 
-var smallChest = new Container('Small Chest');
-var bossChest = new Container('Boss Chest');
-var rupeeBoulder = new Container('Rupee Boulder');
-
 class Flag extends Storable{
     constructor(item, position, { 
             itemCategory=item.getCategory(), baseReqs=[], baseDesc="", 
             randoCategory=itemCategory, randoReqs=baseReqs, randoDesc=baseDesc,
-            glitchedReqs=randoReqs, glitchedDesc=randoDesc 
+            glitchedReqs=randoReqs, glitchedDesc=randoDesc
         } = {}
     ) 
     {
+        super();
         this.item = item;
         this.position = position;
         this.itemCategory = itemCategory;
         this.baseReqs = baseReqs;   
         this.baseDesc = baseDesc;
         // Default category if it's a chest for Rando
-        if (this.item instanceof Container && this.item.image.src.includes('Chest') && randoCategory === itemCategory)
+        if (this.isContainer() && this.item.image.src.includes('Chest') && randoCategory === itemCategory)
             randoCategory = Categories.Main;
         this.randoCategory = randoCategory;
         this.randoReqs = randoReqs;
@@ -85,7 +21,8 @@ class Flag extends Storable{
         this.glitchedReqs = glitchedReqs;
         this.glitchedDesc = glitchedDesc;
 
-        this.set = false;
+        this._set = false;
+        this.initializeMarker();
     }
     getImage() {
         return this.item.image;
@@ -94,12 +31,26 @@ class Flag extends Storable{
         this.name = name;
     }
     isContainer() {
-        return this.base instanceof Container;
+        return this.item instanceof Container;
+    }
+    getItemTracker() {
+        let item = this.isContainer() ? this.item.content : this.item;
+        if (item instanceof Object)
+            item = item.item;
+        if (item.tracker !== undefined)
+            return item.tracker;
+        return null;
+    }
+    getRandoItemTracker() {
+        let randoItem = this.randoItem instanceof Container ? this.randoItem.content : this.randoItem;
+        if (randoItem.tracker !== undefined)
+            return randoItem.tracker;
+        return null;
     }
     set() {
         if (this.isSet())
             return;
-        this.set = true;
+        this._set = true;
         this.storageUnit.setFlag(this);
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
@@ -107,20 +58,196 @@ class Flag extends Storable{
     unset() {
         if (!this.isSet())
             return;
-        this.set = false;
+        this._set = false;
         this.storageUnit.setFlag(this);
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }
     isSet() {
-        return this.set;
+        return this._set;
     }
     getCurrentStoreValue() {
-        return this.set ? 1 : 0;
+        return this._set ? 1 : 0;
     }
     initialize() {
-        this.set = this.storageUnit.getFlagAsBool(this);
+        this._set = this.storageUnit.getFlagAsBool(this);
     }
+    isRandomizerCheck() {
+        if (this.item instanceof Obtainable && this.item.item === null)
+            return false;
+        return RandomizerCheckCategories.includes(this.randoCategory);
+    }
+    // Map
+    isShown() {
+        if (selectedGamemode === Gamemodes.Base) {
+            if (!verifyCategoryVisibility(this.itemCategory))
+                return false;
+            if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && !verifyRequirements(this.baseReqs))
+                return false;
+        }    
+        else {
+            if (!verifyCategoryVisibility(this.randoCategory))
+               return false;
+            if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && 
+                !verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs))
+                return false;
+        }
+        return true;
+    }
+    isCountable() {
+        if (this.isSet())
+            return false;
+        if (!this.isShown())
+            return false;
+        if (selectedGamemode === Gamemodes.Base)
+            return Settings.CountFlags.isEnabled();
+        else {
+            if (this.isRandomizerCheck())
+                return Settings.CountChecks.isEnabled();
+            else 
+                return Settings.CountNonChecks.isEnabled();
+        }
+    }  
+    // Leaflet
+    initializeMarker() {
+         this.marker = L.marker(this.position, {
+            icon: getIcon(this.getImage()),
+            riseOnHover: true, 
+            riseOffset: 2000, 
+            keyboard: false, 
+        });
+        this.marker.on('click', () => this.showDetails());
+        this.boundSetMarker = this.setMarker.bind(this);
+        this.boundUnsetMarker = this.unsetMarker.bind(this);
+    }
+    showDetails() {
+        let base;
+        let requirements;
+        let description;
+        if (selectedGamemode !== Gamemodes.Base && seedIsLoaded)
+            base = this.randoItem;
+        else
+            base = this.item;
+
+        switch(selectedGamemode) {
+            case Gamemodes.Base : {
+                requirements = this.baseReqs;
+                description = this.baseDesc;               
+            }
+            case Gamemodes.Glitchless : {
+                requirements = this.randoReqs;
+                description = this.randoDesc;
+            }
+            case Gamemodes.Glitched : {
+                requirements = this.glitchedReqs;
+                description = this.glitchedDesc;
+            }
+        }
+        let detailsDiv = document.getElementById('flagDetails');
+        detailsDiv.style.visibility = "visible";
+        detailsDiv.style.width = "25%";
+        detailsDiv.style.height = "100%";
+        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);        
+        if (base instanceof Container) {
+            document.getElementById('containerContent').style.display = "block";
+            document.getElementById('containerContentDiv').innerHTML = displayContainer(base);
+        }
+        else 
+            document.getElementById('containerContent').style.display = "none";
+        if (requirements.length > 0) {
+            document.getElementById('flagRequirements').style.display = "block";
+            let rdHtml = "";
+            for (let i = 0; i < requirements.length; ++i) {
+                let currentReq = requirements[i];
+                if (Array.isArray(currentReq)) {
+                    rdHtml += '<div class="oritems"><div class="oritf"><p class="idot">•</p>' + displayRequirement(currentReq[0]) + '</div>';
+                    for(let j = 1; j < currentReq; ++j) {
+                        rdHtml += '<div class="orits"><p class="por">or</p>' + displayRequirement(currentReq[j], "itis") + '</div>';
+                    }
+                    rdHtml += '</div>';
+                }
+                else {
+                    rdHtml += '<div class="item"><p class="idot">•</p>' + displayRequirement(requirements[i]) + '</div>';
+                }
+            }
+            document.getElementById('flagRequirementsDiv').innerHTML = rdHtml;
+        }
+        else 
+            document.getElementById('flagRequirements').style.display = "none";
+        document.getElementById('flagDescription').style.visibility = "visible";
+        document.getElementById('flagDescriptionDiv').innerHTML = description;
+        map.on('click', hideDetails);
+    }
+    loadMarker() {
+        if (!this.isShown())
+            return;
+        if (selectedGamemode === Gamemodes.Base) {
+            // if (Settings.TrackerLogic.isEnabled() && !verifyRequirements(this.baseReqs))
+            //     showMarkerAsUnobtainable(this.marker);       
+            if (Settings.ChestsContent.isEnabled() && this.isContainer()) 
+                this.marker.options.icon = getIcon(this.item.content.image);         
+        }
+        else {
+            // if (Settings.TrackerLogic.isEnabled() && 
+            //     !verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs))               
+            //     showMarkerAsUnobtainable(this.marker);       
+            if (seedIsLoaded && Settings.ChestsContent.isEnabled() && this.randoItem instanceof Container)
+                this.marker.options.icon = getIcon(this.randoItem.content.image);         
+        }
+        addMarkerToMap(this.marker, this.position);
+        if (this.isSet())
+            this.setVisually();
+        else
+            this.unsetVisually();
+    }
+    
+    setMarker() {
+        this.set();
+        this.manageItemTracker();
+        this.setVisually();
+       
+    }
+    unsetMarker() {
+        this.unset();
+        this.manageItemTracker();
+        this.unsetVisually();
+    }
+    manageItemTracker() {
+        if (!Settings.AutocompleteTracker.isEnabled()) 
+            return;
+        if (selectedGamemode === Gamemodes.Base) {
+            let itemTracker = this.getItemTracker();
+            if (itemTracker !== null)
+                this.isSet() ? itemTracker.increase() : itemTracker.decrease();
+        }
+        else if (seedIsLoaded && selectedGamemode !== Gamemodes.Base) {
+            let randoItemTracker = this.getRandoItemTracker();
+            if (randoItemTracker !== null)
+                this.isSet() ? randoItemTracker.increase() : randoItemTracker.decrease();
+        }       
+    }
+    setVisually() {
+        showMarkerAsSet(this.marker);
+        this.marker.off('contextmenu', this.boundSetMarker);
+        this.marker.on('contextmenu', this.boundUnsetMarker);
+    }
+    unsetVisually() {
+        if (Settings.TrackerLogic.isEnabled()) {
+            let currentReqs;
+            if (selectedGamemode === Gamemodes.Base)
+                currentReqs = this.baseReqs;
+            else 
+                currentReqs = selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs;
+            if (!verifyRequirements(currentReqs))
+                showMarkerAsUnobtainable(this.marker);    
+        }
+    
+        showMarkerAsNotSet(this.marker, this.getImage());
+        this.marker.off('contextmenu', this.boundUnsetMarker);
+        this.marker.on('contextmenu', this.boundSetMarker);
+    }
+   
+    
 }
 
 class FlagGroup {
@@ -169,93 +296,6 @@ class FlagGroup {
             this.parentGroup.decreaseAmount();
     }
 } 
-
-// Reccuring Requirements
-let clawshotReq = Requirement.fromBoolItem(clawshots.getItemByIndex(0));
-let doubleClawshotReq = Requirement.fromBoolItem(clawshots.getItemByIndex(1));
-let bombBagReq = Requirement.fromCountItem(bombBag);
-let ballAndChainReq = Requirement.fromBoolItem(ballAndChain);
-let ironBootsReq = Requirement.fromBoolItem(ironBoots);
-let magicArmorReq = Requirement.fromBoolItem(magicArmor);
-let zoraArmorReq = Requirement.fromBoolItem(zoraArmor);
-let shadowCrystalReq = Requirement.fromBoolItem(shadowCrystal);
-let spinnerReq = Requirement.fromBoolItem(spinner);
-let boomerangReq = Requirement.fromBoolItem(boomerang);
-let lanternReq = Requirement.fromBoolItem(lantern);
-let slingshotReq = Requirement.fromBoolItem(slingshot);
-let fishingRodReq = Requirement.fromBoolItem(fishingRods.getItemByIndex(0));
-let coralEarringReq = Requirement.fromBoolItem(fishingRods.getItemByIndex(1));
-let pastDomRodReq = Requirement.fromBoolItem(dominionRods.getItemByIndex(0));
-let domRodReq = Requirement.fromBoolItem(dominionRods.getItemByIndex(1));
-let woodenSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(0));
-let ordonSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(1));
-let masterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(2));
-let lightMasterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(3));
-let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
-let invoiceReq = Requirement.fromBoolItem(invoice);
-let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
-let horseCallReq = Requirement.fromBoolItem(horseCall);
-let endingBlowReq = Requirement.fromBoolItem(hiddenSkills.getItemByReq(1));
-let bulblinKeyReq = Requirement.fromBoolItem(bulblinKey);
-
-let diababaReq = Requirement.fromBoolItem(diababa);
-let forest1SKReq = Requirement.fromCountItem(forestSK);
-let forestBKReq = Requirement.fromBoolItem(forestBK);
-let fyrusReq = Requirement.fromBoolItem(fyrus);
-let mines1SKReq = Requirement.fromCountItem(minesSK);
-let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
-let mines3SKReq = Requirement.fromCountItem(minesSK, 3);
-let dangoroReq = [woodenSwordReq, ballAndChainReq, bombBagReq];
-let minesBKReq = Requirement.fromBoolItem(minesBK.getItemByReq(3));
-let morpheelReq = Requirement.fromBoolItem(morpheel);
-let lakebed1SKReq = Requirement.fromCountItem(lakebedSK);
-let lakebed2SKReq = Requirement.fromCountItem(lakebedSK, 2);
-let lakebed3SKReq = Requirement.fromCountItem(lakebedSK, 3);
-let lakebedBKReq = Requirement.fromBoolItem(lakebedBK);
-let stallordReq = Requirement.fromBoolItem(stallord);
-let arbiter1SKReq = Requirement.fromCountItem(arbiterSK);
-let arbiter2SKReq = Requirement.fromCountItem(arbiterSK, 2);
-let arbiter3SKReq = Requirement.fromCountItem(arbiterSK, 3);
-let arbiter4SKReq = Requirement.fromCountItem(arbiterSK, 4);
-let arbiter5SKReq = Requirement.fromCountItem(arbiterSK, 5);
-let arbiterBKReq = Requirement.fromBoolItem(arbiterBK);
-let blizzetaReq = Requirement.fromBoolItem(blizzeta);
-let snowpeak1SKReq = Requirement.fromCountItem(snowpeakSK);
-let snowpeak2SKReq = Requirement.fromCountItem(snowpeakSK, 2);
-let snowpeak3SKReq = Requirement.fromCountItem(snowpeakSK, 3);
-let snowpeak4SKReq = Requirement.fromCountItem(snowpeakSK, 4);
-let bedroomKeyReq = Requirement.fromBoolItem(snowpeakBK);
-let pumpkinReq = Requirement.fromBoolItem(pumpkin);
-let cheeseReq = Requirement.fromBoolItem(cheese);
-let armogohmaReq = Requirement.fromBoolItem(armogohma);
-let temple1SKReq = Requirement.fromCountItem(templeSK);
-let temple2SKReq = Requirement.fromCountItem(templeSK, 2);
-let temple3SKReq = Requirement.fromCountItem(templeSK, 3);
-let templeBKReq = Requirement.fromBoolItem(templeBK);
-let argorokReq = Requirement.fromBoolItem(argorok);
-let city1SKReq = Requirement.fromCountItem(citySK);
-let cityBKReq = Requirement.fromBoolItem(cityBK);
-let zantReq = Requirement.fromBoolItem(zant);
-let palace1SKReq = Requirement.fromCountItem(palaceSK);
-let palace2SKReq = Requirement.fromCountItem(palaceSK, 2);
-let palace3SKReq = Requirement.fromCountItem(palaceSK, 3);
-let palace4SKReq = Requirement.fromCountItem(palaceSK, 4);
-let palace5SKReq = Requirement.fromCountItem(palaceSK, 5);
-let palace6SKReq = Requirement.fromCountItem(palaceSK, 6);
-let palace7SKReq = Requirement.fromCountItem(palaceSK, 7);
-let palaceBKReq = Requirement.fromBoolItem(palaceBK);
-let castle1SKReq = Requirement.fromCountItem(castleSK);
-let castle2SKReq = Requirement.fromCountItem(castleSK, 2);
-let castle3SKReq = Requirement.fromCountItem(castleSK, 3);
-let castleBKReq = Requirement.fromBoolItem(castleBK);
-
-let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
-reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
-let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
-medicineScentReq.condition = () => true; // To avoid items being hidden by scents
-let nightReq = new Requirement('Moon', 'Night Time', () => true);
-let randoSettingReq = new Requirement('Settings', 'Rando Setting', () => true) //TODO Apply rando setting requirements
-
 
 let agithaBugCoupleRewards = Object.freeze({
     1 : Rupees.Purple,
@@ -336,26 +376,32 @@ let mountainHS = new Flag(howlingStone, [-4063, 8232], {
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the Ordon Spring Golden Wolf, accessible while clearing out the Eldin Twilight.'
 });
+mountainHS.setName("Death Mountain Howling Stone");
 let hiddenHS = new Flag(howlingStone, [-2065, 6665], {
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.'
 });
+hiddenHS.setName("Hidden Village Howling Stone");
 let faronHS = new Flag(howlingStone, [-7340, 4043], {
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the South Castle Town Golden Wolf, accessible while on the way to the Master Sword.'
 });
+faronHS.setName("North Faron Woods Howling Stone");
 let snowpeakHS = new Flag(howlingStone, [-475, 3393], { 
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the Kakariko Graveyard Golden Wolf, accessible on the way to the Snowpeak Ruins.'
 });
+snowpeakHS.setName("Snowpeak Howling Stone");
 let riverHS = new Flag(howlingStone, [-852, 5918], {
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the West Castle Town Golden Wolf, accessible while clearing out the Lanayru Twilight.'
 });
+riverHS.setName("Upper Zoras River Howling Stone");
 let lakeHS = new Flag(howlingStone, [-5405, 3014], {
     baseReqs: [shadowCrystalReq],
     baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
 });
+lakeHS.setName("Lake Hylia Howling Stone");
 
 var flags = new Map([
     // Ordon
@@ -400,7 +446,7 @@ var flags = new Map([
         randoReqs: [Requirement.fromCountItem(rupees, 30)],
         randoDesc: "You can buy the item for 30 rupees."
     })],
-    ["Ordon Cat Rescue", new Flag(Bottle.Sera, [-8837, 4880], {
+    ["Ordon Cat Rescue", new Flag(seraBottle, [-8837, 4880], {
         baseReqs: [fishingRodReq],
         baseDesc: 'Obtain the bottle by talking to Sera after her cat has returned with a fish you gave him with the fishing rod.',
         randoCategory: Categories.Gifts
@@ -443,7 +489,7 @@ var flags = new Map([
     ["North Faron Woods Deku Baba Chest", new Flag(smallChest.with(Rupees.Yellow), [-7121, 4136], {
         baseDesc: 'Defeat the Deku Baba and open the chest behind it.'
     })],
-    ["Coro Bottle", new Flag(Bottle.Coro, [-7405, 4885], {
+    ["Coro Bottle", new Flag(coroBottle, [-7405, 4885], {
         baseReqs: [Requirement.fromCountItem(rupees, 100)],
         baseDesc: 'After clearing the Faron twilight, talk to Coro and he will offer you the oil bottle for 100 rupees.',
         randoCategory: Categories.Gifts,
@@ -581,7 +627,7 @@ var flags = new Map([
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
         randoReq: [[masterSwordReq, randoSettingReq], pastDomRodReq]
     })],
-    ["North Faron Woods Howling Stone", faronHS],
+    [faronHS.name, faronHS],
     // Eldin
     ["Kakariko Graveyard Lantern Chest", new Flag(chest.with(Rupees.Purple), [-5504, 8095], {
         baseReqs: [lanternReq],
@@ -879,8 +925,8 @@ var flags = new Map([
         randoCategory: Categories.Gifts,
         randoDesc: 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the item.'
     })],
-    ["Death Mountain Howling Stone", mountainHS],
-    ["Hidden Village Howling Stone", hiddenHS],
+    [mountainHS.name, mountainHS],
+    [hiddenHS.name, hiddenHS],
     // Gerudo 
     ["Gerudo Desert Golden Wolf", new Flag(goldenWolf, [-4664, 582], {
         baseReqs: [Requirement.fromFlag(lakeHS)],
@@ -1017,7 +1063,7 @@ var flags = new Map([
         baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
         baseDesc: 'In the middle of the room'
     })],
-    ["Cave of Ordeals Great Fairy Reward", new Flag(Bottle.Jovani, [-5928, 737], {
+    ["Cave of Ordeals Great Fairy Reward", new Flag(Bottle.Tears, [-5928, 737], {
         baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
         baseDesc: "Talk to the Great Fairy to obtain Great Fairy's Tears.",
         randoCategory: Categories.Gifts
@@ -1064,7 +1110,7 @@ var flags = new Map([
         baseDesc: 'In the cave, break the 2 ice blocks to reveal torches. Light them up to make the chest appear.',
         randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq, lanternReq],
     })],
-    ["Snowpeak Howling Stone", snowpeakHS],
+    [snowpeakHS.name, snowpeakHS],
     ["Snowpeak Freezard Grotto Chest", new Flag(chest.with(Rupees.Orange), [-265, 3631], {
         baseReqs: [coralEarringReq, ballAndChainReq, shadowCrystalReq],
         baseDesc: 'Defeat the furthest Freezard to reveal the chest.',
@@ -1329,8 +1375,8 @@ var flags = new Map([
         baseReqs: [doubleClawshotReq],
         baseDesc: 'Follow the clawshot target path down the chasm to reach the chest.'
     })],
-    ["Upper Zoras River Howling Stone", riverHS],
-    ["Lake Hylia Howling Stone", lakeHS],
+    [riverHS.name, riverHS],
+    [lakeHS.name, lakeHS],
     ["Lake Hylia Bridge South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
         baseReqs: [[bombBagReq, ballAndChainReq]],
         baseDesc: 'Hidden between two larger stone structures.'
@@ -1443,7 +1489,7 @@ var flags = new Map([
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Enter the house using the dig spot to obtain this poe soul.'
     })],
-    ["Jovani 20 Poe Soul Reward", new Flag(Bottle.Jovani, [-3915, 4994], {
+    ["Jovani 20 Poe Soul Reward", new Flag(jovaniBottle, [-3915, 4994], {
         baseReqs: [shadowCrystalReq, Requirement.fromCountItem(poeSoul, 20)],
         baseDesc: "Talk to Jovani after collecting 20 poe souls to receive this reward.",
         randoCategory: Categories.Gifts
@@ -2809,9 +2855,9 @@ var flags = new Map([
     ["Temple_of_Time_Sign", new Flag(randoHint, [-5721, 4278])],
     ["Upper_Zoras_River_Sign", new Flag(randoHint, [-590, 5780])],
     ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
-]);
+]); // Always add flags at the end to preserve storage IDs
 
-const flagsSU = new StorageUnit('Flags', flags.values());
+const flagsSU = new StorageUnit('flags', flags.values());
 for (let [name, flag] of flags.entries()) {
     flag.setName(name);
     flag.initialize();

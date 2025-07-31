@@ -1,5 +1,7 @@
-const icons = new Map();
 let seedIsLoaded = false;
+let currentMapState;
+let loadedSubmap;
+
 const MapStates = Object.freeze({
     ImageMap: 0,
     TileMap: 1,
@@ -7,11 +9,37 @@ const MapStates = Object.freeze({
     Submap: 3,
     FlooredSubmap: 4
 });
+const mapCenter = [-4913, 4257];
+const map = L.map('map', {
+        zoom: -5,
+        minZoom: -5,
+        maxZoom: 0,
+        center: mapCenter,
+        crs: L.CRS.Simple,
+        maxBoundsViscosity: 1,
+        zoomControl: false,
+        keyboard: false,
+        doubleClickZoom: false,
+        bounds: [[500, -500], [-10836, 10676]],
+        dragging: false
+}); 
 
+const tileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
+    maxZoom: 0,
+    minZoom: -6,
+    zoomOffset: 6,
+    crs: L.CRS.Simple,
+    bounds: [[0, 0], [-9826, 8515]] 
+});
 
+// Markers and Icons
+const icons = new Map();
 function getIcon(image) {
     if (image in icons.keys())
         return icons.get(image);
+
+    let width = image.width;
+    let height = image.height;
     let mult = window.innerWidth <= window.innerHeight ? window.innerWidth / 1600 : window.innerHeight / 739;
     let maxSize = 50 * mult;
     if (maxSize > 50)
@@ -26,166 +54,327 @@ function getIcon(image) {
         width = width / height * maxSize;
         height = maxSize;
     }
-    let icon = L.icon({iconUrl: image.src, iconSize: [image.width, image,height]});
+    let icon = L.icon({iconUrl: image.src, iconSize: [width, height]});
     icons.set(image, icon);
     return icon; 
 }
 
+function getIconWithCheckmark(icon) {
+     return L.divIcon({ 
+        iconUrl: icon.options.iconUrl,
+        iconSize: icon.options.iconSize,
+        html: '<img src="' + icon.options.iconUrl + '" width="' + icon.options.iconSize[0] + 'px"' +
+              'height="' + icon.options.iconSize[1] + '"><img src="Icons/Checkmark.png" class="checkmark">'
+    });
+}
+
+function getCounterIcon(icon, num) {
+    return L.divIcon({ 
+        iconUrl: icon.options.iconUrl,
+        iconSize: icon.options.iconSize,
+        html: '<img src="' + icon.options.iconUrl + '" width="' + icon.options.iconSize[0] + 'px"' +
+              'height="' + icon.options.iconSize[1] + '"><div class="cpt subcpt">' + num + '</div>'
+    });
+}
+
+function showMarkerAsSet(marker) {
+    marker.setOpacity(0.7);
+    marker.setZIndexOffset(-1000);
+    // marker.options.icon = getIconWithCheckmark(marker.options.icon);
+    marker.getElement().classList.remove("unmarked");
+    marker.getElement().classList.add("marked");
+}
+
+function showMarkerAsNotSet(marker, iconImage) {
+    marker.setOpacity(1);
+    marker.setZIndexOffset(0);
+    marker.options.icon = getIcon(iconImage);
+    marker.getElement().classList.remove("marked");
+    marker.getElement().classList.add("unmarked");
+}
+
+function showMarkerAsUnobtainable(marker) {
+    marker.getElement().classList.add("unobtainable");
+    marker.setZIndexOffset(-500);
+}  
+
+function displayContainer(container) {
+    return '<img class="ii iti" src="' + container.getContent().image.src + '">' +
+    '<p class="itp">' + container.displayText + '</p>';
+}
+
 function displayItem(item, cSSClass="iti") {
-    return '<img class="ii ' + cSSClass + '" src="' + item.image.url + '">' +
+    return '<img class="ii ' + cSSClass + '" src="' + item.image.src + '">' +
     '<p class="itp">' + item.name + '</p>';
 }
 
-function isVisible(marker) {
-
+function displayRequirement(requirement, cSSClass="iti") {
+    return '<img class="ii ' + cSSClass + '" src="' + requirement.image.src + '">' +
+    '<p class="itp">' + requirement.text + '</p>';
 }
 
-function initializeFlag(flag) {
-    flag.marker = L.marker(flag.position, {
-        icon: getIcon(flag.image),
-        riseOnHover: true, 
-        riseOffset: 2000, 
-        keyboard: false, 
-    });
 
-
-    flag.marker.on('click', () => {
-        let base;
-        let requirements;
-        let description;
-        if (selectedGamemode !== Gamemodes.Base && seedIsLoaded)
-            base = flag.randoBase;
-        else
-            base = flag.base;
-
-        switch(selectedGamemode) {
-            case Gamemodes.Base : {
-                requirements = flag.baseReqs;
-                description = flag.baseDesc;               
-            }
-            case Gamemodes.Glitchless : {
-                requirements = flag.randoReqs;
-                description = flag.randoDesc;
-            }
-            case Gamemodes.Glitched : {
-                requirements = flag.glitchedReqs;
-                description = flag.glitchedDesc;
-            }
-        }
-        let box = document.getElementById('flagDetails');
-        box.style.visibility = "visible";
-        box.style.width = "25%";
-        box.style.height = "100%";
-        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);        
-        if (base instanceof Container) {
-            document.getElementById('containerContent').style.display = "block";
-            document.getElementById('containerContentDiv').innerHTML = displayItem(base.content);
-        }
-        else 
-            document.getElementById('containerContent').style.display = "none";
-        if (requirements.length === 0) {
-            document.getElementById('flagRequirements').style.display = "block";
-            let rdHtml = "";
-            for (let i = 0; i < requirements.length; ++i) {
-                let currentReq = requirements[i];
-                if (Array.isArray(currentReq)) {
-                    rdHtml += '<div class="oritems"><div class="oritf"><p class="idot">•</p>' + displayItem(currentReq[0]) + '</div>';
-                    for(let j = 1; j < currentReq; ++j) {
-                        rdHtml += '<div class="orits"><p class="por">or</p>' + displayItem(currentReq[j], "itis") + '</div>';
-                    }
-                    rdHtml += '</div>';
-                }
-                else {
-                    rdHtml += '<div class="item"><p class="idot">•</p>' + displayItem(requirements[i],) + '</div>';
-                }
-            }
-            document.getElementById('flagRequirementsDiv').innerHTML = rdHtml;
-        }
-        else 
-            document.getElementById('flagRequirements').style.display = "none";
-        document.getElementById('flagDescription').style.visibility = "visible";
-        document.getElementById('flagDescriptionDiv').innerHTML = description;
-        map.on('click', hideDetails);
-    }),
-
-    // flag.
-    // flag.marker.on('contextmenu', ())
-
-    flag.load = () => {
-        if (isVisible(this))
-            this.marker.addTo(map);
-    };
-
+// Image Map
+function loadImageMapFromTileMap() {
+    if (map.getZoom() != -5)
+        return;
+    document.getElementById('credit').style.display = 'block';   
+    map.setView([0, 0], -4);
+    map.setMinZoom(-4);
+    if (window.innerWidth >= 1000 && window.innerHeight >= 700)
+        map.dragging.disable();
+    map.setMaxBounds([[500, -500], [-10836, 10676]]); 
+    map.off('zoomend', loadImageMapFromTileMap);    
+    if (document.getElementById('flagDetails').style.visibility == 'visible')
+        hideDetails(); 
+    loadImageMap(); 
 }
 
-function initializeNonFlag(nonFlag) {
-    nonFlag.marker = L.marker(nonFlag.position, {
-        icon: getIcon(nonFlag.image),
-        riseOnHover: true, 
-        riseOffset: 2000, 
-        keyboard: false, 
-        zIndexOffset: -1100
+function loadImageMap() {
+    removeAllLayers();
+    currentMapState = MapStates.ImageMap;
+    map.on("zoomend", loadTilemapFromImageMap);
+    loadImageMapMarkers();
+}
+function loadImageMapMarkers() {
+    addImageOverlayToMap(L.imageOverlay('Submaps/GameMap.png', [[0, 0], [-10336, 10176]]));
+    for (let province of Object.values(Provinces))
+        province.loadPolygon();
+    for (let dungeon of Object.values(Dungeons)) {
+        if (dungeon !== Dungeons.Castle)
+            dungeon.loadImageMapMarker();
+    }
+    
+}
+
+// TileLayer Map
+function loadTileMap() {
+    removeAllLayers();
+    currentMapState = MapStates.TileMap;
+    tileLayer.addTo(map);
+    setBoundsToTL(); 
+    loadTileMapMarkers();
+}
+
+function loadTilemapFromImageMap() {
+    if (map.getZoom() <= -4)
+        return;
+    document.getElementById('credit').style.display = 'none'; 
+    map.dragging.enable();             
+    map.setMinZoom(-5);
+    map.off('zoomend', loadTilemapFromImageMap);
+    map.on('zoomend', loadImageMapFromTileMap); 
+    loadTileMap();
+
+    let cpt = 0;
+    map.eachLayer(function(_){
+        ++cpt; 
     });
-    nonFlag.load = () => {
-        if (isVisible(this))
-            this.marker.addTo(map);
+    console.log('Number of Markers on Tilemap: ' + --cpt);
+}
+
+function loadTileMapMarkers() {
+    for (let province of Object.values(Provinces))
+        province.loadMarkers();
+    for (let dungeon of Object.values(Dungeons)) 
+        dungeon.loadMarker();
+}
+
+function setBoundsToTL() {
+    map.setMaxBounds([[500, -500], [-10000, 9000]]); 
+}
+
+function exitSubmap() {
+    if (map.getZoom() == 0)
+        return;
+    map.off('zoomend', exitSubmap);  
+    removeAllLayersExceptTL();
+    map.setMinZoom(-5);
+    setBoundsToTL();
+    map.dragging.enable();
+    currentMapState = MapStates.TileMap;
+    tileLayer.setOpacity(1);
+    loadTileMapMarkers();
+}
+
+function exitToTilemap() {
+    removeAllLayersExceptTL();
+    map.setMinZoom(-5);
+    setBoundsToTL();
+    map.dragging.enable();
+    currentMapState = MapStates.TileMap;
+    tileLayer.setOpacity(1);
+    loadTileMapMarkers();
+}
+
+// Adding layers to the map
+function addMarkerToMap(marker, position=null) {
+    if (position !== null) 
+        marker.setLatLng(position);
+    marker.addTo(map);
+}
+
+function addPolygonToMap(polygon) {
+    polygon.addTo(map);
+}
+
+function addImageOverlayToMap(imageOverlay) {
+    imageOverlay.addTo(map);
+}
+
+// General Map
+function reloadMap() {
+    switch (currentMapState) {
+        case MapStates.ImageMap : {
+            removeAllLayers();
+            loadImageMapMarkers();
+            break;
+        }
+        case MapStates.TileMap : {
+            removeAllLayersExceptTL(); 
+            loadTileMapMarkers(); 
+            break;
+        }   
+        case MapStates.Dungeon : {
+            loadedSubmap.reload();
+            break;
+        }    
+        default : { // Simple & Simple Floored Submap
+            removeAllLayersExceptTL();
+            loadedSubmap.reload(); 
+            break;
+        }
     }
 }
 
-function initializeFloor(floor) {
+document.addEventListener('trackerUpdated', function(event) {
+    if (Settings.TrackerLogic.isEnabled())
+        reloadMap();
+});
 
-}
+document.addEventListener('settingsUpdated', function(event) {
+    reloadMap();
+});
 
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const map = L.map('map', {
-        zoom: -5,
-        minZoom: -5,
-        maxZoom: 0,
-        center: [-4913, 4257],
-        crs: L.CRS.Simple,
-        maxBoundsViscosity: 1,
-        zoomControl: false,
-        keyboard: false,
-        doubleClickZoom: false
-    }); 
-    const TL = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
-        maxZoom: 0,
-        minZoom: -6,
-        zoomOffset: 6,
-        crs: L.CRS.Simple,
-        bounds: [[0, 0], [-9826, 8515]] 
-    })
-    for (let province of Object.values(provinces)) {
-        province.poly = L.polygon(polyPoints, { fillColor: '#6e5b1e', fillOpacity: 0, opacity: 0});
-        province.poly.on('mouseover', () => this.setStyle({ fillOpacity: 0.5 }));
-        province.poly.on('mouseout', () => this.setStyle({ fillOpacity: 0 }));
-        province.load = () => {
-            this.poly.addTo(map);
-            this.poly.setStyle({ fillOpacity: 0 });
-            L.marker(this.counterPos, {
-                icon: L.divIcon({ html: '<div class="cpt procpt">' + this.countVisibleMarkers() + '</div>'}),
-                interactive: false
-            }).addTo(map);
-            
-        };
-        for (let c of province.contents) {
-            if (c instanceof Flag)
-                initializeFlag(c);
-            else if (c instanceof NonFlag)
-                initializeNonFlag(c);
-            else if (c instanceof SimpleSubmap) {
-
-            }
-            else if (c instanceof SimpleFlooredSubmap) {
-
-            }
+function removeFloorLayer() {
+    switch (currentMapState) {
+        case MapStates.Dungeon : {
+            removeAllLayers();
+            break;
         }
-        province.countVisibleMarkers = () => {
-            for (let c of province.contents) {
-
-            }
+        case MapStates.FlooredSubmap : {
+            removeAllLayersExceptTL();
+            break;
         }
     }
-})
+}
+function removeAllLayers() {
+    map.eachLayer(function(l) {
+        map.removeLayer(l);
+    });
+}
+
+function removeAllLayersExceptTL() {
+    map.eachLayer(function(layer) {
+        if (layer != tileLayer)
+            map.removeLayer(layer);
+    });
+}  
+
+function getCoordsOnClick(e) {
+    if (e.originalEvent.ctrlKey) {
+        navigator.clipboard.writeText("[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]");
+    }
+}
+
+function updateMapSize(width) {
+    map.getContainer().style.width = width;
+    map.invalidateSize();
+}
+
+function clickToZoom(event) {
+    map.setView(L.latLng(event.latlng.lat, event.latlng.lng), -2);  
+}
+
+function unsetAllFlags() {
+    for (let dungeon of Object.values(Dungeons))
+        dungeon.unset();
+    for (let province of Object.values(Provinces))
+        province.unset();
+}
+
+function loadMap() {
+    map.setView([0, 0], -4);
+    map.setMinZoom(-4);
+    if (window.innerWidth <= 1000 || window.innerHeight <= 700)
+        map.dragging.enable();
+    loadImageMap();
+}
+
+// Menus
+function showRightMenu(menuID, width) {
+    let menu = document.getElementById(menuID);
+    if (menuID == "tracker" && !Settings.TrackerOverlay.isEnabled()) {
+        updateMapSize((100 - width) + 'vw');
+    }
+    menu.style.visibility = "visible";
+    menu.style.width = '' + width + 'vw';
+    document.getElementById('menuicons').style.display = "none";
+}
+
+function hideRightMenu(menuID) {
+    let menu = document.getElementById(menuID);
+    document.getElementById('menuicons').style.display = "inline";
+    if (menuID == "tracker") {
+        if (!Settings.TrackerOverlay.isEnabled())
+            updateMapSize('100vw');
+        menu.style.visibility = "hidden";  
+        return;
+    }
+    menu.style.width = "0%";
+    setTimeout(function() {
+        menu.style.visibility = "hidden";  
+    }, 100);  
+}
+
+function hideDetails() {
+    document.getElementById('flagDetailsX').style.visibility = "hidden";
+    document.getElementById('flagDescription').style.visibility = "hidden";
+    document.getElementById('containerContent').style.display = "none"; 
+    document.getElementById('flagRequirements').style.display = "none";   
+    let flagDetails = document.getElementById('flagDetails'); 
+    flagDetails.style.width = "0%";
+    setTimeout(function() {
+        flagDetails.style.height = "0%";
+        flagDetails.style.visibility = "hidden";
+    }, 100);
+    
+    map.off('click', hideDetails);
+}
+
+function resetMap(button) {
+    button.innerHTML = "Resetting...";
+    unsetAllFlags();
+    reloadMap();  
+    resetButtonsFeedback(button, 'Map');
+}
+function trackerButton(button) {
+    button.innerHTML = "Resetting...";
+    resetTracker();
+    if(Settings.TrackerLogic.isEnabled())
+        reloadMap();  
+    resetButtonsFeedback(button, 'Tracker'); 
+}
+function resetButtonsFeedback(button, text) {
+    button.innerHTML = "Reset done!";
+    button.disabled = true;
+    button.classList.remove('setbh');
+    button.style.cursor = 'default';
+    setTimeout(function() {
+        button.innerHTML = "Reset " + text;
+        button.disabled = false;
+        button.classList.add('setbh');
+        button.style.cursor = 'pointer';
+    }, 1500);
+}
+

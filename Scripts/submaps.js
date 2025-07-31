@@ -1,22 +1,9 @@
-class Submap {
-    constructor(position, iconImage, name, 
-        {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
-    ) {
-        this.position = position;
-        this.iconImage = getIconImage(iconImage);
-        this.name = name;
-        this.baseReqs = baseReqs;
-        this.randoReqs = randoReqs;
-        this.glitchedReqs = glitchedReqs;
-    }
-}
-
 class SubmapFloor {
     constructor(floorImage, label, contents) {
         if (floorImage instanceof ImageWrapper)
             this.image = this.image;
         else
-            this.image = images.get(floorImage);
+            this.image = images.get(floorImage + '.png');
         this.label = label;
         let flagContents = [];
         for (let c of contents) {
@@ -28,42 +15,130 @@ class SubmapFloor {
         this.contents = flagContents;
     }
     set() {
-        for (let c of contents) {
+        for (let c of this.contents) {
             if (c instanceof Flag)
                 c.set();
         }
     }
+    setShown() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
+                c.setMarker();
+        }
+    }
     unset() {
-        for (let c of contents) {
+        for (let c of this.contents) {
             if (c instanceof Flag)
                 c.unset();
         }
     }
+    unsetShown() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
+                c.unsetMarker();
+        }
+    }
+    isSet() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && !c.isSet())
+                return false;
+        }
+        return true;
+    }
+    shownContentIsSet() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown() && !c.isSet())
+                return false;
+        }
+        return true;
+    }
+    manageContent() {
+        if (this.shownContentIsSet())
+            this.unsetShown();
+        else
+            this.setShown();
+        reloadIcons();
+    }
+    hasShownContent() {
+        for (let c of this.contents) {
+            if (c.isShown())
+                return true;
+        }
+        return false;
+    }
+    count() {
+        let count = 0;
+        for (let c of this.contents) {
+            if (c.isCountable())
+                ++count;
+        }
+        return count;
+    }
+    getUniqueShownMarker() {
+        let shownMarkerFound = null;
+        for (let c of this.contents) {
+            if (c.isShown()) {
+                if (shownMarkerFound === null)
+                    shownMarkerFound = c;
+                else 
+                    return null;
+            }
+        } 
+        return shownMarkerFound;
+    }
+    load() {
+        addImageOverlayToMap(this.imageOverlay);
+        for (let c of this.contents)
+            c.loadMarker();
+    }
 }
 
-class SimpleSubmap extends Submap {
-    constructor(position, iconImage, name, contents,
-        {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
-    ) {
-        super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
-        this.floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name) + '.png', "1F", contents);
-    }
-    set() {
-        this.floor.set();
-    }
-    unset() {
-        this.floor.unset();
-    }
-}
-
-const floorLabels = ["B3", "B2", "B1", "1F", "2F", "3F", "4F", "5F", "6F", "7F", "8F"];
-
-class FlooredSubmap extends Submap {
+class Submap {
     constructor(position, iconImage, name, floors,
         {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
-        super(position, iconImage, name, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.position = position;
+        this.iconImage = getIconImage(iconImage);
+        this.name = name;
         this.floors = floors;
+        this.baseReqs = baseReqs;
+        this.randoReqs = randoReqs;
+        this.glitchedReqs = glitchedReqs;
+
+        this.initializeMarker();
+        this.initializeImages();
+    }
+    initializeMarker() {
+        this.marker = L.marker(this.position, {
+            icon: getIcon(this.iconImage),
+            riseOnHover: true, 
+            riseOffset: 2000, 
+            keyboard: false, 
+        });
+        this.marker.on('click', () => this.load());
+        this.boundSetShown = this.setShown.bind(this);
+        this.boundUnsetShown = this.unsetShown.bind(this);
+    }
+    initializeImages() {
+        let width = this.floors[0].image.width;
+        let height = this.floors[0].image.height;
+         if (height > 330) {
+            width = 330 / height * width;
+            height = 330;
+    }
+        let topLeftCornerPosition = [
+            this.position[0] + height, 
+            this.position[1] - width
+        ];
+        let bottomRightCornerPosition = [
+            this.position[0] - height, 
+            this.position[1] + width
+        ];
+        for (let floor of this.floors) {
+            floor.imageOverlay = L.imageOverlay(floor.image.src, [
+                topLeftCornerPosition, bottomRightCornerPosition
+            ]);
+        }
     }
     set() {
         for (let floor of this.floors)
@@ -73,23 +148,261 @@ class FlooredSubmap extends Submap {
         for (let floor of this.floors)
             floor.unset();
     }
+    setShown() {
+        for (let floor of this.floors)
+            floor.setShown();
+        this.setVisually();
+    }
+    unsetShown() {
+        for (let floor of this.floors)
+            floor.unsetShown();
+        this.unsetVisually();
+    } 
+    setVisually() {
+        if (Settings.CountersVisibility.isEnabled())
+            this.marker.setIcon(getIcon(this.iconImage));
+        showMarkerAsSet(this.marker);
+        this.marker.off('contextmenu', this.boundSetShown);
+        this.marker.on('contextmenu', this.boundUnsetShown);
+    }
+    unsetVisually() {
+        if (Settings.CountersVisibility.isEnabled())
+            this.marker.setIcon(getCounterIcon(this.marker.options.icon, this.count()));
+        else 
+            this.marker.setIcon(getIcon(this.iconImage));
+        showMarkerAsNotSet(this.marker, this.iconImage);
+        this.marker.off('contextmenu', this.boundUnsetShown);
+        this.marker.on('contextmenu', this.boundSetShown);
+    }
+    isSet() {
+        for (let floor of this.floors) {
+            if (!floor.isSet())
+                return false;
+        }
+        return true;
+    }
+    shownContentIsSet() {
+        for (let floor of this.floors) {
+            if (!floor.shownContentIsSet())
+                return false;
+        }
+        return true;
+    }
+    isShown() {
+        for (let floor of this.floors) {
+            if (floor.hasShownContent())
+                return true;
+        }
+        return false;
+    }
+    count() {
+        if (!verifySubmapRequirements(this))
+            return 0;
+        let count = 0;
+        for (let floor of this.floors)
+            count += floor.count();
+        return count;
+    }
+    getUniqueShownMarker() {
+        let shownMarkerFound = null;
+        for (let floor of this.floors) {
+            let floorMarker = floor.getUniqueShownMarker();
+            if (floorMarker === null)
+                continue;
+            if (shownMarkerFound === null)
+                shownMarkerFound = floorMarker;
+            else 
+                return null;
+        } 
+        return shownMarkerFound;
+    }
+    loadMarker() {
+        if (!Settings.EmptySubmaps.isEnabled() && !this.isShown())
+            return;
+        if (Settings.SubmapAsMarker.isEnabled()) {
+            let uniqueMarker = this.getUniqueShownMarker();
+            if (uniqueMarker !== null) {
+                addMarkerToMap(uniqueMarker.marker, this.position)
+                return;
+            }
+        }
+        addMarkerToMap(this.marker, this.position);
+        if (!verifySubmapRequirements(this)) {
+            showMarkerAsUnobtainable(this.marker);
+            return;
+        }
+
+        if (this.shownContentIsSet())
+            this.setVisually();
+        else
+            this.unsetVisually();
+    }
+    load() {
+        currentMapState = MapStates.Submap;
+        this.prepareMap();
+        this.exitEvent = () => this.exit();
+        map.on('zoomend', this.exitEvent);
+        loadedSubmap = this;
+        this.floors[0].load();  
+    }
+    reload() {
+        this.floors[0].load();
+    }
+    exit() {
+        if (map.getZoom() == 0)
+            return;
+        map.off('zoomend', this.exitEvent);  
+        document.getElementById('submapName').style.display = "none";
+        exitToTilemap();
+    }
+    prepareMap() {
+        map.setView(this.position, 0);     
+        if (window.innerWidth >= 1400 && window.innerHeight >= 600)
+            map.dragging.disable();
+        else {
+            let bounds = this.floors[0].imageOverlay.getBounds();
+            let nwp = bounds.getNorthWest();
+            let sep = bounds.getSouthEast();
+            let controlsOffset = this.getControlsOffset();
+            setTimeout(function() {
+                map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - controlsOffset], [sep.lat - 100, sep.lng + 100]]));
+            }, 200);  
+        }
+        let subName = document.getElementById('submapName');
+        subName.style.display = "inline";
+        subName.children[1].innerHTML = this.name;
+        subName.style.width = this.name.length * 2 + 'vw';
+        tileLayer.setOpacity(0.2);
+        removeAllLayersExceptTL();
+    }
+    getControlsOffset() {
+        return 100;
+    }
+}
+
+class SimpleSubmap extends Submap {
+    constructor(position, iconImage, name, contents,
+        {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
+    ) {
+        let floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name), "1F", contents);
+        super(position, iconImage, name, [floor], {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+    }
+}
+
+const FloorLabels = ["B3", "B2", "B1", "1F", "2F", "3F", "4F", "5F", "6F", "7F", "8F"];
+const DefaultFloor = 3;
+
+class FlooredSubmap extends Submap {
+    constructor(position, iconImage, name, floors,
+        {floorOffset=DefaultFloor, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
+    ) {
+        super(position, iconImage, name, floors, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.floorOffset = floorOffset;
+    }
+    load() {
+        currentMapState = MapStates.FlooredSubmap;
+        this.prepareMap();
+        loadedSubmap = this;
+        // document.getElementById('floors').style.display = 'inline'
+        this.exitEvent = () => {
+            this.exit();
+            if (map.getZoom() == 0)
+                return;
+            this.hideFloorUI();
+            window.removeEventListener('keydown', this.controlsEvent);
+        } 
+        map.on('zoomend', this.exitEvent);
+        this.controlsEvent = (e) => this.controls(e);
+        window.addEventListener('keydown', this.controlsEvent);
+        this.setupFloors();
+    }
+    setupFloors() {
+        for(let floor of this.floors)
+            this.setupFloorButton(floor);
+        this.activeFloor = this.floors[DefaultFloor - this.floorOffset];
+        document.getElementById(this.activeFloor.label).click();
+    }
+    hideFloorUI() {
+        this.resetActiveFloorButton();
+        for (let floor of this.floors) {
+            let floorButton = document.getElementById(floor.label);
+            floorButton.style.display = 'none';
+            floorButton.replaceWith(floorButton.cloneNode(true)); // Remove event listeners
+        }
+    }
+    setupFloorButton(floor) {
+        let floorButton = document.getElementById(floor.label);
+        floorButton.style.display = 'flex';
+        floorButton.addEventListener("click", () => {
+            removeFloorLayer();
+            this.resetActiveFloorButton();
+            floorButton.style.filter = 'brightness(200%)';
+            floorButton.style.transform = "scale(1.025)";
+            this.activeFloor = floor;
+            floor.load();             
+        });
+        floorButton.addEventListener('contextmenu', () => {
+            floor.manageContent();
+        });
+        floorButton.addEventListener('mouseover', () => {
+            if (this.activeFloor == floor) 
+                return;
+            removeFloorLayer();
+            floor.load();  
+        });
+        floorButton.addEventListener('mouseout', () => {
+            if (this.activeFloor == floor || currentMapState === MapStates.TileMap) 
+                return;
+            removeFloorLayer();
+            this.activeFloor.load();
+        });
+    }
+    resetActiveFloorButton() {
+        let floorButton = document.getElementById(this.activeFloor.label);
+        floorButton.style.filter = 'brightness(150%)';
+        floorButton.style.transform = "none";
+    }
+    reload() {
+        removeFloorLayer();
+        this.activeFloor.load();
+    }
+    controls(event) {
+        if (!(event instanceof KeyboardEvent))
+            return;
+        let key = event.key == undefined ? event.originalEvent.key : event.key;
+        if (key == 'e' || key == "ArrowRight") {
+            this.activeFloor.manageContent();
+            return;
+        }
+
+        let newFloorIndex = this.activeFloor.index;
+        if (key == "ArrowDown" || key == 's') 
+            newFloorIndex = this.activeFloor.index == 0 ? this.floors.length - 1 : this.activeFloor.index - 1;
+        else if (key == 'ArrowUp' || key == 'w')
+            newFloorIndex = this.activeFloor.index == this.floors.length - 1 ? 0 : this.activeFloor.index + 1;
+
+        if (newFloorIndex != this.activeFloor.index) 
+            document.getElementById(this.floors[newFloorIndex].label).click();    
+    }
+    getControlsOffset() {
+        return 200;
+    }
 }
 
 class SimpleFlooredSubmap extends FlooredSubmap {
     constructor(position, iconImage, name, contents,
-        {floorOffset=3, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
+        {floorOffset=DefaultFloor, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
         let floors = [];
         for (let i = 0; i < contents.length; ++i) {
             floors.push(new SubmapFloor(
-                'Submaps/' + spaceToUnderscore(name) + '/' + i + '.png', 
-                floorLabels[i + floorOffset], 
+                'Submaps/' + spaceToUnderscore(name) + '/' + i, 
+                FloorLabels[i + floorOffset], 
                 contents[i]
             ));
+            floors[i].index = i;
         }
-        super(position, iconImage, name, floors, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
-        this.floorOffset = floorOffset;
-        
+        super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
     }
 }
 
@@ -98,11 +411,13 @@ class CaveOfOrdeals extends FlooredSubmap {
         let name = "Cave of Ordeals";
         let path = 'Submaps/' + spaceToUnderscore(name) + '/';
         let floors = [];
-        floors.push(new SubmapFloor(path + '0.png', "B1", contents[0]));
+        floors.push(new SubmapFloor(path + '0', "B1", contents[0]));
         for(let i = 1; i < contents.length - 1; ++i)
-            floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1) + '.png', "B" + (i+1), contents[i]));
-        floors.push(new SubmapFloor(path + '5.png', "B" + (contents.length), contents[contents.length - 1]));
+            floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1), "B" + (i + 1), contents[i]));
+        floors.push(new SubmapFloor(path + '5', "B" + (contents.length), contents[contents.length - 1]));
         super(position, iconImage, name, floors);
+        for (let i = 0; i < this.floors.length; ++i)
+            this.floors[i].index = i;
 
 
         let gEL = (enemies) => { // Get Enemy List Formatting
@@ -187,31 +502,178 @@ class CaveOfOrdeals extends FlooredSubmap {
         for (let i= 0; i < this.floors.length; ++i)
             this.floors[i].text = floorsText[i];
     }
+    load() {
+        currentMapState = MapStates.FlooredSubmap;
+        this.prepareMap();
+        map.dragging.enable();
+        loadedSubmap = this;
+        let div = document.getElementById('caveofOrdeals');
+        div.style.display = 'inline';
+        this.exitEvent = () => { 
+            this.exit(); 
+            if (map.getZoom() == 0)
+                return;
+            window.removeEventListener('keydown', this.controlsEvent);
+            div.style.display = "none";
+        } 
+        map.on('zoomend', this.exitEvent);
+        this.controlsEvent = (e) => this.controls(e);
+        window.addEventListener('keydown', this.controlsEvent);
+        this.setupButtons();
+        this.activeFloor = this.floors[0];
+        this.loadActiveFloor();
+    }
+    loadActiveFloor() {
+        removeAllLayersExceptTL();
+        this.activeFloor.load();
+        document.getElementById("caveofOrdealsButtonLabel").innerHTML = this.activeFloor.label;
+        document.getElementById("caveofOrdealsFloorText").innerHTML = this.activeFloor.text;
+    }
+    ascend() {
+        let newFloorIndex = this.activeFloor.index === 0 ? this.floors.length - 1 : this.activeFloor.index - 1;
+        this.activeFloor = this.floors[newFloorIndex];
+        this.loadActiveFloor();
+    }
+    descend() {
+        let newFloorIndex = this.activeFloor.index === this.floors.length - 1 ? 0 : this.activeFloor.index + 1;
+        this.activeFloor = this.floors[newFloorIndex];
+        this.loadActiveFloor();
+    }
+    manageActiveFloor() {
+        this.activeFloor.manageContent();
+    }
+    setupButtons() {
+        let arrowUp = document.getElementById('caveofOrdealsUpArrow');
+        let arrowDown = document.getElementById('caveofOrdealsDownArrow');
+        arrowUp.addEventListener('click', () => this.ascend());
+        arrowUp.addEventListener('contextmenu', () => this.ascend());
+        arrowDown.addEventListener('click', () => this.descend());
+        arrowDown.addEventListener('contextmenu', () => this.descend());
+
+        let button = document.getElementById('caveofOrdealsButton');
+        button.addEventListener('click', () => this.manageActiveFloor());
+        button.addEventListener('contextmenu', () => this.manageActiveFloor());
+    }
+    controls(event) {
+        if (!(event instanceof KeyboardEvent))
+            return;
+        let key = event.key == undefined ? event.originalEvent.key : event.key;
+
+        if (key == 'e' || key == "ArrowRight") {
+            this.manageActiveFloor();
+            return;
+        }
+
+        let arrow;
+        if (key == "ArrowUp" || key == 'w') {
+            this.ascend();
+            arrow = document.getElementById('caveofOrdealsUpArrow');
+        }
+        else if (key == 'ArrowDown' || key == 's') {
+            this.descend();
+            arrow = document.getElementById('caveofOrdealsDownArrow');
+        }      
+        arrow.style.filter = 'brightness(125%)';
+        arrow.style.transform = 'scale(1.1)';
+        setTimeout(function () {
+            arrow.style.filter = 'none';
+            arrow.style.transform = 'none';
+        }, 100);
+    }
+    getControlsOffset() {
+        return 400;
+    }
 }
 
 class Dungeon extends FlooredSubmap {
     constructor(position, imagedPosition, iconImage, name, contents,
-        {floorOffset=3, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
+        {floorOffset=DefaultFloor, baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}
     ) {
         let floors = [];
         for (let i = 0; i < contents.length; ++i) {
-            let floorLabel = floorLabels[i + floorOffset];
+            let floorLabel = FloorLabels[i + floorOffset];
             floors.push(new SubmapFloor(
-                'Dungeons/' + spaceToUnderscore(name) + '/' + floorLabel, + '.png', 
+                'Dungeons/' + spaceToUnderscore(name) + '/' + floorLabel, 
                 floorLabel, 
                 contents[i]
             ));
+            floors[i].index = i;
         }
-        super(position, iconImage, name, floors, {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
         this.floorOffset = floorOffset;
         this.imagedPosition = imagedPosition;
+        this.marker.setZIndexOffset(1000);
     }
+     initializeImages() {
+        let width = this.floors[0].image.width;
+        let height = this.floors[0].image.height;
+        if (height > 1350) {
+            width = 1350 / height * width;
+            height = 1350;
+        }
+        if (width > 2300) {
+            height = 2300 / width * height;
+            width = 2300;
+        }
+        let topLeftCornerPosition = [
+            mapCenter[0] + height, 
+            mapCenter[1] - width
+        ];
+        let bottomRightCornerPosition = [
+            mapCenter[0] - height, 
+            mapCenter[1] + width
+        ];
+        for (let floor of this.floors) {
+            floor.imageOverlay = L.imageOverlay(floor.image.src, [
+                topLeftCornerPosition, bottomRightCornerPosition
+            ]);
+        }
+    }
+    loadImageMapMarker() {
+        addMarkerToMap(this.marker, this.imagedPosition);
+        if (this.shownContentIsSet())
+            this.setVisually();
+        else
+            this.unsetVisually();
+    }
+    load() {
+        removeAllLayers();
+        map.setView(mapCenter, -2); // Center, min dungeon zoom
+        if (currentMapState === MapStates.ImageMap) {
+            map.setMinZoom(-5);
+            document.getElementById('credit').style.display = 'none';
+            map.off('zoomend');
+            map.dragging.enable();         
+            map.on('zoomend', loadTileMap);  
+        }
+        currentMapState = MapStates.Dungeon;
+        loadedSubmap = this;
+        let dungeonName = document.getElementById("dungeonName");
+        dungeonName.style.display = "grid";
+        dungeonName.children[1].innerHTML = this.name; 
+        this.controlsEvent = (e) => this.controls(e);
+        window.addEventListener('keydown', this.controlsEvent);
+        this.exitEvent = () => this.exit();
+        map.on('zoomend', this.exitEvent);
+        this.setupFloors();
+    }
+    exit() {
+        if (map.getZoom() >= -2)
+            return;
+        this.hideFloorUI();
+        document.getElementById('dungeonName').style.display = 'none';
+        removeAllLayers();
+        window.removeEventListener('keydown', this.controlsEvent);
+        map.off('zoomend', this.exitEvent);
+        loadTileMap();
+    }
+
 }
 
 class Province {
     constructor(name, counterPosition, 
         {baseReqs=[], randoReqs=baseReqs, glitchedReqs=randoReqs}={}, 
-        polygonPoints, contents, 
+        polygonPoints, contents=[], 
     ) {
         this.name = name;
         this.polygonPoints = polygonPoints;
@@ -227,6 +689,7 @@ class Province {
                 flagContents.push(c);
         }
         this.contents = flagContents;
+        this.initializePolygon(polygonPoints);
     }
     set() {
         for (let c of this.contents) {
@@ -240,27 +703,478 @@ class Province {
                 c.unset();
         }
     }
+    initializePolygon(polygonPoints) {
+        this.polygon = L.polygon(polygonPoints, { fillColor: '#6e5b1e', fillOpacity: 0, opacity: 0});
+        this.polygon.on('mouseover', function () { this.setStyle({ fillOpacity: 0.5 }) });
+        this.polygon.on('mouseout', function () { this.setStyle({ fillOpacity: 0 }) });
+        this.polygon.on('click', clickToZoom);
+    }
+    loadPolygon() {
+        addPolygonToMap(this.polygon);
+        this.polygon.setStyle({ fillOpacity: 0 });
+        if (Settings.CountersVisibility.isEnabled()) {
+            addMarkerToMap(L.marker(this.counterPosition, {
+                icon: L.divIcon({ html: '<div class="cpt procpt">' + this.count() + '</div>'}),
+                interactive: false
+            }));
+        }
+    }
+    loadMarkers() {
+         if (!verifySubmapRequirements(this))
+            return;
+        for (let c of this.contents)
+            c.loadMarker();
+    }
+    unset() {
+        for (let c of this.contents) {
+            if (c instanceof Flag || c instanceof Submap)
+                c.unset();
+        }
+    }
+    count() {
+        if (!verifySubmapRequirements(this))
+            return 0;
+        let count = 0;
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                count += c.count();
+            else if (c.isCountable()) // Flags & NonFlags
+                ++count;
+        }
+        return count;
+    }
+
+
 }
+
+class DungeonProvince extends Province {
+    constructor(dungeon, counterPosition, polygonPoints) {
+        super(dungeon.name, counterPosition, {
+            baseReqs: dungeon.baseReqs, randoReqs: dungeon.randoReqs, glitchedReqs: dungeon.glitchedReqs
+        }, polygonPoints);
+        this.dungeon = dungeon;
+        this.polygon.on('click', this.dungeon.load);
+    }
+    count() {
+        return this.dungeon.count();
+    }
+}
+
+
+let dungeonIconImage = getIconImage('Dungeon Star');
+
+const Dungeons = Object.freeze({
+    Forest: new Dungeon([-6915, 4098], [-6950, 4900], dungeonIconImage, 'Forest Temple', [
+        [   // 1F
+        "Forest Temple Entrance Vines Chest",
+        "Forest Temple Central Chest Behind Stairs",
+        "Forest Temple Central North Chest",
+        "Forest Temple Windless Bridge Chest",
+        "Forest Temple East Water Cave Chest",
+        "Forest Temple Second Monkey Under Bridge Chest",
+        "Forest Temple Big Baba Key",
+        "Forest Temple West Deku Like Chest",
+        "Forest Temple Totem Pole Chest",
+        "Forest Temple West Tile Worm Room Vines Chest",
+        "Forest Temple Gale Boomerang",
+        "Forest Temple West Tile Worm Chest Behind Stairs",
+        "Forest Temple Central Chest Hanging From Web",
+        "Forest Temple Big Key Chest",
+        "Forest Temple North Deku Like Chest",
+        "Forest Temple East Tile Worm Chest",
+        "Forest Temple Diababa Heart Container",
+        "Forest Temple Dungeon Reward",
+        "Forest Temple Diababa",
+        "Forest Temple Ooccoo",
+        "Forest Temple Tile Worm Monkey Lock",
+        "Forest Temple Big Baba Monkey Lock",
+        "Forest Temple Totem Pole Monkey Lock",
+        "Forest Temple Windless Bridge Lock",
+        "Forest Temple Boss Lock",
+        "Forest_Temple_Sign",
+        Bottle.Fairy.new([-3920, 4820]),
+    ]], {baseReqs: [], randoReqs: []}),
+    
+    Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
+        [   // 1F
+            "Goron Mines Entrance Chest",
+            "Goron Mines Main Magnet Room Bottom Chest",
+            "Goron Mines Gor Amato Key Shard",
+            "Goron Mines Gor Amato Chest",
+            "Goron Mines Gor Amato Small Chest",
+            "Goron Mines Magnet Maze Chest",
+            "Goron Mines Ooccoo",
+            "Goron Mines First Floor Lock",
+        ], [ // 2F
+            "Goron Mines Crystal Switch Room Underwater Chest",
+            "Goron Mines Crystal Switch Room Small Chest",
+            "Goron Mines After Crystal Switch Room Magnet Wall Chest",
+            "Goron Mines Double Beamos Lock",
+            "Goron Mines Outside Beamos Chest",
+            "Goron Mines Outside Underwater Chest",
+            "Goron Mines Outside Clawshot Chest",
+            "Goron Mines Outside Lock",
+            "Goron Mines Gor Ebizo Key Shard",
+            "Goron Mines Gor Ebizo Chest",
+            "Goron Mines Chest Before Dangoro",
+            "Goron Mines Dangoro Chest",
+            "Goron Mines Beamos Room Chest",
+            "Goron Mines Gor Liggs Key Shard",
+            "Goron Mines Gor Liggs Chest",
+            "Goron Mines Main Magnet Room Top Chest",
+            "Goron Mines Boss Lock",    
+            "Goron Mines Fyrus",
+            "Goron Mines Fyrus Heart Container",
+            "Goron Mines Dungeon Reward",
+            "Goron_Mines_Sign",
+            Bottle.Fairy.new([-3644, 4560])
+        ]
+    ], {}),
+
+    Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
+        [   // B2
+            "Lakebed Temple Morpheel",
+            "Lakebed Temple Morpheel Heart Container",
+            "Lakebed Temple Dungeon Reward"
+        ], [ // B1
+            "Lakebed Temple Central Room Spire Chest",
+            "Lakebed Temple Before Deku Toad Underwater Right Chest",
+            "Lakebed Temple Before Deku Toad Underwater Left Chest",
+            "Lakebed Temple Big Key Chest",
+            "Lakebed Temple Boss Lock",
+            Bottle.Fairy.new([-4365, 4362])
+        ], [ // 1F
+            "Lakebed Temple Central Room Small Chest",
+            "Lakebed Temple Central Room Chest",
+            "Lakebed Temple East Lower Waterwheel Stalactite Chest",
+            "Lakebed Temple Before Deku Toad Alcove Chest",
+            "Lakebed Temple Deku Toad Chest",
+            "Lakebed Temple West Lower Small Chest",
+            "Lakebed Temple East Lower Waterwheel Bridge Chest",
+            "Lakebed Temple Underwater Maze Small Chest",
+            "Lakebed Temple Before Deku Toad Lock",
+            "Lakebed_Temple_Sign",
+        ], [ // 2F
+            "Lakebed Temple Lobby Rear Chest",
+            "Lakebed Temple Lobby Left Chest",
+            "Lakebed Temple Stalactite Room Chest",
+            "Lakebed Temple East Second Floor Southwest Chest",
+            "Lakebed Temple East Second Floor Southeast Chest",
+            "Lakebed Temple Chandelier Chest",
+            "Lakebed Temple West Second Floor Central Small Chest",
+            "Lakebed Temple West Second Floor Northeast Chest",
+            "Lakebed Temple West Second Floor Southwest Underwater Chest",
+            "Lakebed Temple West Second Floor Southeast Chest",
+            "Lakebed Temple Ooccoo",
+            "Lakebed Temple Main Room Lock",
+            "Lakebed Temple East Water Supply Lock",
+            Bottle.Fairy.new([-4533, 5253])
+        ], [ // 3F
+
+        ], [ // 4F
+            "Lakebed Temple East Water Supply Small Chest",
+            "Lakebed Temple East Water Supply Clawshot Chest",
+            "Lakebed Temple West Water Supply Small Chest",
+            "Lakebed Temple West Water Supply Chest",
+        ]
+    ], {floorOffset: 1, baseReqs: [zoraArmorReq, bombBagReq]}),
+
+    Grounds: new Dungeon([-3865, 605], [-4500, 1488], dungeonIconImage, "Arbiter's Grounds", [
+        [   // B2
+            "Arbiters Grounds North Turning Room Lock",
+            "Arbiters Grounds Ooccoo",
+            "Arbiters Grounds Death Sword Chest",
+            "Arbiters Grounds Spinner Room First Small Chest",
+            "Arbiters Grounds Spinner Room Second Small Chest",
+            "Arbiters Grounds Spinner Room Lower Central Small Chest",
+            "Arbiters Grounds Spinner Room Stalfos Alcove Chest",
+
+        ], [ // B1
+            "Arbiters Grounds East Lower Turnable Redead Chest",
+            "Arbiters Grounds North Turning Room Chest",
+            "Arbiters Grounds Spinner Room Lower North Chest",
+
+        ], [ // 1F
+            "Arbiters Grounds Entrance Chest",
+            "Arbiters Grounds Entrance Lock",
+            "Arbiters Grounds Torch Room Poe",
+            "Arbiters Grounds Torch Room East Chest",
+            "Arbiters Grounds Torch Room West Chest",
+            "Arbiters Grounds West Small Chest Behind Block",
+            "Arbiters Grounds East Turning Room Poe",
+            "Arbiters Grounds West Chandelier Chest",
+            "Arbiters Grounds West Stalfos Northeast Chest",
+            "Arbiters Grounds West Stalfos West Chest",
+            "Arbiters Grounds Big Key Chest",
+            "Arbiters Grounds East Turning Room Lock",
+            "Arbiters_Grounds_Sign",
+            Bottle.Oil.new([-5341, 4446])
+
+        ], [ // 2F
+            "Arbiters Grounds East Upper Turnable Chest",
+            "Arbiters Grounds East Upper Turnable Redead Chest",
+            "Arbiters Grounds East Upper Turnable Lock",
+            "Arbiters Grounds Hidden Wall Poe",
+            "Arbiters Grounds Ghoul Rat Room Chest",
+            "Arbiters Grounds Ghoul Rat Room Lock",
+            "Arbiters Grounds West Poe",
+        ], [ // 3F
+
+        ], [ // 4F
+            "Arbiters Grounds Boss Lock",
+            "Arbiters Grounds Stallord",
+            "Arbiters Grounds Stallord Heart Container",
+            "Arbiters Grounds Dungeon Reward",
+            Bottle.Fairy.new([-3828, 4100])
+        ]
+    ], {floorOffset: 1, baseReqs: [aurusMemoReq, bulblinKeyReq]}),
+
+    Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
+        [    // 1F
+            "Snowpeak Ruins Lobby West Armor Chest",
+            "Snowpeak Ruins Lobby Armor Poe",
+            "Snowpeak Ruins Lobby East Armor Chest",
+            "Snowpeak Ruins Lobby Armor Bubble Rupee",
+            "Snowpeak Ruins Lobby Poe",
+            "Snowpeak Ruins Mansion Map",
+            "Snowpeak Ruins Ooccoo",
+            "Snowpeak Ruins East Courtyard Chest",
+            "Snowpeak Ruins East Courtyard Buried Chest",
+            "Snowpeak Ruins East Corrider Lock",
+            "Snowpeak Ruins Ordon Pumpkin Chest",
+            "Snowpeak Ruins West Courtyard Buried Chest",
+            "Snowpeak Ruins Courtyard Central Chest",
+            "Snowpeak Ruins Courtyard West Lock",
+            "Snowpeak Ruins West Cannon Room Central Chest",
+            "Snowpeak Ruins West Cannon Room Corner Chest",
+            "Snowpeak Ruins Wooden Beam Central Chest",
+            "Snowpeak Ruins Wooden Beam Northwest Chest",
+            "Snowpeak Ruins Broken Floor Chest",
+            "Snowpeak Ruins Ball and Chain",
+            "Snowpeak Ruins Chest After Darkhammer",
+            "Snowpeak Ruins Armor Bubble Rupee After Darkhammer",
+            "Snowpeak_Ruins_Sign",
+            Bottle.Soup.new([-5141, 4911])
+        ], [ // 2F
+            "Snowpeak Ruins Chapel Chest",
+            "Snowpeak Ruins Ice Room Poe",
+            "Snowpeak Ruins Lobby Chandelier Chest",
+            "Snowpeak Ruins Northeast Chandelier Chest",
+            "Snowpeak Ruins Wooden Beam Chandelier Chest",
+            "Snowpeak Ruins Lobby Lock",
+            "Snowpeak Ruins Ice Room Lock",
+        ], [ // 3F
+            "Snowpeak Ruins Boss Lock",
+            "Snowpeak Ruins Blizzeta",
+            "Snowpeak Ruins Blizzeta Heart Container",
+            "Snowpeak Ruins Dungeon Reward",
+        ]
+    ], {baseReqs: [coralEarringReq, reekfishScentReq]}),
+
+    Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
+        [    // 1F
+            "Temple of Time Lobby Lantern Chest",
+            "Temple of Time Boss Lock",
+            "Temple of Time Armogohma",
+            "Temple of Time Armogohma Heart Container",
+            "Temple of Time Dungeon Reward",
+            Bottle.Fairy.new([-4274, 4301])
+        ], [ // 2F
+            "Temple of Time First Staircase Gohma Gate Chest",
+            "Temple of Time Ooccoo",
+            "Temple of Time Lobby Lock",
+            "Temple_of_Time_Sign"
+        ], [ // 3F
+            "Temple of Time First Staircase Armos Chest",
+            "Temple of Time First Staircase Window Chest",
+            "Temple of Time Poe Behind Gate",
+        ], [ // 4F
+
+        ], [ // 5F
+            "Temple of Time Armos Antechamber East Chest",
+            "Temple of Time Armos Antechamber North Chest",
+            "Temple of Time Armos Antechamber Statue Chest",
+            "Temple of Time Second Staircase Lock",
+            "Temple of Time Moving Wall Beamos Room Chest", 
+            "Temple of Time Moving Wall Dinalfos Room Chest", 
+            "Temple_of_Time_Beyond_Point_Sign",
+        ], [ // 6F
+            "Temple of Time Scales Gohma Chest",
+        ], [ // 7F
+            "Temple of Time Scales Upper Chest",
+            "Temple of Time Poe Above Scales",
+            "Temple of Time Big Key Chest",
+            "Temple of Time Floor Switch Puzzle Room Upper Chest",
+            "Temple of Time Gilloutine Chest",
+        ], [ // 8F
+            "Temple of Time Chest Before Darknut",
+            "Temple of Time Darknut Lock",
+            "Temple of Time Darknut Chest",
+        ]
+    ], {baseReqs: [blizzetaReq, masterSwordReq], randoReqs: [shadowCrystalReq, [masterSwordReq, randoSettingReq]]}),
+
+    City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
+        [    // B3
+            "City in The Sky Aeralfos Chest"
+        ], [ // B2
+
+        ], [ // B1
+            "City in The Sky East Wing Lower Level Chest",
+            "City in The Sky West Wing Baba Balcony Chest"
+        ], [ // 1F
+            "City in The Sky Underwater West Chest",
+            "City in The Sky Underwater East Chest",
+            "City in The Sky Ooccoo",
+            "City in The Sky Lock",
+            "City in The Sky East First Wing Chest After Fans",
+            "City in The Sky East Tile Worm Small Chest",
+            "City in The Sky West Wing First Chest",
+            "City in The Sky West Wing Narrow Ledge Chest",
+            "City in The Sky West Wing Tile Worm Chest",
+            "City in The Sky Chest Behind North Fan",
+            "City in The Sky North Aeralfos Rupee",
+            "City_in_the_Sky_Sign",
+            Bottle.Fairy.new([-4495, 3767])
+        ], [ // 2F
+            "City in The Sky East Wing After Dinalfos Alcove Chest",
+            "City in The Sky East Wing After Dinalfos Ledge Chest",
+            "City in The Sky West Garden Lone Island Chest",
+            "City in The Sky Garden Island Poe",
+            "City in The Sky West Garden Lower Chest",
+            "City in The Sky Baba Tower Alcove Chest",
+            "City in The Sky Baba Tower Narrow Ledge Chest"
+        ], [ // 3F
+            "City in The Sky Chest Below Big Key Chest",
+            "City in The Sky West Garden Corner Chest",
+            "City in The Sky West Garden Ledge Chest",
+            "City in The Sky Baba Tower Top Small Chest",
+        ], [ // 4F
+            "City in The Sky Central Outside Ledge Chest",
+            "City in The Sky Central Outside Poe Island Chest",
+            "City in The Sky Big Key Chest",
+            "City in The Sky Poe Above Central Fan",
+            Bottle.BlueChu.new([-3776, 3738])
+        ], [ // 5F
+            "City in The Sky Boss Lock",
+            "City in The Sky Argorok",
+            "City in The Sky Argorok Heart Container",
+            "City in The Sky Dungeon Reward",
+            Bottle.Fairy.new([-3728, 4136]),
+            Bottle.BlueChu.new([-3674, 4127])
+        ]
+    ], {floorOffset: 0, baseReqs: [clawshotReq, completedSkybookReq]}),
+
+    Palace: new Dungeon([-3636, 602], [-3800, 1472], "Mirror", 'Palace of Twilight', [
+        [    // 1F
+            "Palace of Twilight Collect Both Sols",
+            "Palace of Twilight West Wing Chest Behind Wall of Darkness",
+            "Palace of Twilight West Wing First Room Central Chest",
+            "Palace of Twilight West Wing First Lock",
+            "Palace of Twilight West Wing Second Room Central Chest",
+            "Palace of Twilight West Wing Second Room Lower South Chest",
+            "Palace of Twilight West Wing Second Room Southeast Chest",
+            "Palace of Twilight West Wing Second Lock",
+            "Palace of Twilight East Wing First Room Zant Head Chest",
+            "Palace of Twilight East Wing First Room North Small Chest",
+            "Palace of Twilight East Wing First Room West Alcove",
+            "Palace of Twilight East Wing First Room East Alcove",
+            "Palace of Twilight East Wing First Lock",
+            "Palace of Twilight East Wing Second Room Southwest Chest",
+            "Palace of Twilight East Wing Second Room Northwest Chest",
+            "Palace of Twilight East Wing Second Room Northeast Chest",
+            "Palace of Twilight East Wing Second Room Southeast Chest",
+            "Palace of Twilight East Wing Second Lock",
+            "Palace_of_Twilight_Sign",
+            Bottle.Fairy.new([-5106, 3727])
+        ], [ // 2F
+            "Palace of Twilight Central First Room Chest"
+        ], [ // 3F
+            "Palace of Twilight Big Key Chest",
+            "Palace of Twilight Central Outdoor Chest",
+            "Palace of Twilight Central Tower Chest",
+            "Palace of Twilight Central First Room Lock",
+            "Palace of Twilight Central Outdoor Lock",
+            Bottle.Fairy.new([-4656, 4439])
+        ], [ // 4F
+            "Palace of Twilight Before Zant Lock",
+            "Palace of Twilight Boss Lock",
+            "Palace of Twilight Zant",
+            "Palace of Twilight Zant Heart Container",
+        ]
+    ], {baseReqs: [stallordReq, completedMirrorReq], randoReqs: [stallordReq]}),
+
+    Castle: new Dungeon([-3250, 4712], [], 'Castle', 'Hyrule Castle', [
+        [    // 1F
+            "Hyrule Castle Outside Lock",
+            "Hyrule Castle West Courtyard Central Small Chest",
+            "Hyrule Castle King Bulblin Key",
+            "Hyrule Castle West Courtyard North Small Chest",
+            "Hyrule Castle East Wing Balcony Chest",
+            "Hyrule Castle East Wing Boomerang Puzzle Chest",
+            "Hyrule Castle Graveyard Grave Switch Room Front Left Chest",
+            "Hyrule Castle Graveyard Grave Switch Room Back Left Chest",
+            "Hyrule Castle Graveyard Grave Switch Room Right Chest",
+            "Hyrule Castle Graveyard Owl Statue Chest",
+            "Hyrule_Castle_Sign",
+            Bottle.Oil.new([-3890, 4791])
+        ], [ // 2F
+            "Hyrule Castle Main Hall Northeast Chest",
+            "Hyrule Castle Main Hall Northwest Chest",
+            "Hyrule Castle Main Hall Southwest Chest",
+            "Hyrule Castle Lantern Staircase Chest",
+            "Hyrule Castle Southeast Balcony Tower Chest",
+            "Hyrule Castle Big Key Chest",
+            Bottle.Oil.new([-4615, 4172]),
+            Bottle.YellowChu.new([-4910, 3843]),
+            Bottle.YellowChu.new([-4686, 3917]),
+            Bottle.RedChu.new([-4759, 3845])
+        ], [ // 3F
+            'Hyrule Castle Balcony Lock'
+        ], [ // 4F
+            'Hyrule Castle Darknut Before Boss Rupee',
+            "Hyrule Castle Boss Lock",
+            "Hyrule Castle Treasure Room Lock",
+            "Hyrule Castle Treasure Room First Chest",
+            "Hyrule Castle Treasure Room Second Chest",
+            "Hyrule Castle Treasure Room Third Chest",
+            "Hyrule Castle Treasure Room Fourth Chest",
+            "Hyrule Castle Treasure Room Fifth Chest",
+            "Hyrule Castle Treasure Room First Small Chest",
+            "Hyrule Castle Treasure Room Second Small Chest",
+            "Hyrule Castle Treasure Room Third Small Chest",
+            "Hyrule Castle Treasure Room Fourth Small Chest",
+            "Hyrule Castle Treasure Room Fifth Small Chest",
+            "Hyrule Castle Treasure Room Sixth Small Chest",
+            "Hyrule Castle Treasure Room Seventh Small Chest",
+            "Hyrule Castle Treasure Room Eighth Small Chest",
+            Bottle.Fairy.new([-5030, 4760])
+        ], [ // 5F
+            "Hyrule Castle Ganondorf",
+            Bottle.Fairy.new([-4957, 4179])
+        ]   
+    ])
+});
+
 
 let grottoIconImage = getIconImage('Grotto');
 let doorIconImage = getIconImage('Door');
 let entranceIconImage = getIconImage('Entrance');
-let dungeonIconImage = getIconImage('Dungeon Star');
 
 function newGrotto(id, position, name, contents) {
-    let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto' + id, contents);
+    let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto_' + id, contents);
     grotto.name = name;
     return grotto;
 }
 
-let castlePoints = [
+let hyruleCastlePolygonPoints = [
     [-2798, 5430], [-2863, 5622], [-2940, 5472], [-3184, 5586], [-3188, 5550], [-3362, 5552], [-3357, 5551], [-3357, 5588], 
     [-3225, 5632], [-3481, 5705], [-3556, 5756], [-3558, 5664], [-3653, 5729], [-3370, 5828], [-3702, 5958], [-3707, 5907], 
     [-3782, 5912], [-3938, 5914], [-3938, 4990], [-3788, 4994], [-3707, 4986], [-3706, 4940], [-3358, 5074], [-3649, 5173], 
     [-3558, 5242], [-3552, 5158], [-3218, 5266], [-3360, 5325], [-3359, 5348], [-3184, 5345], [-3180, 5304], [-2936, 5440]
 ];
 
-const provinces = Object.freeze({
+
+const Provinces = Object.freeze({
     Ordona: new Province('Ordona', [-8816, 5664], {}, [
             [-8053, 5568], [-7628, 6232], [-8208, 6872], [-8776, 7160], [-9752, 6952], [-9876, 6564], [-9976, 5776], [-9924, 5088], 
             [-9750, 4672], [-8792, 4338], [-7853, 4693]
@@ -286,7 +1200,8 @@ const provinces = Object.freeze({
                 "Ordon Shield"
             ]),
             new SimpleFlooredSubmap([-9171, 4953], doorIconImage, "Bo's House", [
-                "Wrestling With Bo"
+                ["Wrestling With Bo"],
+                []
             ]),
             newGrotto(1, [-9523, 4765], "Ordon Ranch Grotto", [
                 "Ordon Ranch Grotto Lantern Chest"
@@ -451,8 +1366,8 @@ const provinces = Object.freeze({
                    "Renados Letter",
                    "Ilia Memory Reward"
                 ]
-            ]),
-            new SimpleSubmap([-5711, 6043], doorIconImage, 'Eldin Lantern Cave', [
+            ], {floorOffset: 2}),
+            new SimpleSubmap([-5711, 6043], entranceIconImage, 'Eldin Lantern Cave', [
                 "Eldin Lantern Cave First Chest",
                 "Eldin Lantern Cave Second Chest",
                 "Eldin Lantern Cave Lantern Chest",
@@ -630,7 +1545,7 @@ const provinces = Object.freeze({
         [-504, 5832], [-606, 5444], [-722, 5358], [-1104, 5408], [-1288, 5376], [-1554, 5161], [-1704, 4896], [-1894, 4812], 
         [-2077, 4634], [-2539, 4431], [-2749, 4205], [-3632, 3892], [-3764, 3420], [-3820, 3180], [-4288, 3200], [-4974, 3290],
         [-5081, 3201], [-5319, 3218], [-5592, 3400], [-5936, 3768], [-5813, 4728], [-5776, 4750], [-5624, 4872], [-5552, 5096]
-    ], castlePoints], [
+    ], hyruleCastlePolygonPoints], [
         "Zoras Domain Chest By Mother and Child Isles",
         "Zoras Domain Chest Behind Waterfall",
         "Lake Hylia Underwater Chest",
@@ -729,7 +1644,7 @@ const provinces = Object.freeze({
         Bottle.BeeLarva.new([-614, 5775]),
         Bottle.Fairy.new([-5488, 3116]),
         Bottle.RareChu.new([-5353, 3456]),
-        new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle", [
+        new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle",[[
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
             "Agitha Male Dayfly Reward",
@@ -756,7 +1671,7 @@ const provinces = Object.freeze({
             "Agitha Female Dragonfly Reward",
         ], [
 
-        ]),
+        ]]),
         new SimpleSubmap([-4057, 4837], doorIconImage, "Jovani's House", [
             "Jovani House Poe",
             "Jovani 20 Poe Soul Reward",
@@ -853,397 +1768,7 @@ const provinces = Object.freeze({
             "Lanayru Ice Block Puzzle Cave Chest"
         ]),
     ]),
-    Castle: new Province('Hyrule Castle', [-3584, 5440], {}, castlePoints, [])
+    Castle: new DungeonProvince(Dungeons.Castle, [-3584, 5440], hyruleCastlePolygonPoints)
 });
 
-const dungeons = Object.freeze({
-    Forest: new Dungeon([-6915, 4098], [-6950, 4900], dungeonIconImage, 'Forest Temple', [
-        [   // 1F
-        "Forest Temple Entrance Vines Chest",
-        "Forest Temple Central Chest Behind Stairs",
-        "Forest Temple Central North Chest",
-        "Forest Temple Windless Bridge Chest",
-        "Forest Temple East Water Cave Chest",
-        "Forest Temple Second Monkey Under Bridge Chest",
-        "Forest Temple Big Baba Key",
-        "Forest Temple West Deku Like Chest",
-        "Forest Temple Totem Pole Chest",
-        "Forest Temple West Tile Worm Room Vines Chest",
-        "Forest Temple Gale Boomerang",
-        "Forest Temple West Tile Worm Chest Behind Stairs",
-        "Forest Temple Central Chest Hanging From Web",
-        "Forest Temple Big Key Chest",
-        "Forest Temple North Deku Like Chest",
-        "Forest Temple East Tile Worm Chest",
-        "Forest Temple Diababa Heart Container",
-        "Forest Temple Dungeon Reward",
-        "Forest Temple Diababa",
-        "Forest Temple Ooccoo",
-        "Forest Temple Tile Worm Monkey Lock",
-        "Forest Temple Big Baba Monkey Lock",
-        "Forest Temple Totem Pole Monkey Lock",
-        "Forest Temple Windless Bridge Lock",
-        "Forest Temple Boss Lock",
-        "Forest_Temple_Sign",
-        Bottle.Fairy.new([-3920, 4820]),
-    ]], {baseReqs: [], randoReqs: []}),
-    
-    Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
-        [   // 1F
-            "Goron Mines Entrance Chest",
-            "Goron Mines Main Magnet Room Bottom Chest",
-            "Goron Mines Gor Amato Key Shard",
-            "Goron Mines Gor Amato Chest",
-            "Goron Mines Gor Amato Small Chest",
-            "Goron Mines Magnet Maze Chest",
-            "Goron Mines Ooccoo",
-            "Goron Mines First Floor Lock",
-        ], [ // 2F
-            "Goron Mines Crystal Switch Room Underwater Chest",
-            "Goron Mines Crystal Switch Room Small Chest",
-            "Goron Mines After Crystal Switch Room Magnet Wall Chest",
-            "Goron Mines Double Beamos Lock",
-            "Goron Mines Outside Beamos Chest",
-            "Goron Mines Outside Underwater Chest",
-            "Goron Mines Outside Clawshot Chest",
-            "Goron Mines Outside Lock",
-            "Goron Mines Gor Ebizo Key Shard",
-            "Goron Mines Gor Ebizo Chest",
-            "Goron Mines Chest Before Dangoro",
-            "Goron Mines Dangoro Chest",
-            "Goron Mines Beamos Room Chest",
-            "Goron Mines Gor Liggs Key Shard",
-            "Goron Mines Gor Liggs Chest",
-            "Goron Mines Main Magnet Room Top Chest",
-            "Goron Mines Boss Lock",    
-            "Goron Mines Fyrus",
-            "Goron Mines Fyrus Heart Container",
-            "Goron Mines Dungeon Reward",
-            "Goron_Mines_Sign",
-            Bottle.Fairy.new([-3644, 4560])
-        ]
-    ], {}),
 
-    Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
-        [   // B2
-            "Lakebed Temple Morpheel",
-            "Lakebed Temple Morpheel Heart Container",
-            "Lakebed Temple Dungeon Reward"
-        ], [ // B1
-            "Lakebed Temple Central Room Spire Chest",
-            "Lakebed Temple Before Deku Toad Underwater Right Chest",
-            "Lakebed Temple Before Deku Toad Underwater Left Chest",
-            "Lakebed Temple Big Key Chest",
-            "Lakebed Temple Boss Lock",
-            Bottle.Fairy.new([-4365, 4362])
-        ], [ // 1F
-            "Lakebed Temple Central Room Small Chest",
-            "Lakebed Temple Central Room Chest",
-            "Lakebed Temple East Lower Waterwheel Stalactite Chest",
-            "Lakebed Temple Before Deku Toad Alcove Chest",
-            "Lakebed Temple Deku Toad Chest",
-            "Lakebed Temple West Lower Small Chest",
-            "Lakebed Temple East Lower Waterwheel Bridge Chest",
-            "Lakebed Temple Underwater Maze Small Chest",
-            "Lakebed Temple Before Deku Toad Lock",
-            "Lakebed_Temple_Sign",
-        ], [ // 2F
-            "Lakebed Temple Lobby Rear Chest",
-            "Lakebed Temple Lobby Left Chest",
-            "Lakebed Temple Stalactite Room Chest",
-            "Lakebed Temple East Second Floor Southwest Chest",
-            "Lakebed Temple East Second Floor Southeast Chest",
-            "Lakebed Temple Chandelier Chest",
-            "Lakebed Temple West Second Floor Central Small Chest",
-            "Lakebed Temple West Second Floor Northeast Chest",
-            "Lakebed Temple West Second Floor Southwest Underwater Chest",
-            "Lakebed Temple West Second Floor Southeast Chest",
-            "Lakebed Temple Ooccoo",
-            "Lakebed Temple Main Room Lock",
-            "Lakebed Temple East Water Supply Lock",
-            Bottle.Fairy.new([-4533, 5253])
-        ], [ // 3F
-
-        ], [ // 4F
-            "Lakebed Temple East Water Supply Small Chest",
-            "Lakebed Temple East Water Supply Clawshot Chest",
-            "Lakebed Temple West Water Supply Small Chest",
-            "Lakebed Temple West Water Supply Chest",
-        ]
-    ], {floorOffset: 1, baseReqs: [zoraArmorReq, bombBagReq]}),
-
-    Grounds: new Dungeon([-3865, 605], [-4500, 1488], dungeonIconImage, "Arbiter's Grounds", [
-        [   // B2
-            "Arbiters Grounds North Turning Room Lock",
-            "Arbiters Grounds Ooccoo",
-            "Arbiters Grounds Death Sword Chest",
-            "Arbiters Grounds Spinner Room First Small Chest",
-            "Arbiters Grounds Spinner Room Second Small Chest",
-            "Arbiters Grounds Spinner Room Lower Central Small Chest",
-            "Arbiters Grounds Spinner Room Stalfos Alcove Chest",
-
-        ], [ // B1
-            "Arbiters Grounds East Lower Turnable Redead Chest",
-            "Arbiters Grounds North Turning Room Chest",
-            "Arbiters Grounds Spinner Room Lower North Chest",
-
-        ], [ // 1F
-            "Arbiters Grounds Entrance Chest",
-            "Arbiters Grounds Entrance Lock",
-            "Arbiters Grounds Torch Room Poe",
-            "Arbiters Grounds Torch Room East Chest",
-            "Arbiters Grounds Torch Room West Chest",
-            "Arbiters Grounds West Small Chest Behind Block",
-            "Arbiters Grounds East Turning Room Poe",
-            "Arbiters Grounds West Chandelier Chest",
-            "Arbiters Grounds West Stalfos Northeast Chest",
-            "Arbiters Grounds West Stalfos West Chest",
-            "Arbiters Grounds Big Key Chest",
-            "Arbiters Grounds East Turning Room Lock",
-            "Arbiters_Grounds_Sign",
-            Bottle.Oil.new([-5341, 4446])
-
-        ], [ // 2F
-            "Arbiters Grounds East Upper Turnable Chest",
-            "Arbiters Grounds East Upper Turnable Redead Chest",
-            "Arbiters Grounds East Upper Turnable Lock",
-            "Arbiters Grounds Hidden Wall Poe",
-            "Arbiters Grounds Ghoul Rat Room Chest",
-            "Arbiters Grounds Ghoul Rat Room Lock",
-            "Arbiters Grounds West Poe",
-        ], [ // 3F
-
-        ], [ // 4F
-            "Arbiters Grounds Boss Lock",
-            "Arbiters Grounds Stallord",
-            "Arbiters Grounds Stallord Heart Container",
-            "Arbiters Grounds Dungeon Reward",
-            Bottle.Fairy.new([-3828, 4100])
-        ]
-    ], {floorOffset: 1, baseReqs: [Requirement.fromBoolItem(aurusMemo), bulblinKeyReq]}),
-
-    Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
-        [    // 1F
-            "Snowpeak Ruins Lobby West Armor Chest",
-            "Snowpeak Ruins Lobby Armor Poe",
-            "Snowpeak Ruins Lobby East Armor Chest",
-            "Snowpeak Ruins Lobby Armor Bubble Rupee",
-            "Snowpeak Ruins Lobby Poe",
-            "Snowpeak Ruins Mansion Map",
-            "Snowpeak Ruins Ooccoo",
-            "Snowpeak Ruins East Courtyard Chest",
-            "Snowpeak Ruins East Courtyard Buried Chest",
-            "Snowpeak Ruins East Corrider Lock",
-            "Snowpeak Ruins Ordon Pumpkin Chest",
-            "Snowpeak Ruins West Courtyard Buried Chest",
-            "Snowpeak Ruins Courtyard Central Chest",
-            "Snowpeak Ruins Courtyard West Lock",
-            "Snowpeak Ruins West Cannon Room Central Chest",
-            "Snowpeak Ruins West Cannon Room Corner Chest",
-            "Snowpeak Ruins Wooden Beam Central Chest",
-            "Snowpeak Ruins Wooden Beam Northwest Chest",
-            "Snowpeak Ruins Broken Floor Chest",
-            "Snowpeak Ruins Ball and Chain",
-            "Snowpeak Ruins Chest After Darkhammer",
-            "Snowpeak Ruins Armor Bubble Rupee After Darkhammer",
-            "Snowpeak_Ruins_Sign",
-            Bottle.Soup.new([-5141, 4911])
-        ], [ // 2F
-            "Snowpeak Ruins Chapel Chest",
-            "Snowpeak Ruins Ice Room Poe",
-            "Snowpeak Ruins Lobby Chandelier Chest",
-            "Snowpeak Ruins Northeast Chandelier Chest",
-            "Snowpeak Ruins Wooden Beam Chandelier Chest",
-            "Snowpeak Ruins Lobby Lock",
-            "Snowpeak Ruins Ice Room Lock",
-        ], [ // 3F
-            "Snowpeak Ruins Boss Lock",
-            "Snowpeak Ruins Blizzeta",
-            "Snowpeak Ruins Blizzeta Heart Container",
-            "Snowpeak Ruins Dungeon Reward",
-        ]
-    ], {baseReqs: [coralEarringReq, reekfishScentReq]}),
-
-    Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
-        [    // 1F
-            "Temple of Time Lobby Lantern Chest",
-            "Temple of Time Boss Lock",
-            "Temple of Time Armogohma",
-            "Temple of Time Armogohma Heart Container",
-            "Temple of Time Dungeon Reward",
-            Bottle.Fairy.new([-4274, 4301])
-        ], [ // 2F
-            "Temple of Time First Staircase Gohma Gate Chest",
-            "Temple of Time Ooccoo",
-            "Temple of Time Lobby Lock",
-            "Temple_of_Time_Sign"
-        ], [ // 3F
-            "Temple of Time First Staircase Armos Chest",
-            "Temple of Time First Staircase Window Chest",
-            "Temple of Time Poe Behind Gate",
-        ], [ // 4F
-
-        ], [ // 5F
-            "Temple of Time Armos Antechamber East Chest",
-            "Temple of Time Armos Antechamber North Chest",
-            "Temple of Time Armos Antechamber Statue Chest",
-            "Temple of Time Second Staircase Lock",
-            "Temple of Time Moving Wall Beamos Room Chest", 
-            "Temple of Time Moving Wall Dinalfos Room Chest", 
-            "Temple_of_Time_Beyond_Point_Sign",
-        ], [ // 6F
-            "Temple of Time Scales Gohma Chest",
-        ], [ // 7F
-            "Temple of Time Scales Upper Chest",
-            "Temple of Time Poe Above Scales",
-            "Temple of Time Big Key Chest",
-            "Temple of Time Floor Switch Puzzle Room Upper Chest",
-            "Temple of Time Gilloutine Chest",
-        ], [ // 8F
-            "Temple of Time Chest Before Darknut",
-            "Temple of Time Darknut Lock",
-            "Temple of Time Darknut Chest",
-        ]
-    ], {baseReqs: [blizzetaReq, masterSwordReq], randoReqs: [shadowCrystalReq, [masterSwordReq, randoSettingReq]]}),
-
-    City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
-        [    // B3
-            "City in The Sky Aeralfos Chest"
-        ], [ // B2
-
-        ], [ // B1
-            "City in The Sky East Wing Lower Level Chest",
-            "City in The Sky West Wing Baba Balcony Chest"
-        ], [ // 1F
-            "City in The Sky Underwater West Chest",
-            "City in The Sky Underwater East Chest",
-            "City in The Sky Ooccoo",
-            "City in The Sky Lock",
-            "City in The Sky East First Wing Chest After Fans",
-            "City in The Sky East Tile Worm Small Chest",
-            "City in The Sky West Wing First Chest",
-            "City in The Sky West Wing Narrow Ledge Chest",
-            "City in The Sky West Wing Tile Worm Chest",
-            "City in The Sky Chest Behind North Fan",
-            "City in The Sky North Aeralfos Rupee",
-            "City_in_the_Sky_Sign",
-            Bottle.Fairy.new([-4495, 3767])
-        ], [ // 2F
-            "City in The Sky East Wing After Dinalfos Alcove Chest",
-            "City in The Sky East Wing After Dinalfos Ledge Chest",
-            "City in The Sky West Garden Lone Island Chest",
-            "City in The Sky Garden Island Poe",
-            "City in The Sky West Garden Lower Chest",
-            "City in The Sky Baba Tower Alcove Chest",
-            "City in The Sky Baba Tower Narrow Ledge Chest"
-        ], [ // 3F
-            "City in The Sky Chest Below Big Key Chest",
-            "City in The Sky West Garden Corner Chest",
-            "City in The Sky West Garden Ledge Chest",
-            "City in The Sky Baba Tower Top Small Chest",
-        ], [ // 4F
-            "City in The Sky Central Outside Ledge Chest",
-            "City in The Sky Central Outside Poe Island Chest",
-            "City in The Sky Big Key Chest",
-            "City in The Sky Poe Above Central Fan",
-            Bottle.BlueChu.new([-3776, 3738])
-        ], [ // 5F
-            "City in The Sky Boss Lock",
-            "City in The Sky Argorok",
-            "City in The Sky Argorok Heart Container",
-            "City in The Sky Dungeon Reward",
-            Bottle.Fairy.new([-3728, 4136]),
-            Bottle.BlueChu.new([-3674, 4127])
-        ]
-    ], {floorOffset: 0, baseReqs: [clawshotReq, Requirement.fromBoolItem(skybook.getItemByReq(7))]}),
-
-    Palace: new Dungeon([-3636, 602], [-3800, 1472], "Mirror", 'Palace of Twilight', [
-        [    // 1F
-            "Palace of Twilight Collect Both Sols",
-            "Palace of Twilight West Wing Chest Behind Wall of Darkness",
-            "Palace of Twilight West Wing First Room Central Chest",
-            "Palace of Twilight West Wing First Lock",
-            "Palace of Twilight West Wing Second Room Central Chest",
-            "Palace of Twilight West Wing Second Room Lower South Chest",
-            "Palace of Twilight West Wing Second Room Southeast Chest",
-            "Palace of Twilight West Wing Second Lock",
-            "Palace of Twilight East Wing First Room Zant Head Chest",
-            "Palace of Twilight East Wing First Room North Small Chest",
-            "Palace of Twilight East Wing First Room West Alcove",
-            "Palace of Twilight East Wing First Room East Alcove",
-            "Palace of Twilight East Wing First Lock",
-            "Palace of Twilight East Wing Second Room Southwest Chest",
-            "Palace of Twilight East Wing Second Room Northwest Chest",
-            "Palace of Twilight East Wing Second Room Northeast Chest",
-            "Palace of Twilight East Wing Second Room Southeast Chest",
-            "Palace of Twilight East Wing Second Lock",
-            "Palace_of_Twilight_Sign",
-            Bottle.Fairy.new([-5106, 3727])
-        ], [ // 2F
-            "Palace of Twilight Central First Room Chest"
-        ], [ // 3F
-            "Palace of Twilight Big Key Chest",
-            "Palace of Twilight Central Outdoor Chest",
-            "Palace of Twilight Central Tower Chest",
-            "Palace of Twilight Central First Room Lock",
-            "Palace of Twilight Central Outdoor Lock",
-            Bottle.Fairy.new([-4656, 4439])
-        ], [ // 4F
-            "Palace of Twilight Before Zant Lock",
-            "Palace of Twilight Boss Lock",
-            "Palace of Twilight Zant",
-            "Palace of Twilight Zant Heart Container",
-        ]
-    ], {baseReqs: [stallordReq, Requirement.fromCountItem(mirrorShard, 4)], randoReqs: [stallordReq]}),
-
-    Castle: new Dungeon([-3250, 4712], [], 'Castle', 'Hyrule Castle', [
-        [    // 1F
-            "Hyrule Castle Outside Lock",
-            "Hyrule Castle West Courtyard Central Small Chest",
-            "Hyrule Castle King Bulblin Key",
-            "Hyrule Castle West Courtyard North Small Chest",
-            "Hyrule Castle East Wing Balcony Chest",
-            "Hyrule Castle East Wing Boomerang Puzzle Chest",
-            "Hyrule Castle Graveyard Grave Switch Room Front Left Chest",
-            "Hyrule Castle Graveyard Grave Switch Room Back Left Chest",
-            "Hyrule Castle Graveyard Grave Switch Room Right Chest",
-            "Hyrule Castle Graveyard Owl Statue Chest",
-            "Hyrule_Castle_Sign",
-            Bottle.Oil.new([-3890, 4791])
-        ], [ // 2F
-            "Hyrule Castle Main Hall Northeast Chest",
-            "Hyrule Castle Main Hall Northwest Chest",
-            "Hyrule Castle Main Hall Southwest Chest",
-            "Hyrule Castle Lantern Staircase Chest",
-            "Hyrule Castle Southeast Balcony Tower Chest",
-            "Hyrule Castle Big Key Chest",
-            Bottle.Oil.new([-4615, 4172]),
-            Bottle.YellowChu.new([-4910, 3843]),
-            Bottle.YellowChu.new([-4686, 3917]),
-            Bottle.RedChu.new([-4759, 3845])
-        ], [ // 3F
-            'Hyrule Castle Balcony Lock'
-        ], [ // 4F
-            'Hyrule Castle Darknut Before Boss Rupee',
-            "Hyrule Castle Boss Lock",
-            "Hyrule Castle Treasure Room Lock",
-            "Hyrule Castle Treasure Room First Chest",
-            "Hyrule Castle Treasure Room Second Chest",
-            "Hyrule Castle Treasure Room Third Chest",
-            "Hyrule Castle Treasure Room Fourth Chest",
-            "Hyrule Castle Treasure Room Fifth Chest",
-            "Hyrule Castle Treasure Room First Small Chest",
-            "Hyrule Castle Treasure Room Second Small Chest",
-            "Hyrule Castle Treasure Room Third Small Chest",
-            "Hyrule Castle Treasure Room Fourth Small Chest",
-            "Hyrule Castle Treasure Room Fifth Small Chest",
-            "Hyrule Castle Treasure Room Sixth Small Chest",
-            "Hyrule Castle Treasure Room Seventh Small Chest",
-            "Hyrule Castle Treasure Room Eighth Small Chest",
-            Bottle.Fairy.new([-5030, 4760])
-        ], [ // 5F
-            "Hyrule Castle Ganondorf",
-            Bottle.Fairy.new([-4957, 4179])
-        ]   
-    ])
-});

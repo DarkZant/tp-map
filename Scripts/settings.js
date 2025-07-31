@@ -13,6 +13,7 @@ document.getElementById('Gamemodes').addEventListener('change', function () {
         document.getElementById('randoVisibility').style.display = "inline";
         document.getElementById('randoFlagCounters').style.display = "inline";
     }
+    document.dispatchEvent(new CustomEvent('settingsUpdated'));
 });
 
 
@@ -28,7 +29,11 @@ class Setting extends Storable {
             if (this.parent)
                 this.parent.update(this.active);
             this.storageUnit.setFlag(this);
+            document.dispatchEvent(new CustomEvent('settingsUpdated'));
         });
+    }
+    isEnabled() {
+        return this.active;
     }
     getDefaultStoreValue() {
         return this.defaultValue;
@@ -96,13 +101,13 @@ class ParentSetting {
 }
 
 let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
-    new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main),
-    new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.Souls),
-    new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters),
-    new CategoryVisibilitySetting('Base_Bugs_Visibility', Categories.Bugs),
-    new CategoryVisibilitySetting('Base_Skills_Visibility', Categories.HiddenSkills),
+    new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main, 1),
+    new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.PoeSouls, 1),
+    new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters,1 ),
+    new CategoryVisibilitySetting('Base_Bugs_Visibility', Categories.Bugs, 1),
+    new CategoryVisibilitySetting('Base_Skills_Visibility', Categories.HiddenSkills, 1),
     new CategoryVisibilitySetting('Base_Rupees_Visibility', Categories.Rupees),
-    new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts),
+    new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts, 1),
     new CategoryVisibilitySetting('Base_Ammunition_Visibility', Categories.Ammo),
     new CategoryVisibilitySetting('Base_Locks_Visibility', Categories.Locks),
     new CategoryVisibilitySetting('Base_Ooccoo_Visibility', Categories.Ooccoo),
@@ -110,8 +115,8 @@ let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
 ]);
 
 let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Parent', [ // 7
-    new CategoryVisibilitySetting('Rando_Main_Visibility', Categories.Main),
-    new CategoryVisibilitySetting('Rando_Souls_Visibility', Categories.Souls),
+    new CategoryVisibilitySetting('Rando_Main_Visibility', Categories.Main, 1),
+    new CategoryVisibilitySetting('Rando_Souls_Visibility', Categories.PoeSouls),
     new CategoryVisibilitySetting('Rando_Characters_Visibility', Categories.SkyCharacters),
     new CategoryVisibilitySetting('Rando_Bugs_Visibility', Categories.Bugs),
     new CategoryVisibilitySetting('Rando_Skills_Visibility', Categories.HiddenSkills),
@@ -120,7 +125,7 @@ let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Paren
 ]);
 
 let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibility_Parent', [ // 6
-    new CategoryVisibilitySetting('Rando_Hints_Visibility', Categories.Hints),
+    new CategoryVisibilitySetting('Rando_Hints_Visibility', Categories.Hints, 1),
     new CategoryVisibilitySetting('Rando_Bosses_Visibility', Categories.Bosses),
     new CategoryVisibilitySetting('Rando_Rupees_Visibility', Categories.Rupees),
     new CategoryVisibilitySetting('Rando_Locks_Visibility', Categories.Locks),
@@ -152,22 +157,28 @@ addChildrenToMap(nonFlagVisibilityParent, randoVisibilitySettings);
 
 
 function verifyCategoryVisibility(category) {
-    if (selectedGamemode === Gamemodes.Base)
-        return baseVisibilitySettings.get(category).active;
+    let setting;
+    
+    if (selectedGamemode === Gamemodes.Base) 
+        setting = baseVisibilitySettings.get(category);
     else 
-        return randoVisibilitySettings.get(category).active;
+        setting = randoVisibilitySettings.get(category);
+
+    return setting === undefined ? false : setting.isEnabled();
+
+    
 }
 
 const Settings = Object.freeze({ // 12
-    TrackerLogic: new Setting('Tracker_Logic'),
+    TrackerLogic: new Setting('Tracker_Logic', 1),
     HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),
     AutocompleteTracker: new Setting('Tracker_Autocompletion'),
-    EmptySubmaps: new Setting('Empty_Submaps_Visibility'),
+    EmptySubmaps: new Setting('Empty_Submaps_Visibility', 1),
     SubmapAsMarker: new Setting('Submap_As_One_Marker'),
     ChestsContent: new Setting('Show_Chests_As_Content'),
     TrackerOverlay: new Setting('Tracker_Position'),
-    CountersVisibility: new Setting('Show_Counters'),
-    CountFlags: new Setting('Count_Flags'),
+    CountersVisibility: new Setting('Show_Counters', 1),
+    CountFlags: new Setting('Count_Flags', 1),
     CountChecks: new Setting('Count_Checks'),
     CountNonChecks: new Setting('Count_Non_Checks'),
     CountNonFlags: new Setting('Count_Non_Flags')
@@ -217,7 +228,7 @@ let storableArray =  [
     settingsArray[9],
     settingsArray[10],
     settingsArray[11],
-];
+]; // Always add settings at the end to preserve storage IDs
 
 const settingsSU = new StorageUnit('settings', storableArray);
 

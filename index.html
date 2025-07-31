@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
         
         <!-- Meta Tags -->
-        <meta name="keywords" content="tp, map, interactive, twilight, princess, zelda">
+        <meta name="keywords" content="tp, map, tracker, interactive, twilight, princess, zelda">
         <meta name="description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer.">
         <meta name="author" content="Etienne Mitchell-Bouchard">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,8 +30,8 @@
         <meta property="og:description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer." />
     </head>
     <body oncontextmenu="return false">
-        <div id="made">
-            Made by <a id="dz" href="https://github.com/darkzant" target="_blank" rel="noopener noreferrer">DarkZant</a>
+        <div id="credit">
+            Made by <a href="https://github.com/darkzant" target="_blank" rel="noopener noreferrer">DarkZant</a>
         </div>    
         <div id="flagDetails" class="menu">
             <div id="flagDetailsX" class="menuX" onclick="hideDetails()">×</div>
@@ -50,37 +50,73 @@
             <br>
         </div>
         <div id="map">
-            <div id="dun">         
-                <img id="dn" class="di">
-                <div id="dc">
-                    <img id="F10" class="F di" src="Dungeons/8F.png">
-                    <img id="F9" class="F di" src="Dungeons/7F.png">
-                    <img id="F8" class="F di" src="Dungeons/6F.png">
-                    <img id="F7" class="F di" src="Dungeons/5F.png">
-                    <img id="F6" class="F di" src="Dungeons/4F.png">
-                    <img id="F5" class="F di" src="Dungeons/3F.png">
-                    <img id="F4" class="F di" src="Dungeons/2F.png">
-                    <img id="F3" class="F di" src="Dungeons/1F.png">
-                    <img id="F2" class="F di" src="Dungeons/B1.png">
-                    <img id="F1" class="F di" src="Dungeons/B2.png">
-                    <img id="F0" class="F di" src="Dungeons/B3.png">
+            <div id="submap">      
+                <div id="dungeonName">
+                    <img src="Dungeons/Name.png" class="dungeonImg">
+                    <div>Snowpeak Ruins</div>
+                </div> 
+                <div id="submapName">
+                    <img src="Submaps/Name.png">
+                    <div></div>
                 </div>  
-            </div>   
-            <div id="subName">
-                <img src="Submaps/Name.png">
-                <div></div>
-            </div>  
-            <div id="coo">
-                <div id="cooCont">
-                    <img src="Dungeons/ArrowUp.png" id="cooUP" class="cooArrows">
-                    <div id="cooBut">
-                        <img src="Dungeons/Blank.png" id="cooBI" class="di">
+                <div id="floors">
+                    <div id="8F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>8F</div>
+                    </div>
+                    <div id="7F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>7F</div>
+                    </div>
+                    <div id="6F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>6F</div>
+                    </div>
+                    <div id="5F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>5F</div>
+                    </div>
+                    <div id="4F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>4F</div>
+                    </div>
+                    <div id="3F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>3F</div>
+                    </div>
+                    <div id="2F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>2F</div>
+                    </div>
+                    <div id="1F" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>1F</div>
+                    </div>
+                    <div id="B1" class="floorButton">
+                        <img src="Dungeons/Blank.png">
                         <div>B1</div>
                     </div>
-                    <img src="Dungeons/ArrowDown.png" id="cooDOWN" class="cooArrows">
+                    <div id="B2" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>B2</div>
+                    </div>
+                    <div id="B3" class="floorButton">
+                        <img src="Dungeons/Blank.png">
+                        <div>B3</div>
+                    </div>
+                </div>  
+                <div id="caveofOrdeals">
+                    <div id="caveofOrdealsControls">
+                        <img src="Dungeons/ArrowUp.png" id="caveofOrdealsUpArrow" class="caveofOrdealsArrows">
+                        <div id="caveofOrdealsButton" class="floorButton">
+                            <img src="Dungeons/Blank.png" id="caveofOrdealsButtonImg" class="dungeonImg">
+                            <div id="caveofOrdealsButtonLabel">B1</div>
+                        </div>
+                        <img src="Dungeons/ArrowDown.png" id="caveofOrdealsDownArrow" class="caveofOrdealsArrows">
+                    </div>
+                    <div id="caveofOrdealsFloorText">Cave of Ordeals</div>                  
                 </div>
-                <div id="cooText">Cave of Ordeals</div>                  
-            </div>
+            </div>   
         </div>
         <div id="menuicons"> 
             <div class="menuicon">
@@ -230,6 +266,7 @@
                 <li><b>Click</b> on an item to <i>Mark</i> it</li>
                 <li><b>Right Click</b> on an item to <i>Unmark</i> it</li>
                 <li><b>Middle Click</b> on an item to <i>Reset</i> it</li>
+                <li><b>Middle Click</b> on a boss to mark it as <i>Required</i></li>
                 <li><b>Click Anywhere</b> on the Tracker to <i>Close</i> a Tracker Submenu</li>
                 <li>You can <i>Reset</i> the Tracker in the settings</li>
             </ul>
@@ -392,6 +429,7 @@
                 <img src="Icons/Boss_KeyHC.png" class="timage">
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="tboss titem">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Diababa.png" class="timage">
@@ -407,6 +445,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Fyrus.png" class="timage">
@@ -423,6 +462,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Morpheel.png" class="timage">
@@ -438,6 +478,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Stallord.png" class="timage">
@@ -453,6 +494,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Blizzeta.png" class="timage">
@@ -468,6 +510,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Armogohma.png" class="timage">
@@ -483,6 +526,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Argorok.png" class="timage">
@@ -499,6 +543,7 @@
                 </div>
             </div>
             <div class="tdungeon">
+                <span>Required</span>
                 <div class="titem tboss">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Zant.png" class="timage">
@@ -672,14 +717,17 @@
     <script src="Scripts/images.js"></script>
     <script src="Scripts/items.js"></script>
     <script src="Scripts/storage.js"></script>
-    <!-- <script src="Scripts/tracker.js"></script> -->
-    <!-- <script src="Scripts/flags.js"></script> -->
-    <!-- <script src="Scripts/submaps.js"></script> -->
+    <script src="Scripts/tracker.js"></script>
     <script src="Scripts/settings.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- <script src="Scripts/map.js"></script> -->
+    <script src="Scripts/map.js"></script>
+    <script src="Scripts/requirements.js"></script>
+    <script src="Scripts/nonflags.js"></script>
+    <script src="Scripts/flags.js"></script>
+    <script src="Scripts/submaps.js"></script>
     <!-- <script src="Scripts/oldMap.js"></script>  -->
     <script src="Scripts/storageCleanup.js"></script>
+    <script>loadMap();</script>
 
     </body>
 </html>

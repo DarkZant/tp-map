@@ -56,11 +56,20 @@ const Categories = Object.freeze({
     NonChecks: "Non-Check Items"
 });
 
+const RandomizerCheckCategories = [
+    Categories.Main,
+    Categories.PoeSouls,
+    Categories.SkyCharacters,
+    Categories.Bugs,
+    Categories.Gifts,
+    Categories.ShopItems
+];
+
 class Obtainable {
     constructor(imageInfo, item, {name=imageInfo, category}={}) {
         this.image = getIconImage(imageInfo);
         this.item = item;
-        this.name = item === null ? name : item.name;
+        this.name = name;
         this.category = item === null ? category : item.getCategory();
     }
     getCategory() {
@@ -68,15 +77,21 @@ class Obtainable {
     }
 }
 
-class NonFlag {
-    constructor(image, category, name=image, position=[]) {
-        this.image = getIconImage(image);
-        this.name = name;
-        this.category = category;
-        this.position = position;
+class Container {
+    constructor(imageInfo, content=null, amount=1) {
+        this.image = getIconImage(imageInfo);
+        this.content = content;
+        if (content !== null)
+            this.displayText = amount > 1 ? content.name + "&nbsp × &nbsp" + amount : content.name;
     }
-    new(position) {
-        return new NonFlag(this.image, this.category, this.name, position);
+    with(content, amount=1) {
+        return new Container(this.image, content, amount);
+    }
+    getCategory() {
+        return this.content.getCategory();
+    }
+    getContent() {
+        return this.content;
     }
 }
 
@@ -86,6 +101,7 @@ class BoolItem {
         this.name = name;
         this.category = category;
         this.obtained = false;
+        this.parentItem = null;
     }
     increase() {
         this.obtained = !this.obtained;
@@ -102,6 +118,9 @@ class BoolItem {
     getState() {
         return this.obtained ? 1 : 0;
     }
+    isObtained() {
+        return this.obtained;
+    }
     getMaxState() {
         return 1;
     }
@@ -114,7 +133,10 @@ class BoolItem {
     getCategory() {
         return this.category;
     }
-}
+    hasParentItem() {
+        return this.parentItem !== null;
+    }
+ }
 
 class CountItem {
     constructor(imageName, maxCount, {category=Categories.Main, name=imageName, min=0}={}) {
@@ -485,21 +507,24 @@ const Rupees = Object.freeze({
 });
 
 let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
-let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.Skills});
+let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.HiddenSkills});
 let skybookChar = new Obtainable("Sky Book Character", skybook);
 let coralEarring = new Obtainable("Coral Earring", fishingRods);
+let coroBottle = new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"});
+let seraBottle = new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"});
+let jovaniBottle = new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"});
 let bigQuiver = new Obtainable("Quiver1", bow, {name: "Big Quiver"});
 let giantQuiver = new Obtainable("Quiver2", bow, {name: "Giant Quiver"});
 let minesBKAmoto = new Obtainable("GBK0", minesBK, {name: "Gor Amato Key Shard"});
 let minesBKEbizo = new Obtainable("GBK1", minesBK, {name: "Gor Ebizo Key Shard"});
 let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"});
-let nightPoe = new Obtainable("Night Poe Soul", poeSoul);
+let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Night Poe Soul"});
 
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
 
 let lock = new Obtainable("Lock", null, {category: Categories.Locks});
 let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks});
-let bossLock = new Obtainable("Boss Door", null, {category: Categories.Locks});
+let bossLock = new Obtainable("Boss Lock", null, {category: Categories.Locks});
 let minesBossLock = new Obtainable("Boss LockG", null, {category: Categories.Locks});
 let lakebedBossLock = new Obtainable("Boss LockL", null, {category: Categories.Locks});
 let snowpeakBossLock = new Obtainable("Boss LockS", null, {category: Categories.Locks});
@@ -512,31 +537,7 @@ let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
 
-let horseGrass = new NonFlag('Horse Grass', Categories.Grass);
-let hawkGrass = new NonFlag('Hawk Grass', Categories.Grass);
-let postman = new NonFlag('Postman', Categories.Postman);
-
-// Bottled Items Enum
-const Bottle = Object.freeze({
-    BeeLarva : new NonFlag("BottleBee", Categories.Bottle, "Bee Larva"),
-    Worm : new NonFlag("BottleWorm", Categories.Bottle, "Worm"),
-    Oil : new NonFlag("BottleYellow", Categories.Bottle, "Lantern Oil"),
-    HotSpringWater : new NonFlag("BottleWater", Categories.Bottle, "Hot Spring Water"),
-    RedPotion : new NonFlag("BottleRed", Categories.Bottle, "Red Potion"),
-    BluePotion : new NonFlag("BottleBlue", Categories.Bottle, "Blue Potion"),
-    Fairy : new NonFlag('BottleFairy', Categories.Bottle, "Fairy"),
-    Tears : new NonFlag('BottleTears', Categories.Bottle, "Great Fairy's Tears"),
-    Milk : new NonFlag('BottleMilk', Categories.Bottle, 'Milk'),
-    HalfMilk : new NonFlag('BottleMilkH', Categories.Bottle, "1/2 Milk"),
-    Nasty : new NonFlag('BottleNasty', Categories.Bottle, 'Nasty Soup'),
-    Soup : new NonFlag('BottleSoup', Categories.Bottle, "Superb Soup"),
-    PurpleChu: new NonFlag('BottlePurple', Categories.Bottle,"Purple Chu Jelly"),
-    RedChu : new NonFlag('BottleRed', Categories.Bottle, "Red Chu Jelly"),
-    BlueChu : new NonFlag("BottleBlue", Categories.Bottle, "Blue Chu Jelly"),
-    YellowChu : new NonFlag("BottleYellow", Categories.Bottle, "Yellow Chu Jelly"),
-    RareChu : new NonFlag("BottleRare", Categories.Bottle, "Rare Chu Jelly"),
-
-    Coro : new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"}),
-    Sera : new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"}),
-    Jovani : new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"})
-});
+let chest = new Container('Chest'); 
+let smallChest = new Container('Small Chest');
+let bossChest = new Container('Boss Chest');
+let rupeeBoulder = new Container('Rupee Boulder');
