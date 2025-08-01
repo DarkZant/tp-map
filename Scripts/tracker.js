@@ -49,8 +49,7 @@ class TrackerItem extends Storable {
             elem.addEventListener('auxclick', (e) => { 
                 if (e.button == 1) {
                     e.preventDefault();
-                    this.item.reset();
-                    this.update();
+                    this.reset();
                 }
             }); 
         }
@@ -109,6 +108,10 @@ class TrackerItem extends Storable {
         else if (currentItemState == maxItemState - 1) {
             this.elem.children[2].style.color = "#c0c0c0"; // Set color to white
         }
+    }
+    reset() {
+        this.item.reset();
+        this.update();
     }
     updateElementImage() {
         let imgElem = this.elem.children[1];
@@ -199,6 +202,10 @@ function hideTrackerSubmenuHandler() {
 }
 
 function resetTracker() {
-    for (let titem of document.getElementsByClassName('titem'))
-        titem.dispatchEvent(new MouseEvent('auxclick', { button: 1 }));
+    for (let trackerItem of trackerItems.values()) 
+        trackerItem.reset();
+    for (let requiredElem of document.querySelectorAll('.tdungeon span')) {
+        if (requiredElem.style.display === 'inline')
+            requiredElem.style.display = 'none';
+    }
 }

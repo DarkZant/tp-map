@@ -30,21 +30,22 @@ class Flag extends Storable{
     setName(name) {
         this.name = name;
     }
+    setItem(item) {
+        this.item = item;
+        this.itemCategory = item.getCategory();
+        this.marker.setIcon(getIcon(this.getImage()));
+    }
     isContainer() {
         return this.item instanceof Container;
     }
-    getItemTracker() {
-        let item = this.isContainer() ? this.item.content : this.item;
-        if (item instanceof Object)
+    getItemTracker(item) {
+        item = this.isContainer() ? item.content : item;
+        if (item instanceof Obtainable && item.hasItem())
             item = item.item;
+        if (item instanceof BoolItem && item.hasParentItem())
+            item = item.parentItem;
         if (item.tracker !== undefined)
-            return item.tracker;
-        return null;
-    }
-    getRandoItemTracker() {
-        let randoItem = this.randoItem instanceof Container ? this.randoItem.content : this.randoItem;
-        if (randoItem.tracker !== undefined)
-            return randoItem.tracker;
+            return item.tracker
         return null;
     }
     set() {
@@ -52,6 +53,7 @@ class Flag extends Storable{
             return;
         this._set = true;
         this.storageUnit.setFlag(this);
+        this.manageItemTracker();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
@@ -60,6 +62,7 @@ class Flag extends Storable{
             return;
         this._set = false;
         this.storageUnit.setFlag(this);
+        this.manageItemTracker();
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }
@@ -110,7 +113,7 @@ class Flag extends Storable{
     }  
     // Leaflet
     initializeMarker() {
-         this.marker = L.marker(this.position, {
+        this.marker = L.marker(this.position, {
             icon: getIcon(this.getImage()),
             riseOnHover: true, 
             riseOffset: 2000, 
@@ -200,28 +203,31 @@ class Flag extends Storable{
         else
             this.unsetVisually();
     }
-    
+    reloadMarker() {
+        if (!this.marker._map) // If Marker is not loaded
+            return
+        this.marker.remove();
+        this.loadMarker();
+    }
     setMarker() {
         this.set();
-        this.manageItemTracker();
         this.setVisually();
        
     }
     unsetMarker() {
         this.unset();
-        this.manageItemTracker();
         this.unsetVisually();
     }
     manageItemTracker() {
         if (!Settings.AutocompleteTracker.isEnabled()) 
             return;
         if (selectedGamemode === Gamemodes.Base) {
-            let itemTracker = this.getItemTracker();
+            let itemTracker = this.getItemTracker(this.item);
             if (itemTracker !== null)
                 this.isSet() ? itemTracker.increase() : itemTracker.decrease();
         }
         else if (seedIsLoaded && selectedGamemode !== Gamemodes.Base) {
-            let randoItemTracker = this.getRandoItemTracker();
+            let randoItemTracker = this.getItemTracker(this.randoItem);
             if (randoItemTracker !== null)
                 this.isSet() ? randoItemTracker.increase() : randoItemTracker.decrease();
         }       
@@ -256,7 +262,13 @@ class FlagGroup {
         for (let flag of flags)
             flag.parentGroup = this;
         this.items = items;
-        this.count = 0;
+    }
+    initialize() {
+        for (let flag of this.flags) {
+            if (flag instanceof FlagGroup)
+                flag.initialize();
+        }
+        this.count = this.obtainedAmount();
         this.updateFlags();
     }
     getNumberOfFlags() {
@@ -264,8 +276,8 @@ class FlagGroup {
     }
     obtainedAmount() {
         let count = 0;
-        for (let flag in flags) {
-            if (flag instanceof Flag && flag.isObtained())
+        for (let flag of this.flags) {
+            if (flag instanceof Flag && flag.isSet())
                 count++;
             else if (flag instanceof FlagGroup)
                 count += flag.obtainedAmount();           
@@ -276,21 +288,50 @@ class FlagGroup {
         return this.obtainedAmount >= amount;
     }
     updateFlags() {
-         for (let [req, item] of Object.entries(this.items)) {
+        for (let [req, item] of Object.entries(this.items)) {
             if (this.count === req - 1) {
-                for (let flag of this.flags)
-                    flag.item = item;
+                this.updateFlagItems(item, false);
+                break;
             }
+        }
+        for (let [req, item] of Object.entries(this.items)) { 
+            if (this.count === parseInt(req)) {
+                this.updateFlagItems(item, true);
+                break;
+            }
+        }
+    }
+    updateFlagItems(item, updateSetFlags) {
+        for (let flag of this.flags) {
+            if (flag instanceof FlagGroup)
+                flag.updateFlagItems(item, updateSetFlags);
+            else {
+                if (!updateSetFlags && flag.isSet())
+                    continue;
+                else if (updateSetFlags && !flag.isSet())
+                    continue;
+                flag.setItem(item);
+                flag.reloadMarker();
+            }
+        }
+    }
+    updateChildGroups() {
+        for (let flag of this.flags) {
+            if (flag instanceof FlagGroup)
+                flag.updateFlags();
         }
     }
     increaseAmount() {
         ++this.count;
+        this.updateChildGroups();
         this.updateFlags();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
+        
     }
     decreaseAmount() {
         --this.count;
+        this.updateChildGroups();
         this.updateFlags();
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
@@ -302,8 +343,12 @@ let agithaBugCoupleRewards = Object.freeze({
     2 : Rupees.Orange
 });   
 
+function makeBugPlaceholder(bugItem) {
+    return new Obtainable(bugItem.image, null, {name: bugItem.name, category: Categories.Main});
+}
+
 function makeAgithaRewardFlag(bugItem, position) {
-    return new Flag(bugItem, position, {
+    return new Flag(makeBugPlaceholder(bugItem), position, {
         baseReqs: [Requirement.fromBoolItem(bugItem)],
         baseDesc: `Give Agitha the ${bugItem.name} to receive the reward.`,
         randoCategory: Categories.Gifts
@@ -415,7 +460,7 @@ var flags = new Map([
         randoDesc: 'Summoned by the Death Mountain howling stone. The item is lying on the ground where the Golden Wolf usually is.'
     })],
     ["Herding Goats Reward", new Flag(heartPiece, [-9514, 4964], {
-        baseReqs: [diababa],
+        baseReqs: [diababaReq],
         baseDesc: 'After getting Epona back from the monsters, talk to Fado and complete the Goat Hoarding minigame in under 2 minutes to receive the heart piece.',
         randoCategory: Categories.Gifts,
         randoReqs: [],
@@ -461,7 +506,9 @@ var flags = new Map([
     })],
     ["Wrestling With Bo", new Flag(chest.with(ironBoots), [-9339, 5044], {
         baseDesc: 'After clearing the Eldin Twilight, wrestle against Bo to obtain the Iron Boots.',
+        baseReqs: [diababaReq],
         randoCategory: Categories.Gifts,
+        randoReqs: [],
         randoDesc: "The chest is available when entering Bo's House."
     })],
     ["Ordon Ranch Grotto Lantern Chest", new Flag(chest.with(Rupees.Purple), [-9267, 4700], {
@@ -469,7 +516,7 @@ var flags = new Map([
         baseDesc: 'Light the 3 torches in front of the elevated platform to make the chest appear.',
     })],
     // Faron
-    ["Coro Gate Key", new Flag(coroKey, [7385, 4898], {
+    ["Coro Gate Key", new Flag(coroKey, [-7385, 4898], {
         baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave.",
         randoCategory: Categories.NonChecks,
     })],
@@ -952,7 +999,7 @@ var flags = new Map([
     ["Gerudo Desert Female Dayfly", new Flag(dayflyF, [-5964, 934], {
         baseDesc: 'This ♀ Dayfly is flying around in the north gap with rocky walls.'
     })],
-    ["Gerudo Desert West Canyon Chest", new Flag(smallChest.with(Rupees.Purple), {
+    ["Gerudo Desert West Canyon Chest", new Flag(smallChest.with(Rupees.Purple), [-5792, 322], {
         baseReqs: [clawshotReq],
         baseDesc: 'Clawshot the peahat to cross the chasm and get to the chest.'
     })],
@@ -1744,7 +1791,7 @@ var flags = new Map([
         baseReqs: [forestBKReq, boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
         baseDesc: 'Defeat Diababa to clear out the Forest Temple.'
     })],
-    ["Forest Temple Ooccoo", new Flag(ooccoo, [-5250, 4565], {
+    ["Forest Temple Ooccoo", new Flag(ooccooPot, [-5250, 4565], {
         baseDesc: 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'
     })],
     ["Forest Temple Tile Worm Monkey Lock", new Flag(lock, [-5309, 2943], {
@@ -1794,7 +1841,7 @@ var flags = new Map([
         baseReqs: [ironBootsReq, mines1SKReq],
         baseDesc: 'Follow the left path when you get on the ceiling to reach the chest.'
     })],
-    ["Goron Mines Ooccoo", new Flag(ooccoo, [-5027, 3150], {
+    ["Goron Mines Ooccoo", new Flag(ooccooPot, [-5027, 3150], {
         baseReqs: [ironBootsReq, mines1SKReq],
         baseDesc: 'Pick up the pot where Ooccoo is hiding for her to join you.'
     })],
@@ -1927,7 +1974,7 @@ var flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, lakebed2SKReq],
         baseDesc: 'Go through the middle room accross the spinning gears to get the chest.'
     })],
-    ["Lakebed Temple Ooccoo", new Flag(ooccoo, [-4490, 4552], {
+    ["Lakebed Temple Ooccoo", new Flag(ooccooPot, [-4490, 4552], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]],
         baseReqs: 'Pick up or break the pot where Ooccoo is hiding.'
     })],
@@ -1992,7 +2039,7 @@ var flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq],
         baseDesc: 'Clawshot the target on the wall behind the chest to reach it.'
     })],
-    ["Lakebed Temple Central Room Spire Chest", new Flag(chest.with(Rupees.Red), {
+    ["Lakebed Temple Central Room Spire Chest", new Flag(chest.with(Rupees.Red), [-4327, 4363], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq],
         baseDesc: 'Make the water level rise once by activated the east water supply to access the chest.'
     })],
@@ -2116,7 +2163,7 @@ var flags = new Map([
         baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: "Unlock this door to reach the spikes room."
     })],
-    ["Arbiters Grounds Ooccoo", new Flag(ooccoo, [-5201, 4240], {
+    ["Arbiters Grounds Ooccoo", new Flag(ooccooPot, [-5201, 4240], {
         baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
         baseDesc: 'Pick up or break the pot where Ooccoo is hiding for her to join you.'
     })],
@@ -2188,7 +2235,7 @@ var flags = new Map([
         randoCategory: Categories.Gifts,
         randoDes: "Talk to Yeta to obtain the item.",
     })],
-    ["Snowpeak Ruins Ooccoo", new Flag(ooccoo, [-5381, 5064], {
+    ["Snowpeak Ruins Ooccoo", new Flag(ooccooPot, [-5381, 5064], {
         baseDesc: "Pick up the pot where Ooccoo is hiding."
     })],
     ["Snowpeak Ruins East Courtyard Chest", new Flag(smallChest.with(Rupees.Red), [-4942, 4533], {
@@ -2798,7 +2845,7 @@ var flags = new Map([
         baseDesc: 'Fifth from the bottom of the east column.'
     })],
     ["Hyrule Castle Ganondorf", new Flag(ganondorf, [-4838, 4328], {
-        baseReqs: [castle2SKReq, castleBKReq, masterSwordReq, endingBlowReq, doubleClawshotReq, boomerangReq, [bowReq, lanternReq], spinnerReq],
+        baseReqs: [castle2SKReq, doubleClawshotReq, boomerangReq, [bowReq, lanternReq], spinnerReq, castleBKReq, shadowCrystalReq, masterSwordReq, endingBlowReq],
         baseDesc: 'Defeat Ganondorf to save Hyrule!'
     })],
     // Rando Hints
@@ -2862,5 +2909,6 @@ for (let [name, flag] of flags.entries()) {
     flag.setName(name);
     flag.initialize();
 }
+agithaRewards.initialize();
 
 

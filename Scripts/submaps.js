@@ -23,6 +23,12 @@ class SubmapFloor {
     setShown() {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown())
+                c.set();
+        }
+    }
+    setMarkerShown() {
+         for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
                 c.setMarker();
         }
     }
@@ -33,6 +39,12 @@ class SubmapFloor {
         }
     }
     unsetShown() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
+                c.unset();
+        }
+    }
+    unsetMarkerShown() {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown())
                 c.unsetMarker();
@@ -54,10 +66,11 @@ class SubmapFloor {
     }
     manageContent() {
         if (this.shownContentIsSet())
-            this.unsetShown();
+            this.unsetMarkerShown();
         else
-            this.setShown();
-        reloadIcons();
+            this.setMarkerShown();
+        removeFloorLayer();
+        this.load();
     }
     hasShownContent() {
         for (let c of this.contents) {
@@ -87,9 +100,16 @@ class SubmapFloor {
         return shownMarkerFound;
     }
     load() {
-        addImageOverlayToMap(this.imageOverlay);
+        addImageOverlayToMap(this.imageOverlay); 
+        this.loadMarkers();
+    }
+    loadMarkers() {
         for (let c of this.contents)
             c.loadMarker();
+    }
+    reload() {
+        removeAllMarkers();
+        this.loadMarkers();
     }
 }
 
@@ -151,12 +171,12 @@ class Submap {
     setShown() {
         for (let floor of this.floors)
             floor.setShown();
-        this.setVisually();
+        this.reloadMarker();
     }
     unsetShown() {
         for (let floor of this.floors)
             floor.unsetShown();
-        this.unsetVisually();
+        this.reloadMarker();
     } 
     setVisually() {
         if (Settings.CountersVisibility.isEnabled())
@@ -237,6 +257,12 @@ class Submap {
         else
             this.unsetVisually();
     }
+    reloadMarker() {
+        if (!this.marker._map) // If Marker is not loaded
+            return
+        this.marker.remove();
+        this.loadMarker();
+    }
     load() {
         currentMapState = MapStates.Submap;
         this.prepareMap();
@@ -246,7 +272,7 @@ class Submap {
         this.floors[0].load();  
     }
     reload() {
-        this.floors[0].load();
+        this.floors[0].reload();
     }
     exit() {
         if (map.getZoom() == 0)
@@ -269,9 +295,14 @@ class Submap {
             }, 200);  
         }
         let subName = document.getElementById('submapName');
-        subName.style.display = "inline";
+        subName.style.display = "flex";
+        let fontSize = 2.25;
+        if (this.name.length > 25)
+            fontSize -= this.name.length / 55
+        // else if (this.name.length < 20)
+        //     subName.style.width = this.name.length * 2 + 'vw';
+        subName.children[1].style.fontSize = fontSize + 'vw';
         subName.children[1].innerHTML = this.name;
-        subName.style.width = this.name.length * 2 + 'vw';
         tileLayer.setOpacity(0.2);
         removeAllLayersExceptTL();
     }
@@ -359,12 +390,11 @@ class FlooredSubmap extends Submap {
     }
     resetActiveFloorButton() {
         let floorButton = document.getElementById(this.activeFloor.label);
-        floorButton.style.filter = 'brightness(150%)';
+        floorButton.style.filter = 'brightness(100%)';
         floorButton.style.transform = "none";
     }
     reload() {
-        removeFloorLayer();
-        this.activeFloor.load();
+        this.activeFloor.reload();
     }
     controls(event) {
         if (!(event instanceof KeyboardEvent))
@@ -643,8 +673,8 @@ class Dungeon extends FlooredSubmap {
             map.setMinZoom(-5);
             document.getElementById('credit').style.display = 'none';
             map.off('zoomend');
-            map.dragging.enable();         
-            map.on('zoomend', loadTileMap);  
+            map.dragging.enable();       
+            map.on('zoomend', loadImageMapFromTileMap);  
         }
         currentMapState = MapStates.Dungeon;
         loadedSubmap = this;
@@ -753,7 +783,8 @@ class DungeonProvince extends Province {
             baseReqs: dungeon.baseReqs, randoReqs: dungeon.randoReqs, glitchedReqs: dungeon.glitchedReqs
         }, polygonPoints);
         this.dungeon = dungeon;
-        this.polygon.on('click', this.dungeon.load);
+        this.polygon.off('click');
+        this.polygon.on('click', () => this.dungeon.load());
     }
     count() {
         return this.dungeon.count();
@@ -1152,7 +1183,7 @@ const Dungeons = Object.freeze({
             "Hyrule Castle Ganondorf",
             Bottle.Fairy.new([-4957, 4179])
         ]   
-    ])
+    ], {baseReqs: [zantReq], randoReqs: []})
 });
 
 

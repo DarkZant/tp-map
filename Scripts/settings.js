@@ -24,13 +24,17 @@ class Setting extends Storable {
         this.element = document.getElementById(this.name);
         this.defaultValue = defaultValue;
         this.active = false;
-        this.element.addEventListener('click', () => {
-            this.active = this.element.checked;
-            if (this.parent)
-                this.parent.update(this.active);
-            this.storageUnit.setFlag(this);
+        this.element.addEventListener('click', () => this.handleClick());
+    }
+    handleClick(fromParent=false) {
+        if (fromParent)
+            this.element.checked = !this.element.checked;
+        this.active = this.element.checked;
+        if (this.parent)
+            this.parent.update(this.active);
+        this.storageUnit.setFlag(this);
+        if (!fromParent)
             document.dispatchEvent(new CustomEvent('settingsUpdated'));
-        });
     }
     isEnabled() {
         return this.active;
@@ -65,14 +69,15 @@ class ParentSetting {
         this.element.addEventListener('click', () => {
             if (this.element.checked) {
                 for (let child of children) 
-                    child.element.click();
+                    child.handleClick(true);
             }
             else {
                 for (let child of children) {
                     if (child.active)
-                        child.element.click();
+                        child.handleClick(true);
                 }
             }
+            document.dispatchEvent(new CustomEvent('settingsUpdated'));
         });
     }
     update(childIsChecked) {

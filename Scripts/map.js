@@ -134,10 +134,10 @@ function loadImageMap() {
     removeAllLayers();
     currentMapState = MapStates.ImageMap;
     map.on("zoomend", loadTilemapFromImageMap);
+    addImageOverlayToMap(L.imageOverlay('Submaps/GameMap.png', [[0, 0], [-10336, 10176]]));
     loadImageMapMarkers();
 }
 function loadImageMapMarkers() {
-    addImageOverlayToMap(L.imageOverlay('Submaps/GameMap.png', [[0, 0], [-10336, 10176]]));
     for (let province of Object.values(Provinces))
         province.loadPolygon();
     for (let dungeon of Object.values(Dungeons)) {
@@ -171,6 +171,12 @@ function loadTilemapFromImageMap() {
         ++cpt; 
     });
     console.log('Number of Markers on Tilemap: ' + --cpt);
+}
+
+function loadTilemapFromDungeon() {
+    if (map.getZoom() <= -4)
+        return;
+    loadTileMap();
 }
 
 function loadTileMapMarkers() {
@@ -226,21 +232,16 @@ function addImageOverlayToMap(imageOverlay) {
 function reloadMap() {
     switch (currentMapState) {
         case MapStates.ImageMap : {
-            removeAllLayers();
+            removeAllMarkers();
             loadImageMapMarkers();
             break;
         }
         case MapStates.TileMap : {
-            removeAllLayersExceptTL(); 
+            removeAllMarkers(); 
             loadTileMapMarkers(); 
             break;
         }   
-        case MapStates.Dungeon : {
-            loadedSubmap.reload();
-            break;
-        }    
-        default : { // Simple & Simple Floored Submap
-            removeAllLayersExceptTL();
+        default : { // Submaps
             loadedSubmap.reload(); 
             break;
         }
@@ -268,6 +269,13 @@ function removeFloorLayer() {
         }
     }
 }
+function removeAllMarkers() {
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker)
+            layer.remove();
+    })
+}
+
 function removeAllLayers() {
     map.eachLayer(function(l) {
         map.removeLayer(l);

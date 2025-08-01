@@ -72,6 +72,9 @@ class Obtainable {
         this.name = name;
         this.category = item === null ? category : item.getCategory();
     }
+    hasItem() {
+        return this.item !== null;
+    }
     getCategory() {
         return this.category;
     }
@@ -143,7 +146,7 @@ class CountItem {
         this.image = getIconImage(imageName);
         this.name = name;
         this.maxCount = maxCount;
-        this.count = 0;
+        this.count = min;
         this.min = min;
         this.category = category;
     }
@@ -295,11 +298,14 @@ class CountRequiredItem {
                 return item;
         return null;
     }
+    getNextItemRequirement() {
+        return parseInt(Array.from(this.items.keys())[this.itemCounter]);
+    }
     increase() {
         if (this.counter < this.maxCount) {
             ++this.counter;
-            if (this.counter == this.items.keys[this.itemCounter]) {
-                this.items.get(this.counter).obtain();
+            if (this.counter === this.getNextItemRequirement()) {
+                this.items.get(this.counter.toString()).obtain();
                 ++this.itemCounter;
             }
         }
@@ -309,8 +315,8 @@ class CountRequiredItem {
     decrease() {
         if (this.counter > 0) {
             --this.counter;
-            if (this.counter == this.items.keys[this.itemCounter]) {
-                this.items.get(this.counter).reset();
+            if (this.counter === this.getNextItemRequirement()) {
+                this.items.get(this.counter.toString()).reset();
                 --this.itemCounter;
             }
         }
@@ -348,7 +354,7 @@ class CountRequiredItem {
 let bugIndex = 0;
 function makeBugItem(species, gender) {
     return new BoolItem('Bug' + bugIndex++, {
-        name: gender === 'M' ? '♂' : '♀' + '&nbsp ' + species,
+        name: (gender === 'M' ? '♂' : '♀') + '&nbsp ' + species,
         category: Categories.Bugs,
     });
 }
@@ -521,6 +527,7 @@ let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"}
 let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Night Poe Soul"});
 
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
+let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo});
 
 let lock = new Obtainable("Lock", null, {category: Categories.Locks});
 let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks});
