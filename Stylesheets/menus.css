@@ -1,0 +1,347 @@
+/* Top right menu icons */
+#menuicons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+    z-index: 1000;
+}
+#menuicons > div {
+    display: flex;
+}
+#menuicons > div div {
+    display: grid;
+    place-items: center;
+    width: 2vw;
+    min-width: 20px;
+    aspect-ratio: 1;
+    border-style: solid;
+    border-color: #38352e;
+    border-width: 0.2vw;
+    border-radius: 0.35vw;
+    padding: 7px;
+    cursor: pointer;
+}
+#menuicons > div div:hover {
+    background-color: #2c2c2c;
+}
+#menuicons img {
+    max-width: 100%;
+}
+#menuicons span {
+    position: absolute;
+    right: 115%;
+    align-self: center;
+    visibility: hidden;
+    opacity: 0%;
+    height: auto;
+    width: auto;
+    background-color: #38352e;
+    padding: 1vh 0.4vw;
+    border-radius: 0.35vw;
+    font-size: 0.85vw;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+#menuicons > div div:hover + span {
+    visibility: visible;
+    opacity: 100%;
+}
+/* General menus */
+.menu {
+    position: absolute;
+    visibility: hidden;
+    right: 0;
+    height: 100dvh;
+    width: 0%;
+    z-index: 1000;
+    background-color: rgb(56, 53, 46, 0.85);
+    border-radius: 8px;
+    transition: width 0.1s;
+    overflow-y: scroll; 
+}
+.menuX {
+    position: fixed;
+    top: 0;
+    right: 0.5vw;
+    width: 1.4vw;
+    height: 1.4vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    color: #757575;
+    font: 1.4vmax Tahoma, Verdana, sans-serif;
+    font-weight: bolder;
+    cursor: pointer;
+    z-index: 1500;
+}
+.menuX:hover {
+    color: #585858;
+}
+@supports not selector(::-webkit-scrollbar) {
+    .menu, textarea {
+        scrollbar-width: thin;
+        scrollbar-color: #757575 rgb(56, 53, 46, 0.85); 
+    }
+}
+@supports selector(::-webkit-scrollbar) {
+    .menu::-webkit-scrollbar {
+        width: 0.6vw;
+        min-width: 5px;
+    }
+    textarea::-webkit-scrollbar {
+        width: 0.4vw;
+    }
+    .menu::-webkit-scrollbar-track {
+        background-color: transparent;
+        /* margin-block: 3.5vh; */
+        border-radius: 4px;
+    }
+    textarea::-webkit-scrollbar-track {
+        margin-block: 0.5dvh;
+    }
+    .menu::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: #757575;
+        border: 2px solid transparent;
+        background-clip: content-box; 
+    }
+    .menu::-webkit-scrollbar-thumb:hover {
+       background-color: #8a8a8a;
+    }
+}
+
+/* Flag Details menu */
+#flagDetails {
+    top: 0;
+    left: 0;
+}
+#flagDetailsX {
+    left: 22.75%;
+}
+#flagRequirements, #containerContent {  
+    font-size: 1.2vw;
+    display: none;
+}
+#containerContent {
+    text-align: center;
+}
+#flagDescription {
+    font-size: 1vmax;
+    text-align: center;
+    visibility: hidden;
+    padding: 0 5%;
+}
+#containerContentDiv {
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+#containerContentDiv .iti {
+    padding-left: 0;
+}
+.flagDetailsTitle {
+    text-decoration: underline;
+    text-align: center;
+    margin-top: 0;
+    padding-top: 2vh;
+    margin-bottom: 2vh;
+    font-size: 1.4vmax;
+}
+.item {
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-bottom: 1vh;
+    border-style: solid;
+    border-color: #3f3f3f;
+    border-radius: 10px;
+    padding: 0.5vh 0 0.5vh 0.7vw;
+}
+.idot {
+    font-size: 2vmax;
+    margin: 0;
+}
+.ii {
+    padding-right: 1vw;
+    padding-left: 1vw;
+}
+.iti { 
+    max-width: 3.5vmax;
+    max-height: 3.5vmax;
+}
+.itis {
+    max-width: 3vmax;
+    max-height: 3vmax;
+}
+.oritems {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    vertical-align: middle;
+    margin-bottom: 1vh;
+    padding-bottom: 0;
+    border-style: solid;
+    border-color: #3f3f3f;
+    border-radius: 10px;
+    padding-left: 0.7vw;
+    padding-top: 1vh;
+}
+.oritf {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    width: 20vw;
+}
+.orits {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    width: 20vw;
+    margin-top: -0.7vh;
+}
+.por {
+    font-family: Arial, sans-serif;
+    margin-left: 1.8vw;
+    font-size: 1.4vmax;
+    font-style: italic;
+}
+
+/* Settings menu */
+#settings {
+    text-align: center;
+}
+#settings h2 {
+    text-decoration: underline; 
+    font-size: 1.3vmax;
+    margin: 2vh 0;
+}
+#settingsButtons {
+    display: flex;
+    justify-content: center;
+    column-gap: 2vw;
+    font-family: Courier;
+}
+#settingsButtons button {
+    width: 8vmax;
+    max-width: 8vmax;
+    min-width: 50px;
+    height: 5.5vmin;
+    max-height: 5.5vmin;
+    min-height: 20px;
+    background-color: #1d1a14;
+    color:#c0c0c0;
+    border-radius: 7px;
+    font-size: 1vmax;
+    cursor: pointer;
+    margin-bottom: 1vh;
+    font-family: Arial, sans-serif;
+}
+#settingsButtons button:hover {
+    background-color: #272727;
+}
+#gamemodeSelection {
+    padding-top: 2.5dvh;
+    padding-bottom: 0.5dvh;
+    text-align: center;
+}
+#gamemodesLabel {
+    display: block;
+    font-size: 1.2dvw;
+    font-weight: bold;
+    padding-bottom: 0.75dvh;
+    cursor: auto;
+}
+#Gamemodes {
+    background-color: #1d1a14;
+    color:#c0c0c0;
+    height: 4dvh;
+    min-height: 20px;
+    font-size: 1.05vmax;
+    padding: 0 5px;
+    cursor: pointer;
+}
+#settingsCheckboxes {
+    text-align: left;
+    margin-left: 5%;
+}
+#settings h3 {
+    font-size: 1.05vmax; 
+    margin-bottom: 0.5%;
+    margin-left: -1.5dvw;
+    text-align: center;
+    text-decoration: underline;
+}
+#settingsCheckboxes input[type="checkbox"] {
+    height: 0.85vmax;
+    aspect-ratio: 1;
+    margin-left: 3%;
+    margin-top: 2%;
+    cursor: pointer;
+}
+#settingsCheckboxes label {
+    font-size: 0.9vmax;
+    cursor: pointer;
+    white-space: nowrap;
+}
+#settingsCheckboxes .bigSettingCheckboxLabel input {
+    height: 0.95vmax;
+    margin-top: 2.5%;
+    margin-left: 0;
+}
+#settingsCheckboxes .bigSettingCheckboxLabel {
+    font-size: 1.025vmax;
+}
+#settingsCheckboxes label::after {
+    content: "\a";
+    white-space: pre;
+}
+/* Controls Menu */
+#controls {
+    text-align: center;
+    font-size: 1.05vmax;
+}
+#controls h2 {
+    font-size: 1.3vmax;
+    text-decoration: underline;
+}
+#controls ul {
+    text-align: left;
+    padding-left: 2vw;
+    padding-right: 1vw;
+    padding-bottom: 0.5dvh;
+}
+#controls li {
+    margin-bottom: 1.8vh;
+}
+#controls b, #controls i {
+    color: rgb(212, 212, 212);
+    font-weight: bold;
+}
+/* Notes Menu */
+#notes {
+    text-align: center;
+    overflow-y: hidden;
+}
+#notes > div {
+    right: 0.1vw;
+}
+#notes h2 {
+    font-size: 1.3vmax;
+    text-decoration: underline;
+}
+#notes textarea {
+    width: 92.5%;
+    height: 90%;
+    border-radius: 0.5dvw;
+    padding: 0.5dvh 0.5dvw;
+    background-color: #1d1a14;
+    color: #c0c0c0;
+    font-size: 0.75vw;
+    resize: none;
+}

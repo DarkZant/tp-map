@@ -1,4 +1,5 @@
 let seedIsLoaded = false;
+let setFlagsHidden = false;
 let currentMapState;
 let loadedSubmap;
 
@@ -42,8 +43,8 @@ function getIcon(image) {
     let height = image.height;
     let mult = window.innerWidth <= window.innerHeight ? window.innerWidth / 1600 : window.innerHeight / 739;
     let maxSize = 50 * mult;
-    if (maxSize > 50)
-        maxSize = 50;
+    if (maxSize > 60)
+        maxSize = 60;
     else if (maxSize < 30)
         maxSize = 30;
     if (width >= height) {
@@ -80,7 +81,7 @@ function getCounterIcon(icon, num) {
 function showMarkerAsSet(marker) {
     marker.setOpacity(0.7);
     marker.setZIndexOffset(-1000);
-    // marker.options.icon = getIconWithCheckmark(marker.options.icon);
+    marker.setIcon(getIconWithCheckmark(marker.getIcon()));
     marker.getElement().classList.remove("unmarked");
     marker.getElement().classList.add("marked");
 }
@@ -88,7 +89,7 @@ function showMarkerAsSet(marker) {
 function showMarkerAsNotSet(marker, iconImage) {
     marker.setOpacity(1);
     marker.setZIndexOffset(0);
-    marker.options.icon = getIcon(iconImage);
+    marker.setIcon(getIcon(iconImage));
     marker.getElement().classList.remove("marked");
     marker.getElement().classList.add("unmarked");
 }
@@ -97,6 +98,19 @@ function showMarkerAsUnobtainable(marker) {
     marker.getElement().classList.add("unobtainable");
     marker.setZIndexOffset(-500);
 }  
+
+function addTooltipToMarker(marker, tooltipText, sticky=false) {
+    if (marker.getTooltip() !== null) 
+        marker.unbindTooltip();
+
+    marker.bindTooltip(tooltipText, {
+        direction: 'top',
+        offset: [0, -25],
+        opacity: 0.95,
+        sticky: sticky,
+        permanent: false
+    });
+}
 
 function displayContainer(container) {
     return '<img class="ii iti" src="' + container.getContent().image.src + '">' +
@@ -143,8 +157,15 @@ function loadImageMapMarkers() {
     for (let dungeon of Object.values(Dungeons)) {
         if (dungeon !== Dungeons.Castle)
             dungeon.loadImageMapMarker();
-    }
-    
+    }  
+}
+function reloadImageMapMarkers() {
+    for (let province of Object.values(Provinces))
+        province.reloadCounter();
+    for (let dungeon of Object.values(Dungeons)) {
+        if (dungeon !== Dungeons.Castle)
+            dungeon.loadImageMapMarker();
+    }  
 }
 
 // TileLayer Map
@@ -232,8 +253,8 @@ function addImageOverlayToMap(imageOverlay) {
 function reloadMap() {
     switch (currentMapState) {
         case MapStates.ImageMap : {
-            removeAllMarkers();
-            loadImageMapMarkers();
+            removeAllMarkersExceptPolygons();
+            reloadImageMapMarkers();
             break;
         }
         case MapStates.TileMap : {
@@ -257,10 +278,16 @@ document.addEventListener('settingsUpdated', function(event) {
     reloadMap();
 });
 
+function hideSetFlags(hide=null) {
+    setFlagsHidden = hide !== null ? hide : !setFlagsHidden;
+    reloadMap();
+}
+
 function removeFloorLayer() {
     switch (currentMapState) {
         case MapStates.Dungeon : {
-            removeAllLayers();
+            removeAllMarkers();
+            loadedSubmap.removeActiveFloorImageOverlay();
             break;
         }
         case MapStates.FlooredSubmap : {
@@ -269,11 +296,19 @@ function removeFloorLayer() {
         }
     }
 }
+
 function removeAllMarkers() {
     map.eachLayer(function (layer) {
         if (layer instanceof L.Marker)
             layer.remove();
     })
+}
+
+function removeAllMarkersExceptPolygons() {
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker && !(layer instanceof L.Polygon))
+            layer.remove();
+    });
 }
 
 function removeAllLayers() {
@@ -284,7 +319,7 @@ function removeAllLayers() {
 
 function removeAllLayersExceptTL() {
     map.eachLayer(function(layer) {
-        if (layer != tileLayer)
+        if (layer !== tileLayer)
             map.removeLayer(layer);
     });
 }  
@@ -317,32 +352,35 @@ function loadMap() {
     if (window.innerWidth <= 1000 || window.innerHeight <= 700)
         map.dragging.enable();
     loadImageMap();
+    map.on('click', getCoordsOnClick);
 }
 
 // Menus
-function showRightMenu(menuID, width) {
+function showRightMenu(menuID, width=25) {
     let menu = document.getElementById(menuID);
-    if (menuID == "tracker" && !Settings.TrackerOverlay.isEnabled()) {
-        updateMapSize((100 - width) + 'vw');
-    }
     menu.style.visibility = "visible";
     menu.style.width = '' + width + 'vw';
     document.getElementById('menuicons').style.display = "none";
 }
 
-function hideRightMenu(menuID) {
-    let menu = document.getElementById(menuID);
-    document.getElementById('menuicons').style.display = "inline";
-    if (menuID == "tracker") {
-        if (!Settings.TrackerOverlay.isEnabled())
-            updateMapSize('100vw');
-        menu.style.visibility = "hidden";  
-        return;
-    }
+function hideRightMenu(menu) {
+    document.getElementById('menuicons').style.display = "flex";
     menu.style.width = "0%";
     setTimeout(function() {
         menu.style.visibility = "hidden";  
     }, 100);  
+}
+function showTracker() {
+    let trackerWidth = 29;
+    if (!Settings.TrackerOverlay.isEnabled()) 
+        updateMapSize((100 - trackerWidth) + 'vw');
+    showRightMenu('tracker', trackerWidth);
+}
+function hideTracker(tracker) {
+    document.getElementById('menuicons').style.display = "flex";
+    if (!Settings.TrackerOverlay.isEnabled())
+            updateMapSize('100vw');
+    tracker.style.visibility = "hidden";  
 }
 
 function hideDetails() {

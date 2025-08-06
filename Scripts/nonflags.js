@@ -28,10 +28,11 @@ class NonFlag {
             keyboard: false, 
             zIndexOffset: -1100
         });
+        addTooltipToMarker(this.marker, this.name);
     }
-    loadMarker() {
+    loadMarker(position=this.position) {
         if (this.isShown())
-            addMarkerToMap(this.marker, this.position);
+            addMarkerToMap(this.marker, position);
     }
 }
 

@@ -1,4 +1,5 @@
 *.xcf
 *.txt
+Dungeons/*/Name.png
 generateImageMap.js
 renameImages.js

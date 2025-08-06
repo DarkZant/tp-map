@@ -529,6 +529,8 @@ let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Night Poe Soul"});
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
 let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo});
 
+let faronBulblinLock = new Obtainable("LockFaronBulblin", null, {category: Categories.Locks});
+let gateLock = new Obtainable("LockGates", null, {category: Categories.Locks});
 let lock = new Obtainable("Lock", null, {category: Categories.Locks});
 let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks});
 let bossLock = new Obtainable("Boss Lock", null, {category: Categories.Locks});

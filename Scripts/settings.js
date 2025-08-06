@@ -1,19 +1,24 @@
 let selectedGamemode = Gamemodes.Base;
+
+function dispatchSettingsUpdate() {
+    document.dispatchEvent(new CustomEvent('settingsUpdated'));
+}
+
 document.getElementById('Gamemodes').addEventListener('change', function () {
     selectedGamemode = this.value;
     if (selectedGamemode === Gamemodes.Base) {
-        document.getElementById('baseFlagsVisibility').style.display = "inline";
-        document.getElementById('baseFlagCounters').style.display = "inline";
+        document.getElementById('baseFlagsVisibility').style.display = "block";
+        document.getElementById('baseFlagCounters').style.display = "block";
         document.getElementById('randoVisibility').style.display = "none";
         document.getElementById('randoFlagCounters').style.display = "none";
     }
     else {
         document.getElementById('baseFlagsVisibility').style.display = "none";
         document.getElementById('baseFlagCounters').style.display = "none";
-        document.getElementById('randoVisibility').style.display = "inline";
-        document.getElementById('randoFlagCounters').style.display = "inline";
+        document.getElementById('randoVisibility').style.display = "block";
+        document.getElementById('randoFlagCounters').style.display = "block";
     }
-    document.dispatchEvent(new CustomEvent('settingsUpdated'));
+    dispatchSettingsUpdate();
 });
 
 
@@ -30,11 +35,11 @@ class Setting extends Storable {
         if (fromParent)
             this.element.checked = !this.element.checked;
         this.active = this.element.checked;
-        if (this.parent)
+        if (!fromParent && this.parent)
             this.parent.update(this.active);
         this.storageUnit.setFlag(this);
         if (!fromParent)
-            document.dispatchEvent(new CustomEvent('settingsUpdated'));
+            dispatchSettingsUpdate();
     }
     isEnabled() {
         return this.active;
@@ -77,7 +82,7 @@ class ParentSetting {
                         child.handleClick(true);
                 }
             }
-            document.dispatchEvent(new CustomEvent('settingsUpdated'));
+            dispatchSettingsUpdate();
         });
     }
     update(childIsChecked) {

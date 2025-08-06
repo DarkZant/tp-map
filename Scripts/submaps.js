@@ -61,6 +61,8 @@ class SubmapFloor {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown() && !c.isSet())
                 return false;
+            else if (c instanceof NonFlag && c.isShown() && c.isCountable())
+                return false;
         }
         return true;
     }
@@ -94,7 +96,7 @@ class SubmapFloor {
                 if (shownMarkerFound === null)
                     shownMarkerFound = c;
                 else 
-                    return null;
+                    return false;
             }
         } 
         return shownMarkerFound;
@@ -110,6 +112,9 @@ class SubmapFloor {
     reload() {
         removeAllMarkers();
         this.loadMarkers();
+    }
+    removeImageOverlay() {
+        this.imageOverlay.remove();
     }
 }
 
@@ -135,9 +140,10 @@ class Submap {
             riseOffset: 2000, 
             keyboard: false, 
         });
+        addTooltipToMarker(this.marker, this.name);
         this.marker.on('click', () => this.load());
-        this.boundSetShown = this.setShown.bind(this);
-        this.boundUnsetShown = this.unsetShown.bind(this);
+        this.boundSetMarker = this.setMarker.bind(this);
+        this.boundUnsetMarker = this.unsetMarker.bind(this);
     }
     initializeImages() {
         let width = this.floors[0].image.width;
@@ -160,6 +166,10 @@ class Submap {
             ]);
         }
     }
+    setName(name) {
+        this.name = name;
+        addTooltipToMarker(this.marker, this.name);
+    }
     set() {
         for (let floor of this.floors)
             floor.set();
@@ -171,28 +181,36 @@ class Submap {
     setShown() {
         for (let floor of this.floors)
             floor.setShown();
-        this.reloadMarker();
     }
     unsetShown() {
         for (let floor of this.floors)
-            floor.unsetShown();
-        this.reloadMarker();
+            floor.unsetShown();    
     } 
+    setMarker() {
+        this.setShown();
+        this.reloadMarker();
+    }
+    unsetMarker() {
+        this.unsetShown();
+        // this.reloadMarker();
+        this.unsetVisually();
+        this.reloadMarkerWithDelay();
+    }
     setVisually() {
         if (Settings.CountersVisibility.isEnabled())
             this.marker.setIcon(getIcon(this.iconImage));
         showMarkerAsSet(this.marker);
-        this.marker.off('contextmenu', this.boundSetShown);
-        this.marker.on('contextmenu', this.boundUnsetShown);
+        this.marker.off('contextmenu', this.boundSetMarker);
+        this.marker.on('contextmenu', this.boundUnsetMarker);
     }
     unsetVisually() {
+        showMarkerAsNotSet(this.marker, this.iconImage);
         if (Settings.CountersVisibility.isEnabled())
-            this.marker.setIcon(getCounterIcon(this.marker.options.icon, this.count()));
+            this.marker.setIcon(getCounterIcon(this.marker.getIcon(), this.count()));
         else 
             this.marker.setIcon(getIcon(this.iconImage));
-        showMarkerAsNotSet(this.marker, this.iconImage);
-        this.marker.off('contextmenu', this.boundUnsetShown);
-        this.marker.on('contextmenu', this.boundSetShown);
+        this.marker.off('contextmenu', this.boundUnsetMarker);
+        this.marker.on('contextmenu', this.boundSetMarker);
     }
     isSet() {
         for (let floor of this.floors) {
@@ -209,6 +227,8 @@ class Submap {
         return true;
     }
     isShown() {
+        if (Settings.EmptySubmaps.isEnabled())
+            return true;
         for (let floor of this.floors) {
             if (floor.hasShownContent())
                 return true;
@@ -227,7 +247,9 @@ class Submap {
         let shownMarkerFound = null;
         for (let floor of this.floors) {
             let floorMarker = floor.getUniqueShownMarker();
-            if (floorMarker === null)
+            if (floorMarker === false)
+                return null;
+            else if (floorMarker === null)
                 continue;
             if (shownMarkerFound === null)
                 shownMarkerFound = floorMarker;
@@ -236,17 +258,17 @@ class Submap {
         } 
         return shownMarkerFound;
     }
-    loadMarker() {
-        if (!Settings.EmptySubmaps.isEnabled() && !this.isShown())
+    loadMarker(position=this.position) {
+        if (!this.isShown())
             return;
         if (Settings.SubmapAsMarker.isEnabled()) {
             let uniqueMarker = this.getUniqueShownMarker();
             if (uniqueMarker !== null) {
-                addMarkerToMap(uniqueMarker.marker, this.position)
+                uniqueMarker.loadMarker(this.position);
                 return;
             }
         }
-        addMarkerToMap(this.marker, this.position);
+        addMarkerToMap(this.marker, position);
         if (!verifySubmapRequirements(this)) {
             showMarkerAsUnobtainable(this.marker);
             return;
@@ -262,6 +284,11 @@ class Submap {
             return
         this.marker.remove();
         this.loadMarker();
+    }
+    reloadMarkerWithDelay(delay=1000) {
+        setTimeout(() => {
+            this.reloadMarker();
+        }, delay);
     }
     load() {
         currentMapState = MapStates.Submap;
@@ -385,6 +412,7 @@ class FlooredSubmap extends Submap {
             if (this.activeFloor == floor || currentMapState === MapStates.TileMap) 
                 return;
             removeFloorLayer();
+            floor.removeImageOverlay();
             this.activeFloor.load();
         });
     }
@@ -413,6 +441,9 @@ class FlooredSubmap extends Submap {
 
         if (newFloorIndex != this.activeFloor.index) 
             document.getElementById(this.floors[newFloorIndex].label).click();    
+    }
+    removeActiveFloorImageOverlay() {
+        this.activeFloor.removeImageOverlay();
     }
     getControlsOffset() {
         return 200;
@@ -634,7 +665,7 @@ class Dungeon extends FlooredSubmap {
         this.imagedPosition = imagedPosition;
         this.marker.setZIndexOffset(1000);
     }
-     initializeImages() {
+    initializeImages() {
         let width = this.floors[0].image.width;
         let height = this.floors[0].image.height;
         if (height > 1350) {
@@ -658,6 +689,12 @@ class Dungeon extends FlooredSubmap {
                 topLeftCornerPosition, bottomRightCornerPosition
             ]);
         }
+        if (this.floors.length > 1) {
+            this.backgroundImageOverlay = L.imageOverlay(
+                'Dungeons/' + spaceToUnderscore(this.name) + '/Background.png',
+                [topLeftCornerPosition, bottomRightCornerPosition]
+            );
+        }
     }
     loadImageMapMarker() {
         addMarkerToMap(this.marker, this.imagedPosition);
@@ -665,6 +702,16 @@ class Dungeon extends FlooredSubmap {
             this.setVisually();
         else
             this.unsetVisually();
+    }
+    reloadMarker() {
+        if (!this.marker._map) // If Marker is not loaded
+            return
+        this.marker.remove();
+        if (currentMapState === MapStates.ImageMap)
+            this.loadImageMapMarker();
+        else
+            this.loadMarker();
+    
     }
     load() {
         removeAllLayers();
@@ -685,6 +732,8 @@ class Dungeon extends FlooredSubmap {
         window.addEventListener('keydown', this.controlsEvent);
         this.exitEvent = () => this.exit();
         map.on('zoomend', this.exitEvent);
+        if (this.floors.length > 1)
+            addImageOverlayToMap(this.backgroundImageOverlay);
         this.setupFloors();
     }
     exit() {
@@ -733,33 +782,88 @@ class Province {
                 c.unset();
         }
     }
+    setShown() {
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                c.setShown();
+            else if (c instanceof Flag && c.isShown())
+                c.set();
+        }
+        this.setVisually();
+    }
+    unsetShown() {
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                c.unsetShown();
+            else if (c instanceof Flag && c.isShown())
+                c.unset();
+        }
+        this.unsetVisually();
+    }
+    setVisually() {
+        this.reloadCounter();
+        this.polygon.off('contextmenu', this.boundSetShown);
+        this.polygon.on('contextmenu', this.boundUnsetShown);
+    }
+    unsetVisually() {
+        this.reloadCounter();
+        this.polygon.off('contextmenu', this.boundUnsetShown);
+        this.polygon.on('contextmenu', this.boundSetShown);
+    }
+    shownContentIsSet() {
+        for (let c of this.contents) {
+            if (c instanceof Submap && !c.shownContentIsSet())
+                return false;
+            else if (c instanceof Flag && c.isShown() && !c.isSet())
+                return false;
+            else if (c instanceof NonFlag && c.isShown() && c.isCountable())
+                return false;
+        }
+        return true;
+    }
     initializePolygon(polygonPoints) {
         this.polygon = L.polygon(polygonPoints, { fillColor: '#6e5b1e', fillOpacity: 0, opacity: 0});
-        this.polygon.on('mouseover', function () { this.setStyle({ fillOpacity: 0.5 }) });
-        this.polygon.on('mouseout', function () { this.setStyle({ fillOpacity: 0 }) });
+        this.polygon.on('mouseover', () => { 
+            this.polygon.setStyle({ fillOpacity: 0.5 });
+        });
+        this.polygon.on('mouseout', () => { 
+            this.polygon.setStyle({ fillOpacity: 0 });
+        });
         this.polygon.on('click', clickToZoom);
+        this.boundSetShown = this.setShown.bind(this);
+        this.boundUnsetShown = this.unsetShown.bind(this);
+        addTooltipToMarker(this.polygon, this.name + " Province", true);
     }
     loadPolygon() {
         addPolygonToMap(this.polygon);
         this.polygon.setStyle({ fillOpacity: 0 });
         if (Settings.CountersVisibility.isEnabled()) {
-            addMarkerToMap(L.marker(this.counterPosition, {
-                icon: L.divIcon({ html: '<div class="cpt procpt">' + this.count() + '</div>'}),
+            this.marker = L.marker(this.counterPosition, {
+                icon: this.getCounterMarkerIcon(),
                 interactive: false
-            }));
+            });
+            addMarkerToMap(this.marker);
         }
+        if (this.shownContentIsSet())
+            this.setVisually();
+        else 
+            this.unsetVisually();
+    }
+    reloadCounter() {
+        if (!Settings.CountersVisibility.isEnabled())
+            return;
+        if (!this.marker._map)
+            addMarkerToMap(this.marker);
+        this.marker.setIcon(this.getCounterMarkerIcon());
+    }
+    getCounterMarkerIcon() {
+        return L.divIcon({ html: '<div class="cpt procpt">' + this.count() + '</div>'});
     }
     loadMarkers() {
          if (!verifySubmapRequirements(this))
             return;
         for (let c of this.contents)
             c.loadMarker();
-    }
-    unset() {
-        for (let c of this.contents) {
-            if (c instanceof Flag || c instanceof Submap)
-                c.unset();
-        }
     }
     count() {
         if (!verifySubmapRequirements(this))
@@ -785,9 +889,21 @@ class DungeonProvince extends Province {
         this.dungeon = dungeon;
         this.polygon.off('click');
         this.polygon.on('click', () => this.dungeon.load());
+        addTooltipToMarker(this.polygon, this.name, false);
+    }
+    shownContentIsSet() {
+        return this.dungeon.shownContentIsSet();
     }
     count() {
         return this.dungeon.count();
+    }
+    setShown() {
+        this.dungeon.setShown();
+        this.setVisually();
+    }
+    unsetShown() {
+        this.dungeon.unsetShown();
+        this.unsetVisually();
     }
 }
 
@@ -813,15 +929,15 @@ const Dungeons = Object.freeze({
         "Forest Temple Big Key Chest",
         "Forest Temple North Deku Like Chest",
         "Forest Temple East Tile Worm Chest",
-        "Forest Temple Diababa Heart Container",
-        "Forest Temple Dungeon Reward",
-        "Forest Temple Diababa",
         "Forest Temple Ooccoo",
         "Forest Temple Tile Worm Monkey Lock",
         "Forest Temple Big Baba Monkey Lock",
         "Forest Temple Totem Pole Monkey Lock",
         "Forest Temple Windless Bridge Lock",
         "Forest Temple Boss Lock",
+        "Forest Temple Diababa",
+        "Forest Temple Diababa Heart Container",
+        "Forest Temple Dungeon Reward",
         "Forest_Temple_Sign",
         Bottle.Fairy.new([-3920, 4820]),
     ]], {baseReqs: [], randoReqs: []}),
@@ -1193,7 +1309,7 @@ let entranceIconImage = getIconImage('Entrance');
 
 function newGrotto(id, position, name, contents) {
     let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto_' + id, contents);
-    grotto.name = name;
+    grotto.setName(name);
     return grotto;
 }
 
@@ -1277,6 +1393,9 @@ const Provinces = Object.freeze({
             "Faron Woods Owl Statue Chest",
             "Faron Owl Statue Rupee Boulder",
             "North Faron Woods Howling Stone",
+            "Coro Lock",
+            "Faron Mist Lock",
+            "Faron Field Gate Lock",
             "Faron_Field_Sign",
             "Faron_Woods_Sign",
             "Sacred_Grove_Sign",
@@ -1358,6 +1477,7 @@ const Provinces = Object.freeze({
             "Bridge of Eldin Rupee Boulder",
             "Death Mountain Howling Stone",
             "Hidden Village Howling Stone",
+            "Kakariko Gorge Gate Lock",
             "Death_Mountain_Sign",
             "Eldin_Field_Sign",
             "Hidden_Village_Sign",
@@ -1462,6 +1582,7 @@ const Provinces = Object.freeze({
             "Bulblin Camp Small Chest in Back of Camp",
             "Bulblin Camp Roasted Boar",
             "Bulblin Guard Key",
+            "Bulblin Camp Lock",
             "Outside Arbiters Grounds Poe",
             "Outside Arbiters Grounds Lantern Chest",
             "Bulblin Camp Poe",
@@ -1620,6 +1741,7 @@ const Provinces = Object.freeze({
         "Upper Zoras River Poe",
         "Lake Hylia Bridge Cliff Chest",
         "Lake Hylia Bridge Cliff Poe",
+        "Lake Hylia Bridge King Bulblin Gate Keys",
         "Lake Hylia Alcove Poe",
         "Lake Hylia Dock Poe",
         "Lake Hylia Tower Poe",

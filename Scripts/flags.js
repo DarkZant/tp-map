@@ -20,8 +20,11 @@ class Flag extends Storable{
         this.randoDesc = randoDesc;
         this.glitchedReqs = glitchedReqs;
         this.glitchedDesc = glitchedDesc;
-
+        
         this._set = false;
+    }
+    initialize() {
+        this._set = this.storageUnit.getFlagAsBool(this);
         this.initializeMarker();
     }
     getImage() {
@@ -54,6 +57,7 @@ class Flag extends Storable{
         this._set = true;
         this.storageUnit.setFlag(this);
         this.manageItemTracker();
+        this.manageFlagRequirements();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
@@ -63,6 +67,7 @@ class Flag extends Storable{
         this._set = false;
         this.storageUnit.setFlag(this);
         this.manageItemTracker();
+        this.manageFlagRequirements();
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }
@@ -72,16 +77,44 @@ class Flag extends Storable{
     getCurrentStoreValue() {
         return this._set ? 1 : 0;
     }
-    initialize() {
-        this._set = this.storageUnit.getFlagAsBool(this);
-    }
     isRandomizerCheck() {
         if (this.item instanceof Obtainable && this.item.item === null)
             return false;
         return RandomizerCheckCategories.includes(this.randoCategory);
     }
+    addFlagRequirement(flag) {
+        let req = Requirement.fromFlag(flag);
+        this.baseReqs.push(req);
+        if (this.randoReqs !== this.baseReqs)
+            this.randoReqs.push(req);
+        if (this.glitchedReqs !== this.randoReqs)
+            this.glitchedReqs.push(req);
+        if (Array.isArray(flag.requiringFlags))
+            flag.requiringFlags.push(this);
+        else 
+            flag.requiringFlags = [this];
+    }
+    manageFlagRequirements() {
+        if (this.requiringFlags === undefined || !Settings.TrackerLogic.isEnabled())
+            return;
+        reloadMap();
+        // for (let flag of this.requiringFlags)
+        //     flag.addMarker();
+    }
+    markerIsLoaded() {
+        return this.marker._map;
+    }
+    addMarker() {
+        if (this.markerIsLoaded())
+            this.marker.remove();
+        this.loadMarker();
+
+    }
     // Map
     isShown() {
+        if (setFlagsHidden && this.isSet())
+            return false;
+
         if (selectedGamemode === Gamemodes.Base) {
             if (!verifyCategoryVisibility(this.itemCategory))
                 return false;
@@ -119,31 +152,28 @@ class Flag extends Storable{
             riseOffset: 2000, 
             keyboard: false, 
         });
+        addTooltipToMarker(this.marker, this.name);
         this.marker.on('click', () => this.showDetails());
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
     }
     showDetails() {
-        let base;
-        let requirements;
-        let description;
+        let base = this.item;
+        let requirements = this.baseReqs;
+        let description = this.baseDesc;
         if (selectedGamemode !== Gamemodes.Base && seedIsLoaded)
             base = this.randoItem;
-        else
-            base = this.item;
 
         switch(selectedGamemode) {
-            case Gamemodes.Base : {
-                requirements = this.baseReqs;
-                description = this.baseDesc;               
-            }
             case Gamemodes.Glitchless : {
                 requirements = this.randoReqs;
                 description = this.randoDesc;
+                break;
             }
             case Gamemodes.Glitched : {
                 requirements = this.glitchedReqs;
                 description = this.glitchedDesc;
+                break;
             }
         }
         let detailsDiv = document.getElementById('flagDetails');
@@ -181,7 +211,7 @@ class Flag extends Storable{
         document.getElementById('flagDescriptionDiv').innerHTML = description;
         map.on('click', hideDetails);
     }
-    loadMarker() {
+    loadMarker(position=this.position) {
         if (!this.isShown())
             return;
         if (selectedGamemode === Gamemodes.Base) {
@@ -197,22 +227,25 @@ class Flag extends Storable{
             if (seedIsLoaded && Settings.ChestsContent.isEnabled() && this.randoItem instanceof Container)
                 this.marker.options.icon = getIcon(this.randoItem.content.image);         
         }
-        addMarkerToMap(this.marker, this.position);
+        addMarkerToMap(this.marker, position);
         if (this.isSet())
             this.setVisually();
         else
             this.unsetVisually();
     }
     reloadMarker() {
-        if (!this.marker._map) // If Marker is not loaded
-            return
+        if (!this.markerIsLoaded()) // If Marker is not loaded
+            return;
         this.marker.remove();
         this.loadMarker();
     }
     setMarker() {
         this.set();
-        this.setVisually();
-       
+        if (setFlagsHidden) {
+            this.marker.remove();
+            return;
+        }
+        this.setVisually();    
     }
     unsetMarker() {
         this.unset();
@@ -415,47 +448,13 @@ function getAgithaRewardFlag(index) {
     return agithaRewards.flags[pairIndex].flags[genderIndex];
 }
 
-// Howling Stones obtainables for Golden Wolves requirements
-// Could add them as requirements after Map is initialized
-let mountainHS = new Flag(howlingStone, [-4063, 8232], {
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the Ordon Spring Golden Wolf, accessible while clearing out the Eldin Twilight.'
-});
-mountainHS.setName("Death Mountain Howling Stone");
-let hiddenHS = new Flag(howlingStone, [-2065, 6665], {
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.'
-});
-hiddenHS.setName("Hidden Village Howling Stone");
-let faronHS = new Flag(howlingStone, [-7340, 4043], {
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the South Castle Town Golden Wolf, accessible while on the way to the Master Sword.'
-});
-faronHS.setName("North Faron Woods Howling Stone");
-let snowpeakHS = new Flag(howlingStone, [-475, 3393], { 
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the Kakariko Graveyard Golden Wolf, accessible on the way to the Snowpeak Ruins.'
-});
-snowpeakHS.setName("Snowpeak Howling Stone");
-let riverHS = new Flag(howlingStone, [-852, 5918], {
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the West Castle Town Golden Wolf, accessible while clearing out the Lanayru Twilight.'
-});
-riverHS.setName("Upper Zoras River Howling Stone");
-let lakeHS = new Flag(howlingStone, [-5405, 3014], {
-    baseReqs: [shadowCrystalReq],
-    baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
-});
-lakeHS.setName("Lake Hylia Howling Stone");
-
-var flags = new Map([
+const flags = new Map([
     // Ordon
     ['Uli Cradle Delivery', new Flag(fishingRods.getItemByIndex(0), [-9094, 4809], {
         baseDesc: 'Retrieve the cradle from the monkey using the hawk and deliver it to Uli to receive the fishing rod.',
         randoCategory: Categories.Gifts
     })],
     ["Ordon Spring Golden Wolf", new Flag(goldenWolf, [-8542, 4795], {
-        baseReqs: [Requirement.fromFlag(mountainHS)],
         baseDesc: 'Summoned by the Death Mountain howling stone.',
         randoDesc: 'Summoned by the Death Mountain howling stone. The item is lying on the ground where the Golden Wolf usually is.'
     })],
@@ -519,6 +518,14 @@ var flags = new Map([
     ["Coro Gate Key", new Flag(coroKey, [-7385, 4898], {
         baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave.",
         randoCategory: Categories.NonChecks,
+    })],
+    ["Coro Lock", new Flag(faronBulblinLock, [-7496, 4787], {
+        baseReqs: [coroKeyReq],
+        baseDesc: "Unlock this gate with the key obtained from Coro to reach the mist area of the forest."
+    })],
+    ["Faron Mist Lock", new Flag(faronBulblinLock, [-7343, 4351], {
+        baseReqs: [faronKeyReq],
+        baseDesc: "Unlock this gate to reach the north part of the Faron Woods.",
     })],
     ["Coro Lantern", new Flag(lantern, [-7405, 4910], {
         baseDesc: 'While chasing Talo and the monkey, talk to Coro to obtain the lantern.',
@@ -674,7 +681,16 @@ var flags = new Map([
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
         randoReq: [[masterSwordReq, randoSettingReq], pastDomRodReq]
     })],
-    [faronHS.name, faronHS],
+    ["North Faron Woods Howling Stone", new Flag(howlingStone, [-7340, 4043], {
+        baseReqs: [morpheelReq],
+        baseDesc: 'Summons the South Castle Town Golden Wolf, accessible while on the way to the Master Sword.',
+        randoReqs: [shadowCrystalReq]
+    })],
+    ["Faron Field Gate Lock", new Flag(gateLock, [-5825, 4324], {
+        baseReqs: [gateKeyReq],
+        baseDesc: "Unlock this gate during the escort quest to reach Faron Field.",
+        randoDesc: "This gate unlocks automatically upon obtaining the gate keys, giving access to the Lanayru Province."
+    })],
     // Eldin
     ["Kakariko Graveyard Lantern Chest", new Flag(chest.with(Rupees.Purple), [-5504, 8095], {
         baseReqs: [lanternReq],
@@ -744,7 +760,7 @@ var flags = new Map([
                 'the ball and chain to destroy the rock and jump to climb the vines. Finally, jump down a few times to reach the chest.'
     })],
     ["Rutelas Blessing", new Flag(zoraArmor, [-5474, 8273], {
-        baseReqs: [Requirement.fromBoolItem(gateKey)],
+        baseReqs: [gateKeyReq],
         baseDesc: 'Save Ralis and follow Rutella through the graveyard to obtain the Zora Armor.',
         randoCategory: Categories.Gifts
     })],
@@ -790,7 +806,6 @@ var flags = new Map([
         randoDesc: 'Show the sketch to Ralis to obtain theitem.'
     })],
     ["Kakariko Graveyard Golden Wolf", new Flag(goldenWolf, [-5479, 8140], {
-        baseReqs: [Requirement.fromFlag(snowpeakHS)],
         baseDesc: 'Summoned by the Snowpeak Howling Stone.'
     })],
     ["Kakariko Graveyard Grave Poe", new Flag(nightPoe, [-5493, 7987], {
@@ -972,11 +987,21 @@ var flags = new Map([
         randoCategory: Categories.Gifts,
         randoDesc: 'Defeat all the Bulblins, then show Impaz the Powerless Dominion Rod to receive the item.'
     })],
-    [mountainHS.name, mountainHS],
-    [hiddenHS.name, hiddenHS],
+    ["Death Mountain Howling Stone", new Flag(howlingStone, [-4063, 8232], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: 'Summons the Ordon Spring Golden Wolf, accessible while clearing out the Eldin Twilight.'
+    })],
+    ["Hidden Village Howling Stone", new Flag(howlingStone, [-2065, 6665], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.'
+    })],
+    ["Kakariko Gorge Gate Lock", new Flag(gateLock, [-5253, 6506], {
+        baseReqs: [gateKeyReq],
+         baseDesc: "Unlock this gate during the escort quest to reach Kakariko Village.",
+        randoDesc: "This gate unlocks automatically upon obtaining the gate keys, giving access to Kakariko Village."
+    })],
     // Gerudo 
     ["Gerudo Desert Golden Wolf", new Flag(goldenWolf, [-4664, 582], {
-        baseReqs: [Requirement.fromFlag(lakeHS)],
         baseDesc: 'Summoned by the Lake Hylia Howling Stone.'
     })],
     ["Gerudo Desert East Poe", new Flag(nightPoe, [-6110, 2588], {
@@ -1049,6 +1074,10 @@ var flags = new Map([
         baseDesc: 'Defeat the Bulblin that has the key to collect it.',
         randoReqs: [],
         randoDesc: 'The item is on the ground behind the roasting boar.'
+    })],
+    ["Bulblin Camp Lock", new Flag(faronBulblinLock, [-4255, 601], {
+        baseReqs: [bulblinKeyReq],
+        baseDesc: 'Unlock this door to reach the boar at the center of the camp.'
     })],
     ["Outside Arbiters Grounds Poe", new Flag(nightPoe, [-3892, 557], {
         baseReqs: [bulblinKeyReq, shadowCrystalReq, nightReq],
@@ -1157,7 +1186,10 @@ var flags = new Map([
         baseDesc: 'In the cave, break the 2 ice blocks to reveal torches. Light them up to make the chest appear.',
         randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq, lanternReq],
     })],
-    [snowpeakHS.name, snowpeakHS],
+    ["Snowpeak Howling Stone", new Flag(howlingStone, [-475, 3393], { 
+        baseReqs: [shadowCrystalReq],
+        baseDesc: 'Summons the Kakariko Graveyard Golden Wolf, accessible on the way to the Snowpeak Ruins.'
+    })],
     ["Snowpeak Freezard Grotto Chest", new Flag(chest.with(Rupees.Orange), [-265, 3631], {
         baseReqs: [coralEarringReq, ballAndChainReq, shadowCrystalReq],
         baseDesc: 'Defeat the furthest Freezard to reveal the chest.',
@@ -1255,7 +1287,6 @@ var flags = new Map([
         randoDesc: 'The item is in the flowers on the ground.'
     })],
     ["West Hyrule Field Golden Wolf", new Flag(goldenWolf, [-3917, 4177], {
-        baseReqs: [Requirement.fromFlag(riverHS)],
         baseDesc: "Summoned by the Upper Zora's River Howling Stone."
     })],
     ["East Castle Town Bridge Poe", new Flag(nightPoe, [-3967, 5062], {
@@ -1316,7 +1347,6 @@ var flags = new Map([
                 "the chest on the other statue and only play the minigame once"
     })],
     ["Outside South Castle Town Golden Wolf", new Flag(goldenWolf, [-4430, 4591], {
-        baseReqs: [Requirement.fromFlag(faronHS)],
         baseDesc: 'Summoned by the Faron Woods Howling Stone.'
     })],
     ["Plumm Fruit Balloon Minigame", new Flag(heartPiece, [-4905, 3923], {
@@ -1354,6 +1384,11 @@ var flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, shadowCrystalReq],
         baseDesc: 'On the left of the chest.'
     })],
+    ["Lake Hylia Bridge King Bulblin Gate Keys", new Flag(gateKey, [-5048, 3400], {
+        baseDesc: 'Defeat King Bulblin for the second time during the escort to obtain the gate keys.',
+        randoCategory: Categories.NonChecks,
+        randoDesc: 'Defeat King Bulblin for the second time during the escort to obtain the item.'
+    })],
     ["Lake Hylia Alcove Poe", new Flag(nightPoe, [-5539, 3312], {
         baseReqs: [shadowCrystalReq, nightReq],
         baseDesc: 'In the middle of the tall grass.'
@@ -1379,7 +1414,9 @@ var flags = new Map([
     })],
     ["Auru Gift To Fyer", new Flag(aurusMemo, [-5460, 2690], {
         baseDesc: "Climb the tower with the ladder and talk to Auru to obtain the memo.",
+        baseReqs: [masterSwordReq],
         randoCategory: Categories.Gifts,
+        randoReqs: [],
         randoDesc: "Climb the tower with the ladder and talk to Auru to obtain the item."
     })],
     ["Lanayru Field Spinner Track Chest", new Flag(chest.with(heartPiece), [-3349, 3595], {
@@ -1399,7 +1436,6 @@ var flags = new Map([
         baseDesc: 'After collecting the Medicine Scent and talking to Louise, defeat all of the Stallhounds at Night to receive the wooden statue.',
     })],
     ["North Castle Town Golden Wolf", new Flag(goldenWolf, [-3701, 4709], {
-        baseReqs: [Requirement.fromFlag(hiddenHS)],
         baseDesc: 'Summoned by the Hidden Village Howling Stone.'
     })],
     ["Lake Hylia Bridge Owl Statue Sky Character", new Flag(skybookChar, [-4220, 3378], {
@@ -1422,8 +1458,14 @@ var flags = new Map([
         baseReqs: [doubleClawshotReq],
         baseDesc: 'Follow the clawshot target path down the chasm to reach the chest.'
     })],
-    [riverHS.name, riverHS],
-    [lakeHS.name, lakeHS],
+    ["Upper Zoras River Howling Stone", new Flag(howlingStone, [-852, 5918], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: 'Summons the West Castle Town Golden Wolf, accessible while clearing out the Lanayru Twilight.'
+    })],
+    ["Lake Hylia Howling Stone", new Flag(howlingStone, [-5405, 3014], {
+        baseReqs: [shadowCrystalReq],
+        baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
+    })],
     ["Lake Hylia Bridge South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
         baseReqs: [[bombBagReq, ballAndChainReq]],
         baseDesc: 'Hidden between two larger stone structures.'
@@ -2904,11 +2946,20 @@ var flags = new Map([
     ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
 ]); // Always add flags at the end to preserve storage IDs
 
+// Flag initiliazation
 const flagsSU = new StorageUnit('flags', flags.values());
 for (let [name, flag] of flags.entries()) {
     flag.setName(name);
     flag.initialize();
 }
+
+// Flag groups initialization
 agithaRewards.initialize();
 
-
+// Flag requirements 
+flags.get("Ordon Spring Golden Wolf").addFlagRequirement(flags.get("Death Mountain Howling Stone"));
+flags.get("West Hyrule Field Golden Wolf").addFlagRequirement(flags.get("Upper Zoras River Howling Stone"));
+flags.get("Outside South Castle Town Golden Wolf").addFlagRequirement(flags.get("North Faron Woods Howling Stone"));
+flags.get("Gerudo Desert Golden Wolf").addFlagRequirement(flags.get("Lake Hylia Howling Stone"));
+flags.get("Kakariko Graveyard Golden Wolf").addFlagRequirement(flags.get("Snowpeak Howling Stone"));
+flags.get("North Castle Town Golden Wolf").addFlagRequirement(flags.get("Hidden Village Howling Stone"));

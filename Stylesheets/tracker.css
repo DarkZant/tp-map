@@ -1,0 +1,110 @@
+#tracker {
+    /* transition: none; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 29vw;
+}
+#tracker #traX {
+    position: fixed;
+}
+#tracker #mainTracker {
+    height: 95dvh;
+    background-color: transparent;
+}
+.disabled {
+    pointer-events: none;
+}
+#tracker > div:nth-child(n + 3) {
+    display: none;
+}
+#tracker > div {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.8vw;
+    row-gap: 2dvh;
+    width: auto;
+    height: auto;
+    background-color: rgb(56, 53, 46, 0.85);
+    border-radius: 8px;
+}
+.tsubmenu {
+    z-index: 1500;
+    padding: 2.5dvh 1.25vw;
+}
+#tracker .tsubmenuX {
+    position: absolute;
+    right: 2px;
+    top: -3px;
+    z-index: 1600;
+}
+#tbugs {
+    padding: 2.5dvh 0;
+}
+.titem, .tsubmenuO {
+    position: relative;
+    width: 3.75vmax;
+    aspect-ratio: 1;
+    display: flex;
+    cursor: pointer;
+    filter: brightness(50%);
+}
+.tsubmenuO {
+    filter: brightness(100%);
+}
+.titem:hover .tbox, .tsubmenuO:hover .tbox{
+    filter: brightness(150%);
+}
+.tbox, .timage {
+    position: absolute;
+    top: 50%; 
+    left: 50%;  
+    transform: translate(-50%, -50%);  
+    max-width: 100%;
+    max-height: 100%;
+}
+.timage {
+    max-width: 90%; 
+    max-height: 90%;
+    z-index: 1100;
+}
+.tdungeon {
+    position: relative;
+    width: 6.25vmax;
+    display: inline-flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    column-gap: 0.1vw;
+    row-gap: 0.5vh;
+}
+.tdungeon span {
+    position: absolute;
+    bottom: 98%;
+    z-index: 1500;
+    color: #c0c0c0;
+    display: none;
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 0.94dvw;
+}
+.tboss {
+    width: 4.5vmax;
+}
+.tdkey {
+    width: 3vmax;
+}
+.tcpt {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0.3vw;
+    z-index: 1200;
+    padding: 2.5px 5px;
+    border-radius: 100vw;
+    background-color: #38352e;
+    font-size: 0.95vmax;
+}

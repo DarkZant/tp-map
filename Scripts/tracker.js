@@ -16,6 +16,10 @@ var trackedItems = [
 ]; // Always add items at the end to preserve storage IDs
 
 
+function dispatchTrackerUpdate() {
+    document.dispatchEvent(new CustomEvent('trackerUpdated'));
+}
+
 class TrackerItem extends Storable {
     constructor(item) {
         super();
@@ -67,7 +71,7 @@ class TrackerItem extends Storable {
         }
         this.initialized = true;
     }
-    update() {
+    update(dispatchEvent=true) {
         this.updateElementBrightness();
         if (this.item instanceof ProgressiveItem)
             this.updateElementImage();
@@ -75,7 +79,8 @@ class TrackerItem extends Storable {
             this.updateElementCounter();
         if (this.initialized) 
             this.storageUnit.setFlag(this);
-        document.dispatchEvent(new CustomEvent('trackerUpdated'));
+        if (dispatchEvent)
+            dispatchTrackerUpdate();
     }
     updateElementBrightness() {
         let currentItemState = this.item.getState();
@@ -109,9 +114,9 @@ class TrackerItem extends Storable {
             this.elem.children[2].style.color = "#c0c0c0"; // Set color to white
         }
     }
-    reset() {
+    reset(dispatchEvent=true) {
         this.item.reset();
-        this.update();
+        this.update(dispatchEvent);
     }
     updateElementImage() {
         let imgElem = this.elem.children[1];
@@ -174,36 +179,47 @@ function showTrackerSubmenu(submenuID) {
     let menu = document.getElementById(submenuID);
     menu.style.display = "flex";
     menu.style.visibility = "visible";
-    let tracker = document.getElementById('tracker');
-    tracker.style.filter = "brightness(25%)";
-    tracker.submenuID = submenuID;
-    document.getElementById('traX').style.right = "0";
-    let children = tracker.children;
-    for (let i = 0; i < children.length; ++i) 
-        children[i].classList.add('disabled');
+
+    document.getElementById('tracker').style.backgroundColor = "rgba(14, 13, 12, 0.85)";
+
+    let trackerX = document.getElementById('traX');
+    trackerX.style.color = "#1D1D1D";
+    trackerX.classList.add('disabled');
+
+    let mainTracker = document.getElementById('mainTracker');
+    mainTracker.style.filter = "brightness(25%)";
+    mainTracker.submenuID = submenuID;
+    for (let child of mainTracker.children) 
+        child.classList.add('disabled');
+ 
     setTimeout(function () {
-        tracker.addEventListener('click', hideTrackerSubmenuHandler); 
+        mainTracker.addEventListener('click', hideTrackerSubmenuHandler); 
     }, 100);  
 }   
-function hideTrackerSubmenu(submenuID) {
-    let menu = document.getElementById(submenuID);
-    menu.style.display = "none";
-    menu.style.visibility = "hidden";
-    let tracker = document.getElementById('tracker');
-    tracker.style.filter = "none";
-    document.getElementById('traX').style.right = null;
-    let children = tracker.children;
-    for (let i = 0; i < children.length; ++i) 
-        children[i].classList.remove('disabled');
-    tracker.removeEventListener('click', hideTrackerSubmenuHandler);
+function hideTrackerSubmenu(submenu) {
+    submenu.style.display = "none";
+    submenu.style.visibility = "hidden";
+
+    document.getElementById('tracker').style.backgroundColor = "rgb(56, 53, 46, 0.85)";
+
+    let trackerX = document.getElementById('traX');
+    trackerX.style.color = "#757575";
+    trackerX.classList.remove('disabled');
+
+    let mainTracker = document.getElementById('mainTracker');
+    mainTracker.style.filter = "none";
+    for (let child of mainTracker.children) 
+        child.classList.remove('disabled');
+
+    mainTracker.removeEventListener('click', hideTrackerSubmenuHandler);
 }
 function hideTrackerSubmenuHandler() {
-    hideTrackerSubmenu(this.submenuID)
+    hideTrackerSubmenu(document.getElementById(this.submenuID));
 }
 
 function resetTracker() {
     for (let trackerItem of trackerItems.values()) 
-        trackerItem.reset();
+        trackerItem.reset(false);
     for (let requiredElem of document.querySelectorAll('.tdungeon span')) {
         if (requiredElem.style.display === 'inline')
             requiredElem.style.display = 'none';
