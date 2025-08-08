@@ -1,6 +1,6 @@
 class Flag extends Storable{
     constructor(item, position, { 
-            itemCategory=item.getCategory(), baseReqs=[], baseDesc="", 
+            itemCategory=item.getCategory(), baseReqs=[], baseDesc="Randomizer seed not loaded.", 
             randoCategory=itemCategory, randoReqs=baseReqs, randoDesc=baseDesc,
             glitchedReqs=randoReqs, glitchedDesc=randoDesc
         } = {}
@@ -29,6 +29,11 @@ class Flag extends Storable{
     }
     getImage() {
         return this.item.image;
+    }
+    getMarkerImage() {
+        if (Settings.ChestsContent.isEnabled() && this.isContainer())
+            return this.item.content.image;
+        return this.getImage();
     }
     setName(name) {
         this.name = name;
@@ -101,11 +106,8 @@ class Flag extends Storable{
         // for (let flag of this.requiringFlags)
         //     flag.addMarker();
     }
-    markerIsLoaded() {
-        return this.marker._map;
-    }
     addMarker() {
-        if (this.markerIsLoaded())
+        if (layerIsLoaded(this.marker))
             this.marker.remove();
         this.loadMarker();
 
@@ -152,7 +154,7 @@ class Flag extends Storable{
             riseOffset: 2000, 
             keyboard: false, 
         });
-        addTooltipToMarker(this.marker, this.name);
+        addTooltipToMarker(this.marker, underscoreToSpace(this.name));
         this.marker.on('click', () => this.showDetails());
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
@@ -176,17 +178,32 @@ class Flag extends Storable{
                 break;
             }
         }
-        let detailsDiv = document.getElementById('flagDetails');
-        detailsDiv.style.visibility = "visible";
-        detailsDiv.style.width = "25%";
-        detailsDiv.style.height = "100%";
-        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);        
-        if (base instanceof Container) {
-            document.getElementById('containerContent').style.display = "block";
-            document.getElementById('containerContentDiv').innerHTML = displayContainer(base);
+        let detailsMenu = document.getElementById('flagDetails');
+        detailsMenu.style.visibility = "visible";
+        detailsMenu.style.width = "24.4vw";
+        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);    
+        document.getElementById("flagName").style.display = "inline";
+        document.getElementById("flagNameDiv").innerHTML = underscoreToSpace(this.name);   
+        document.getElementById('flagItem').style.display = "inline"; 
+        if (this.isContainer()) {
+            document.getElementById('flagItemTitle').innerHTML = "Content";
+            document.getElementById('flagItemDiv').innerHTML = displayContainer(base);
         }
-        else 
-            document.getElementById('containerContent').style.display = "none";
+        else {
+            let title = "Item";
+            switch (this.item.getCategory()) {
+                case (Categories.Bosses) : {
+                    title = "Boss";
+                    break;
+                }
+                case (Categories.Locks) : {
+                    title = "Lock";
+                    break;
+                }
+            }
+            document.getElementById('flagItemTitle').innerHTML = title;
+            document.getElementById('flagItemDiv').innerHTML = displayItem(base);
+        }
         if (requirements.length > 0) {
             document.getElementById('flagRequirements').style.display = "block";
             let rdHtml = "";
@@ -214,16 +231,11 @@ class Flag extends Storable{
     loadMarker(position=this.position) {
         if (!this.isShown())
             return;
-        if (selectedGamemode === Gamemodes.Base) {
-            // if (Settings.TrackerLogic.isEnabled() && !verifyRequirements(this.baseReqs))
-            //     showMarkerAsUnobtainable(this.marker);       
+        if (selectedGamemode === Gamemodes.Base) {     
             if (Settings.ChestsContent.isEnabled() && this.isContainer()) 
                 this.marker.options.icon = getIcon(this.item.content.image);         
         }
-        else {
-            // if (Settings.TrackerLogic.isEnabled() && 
-            //     !verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs))               
-            //     showMarkerAsUnobtainable(this.marker);       
+        else {      
             if (seedIsLoaded && Settings.ChestsContent.isEnabled() && this.randoItem instanceof Container)
                 this.marker.options.icon = getIcon(this.randoItem.content.image);         
         }
@@ -234,7 +246,7 @@ class Flag extends Storable{
             this.unsetVisually();
     }
     reloadMarker() {
-        if (!this.markerIsLoaded()) // If Marker is not loaded
+        if (!layerIsLoaded(this.marker)) 
             return;
         this.marker.remove();
         this.loadMarker();
@@ -281,7 +293,7 @@ class Flag extends Storable{
                 showMarkerAsUnobtainable(this.marker);    
         }
     
-        showMarkerAsNotSet(this.marker, this.getImage());
+        showMarkerAsNotSet(this.marker, this.getMarkerImage());
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
     }
@@ -372,8 +384,8 @@ class FlagGroup {
 } 
 
 let agithaBugCoupleRewards = Object.freeze({
-    1 : Rupees.Purple,
-    2 : Rupees.Orange
+    1 : new Obtainable("Purple Rupee", rupees, {category: Categories.Main}),
+    2 : new Obtainable("Orange Rupee", rupees, {category: Categories.Main})
 });   
 
 function makeBugPlaceholder(bugItem) {
@@ -496,10 +508,13 @@ const flags = new Map([
         randoCategory: Categories.Gifts
     })],
     ["Ordon Sword", new Flag(swords.getItemByIndex(1), [-9004, 4850], {
+        baseReqs: [woodenSwordReq],
         baseDesc: 'Pick up the sword on the couch after entering by the side of the house by digging as Wolf Link.',
+        randoReqs: [],
         randoDesc: 'Pick up the sword on the couch after entering the house.'
     })],
-    ["Ordon Shield", new Flag(shields.getItemByIndex(0), [-9044, 4410], {
+    ["Ordon Shield", new Flag(woodenShields.getItemByIndex(0), [-9044, 4410], {
+        baseReqs: [woodenSwordReq],
         baseDesc: 'Use Midna to jump to the ledge where the shield is, then bonk on the wall twice to make it fall and obtain it.',
         randoReqs: [shadowCrystalReq]
     })],
@@ -888,13 +903,13 @@ const flags = new Map([
     ["Kakariko Watchtower Chest", new Flag(chest.with(Rupees.Purple), [-5181, 7310], {
         baseDesc: 'Climb the ladder to reach the chest.'
     })],
-    ["Kakariko Village Malo Mart Hylian Shield", new Flag(shields.getItemByIndex(2), [-5445, 7250], {
+    ["Kakariko Village Malo Mart Hylian Shield", new Flag(hylianShield, [-5445, 7250], {
         baseReqs: [Requirement.fromCountItem(rupees, 200)],
         baseDesc: 'You can buy it after saving Collin for 200 rupees.',
         randoCategory: Categories.ShopItems,
         randoDesc: "You can buy the item for 200 rupees."
     })],
-    ["Kakariko Village Malo Mart Wooden Shield", new Flag(shields.getItemByIndex(1), [-5445, 7325], {
+    ["Kakariko Village Malo Mart Wooden Shield", new Flag(woodenShields.getItemByIndex(1), [-5445, 7325], {
         baseReqs: [Requirement.fromCountItem(rupees, 50)],
         baseDesc: 'You can buy it after saving Collin for 50 rupees.',
         randoCategory: Categories.ShopItems,
@@ -912,13 +927,13 @@ const flags = new Map([
         randoCategory: Categories.ShopItems
     })],
     ["Shad Dominion Rod", new Flag(dominionRods.getItemByIndex(1), [-5390, 7453], {
-        baseReqs: [Requirement.fromBoolItem(skybook.getItemByReq(1))],
+        baseReqs: [skybookReq],
         baseDesc: 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod.',
         randoCategory: Categories.NonChecks,
         randoDesc: 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod. This is not a Randomizer Check.',
     })],
     ["Renados Letter", new Flag(renadosLetter, [-5640, 7377], {
-        baseReqs: [Requirement.fromBoolItem(armogohma)],
+        baseReqs: [armogohmaReq],
         baseDesc: 'After clearing the Temple of Time, talk to Renado to obtain his letter to Telma. ',
         randoCategory: Categories.Gifts,
         randoDesc: "After clearing the Temple of Time, talk to Renado to obtain his letter to Telma. This item is never Randomized."
@@ -958,7 +973,7 @@ const flags = new Map([
         baseDesc: 'Cross the water to reach the chest. Be careful of the Skullfish and Bombfish.'
     })],
     ["Eldin Stockcave Upper Chest", new Flag(smallChest.with(Rupees.Red), [-2253, 7920], {
-        baseDesc: [clawshotReq, ironBootsReq],
+        baseReqs: [clawshotReq, ironBootsReq],
         baseDesc: 'From the entrance at the top, jump down in the magnetic field with the Iron Boots to reach the chest.'
     })],
     ["Eldin Stockcave Lantern Chest", new Flag(chest.with(Rupees.Orange), [-2310, 7530], {
@@ -992,7 +1007,7 @@ const flags = new Map([
         baseDesc: 'Summons the Ordon Spring Golden Wolf, accessible while clearing out the Eldin Twilight.'
     })],
     ["Hidden Village Howling Stone", new Flag(howlingStone, [-2065, 6665], {
-        baseReqs: [shadowCrystalReq],
+        baseReqs: [horseCallReq, shadowCrystalReq],
         baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.'
     })],
     ["Kakariko Gorge Gate Lock", new Flag(gateLock, [-5253, 6506], {
@@ -1187,7 +1202,7 @@ const flags = new Map([
         randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq, lanternReq],
     })],
     ["Snowpeak Howling Stone", new Flag(howlingStone, [-475, 3393], { 
-        baseReqs: [shadowCrystalReq],
+        baseReqs: [coralEarringReq, shadowCrystalReq],
         baseDesc: 'Summons the Kakariko Graveyard Golden Wolf, accessible on the way to the Snowpeak Ruins.'
     })],
     ["Snowpeak Freezard Grotto Chest", new Flag(chest.with(Rupees.Orange), [-265, 3631], {
@@ -1603,7 +1618,7 @@ const flags = new Map([
         randoDesc: 'Pay 15 rupees to play the second STAR minigame and win it to receive the reward.'
     })],
     ["Castle Town Malo Mart Magic Armor", new Flag(magicArmor, [-4231, 4706], {
-        baseReqs: [Requirement.fromBoolItem(wallets.getItemByIndex(1))],
+        baseReqs: [Requirement.fromBoolItem(wallets.getItemByIndex(1)), [Requirement.fromCountItem(rupees, 1798), Requirement.fromCountItem(rupees, 3598)]],
         baseDesc: 'After repairing the Castle Town bridge for 1000 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
                   'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1798 rupees total (or 3598 rupees without GSR).',
         randoCategory: Categories.ShopItems
@@ -2242,7 +2257,7 @@ const flags = new Map([
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
-        baseDesc: [stallordReq],
+        baseReqs: [stallordReq],
         baseDesc: 'Defeat Stallord to obtain the Heart Container.',
         randoCategory: Categories.Main,
         randoDesc: 'Defeat Stallord to obtain the item.'

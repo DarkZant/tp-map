@@ -31,13 +31,16 @@ class Setting extends Storable {
         this.active = false;
         this.element.addEventListener('click', () => this.handleClick());
     }
+    updateActive() {
+        this.active = this.element.checked;
+        this.storageUnit.setFlag(this);
+    }
     handleClick(fromParent=false) {
         if (fromParent)
             this.element.checked = !this.element.checked;
-        this.active = this.element.checked;
+        this.updateActive();
         if (!fromParent && this.parent)
             this.parent.update(this.active);
-        this.storageUnit.setFlag(this);
         if (!fromParent)
             dispatchSettingsUpdate();
     }
@@ -54,6 +57,25 @@ class Setting extends Storable {
         this.active = this.storageUnit.getFlagAsBool(this);
         if (this.active)
             this.element.click();
+    }
+}
+
+class FunctionSetting extends Setting {
+    constructor(name, defaultValue=0) {
+        super(name, defaultValue);
+    }
+    handleClick() {
+        this.updateActive();
+        this.func();
+    }
+    setFunction(func) {
+        this.func = func;
+        if (this.active)
+            func();
+    }
+    initialize() {
+        this.active = this.storageUnit.getFlagAsBool(this);
+        this.element.checked = this.active;
     }
 }
 
@@ -186,10 +208,10 @@ const Settings = Object.freeze({ // 12
     EmptySubmaps: new Setting('Empty_Submaps_Visibility', 1),
     SubmapAsMarker: new Setting('Submap_As_One_Marker'),
     ChestsContent: new Setting('Show_Chests_As_Content'),
-    TrackerOverlay: new Setting('Tracker_Position'),
+    TrackerOverlay: new FunctionSetting('Tracker_Position'),
     CountersVisibility: new Setting('Show_Counters', 1),
     CountFlags: new Setting('Count_Flags', 1),
-    CountChecks: new Setting('Count_Checks'),
+    CountChecks: new Setting('Count_Checks', 1),
     CountNonChecks: new Setting('Count_Non_Checks'),
     CountNonFlags: new Setting('Count_Non_Flags')
 });

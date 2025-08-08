@@ -14,7 +14,11 @@ for (let [src, size] of imageSizes)
     images.set(src, new ImageWrapper(src, size));
 
 function spaceToUnderscore(str) {
-    return str.replace(/ /g, "_");
+    return str.replaceAll(" ", "_");
+}
+
+function underscoreToSpace(str) {
+    return str.replaceAll("_", " ");
 }
 
 function getIconImage(imageName) {
@@ -66,11 +70,11 @@ const RandomizerCheckCategories = [
 ];
 
 class Obtainable {
-    constructor(imageInfo, item, {name=imageInfo, category}={}) {
+    constructor(imageInfo, item, {name=imageInfo, category=item.getCategory()}={}) {
         this.image = getIconImage(imageInfo);
         this.item = item;
         this.name = name;
-        this.category = item === null ? category : item.getCategory();
+        this.category = category;
     }
     hasItem() {
         return this.item !== null;
@@ -120,6 +124,12 @@ class BoolItem {
     }
     getState() {
         return this.obtained ? 1 : 0;
+    }
+    setState(state) {
+        if (typeof state === "boolean")
+            this.state = state;
+        else
+            this.state = state === 1 ? true : false;
     }
     isObtained() {
         return this.obtained;
@@ -390,9 +400,10 @@ var skybook = new CountRequiredItem('Sky Book Character', 7, {
 var swords = new ProgressiveItem('Sword', [
     'Wooden Sword', 'Ordon Sword', 'Master Sword', 'Light Filled Master Sword'
 ]);
-var shields = new ProgressiveItem("Shield", [
-    'Ordon Shield', 'Wooden Shield', 'Hylian Shield'
+var woodenShields = new ProgressiveItem("Shield", [
+    'Ordon Shield', 'Wooden Shield'
 ]);
+var hylianShield = new BoolItem('Shield2', {name: "Hylian Shield"});
 var zoraArmor = new BoolItem("Zora Armor");
 var magicArmor = new BoolItem("Magic Armor");
 var heartPiece = new CountItem('Heart Piece', 45, {category: Categories.Hearts});
@@ -447,7 +458,7 @@ var forestSK = new CountItem('Small Key', 4, {name: 'Forest Temple Small Key'});
 var forestMap = new BoolItem('Dungeon Map', {name: "Forest Temple Map"});
 var forestCompass = new BoolItem("Compass", {name: "Forest Temple Compass"});
 var forestBK = new BoolItem('Boss Key', {name: 'Forest Temple Boss Key'}); 
-var diababa = new BoolItem('Diababa', {name: 'Diababa Defeated', category: Categories.Bosses});
+var diababa = new BoolItem('Diababa', {category: Categories.Bosses});
 
 var minesSK = new CountItem('Small Key', 3, {name: 'Goron Mines Small Key'});
 var minesMap = new BoolItem('Dungeon Map', {name: "Goron Mines Map"});
@@ -455,19 +466,19 @@ var minesCompass = new BoolItem("Compass", {name: "Goron Mines Compass"});
 var minesBK = new CountRequiredItem('GBK2', 3, {
     3 : {name: "Goron Mines Boss Key", imageName: "GBK3"}
 }); 
-var fyrus = new BoolItem('Fyrus', {name: 'Fyrus Defeated', category: Categories.Bosses});
+var fyrus = new BoolItem('Fyrus', {category: Categories.Bosses});
 
 var lakebedSK = new CountItem('Small Key', 3, {name: 'Lakebed Temple Small Key'});
 var lakebedMap = new BoolItem('Dungeon Map', {name: "Lakebed Temple Map"});
 var lakebedCompass = new BoolItem("Compass", {name: "Lakebed Temple Compass"});
 var lakebedBK = new BoolItem('Boss Key', {name: 'Lakebed Temple Boss Key'}); 
-var morpheel = new BoolItem('Morpheel', {name: 'Morpheel Defeated', category: Categories.Bosses});
+var morpheel = new BoolItem('Morpheel', {category: Categories.Bosses});
 
 var arbiterSK = new CountItem('Small Key', 5, {name: "Arbiter's Ground Small Key"});
 var arbiterMap = new BoolItem('Dungeon Map', {name: "Arbiter's Ground Map"});
 var arbiterCompass = new BoolItem("Compass", {name: "Arbiter's Ground Compass"});
 var arbiterBK = new BoolItem('Boss Key', {name: "Arbiter's Ground Boss Key"}); 
-var stallord = new BoolItem('Stallord', {name: 'Stallord Defeated', category: Categories.Bosses});
+var stallord = new BoolItem('Stallord', {category: Categories.Bosses});
 
 var snowpeakSK = new CountItem('Small Key', 4, {name: "Snowpeak Ruins Small Key"});
 var snowpeakMap = new BoolItem('Dungeon Map', {name: "Snowpeak Ruins Map"});
@@ -475,31 +486,31 @@ var snowpeakCompass = new BoolItem("Compass", {name: "Snowpeak Ruins Compass"});
 var snowpeakBK = new BoolItem('Bedroom Key'); 
 var pumpkin = new BoolItem('Ordon Pumpkin');
 var cheese = new BoolItem("Ordon Goat Cheese");
-var blizzeta = new BoolItem("Blizzeta", {name: 'Blizzeta Defeated', category: Categories.Bosses});
+var blizzeta = new BoolItem("Blizzeta", {category: Categories.Bosses});
 
 var templeSK = new CountItem('Small Key', 3, {name: "Temple of Time Small Key"});
 var templeMap = new BoolItem('Dungeon Map', {name: "Temple of Time Map"});
 var templeCompass = new BoolItem("Compass", {name: "Temple of Time Compass"});
 var templeBK = new BoolItem('Boss Key', {name: "Temple of Time Boss Key"}); 
-var armogohma = new BoolItem('Armogohma', {name: 'Armogohma Defeated', category: Categories.Bosses});
+var armogohma = new BoolItem('Armogohma', {category: Categories.Bosses});
 
 var citySK = new CountItem('Small Key', 1, {name: "City in the Sky Small Key"});
 var cityMap = new BoolItem('Dungeon Map', {name: "City in the Sky Map"});
 var cityCompass = new BoolItem("Compass", {name: "City in the Sky Compass"});
 var cityBK = new BoolItem('Boss Key', {name: "City in the Sky Boss Key"}); 
-var argorok = new BoolItem('Argorok', {name: 'Argorok Defeated', category: Categories.Bosses});
+var argorok = new BoolItem('Argorok', {category: Categories.Bosses});
 
 var palaceSK = new CountItem('Small Key', 7, {name: "Palace of Twilight Small Key"});
 var palaceMap = new BoolItem('Dungeon Map', {name: "Palace of Twilight Map"});
 var palaceCompass = new BoolItem("Compass", {name: "Palace of Twilight Compass"});
 var palaceBK = new BoolItem('Boss Key', {name: "Palace of Twilight Boss Key"}); 
-var zant = new BoolItem('Zant', {name: 'Zant Defeated', category: Categories.Bosses});
+var zant = new BoolItem('Zant', {category: Categories.Bosses});
 
 var castleSK = new CountItem('Small KeyHC', 3, {name: 'Hyrule Castle Small Key'});
 var castleMap = new BoolItem('Dungeon Map', {name: "Hyrule Castle Map"});
 var castleCompass = new BoolItem("Compass", {name: "Hyrule Castle Compass"});
 var castleBK = new BoolItem("Boss KeyHC", {name: "Hyrule Castle Boss Key"});
-var ganondorf = new BoolItem('Ganondorf', {name: 'Ganondorf Defeated', category: Categories.Bosses});
+var ganondorf = new BoolItem('Ganondorf', {category: Categories.Bosses});
 
 // Rupees Enum
 const Rupees = Object.freeze({
@@ -527,16 +538,16 @@ let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"}
 let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Night Poe Soul"});
 
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
-let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo});
+let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo, name: "Ooccoo"});
 
-let faronBulblinLock = new Obtainable("LockFaronBulblin", null, {category: Categories.Locks});
-let gateLock = new Obtainable("LockGates", null, {category: Categories.Locks});
-let lock = new Obtainable("Lock", null, {category: Categories.Locks});
-let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks});
-let bossLock = new Obtainable("Boss Lock", null, {category: Categories.Locks});
-let minesBossLock = new Obtainable("Boss LockG", null, {category: Categories.Locks});
-let lakebedBossLock = new Obtainable("Boss LockL", null, {category: Categories.Locks});
-let snowpeakBossLock = new Obtainable("Boss LockS", null, {category: Categories.Locks});
+let faronBulblinLock = new Obtainable("LockFaronBulblin", null, {category: Categories.Locks, name: "Overworld Lock"});
+let gateLock = new Obtainable("LockGates", null, {category: Categories.Locks, name: "Gate Lock"});
+let lock = new Obtainable("Lock", null, {category: Categories.Locks, name: "Dungeon Lock"});
+let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks, name: "Snowpeak Ruins Lock"});
+let bossLock = new Obtainable("Boss Lock", null, {category: Categories.Locks, name: "Dungeon Boss Lock"});
+let minesBossLock = new Obtainable("Boss LockG", null, {category: Categories.Locks, name: "Goron Mines Boss Lock"});
+let lakebedBossLock = new Obtainable("Boss LockL", null, {category: Categories.Locks, name: "Lakebed Temple Boss Lock"});
+let snowpeakBossLock = new Obtainable("Boss LockS", null, {category: Categories.Locks, name: "Snowpeak Ruins Boss Lock"});
 
 let bombs = new Obtainable("Bombs", null, {category: Categories.Ammo});
 let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo});

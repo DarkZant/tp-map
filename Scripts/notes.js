@@ -13,7 +13,9 @@ function saveWithDelay() {
     let now = Date.now();
     if (now - lastCall >= msDelay) {
         lastCall = now;
-        localStorage.setItem(notesStorageName, this.value);
+        setTimeout(() => {
+            localStorage.setItem(notesStorageName, this.value);
+        }, msDelay);
     }
 }
 

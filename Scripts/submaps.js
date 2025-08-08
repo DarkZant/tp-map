@@ -57,14 +57,21 @@ class SubmapFloor {
         }
         return true;
     }
-    shownContentIsSet() {
+    shownFlagsAreSet() {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown() && !c.isSet())
                 return false;
-            else if (c instanceof NonFlag && c.isShown() && c.isCountable())
-                return false;
         }
         return true;
+    }
+    hasCountableNonFlag() {
+        if (!Settings.CountNonFlags.isEnabled())
+            return false;
+        for (let c of this.contents) {
+            if (c instanceof NonFlag && c.isShown())
+                return true;
+        }
+        return false;
     }
     manageContent() {
         if (this.shownContentIsSet())
@@ -187,28 +194,39 @@ class Submap {
             floor.unsetShown();    
     } 
     setMarker() {
+        blockMapReloading();
         this.setShown();
-        this.reloadMarker();
+        this.setVisually();
+        this.reloadMarkerWithDelay();
+        if (unblockMapReloading())
+            return;
+        this.setMarkerEvents();
     }
     unsetMarker() {
-        this.unsetShown();
-        // this.reloadMarker();
-        this.unsetVisually();
-        this.reloadMarkerWithDelay();
+        blockMapReloading();
+        this.unset();
+        if (unblockMapReloading())
+            return;
+        this.reloadMarker();
+        this.unsetMarkerEvents();
     }
     setVisually() {
         if (Settings.CountersVisibility.isEnabled())
             this.marker.setIcon(getIcon(this.iconImage));
-        showMarkerAsSet(this.marker);
-        this.marker.off('contextmenu', this.boundSetMarker);
-        this.marker.on('contextmenu', this.boundUnsetMarker);
+        showMarkerAsSet(this.marker);    
     }
     unsetVisually() {
         showMarkerAsNotSet(this.marker, this.iconImage);
         if (Settings.CountersVisibility.isEnabled())
             this.marker.setIcon(getCounterIcon(this.marker.getIcon(), this.count()));
         else 
-            this.marker.setIcon(getIcon(this.iconImage));
+            this.marker.setIcon(getIcon(this.iconImage));      
+    }
+    setMarkerEvents() {
+        this.marker.off('contextmenu', this.boundSetMarker);
+        this.marker.on('contextmenu', this.boundUnsetMarker);
+    }
+    unsetMarkerEvents() {
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
     }
@@ -219,12 +237,19 @@ class Submap {
         }
         return true;
     }
-    shownContentIsSet() {
+    shownFlagsAreSet() {
         for (let floor of this.floors) {
-            if (!floor.shownContentIsSet())
+            if (!floor.shownFlagsAreSet())
                 return false;
         }
         return true;
+    }
+    hasCountableNonFlag() {
+        for (let floor of this.floors) {
+            if (floor.hasCountableNonFlag())
+                return true;
+        }
+        return false;
     }
     isShown() {
         if (Settings.EmptySubmaps.isEnabled())
@@ -261,7 +286,8 @@ class Submap {
     loadMarker(position=this.position) {
         if (!this.isShown())
             return;
-        if (Settings.SubmapAsMarker.isEnabled()) {
+        let requirementsAreMet = verifySubmapRequirements(this);
+        if (Settings.SubmapAsMarker.isEnabled() && requirementsAreMet) {
             let uniqueMarker = this.getUniqueShownMarker();
             if (uniqueMarker !== null) {
                 uniqueMarker.loadMarker(this.position);
@@ -269,15 +295,26 @@ class Submap {
             }
         }
         addMarkerToMap(this.marker, position);
-        if (!verifySubmapRequirements(this)) {
+        if (!requirementsAreMet) {
+            this.marker.setIcon(getIcon(this.iconImage));
             showMarkerAsUnobtainable(this.marker);
             return;
         }
-
-        if (this.shownContentIsSet())
-            this.setVisually();
-        else
+        this.loadMarkerVisuals();
+        
+    }
+    loadMarkerVisuals() {
+        if (this.shownFlagsAreSet()) {
+            this.setMarkerEvents();
+            if (!this.hasCountableNonFlag())
+                this.setVisually();
+            else 
+                this.unsetVisually();
+        }
+        else {
+            this.unsetMarkerEvents();
             this.unsetVisually();
+        }
     }
     reloadMarker() {
         if (!this.marker._map) // If Marker is not loaded
@@ -698,10 +735,7 @@ class Dungeon extends FlooredSubmap {
     }
     loadImageMapMarker() {
         addMarkerToMap(this.marker, this.imagedPosition);
-        if (this.shownContentIsSet())
-            this.setVisually();
-        else
-            this.unsetVisually();
+        this.loadMarkerVisuals();
     }
     reloadMarker() {
         if (!this.marker._map) // If Marker is not loaded
@@ -800,23 +834,31 @@ class Province {
         }
         this.unsetVisually();
     }
+    setPolygon() {
+        blockMapReloading();
+        this.setShown();
+        unblockMapReloading();
+    }
+    unsetPolygon() {
+        blockMapReloading();
+        this.unsetShown();
+        unblockMapReloading();
+    }
     setVisually() {
         this.reloadCounter();
-        this.polygon.off('contextmenu', this.boundSetShown);
-        this.polygon.on('contextmenu', this.boundUnsetShown);
+        this.polygon.off('contextmenu', this.boundSetPolygon);
+        this.polygon.on('contextmenu', this.boundUnsetPolygon);
     }
     unsetVisually() {
         this.reloadCounter();
-        this.polygon.off('contextmenu', this.boundUnsetShown);
-        this.polygon.on('contextmenu', this.boundSetShown);
+        this.polygon.off('contextmenu', this.boundUnsetPolygon);
+        this.polygon.on('contextmenu', this.boundSetPolygon);
     }
-    shownContentIsSet() {
+    shownFlagsAreSet() {
         for (let c of this.contents) {
-            if (c instanceof Submap && !c.shownContentIsSet())
+            if (c instanceof Submap && !c.shownFlagsAreSet())
                 return false;
             else if (c instanceof Flag && c.isShown() && !c.isSet())
-                return false;
-            else if (c instanceof NonFlag && c.isShown() && c.isCountable())
                 return false;
         }
         return true;
@@ -830,8 +872,8 @@ class Province {
             this.polygon.setStyle({ fillOpacity: 0 });
         });
         this.polygon.on('click', clickToZoom);
-        this.boundSetShown = this.setShown.bind(this);
-        this.boundUnsetShown = this.unsetShown.bind(this);
+        this.boundSetPolygon = this.setPolygon.bind(this);
+        this.boundUnsetPolygon = this.unsetPolygon.bind(this);
         addTooltipToMarker(this.polygon, this.name + " Province", true);
     }
     loadPolygon() {
@@ -844,10 +886,15 @@ class Province {
             });
             addMarkerToMap(this.marker);
         }
-        if (this.shownContentIsSet())
+        if (this.shownFlagsAreSet())
             this.setVisually();
         else 
             this.unsetVisually();
+    }
+    reloadPolygon() {
+        if (layerIsLoaded(this.polygon))
+            this.polygon.remove();
+        this.loadPolygon();
     }
     reloadCounter() {
         if (!Settings.CountersVisibility.isEnabled())
@@ -891,8 +938,8 @@ class DungeonProvince extends Province {
         this.polygon.on('click', () => this.dungeon.load());
         addTooltipToMarker(this.polygon, this.name, false);
     }
-    shownContentIsSet() {
-        return this.dungeon.shownContentIsSet();
+    shownFlagsAreSet() {
+        return this.dungeon.shownFlagsAreSet();
     }
     count() {
         return this.dungeon.count();
@@ -940,7 +987,7 @@ const Dungeons = Object.freeze({
         "Forest Temple Dungeon Reward",
         "Forest_Temple_Sign",
         Bottle.Fairy.new([-3920, 4820]),
-    ]], {baseReqs: [], randoReqs: []}),
+    ]], {baseReqs: [lanternReq], randoReqs: []}),
     
     Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
         [   // 1F

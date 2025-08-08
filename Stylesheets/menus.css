@@ -29,6 +29,7 @@
 }
 #menuicons img {
     max-width: 100%;
+    grid-area: 1 / 1;
 }
 #menuicons span {
     position: absolute;
@@ -53,7 +54,6 @@
 .menu {
     position: absolute;
     visibility: hidden;
-    right: 0;
     height: 100dvh;
     width: 0%;
     z-index: 1000;
@@ -62,12 +62,10 @@
     transition: width 0.1s;
     overflow-y: scroll; 
 }
-.menuX {
-    position: fixed;
-    top: 0;
-    right: 0.5vw;
-    width: 1.4vw;
-    height: 1.4vw;
+.rightMenu {
+    right: 0;
+}
+.xButton {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -78,6 +76,13 @@
     font-weight: bolder;
     cursor: pointer;
     z-index: 1500;
+}
+.menuX {
+    position: fixed;
+    top: 0;
+    right: 0.5vw;
+    width: 1.4vw;
+    height: 1.4vw; 
 }
 .menuX:hover {
     color: #585858;
@@ -117,47 +122,55 @@
 
 /* Flag Details menu */
 #flagDetails {
-    top: 0;
-    left: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1dvh;
+    padding-left: 0.6vw;
+    /* overflow-y: scroll; */
 }
 #flagDetailsX {
     left: 22.75%;
 }
-#flagRequirements, #containerContent {  
-    font-size: 1.2vw;
-    display: none;
-}
-#containerContent {
+#flagDetails h3 {
+    text-decoration: underline;
+    font-size: 1.4vmax;
     text-align: center;
+}
+#flagNameDiv {
+    text-align: center;
+    font-size: 1.1dvw;
+    border-style: solid;
+    border-color: #3f3f3f;
+    border-radius: 10px;
+    padding: 1.5dvh 0;
 }
 #flagDescription {
+    visibility: hidden;
+}   
+#flagDescriptionDiv {
     font-size: 1vmax;
     text-align: center;
-    visibility: hidden;
-    padding: 0 5%;
+    padding-left: 5%;
+    padding-right: 5%;
 }
-#containerContentDiv {
+#flagRequirements, #flagItem {  
+    font-size: 1.2vw;
+    display: none;
+    text-align: center;
+}
+#flagItem {
+    text-align: center;
+}
+#flagItemDiv {
     justify-content: center;
     margin: 0;
     padding: 0;
 }
-#containerContentDiv .iti {
-    padding-left: 0;
-}
-.flagDetailsTitle {
-    text-decoration: underline;
-    text-align: center;
-    margin-top: 0;
-    padding-top: 2vh;
-    margin-bottom: 2vh;
-    font-size: 1.4vmax;
-}
+
 .item {
-    font-family: Arial, sans-serif;
     display: flex;
     align-items: center;
     vertical-align: middle;
-    margin-bottom: 1vh;
     border-style: solid;
     border-color: #3f3f3f;
     border-radius: 10px;
@@ -166,10 +179,10 @@
 .idot {
     font-size: 2vmax;
     margin: 0;
+    padding-right: 1vw;
 }
 .ii {
     padding-right: 1vw;
-    padding-left: 1vw;
 }
 .iti { 
     max-width: 3.5vmax;

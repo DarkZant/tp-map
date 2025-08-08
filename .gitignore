@@ -1,5 +1,9 @@
 *.xcf
 *.txt
-Dungeons/*/Name.png
 generateImageMap.js
 renameImages.js
+
+# No longer useful
+# Dungeons/*/Name.png
+# Dungeons/*F.png
+# Dungeons/B*.png

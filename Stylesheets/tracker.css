@@ -5,9 +5,9 @@
     justify-content: center;
     width: 29vw;
 }
-#tracker #traX {
+/* #tracker #traX {
     position: fixed;
-}
+} */
 #tracker #mainTracker {
     height: 95dvh;
     background-color: transparent;
@@ -35,10 +35,10 @@
     z-index: 1500;
     padding: 2.5dvh 1.25vw;
 }
-#tracker .tsubmenuX {
+.tsubmenuX {
     position: absolute;
-    right: 2px;
-    top: -3px;
+    right: 0.25vw;
+    top: -0.25dvh;
     z-index: 1600;
 }
 #tbugs {

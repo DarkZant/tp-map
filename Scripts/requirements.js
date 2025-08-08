@@ -1,5 +1,7 @@
 class Requirement {
-    constructor(imageInfo, text, condition) {
+    constructor(imageInfo, text, 
+        condition=() => { return true; }
+    ) {
         this.image = getIconImage(imageInfo);
         this.text = text;
         this.condition = condition;
@@ -11,10 +13,23 @@ class Requirement {
             () => item.isObtained()
         );
     }
+    static fromBoss(boss) {
+        return new Requirement(
+            boss.image,
+            boss.name + " Defeated",
+            () => item.isObtained()
+        );
+    }
+    static fromAlwaysMetBoolItem(item) {
+        return new Requirement(
+            item.image,
+            item.name
+        );
+    }
     static fromCountItem(item, amount=1) {
         return new Requirement(
             item.image, 
-            amount > 1 ? item.name + "&nbsp × &nbsp" + amount : item.name, 
+            amount > 1 ? item.name + "&nbsp&nbsp×&nbsp&nbsp" + amount : item.name, 
             () => item.amountIsObtained(amount)
         );
     }
@@ -91,30 +106,31 @@ let gateKeyReq = Requirement.fromBoolItem(gateKey);
 let bulblinKeyReq = Requirement.fromBoolItem(bulblinKey);
 let aurusMemoReq = Requirement.fromBoolItem(aurusMemo);
 let completedMirrorReq = Requirement.fromCountItem(mirrorShard, 4);
+let skybookReq = Requirement.fromBoolItem(skybook.getItemByReq(1));
 let completedSkybookReq = Requirement.fromBoolItem(skybook.getItemByReq(7));
 
-let diababaReq = Requirement.fromBoolItem(diababa);
+let diababaReq = Requirement.fromBoss(diababa);
 let forest1SKReq = Requirement.fromCountItem(forestSK);
 let forestBKReq = Requirement.fromBoolItem(forestBK);
-let fyrusReq = Requirement.fromBoolItem(fyrus);
+let fyrusReq = Requirement.fromBoss(fyrus);
 let mines1SKReq = Requirement.fromCountItem(minesSK);
 let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
 let mines3SKReq = Requirement.fromCountItem(minesSK, 3);
 let dangoroReq = [woodenSwordReq, ballAndChainReq, bombBagReq];
 let minesBKReq = Requirement.fromBoolItem(minesBK.getItemByReq(3));
-let morpheelReq = Requirement.fromBoolItem(morpheel);
+let morpheelReq = Requirement.fromBoss(morpheel);
 let lakebed1SKReq = Requirement.fromCountItem(lakebedSK);
 let lakebed2SKReq = Requirement.fromCountItem(lakebedSK, 2);
 let lakebed3SKReq = Requirement.fromCountItem(lakebedSK, 3);
 let lakebedBKReq = Requirement.fromBoolItem(lakebedBK);
-let stallordReq = Requirement.fromBoolItem(stallord);
+let stallordReq = Requirement.fromBoss(stallord);
 let arbiter1SKReq = Requirement.fromCountItem(arbiterSK);
 let arbiter2SKReq = Requirement.fromCountItem(arbiterSK, 2);
 let arbiter3SKReq = Requirement.fromCountItem(arbiterSK, 3);
 let arbiter4SKReq = Requirement.fromCountItem(arbiterSK, 4);
 let arbiter5SKReq = Requirement.fromCountItem(arbiterSK, 5);
 let arbiterBKReq = Requirement.fromBoolItem(arbiterBK);
-let blizzetaReq = Requirement.fromBoolItem(blizzeta);
+let blizzetaReq = Requirement.fromBoss(blizzeta);
 let snowpeak1SKReq = Requirement.fromCountItem(snowpeakSK);
 let snowpeak2SKReq = Requirement.fromCountItem(snowpeakSK, 2);
 let snowpeak3SKReq = Requirement.fromCountItem(snowpeakSK, 3);
@@ -122,15 +138,15 @@ let snowpeak4SKReq = Requirement.fromCountItem(snowpeakSK, 4);
 let bedroomKeyReq = Requirement.fromBoolItem(snowpeakBK);
 let pumpkinReq = Requirement.fromBoolItem(pumpkin);
 let cheeseReq = Requirement.fromBoolItem(cheese);
-let armogohmaReq = Requirement.fromBoolItem(armogohma);
+let armogohmaReq = Requirement.fromBoss(armogohma);
 let temple1SKReq = Requirement.fromCountItem(templeSK);
 let temple2SKReq = Requirement.fromCountItem(templeSK, 2);
 let temple3SKReq = Requirement.fromCountItem(templeSK, 3);
 let templeBKReq = Requirement.fromBoolItem(templeBK);
-let argorokReq = Requirement.fromBoolItem(argorok);
+let argorokReq = Requirement.fromBoss(argorok);
 let city1SKReq = Requirement.fromCountItem(citySK);
 let cityBKReq = Requirement.fromBoolItem(cityBK);
-let zantReq = Requirement.fromBoolItem(zant);
+let zantReq = Requirement.fromBoss(zant);
 let palace1SKReq = Requirement.fromCountItem(palaceSK);
 let palace2SKReq = Requirement.fromCountItem(palaceSK, 2);
 let palace3SKReq = Requirement.fromCountItem(palaceSK, 3);
@@ -144,9 +160,7 @@ let castle2SKReq = Requirement.fromCountItem(castleSK, 2);
 let castle3SKReq = Requirement.fromCountItem(castleSK, 3);
 let castleBKReq = Requirement.fromBoolItem(castleBK);
 
-let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
-reekfishScentReq.condition = () => true; // To avoid items being hidden by scents
-let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
-medicineScentReq.condition = () => true; // To avoid items being hidden by scents
-let nightReq = new Requirement('Moon', 'Night Time', () => true);
-let randoSettingReq = new Requirement('Settings', 'Rando Setting', () => true) //TODO Apply rando setting requirements
+let reekfishScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Reekfish Scent"));
+let medicineScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Medicine Scent"));
+let nightReq = new Requirement('Moon', 'Night Time');
+let randoSettingReq = new Requirement('Settings', 'Rando Setting') //TODO Apply rando setting requirements

@@ -2,8 +2,8 @@ var trackedItems = [
     fishingRods, slingshot, lantern, boomerang, ironBoots, bow, hawkeye, 
     bombBag, giantBombBag,  clawshots, aurusMemo, spinner, asheisSketch, 
     ballAndChain, dominionRods, horseCall, iliasCharm, renadosLetter, invoice,
-    woodenStatue, bottle, skybook, swords, shields, zoraArmor, magicArmor,
-    heartPiece, heartContainer, wallets, scents, hiddenSkills, poeSoul,
+    woodenStatue, bottle, skybook, swords, woodenShields, hylianShield, zoraArmor, 
+    magicArmor, heartPiece, heartContainer, wallets, scents, hiddenSkills, poeSoul,
     fusedShadow, mirrorShard, shadowCrystal, coroKey, bulblinKey, gateKey,
     antM, antF, dayflyM, dayflyF, beetleM, beetleF, mantisM, mantisF, 
     stagBeetleM, stagBeetleF, pillbugM, pillbugF, butterflyM, butterflyF,
@@ -71,7 +71,7 @@ class TrackerItem extends Storable {
         }
         this.initialized = true;
     }
-    update(dispatchEvent=true) {
+    update() {
         this.updateElementBrightness();
         if (this.item instanceof ProgressiveItem)
             this.updateElementImage();
@@ -79,8 +79,7 @@ class TrackerItem extends Storable {
             this.updateElementCounter();
         if (this.initialized) 
             this.storageUnit.setFlag(this);
-        if (dispatchEvent)
-            dispatchTrackerUpdate();
+        dispatchTrackerUpdate();
     }
     updateElementBrightness() {
         let currentItemState = this.item.getState();
@@ -114,9 +113,9 @@ class TrackerItem extends Storable {
             this.elem.children[2].style.color = "#c0c0c0"; // Set color to white
         }
     }
-    reset(dispatchEvent=true) {
+    reset() {
         this.item.reset();
-        this.update(dispatchEvent);
+        this.update();
     }
     updateElementImage() {
         let imgElem = this.elem.children[1];
@@ -126,16 +125,10 @@ class TrackerItem extends Storable {
         (itemState == 0 ? 0 : itemState - 1) + imgSrc.slice(-4); 
     }
     increase() {
-        if (this.item instanceof BoolItem && this.item.hasParentItem())
-            this.item.parentItem.tracker.increase();
-        else
-            this.elem.click();
+        this.elem.click();
     }
     decrease() {
-        if (this.item instanceof BoolItem && this.item.hasParentItem())
-            this.item.parentItem.tracker.decrease();
-        else
-            this.elem.dispatchEvent(new MouseEvent('contextmenu'));
+        this.elem.dispatchEvent(new MouseEvent('contextmenu'));
     }
     getDefaultStoreValue() {
         return this.item.getMinState();
@@ -196,6 +189,7 @@ function showTrackerSubmenu(submenuID) {
         mainTracker.addEventListener('click', hideTrackerSubmenuHandler); 
     }, 100);  
 }   
+
 function hideTrackerSubmenu(submenu) {
     submenu.style.display = "none";
     submenu.style.visibility = "hidden";
@@ -213,13 +207,14 @@ function hideTrackerSubmenu(submenu) {
 
     mainTracker.removeEventListener('click', hideTrackerSubmenuHandler);
 }
+
 function hideTrackerSubmenuHandler() {
     hideTrackerSubmenu(document.getElementById(this.submenuID));
 }
 
 function resetTracker() {
     for (let trackerItem of trackerItems.values()) 
-        trackerItem.reset(false);
+        trackerItem.reset();
     for (let requiredElem of document.querySelectorAll('.tdungeon span')) {
         if (requiredElem.style.display === 'inline')
             requiredElem.style.display = 'none';

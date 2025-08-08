@@ -1,5 +1,8 @@
 let seedIsLoaded = false;
 let setFlagsHidden = false;
+let blockMapReset = false;
+let storedMapReload = false;
+let menuDisplacement = 0;
 let currentMapState;
 let loadedSubmap;
 
@@ -78,10 +81,16 @@ function getCounterIcon(icon, num) {
     });
 }
 
+function layerIsLoaded(marker) {
+    return map.hasLayer(marker);
+}
+
 function showMarkerAsSet(marker) {
     marker.setOpacity(0.7);
     marker.setZIndexOffset(-1000);
     marker.setIcon(getIconWithCheckmark(marker.getIcon()));
+    if (!layerIsLoaded(marker))
+        return;
     marker.getElement().classList.remove("unmarked");
     marker.getElement().classList.add("marked");
 }
@@ -90,13 +99,17 @@ function showMarkerAsNotSet(marker, iconImage) {
     marker.setOpacity(1);
     marker.setZIndexOffset(0);
     marker.setIcon(getIcon(iconImage));
+    if (!layerIsLoaded(marker))
+        return;
     marker.getElement().classList.remove("marked");
     marker.getElement().classList.add("unmarked");
 }
 
 function showMarkerAsUnobtainable(marker) {
-    marker.getElement().classList.add("unobtainable");
     marker.setZIndexOffset(-500);
+    if (!layerIsLoaded(marker))
+        return;
+    marker.getElement().classList.add("unobtainable");
 }  
 
 function addTooltipToMarker(marker, tooltipText, sticky=false) {
@@ -161,7 +174,7 @@ function loadImageMapMarkers() {
 }
 function reloadImageMapMarkers() {
     for (let province of Object.values(Provinces))
-        province.reloadCounter();
+        province.reloadPolygon();
     for (let dungeon of Object.values(Dungeons)) {
         if (dungeon !== Dungeons.Castle)
             dungeon.loadImageMapMarker();
@@ -251,6 +264,12 @@ function addImageOverlayToMap(imageOverlay) {
 
 // General Map
 function reloadMap() {
+    if (blockMapReset) {
+        if (!storedMapReload)
+            storedMapReload = true;
+        return;
+    }
+    console.log('Reloading Map');
     switch (currentMapState) {
         case MapStates.ImageMap : {
             removeAllMarkersExceptPolygons();
@@ -269,6 +288,19 @@ function reloadMap() {
     }
 }
 
+function blockMapReloading() {
+    blockMapReset = true;
+}
+function unblockMapReloading() {
+    blockMapReset = false;
+    if (storedMapReload) {
+        reloadMap();
+        storedMapReload = false;
+        return true;
+    }
+    return false;
+}
+
 document.addEventListener('trackerUpdated', function(event) {
     if (Settings.TrackerLogic.isEnabled())
         reloadMap();
@@ -278,9 +310,27 @@ document.addEventListener('settingsUpdated', function(event) {
     reloadMap();
 });
 
-function hideSetFlags(hide=null) {
-    setFlagsHidden = hide !== null ? hide : !setFlagsHidden;
+function showSetFlags() {
+    setFlagsHidden = false;
+    let button = document.getElementById("setFlagsVisibilityButton");
+    button.children[1].innerHTML = "Hide Set Flags";
+    button.children[0].children[1].remove();
     reloadMap();
+}
+function hideSetFlags() {
+    setFlagsHidden = true;
+    let button = document.getElementById("setFlagsVisibilityButton");
+    button.children[1].innerHTML = "Show Set Flags";
+    let blockImage = document.createElement('img');
+    blockImage.src = "Icons/Block.png";
+    button.children[0].appendChild(blockImage);
+    reloadMap();
+}
+function toggleSetFlagsVisibility() {
+    if (setFlagsHidden)
+        showSetFlags();
+    else
+        hideSetFlags();
 }
 
 function removeFloorLayer() {
@@ -357,41 +407,74 @@ function loadMap() {
 
 // Menus
 function showRightMenu(menuID, width=25) {
-    let menu = document.getElementById(menuID);
+    let menu = document.getElementById(menuID);   
     menu.style.visibility = "visible";
-    menu.style.width = '' + width + 'vw';
+    menu.style.width = width + 'vw';
     document.getElementById('menuicons').style.display = "none";
 }
 
 function hideRightMenu(menu) {
     document.getElementById('menuicons').style.display = "flex";
-    menu.style.width = "0%";
+    menu.style.width = "0vw";
     setTimeout(function() {
         menu.style.visibility = "hidden";  
     }, 100);  
 }
-function showTracker() {
-    let trackerWidth = 29;
-    if (!Settings.TrackerOverlay.isEnabled()) 
-        updateMapSize((100 - trackerWidth) + 'vw');
-    showRightMenu('tracker', trackerWidth);
+function updateMenuXPosition(menuX) {
+    let menuXRight = window.getComputedStyle(menuX).right;
+    menuX.oldPosition = menuXRight;
+    menuX.style.right = "calc(" + menuXRight + " + 29vw)";
 }
-function hideTracker(tracker) {
+function resetMenuXPosition(menuX) {
+    menuX.style.right = menuX.oldPosition;
+}
+function hideTracker() {
     document.getElementById('menuicons').style.display = "flex";
-    if (!Settings.TrackerOverlay.isEnabled())
-            updateMapSize('100vw');
-    tracker.style.visibility = "hidden";  
+    document.getElementById('tracker').style.visibility = "hidden";  
+}
+function clickSeparateTrackerSetting() {
+    document.getElementById('Tracker_Position').click();
+}
+
+Settings.TrackerOverlay.setFunction(separateTrackerFromMap);
+document.getElementById('traX').addEventListener('click', hideTracker);
+
+function separateTrackerFromMap() {
+    let tracker = document.getElementById('tracker');
+    let trackerWidth = 29;
+    if (window.getComputedStyle(tracker).visibility === "hidden") {
+        tracker.style.visibility = 'visible';
+        document.getElementById('menuicons').style.right = trackerWidth + 'vw';
+        document.getElementById('trackerButton').style.display = 'none';
+        let traX = document.getElementById('traX');
+        traX.removeEventListener('click', hideTracker);
+        traX.addEventListener('click', clickSeparateTrackerSetting);
+        for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
+            menu.style.right = trackerWidth + 'vw';
+        for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
+            updateMenuXPosition(menuX);
+        updateMapSize((100 - trackerWidth) + 'vw');
+    }
+    else {
+        tracker.style.visibility = 'hidden';
+        document.getElementById('menuicons').style.right = '0vw';
+        document.getElementById('trackerButton').style.display = 'inline';
+        let traX = document.getElementById('traX');
+        traX.removeEventListener('click', clickSeparateTrackerSetting);
+        traX.addEventListener('click', hideTracker);
+        for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
+            menu.style.right = '0vw';
+        for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
+            resetMenuXPosition(menuX);
+        updateMapSize('100vw');
+    }
 }
 
 function hideDetails() {
-    document.getElementById('flagDetailsX').style.visibility = "hidden";
-    document.getElementById('flagDescription').style.visibility = "hidden";
-    document.getElementById('containerContent').style.display = "none"; 
-    document.getElementById('flagRequirements').style.display = "none";   
+    document.getElementById('flagDetailsX').style.visibility = "hidden"; 
     let flagDetails = document.getElementById('flagDetails'); 
-    flagDetails.style.width = "0%";
+    flagDetails.style.width = "0vw";
     setTimeout(function() {
-        flagDetails.style.height = "0%";
         flagDetails.style.visibility = "hidden";
     }, 100);
     
@@ -400,15 +483,18 @@ function hideDetails() {
 
 function resetMap(button) {
     button.innerHTML = "Resetting...";
+    blockMapReloading();
     unsetAllFlags();
-    reloadMap();  
+    if (!unblockMapReloading())
+        reloadMap();
     resetButtonsFeedback(button, 'Map');
 }
 function trackerButton(button) {
     button.innerHTML = "Resetting...";
+    blockMapReloading();
     resetTracker();
-    if(Settings.TrackerLogic.isEnabled())
-        reloadMap();  
+    if (!unblockMapReloading())
+        dispatchTrackerUpdate();
     resetButtonsFeedback(button, 'Tracker'); 
 }
 function resetButtonsFeedback(button, text) {
