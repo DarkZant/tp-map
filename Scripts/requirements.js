@@ -17,7 +17,7 @@ class Requirement {
         return new Requirement(
             boss.image,
             boss.name + " Defeated",
-            () => item.isObtained()
+            () => boss.isObtained()
         );
     }
     static fromAlwaysMetBoolItem(item) {
@@ -51,6 +51,9 @@ class AndRequirements {
     }
     isMet() {
         return verifyRequirements(this.requirements);
+    }
+    getRequirements() {
+        return this.requirements;
     }
 }
 

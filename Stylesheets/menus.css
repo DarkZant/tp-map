@@ -136,92 +136,67 @@
     font-size: 1.4vmax;
     text-align: center;
 }
+#flagDetails .bordered {
+    border: solid 0.25vw #3f3f3f;
+    border-radius: 0.65vw;
+}
+#flagDetails .insideBordered {
+    border-radius: 0;
+}
 #flagNameDiv {
     text-align: center;
     font-size: 1.1dvw;
-    border-style: solid;
-    border-color: #3f3f3f;
-    border-radius: 10px;
-    padding: 1.5dvh 0;
+    padding: 1.5dvh 0.5vw;
 }
 #flagDescription {
     visibility: hidden;
 }   
 #flagDescriptionDiv {
-    font-size: 1vmax;
+    font-size: 1vw;
     text-align: center;
-    padding-left: 5%;
-    padding-right: 5%;
+    padding: 0 2%;
 }
 #flagRequirements, #flagItem {  
     font-size: 1.2vw;
-    display: none;
-    text-align: center;
 }
 #flagItem {
     text-align: center;
 }
 #flagItemDiv {
     justify-content: center;
-    margin: 0;
-    padding: 0;
 }
-
+#flagRequirementsDiv {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.25dvh;
+}
 .item {
     display: flex;
     align-items: center;
-    vertical-align: middle;
-    border-style: solid;
-    border-color: #3f3f3f;
-    border-radius: 10px;
-    padding: 0.5vh 0 0.5vh 0.7vw;
+    padding: 0.5dvh 0;
 }
-.idot {
-    font-size: 2vmax;
-    margin: 0;
+#flagDetails img {
     padding-right: 1vw;
-}
-.ii {
-    padding-right: 1vw;
-}
-.iti { 
     max-width: 3.5vmax;
     max-height: 3.5vmax;
 }
-.itis {
-    max-width: 3vmax;
-    max-height: 3vmax;
+#flagRequirementsDiv span {
+    font-size: 2vw;
+    padding: 0 1vw;
 }
 .oritems {
-    font-family: Arial, sans-serif;
     display: flex;
-    flex-wrap: wrap;
-    vertical-align: middle;
-    margin-bottom: 1vh;
-    padding-bottom: 0;
-    border-style: solid;
-    border-color: #3f3f3f;
-    border-radius: 10px;
-    padding-left: 0.7vw;
-    padding-top: 1vh;
+    flex-direction: column;
 }
-.oritf {
-    display: flex;
-    align-items: center;
-    vertical-align: middle;
-    width: 20vw;
+#flagRequirementsDiv .itemOr {
+    padding-left: 0.65vw;
+    font-size: 1.4vw;
+    font-style: italic;
 }
-.orits {
-    display: flex;
-    align-items: center;
-    vertical-align: middle;
-    width: 20vw;
-    margin-top: -0.7vh;
-}
-.por {
-    font-family: Arial, sans-serif;
-    margin-left: 1.8vw;
-    font-size: 1.4vmax;
+.separationOr {
+    text-align: center;
+    padding-bottom: 0.5dvh;
+    font-size: 1.5vw;
     font-style: italic;
 }
 
@@ -258,19 +233,19 @@
 #settingsButtons button:hover {
     background-color: #272727;
 }
-#gamemodeSelection {
+.selectContainer {
     padding-top: 2.5dvh;
     padding-bottom: 0.5dvh;
     text-align: center;
 }
-#gamemodesLabel {
+.selectLabel {
     display: block;
     font-size: 1.2dvw;
     font-weight: bold;
     padding-bottom: 0.75dvh;
     cursor: auto;
 }
-#Gamemodes {
+select {
     background-color: #1d1a14;
     color:#c0c0c0;
     height: 4dvh;

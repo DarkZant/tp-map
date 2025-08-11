@@ -77,11 +77,11 @@
             <span id="flagDetailsX" class="xButton menuX" onclick="hideDetails()">×</span>
             <div id="flagName">
                 <h3>Flag Name</h3>
-                <div id="flagNameDiv"></div>
+                <div id="flagNameDiv" class="bordered"></div>
             </div>
             <div id="flagItem">
                 <h3 id="flagItemTitle">Content</h3>
-                <div id="flagItemDiv" class="item"></div>
+                <div id="flagItemDiv" class="item bordered"></div>
             </div>
             <div id="flagRequirements">
                 <h3>Requirements</h3>
@@ -171,13 +171,21 @@
                 <button onclick="resetMap(this)">Reset Map</button>
                 <button onclick="trackerButton(this)">Reset Tracker</button>
             </div>      
-            <div id="gamemodeSelection">
-                <label id="gamemodesLabel" for="Gamemodes">Gamemode</label>
+            <div id="gamemodeSelection" class="selectContainer">
+                <label id="gamemodesLabel" for="Gamemodes" class="selectLabel">Gamemode</label>
                     <select name="Gamemodes" id="Gamemodes">
-                    <option>Base Game</option>
-                    <option>Glitchless Randomizer</option>
-                    <option>Glitched Randomizer</option>
-                </select>
+                        <option value="0">Base Game</option>
+                        <option value="1">Glitchless Randomizer</option>
+                        <option value="2">Glitched Randomizer</option>
+                    </select>
+            </div>
+             <div id="gameVersionSelection" class="selectContainer">
+                <label id="gameVersionLabel" for="gameVersion" class="selectLabel">Game Version</label>
+                    <select name="gameVersion" id="gameVersion">
+                        <option value="0">Gamecube</option>
+                        <option value="1">Wii</option>
+                        <option value="2">Wii U (HD)</option>
+                    </select>
             </div>
             <div id="settingsCheckboxes">
                 

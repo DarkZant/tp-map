@@ -74,7 +74,7 @@ class SubmapFloor {
         return false;
     }
     manageContent() {
-        if (this.shownContentIsSet())
+        if (this.shownFlagsAreSet())
             this.unsetMarkerShown();
         else
             this.setMarkerShown();
@@ -143,7 +143,8 @@ class Submap {
     initializeMarker() {
         this.marker = L.marker(this.position, {
             icon: getIcon(this.iconImage),
-            riseOnHover: true, 
+            riseOnHover: true,
+            zIndexOffset: 500, 
             riseOffset: 2000, 
             keyboard: false, 
         });
@@ -211,9 +212,9 @@ class Submap {
         this.unsetMarkerEvents();
     }
     setVisually() {
-        if (Settings.CountersVisibility.isEnabled())
-            this.marker.setIcon(getIcon(this.iconImage));
-        showMarkerAsSet(this.marker);    
+        // if (Settings.CountersVisibility.isEnabled())
+        //     this.marker.setIcon(getIcon(this.iconImage));
+        showMarkerAsSet(this.marker, this.iconImage);    
     }
     unsetVisually() {
         showMarkerAsNotSet(this.marker, this.iconImage);

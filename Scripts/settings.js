@@ -4,22 +4,36 @@ function dispatchSettingsUpdate() {
     document.dispatchEvent(new CustomEvent('settingsUpdated'));
 }
 
-document.getElementById('Gamemodes').addEventListener('change', function () {
-    selectedGamemode = this.value;
-    if (selectedGamemode === Gamemodes.Base) {
-        document.getElementById('baseFlagsVisibility').style.display = "block";
-        document.getElementById('baseFlagCounters').style.display = "block";
-        document.getElementById('randoVisibility').style.display = "none";
-        document.getElementById('randoFlagCounters').style.display = "none";
+class SelectSetting extends Storable {
+    constructor(name, func, defaultValue=0) {
+        super();
+        this.name = name;
+        this.element = document.getElementById(this.name);
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
+        this.func = func;
+        this.element.addEventListener('change', () => this.handleChange());
     }
-    else {
-        document.getElementById('baseFlagsVisibility').style.display = "none";
-        document.getElementById('baseFlagCounters').style.display = "none";
-        document.getElementById('randoVisibility').style.display = "block";
-        document.getElementById('randoFlagCounters').style.display = "block";
+    updateValue() {
+        this.value = this.element.value;
+        this.storageUnit.setFlag(this);
     }
-    dispatchSettingsUpdate();
-});
+    handleChange() {
+        this.updateValue();
+        this.func();   
+        dispatchSettingsUpdate();
+    }
+    getDefaultStoreValue() {
+        return this.defaultValue;
+    }
+    getCurrentStoreValue() {
+        return this.value;
+    }
+    initialize() {
+        this.value = this.storageUnit.getFlagAsNumber(this);
+        this.element.value = this.value;
+    }
+}
 
 
 class Setting extends Storable {
@@ -132,6 +146,26 @@ class ParentSetting {
     }
 }
 
+let gamemodeSetting = new SelectSetting('Gamemodes',  function() { 
+    selectedGamemode = this.value;
+    if (selectedGamemode === Gamemodes.Base) {
+        document.getElementById('baseFlagsVisibility').style.display = "block";
+        document.getElementById('baseFlagCounters').style.display = "block";
+        document.getElementById('randoVisibility').style.display = "none";
+        document.getElementById('randoFlagCounters').style.display = "none";
+    }
+    else {
+        document.getElementById('baseFlagsVisibility').style.display = "none";
+        document.getElementById('baseFlagCounters').style.display = "none";
+        document.getElementById('randoVisibility').style.display = "block";
+        document.getElementById('randoFlagCounters').style.display = "block";
+    }
+});
+
+let gameVersionSetting = new SelectSetting('gameVersion', function() {
+
+})
+
 let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
     new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main, 1),
     new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.PoeSouls, 1),
@@ -218,6 +252,8 @@ const Settings = Object.freeze({ // 12
 
 let settingsArray = Object.values(Settings);
 let storableArray =  [
+    gamemodeSetting,
+    gameVersionSetting,
     baseVisibilityParent.getChildByIndex(0),
     baseVisibilityParent.getChildByIndex(1),
     baseVisibilityParent.getChildByIndex(2),

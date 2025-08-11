@@ -31,8 +31,12 @@ class Flag extends Storable{
         return this.item.image;
     }
     getMarkerImage() {
-        if (Settings.ChestsContent.isEnabled() && this.isContainer())
-            return this.item.content.image;
+        if (Settings.ChestsContent.isEnabled() && this.isContainer()) {
+            if (seedIsLoaded && selectedGamemode !== Gamemodes.Base)
+                return this.randoItem.content.image;
+            else
+                return this.item.content.image;
+        }
         return this.getImage();
     }
     setName(name) {
@@ -207,18 +211,31 @@ class Flag extends Storable{
         if (requirements.length > 0) {
             document.getElementById('flagRequirements').style.display = "block";
             let rdHtml = "";
-            for (let i = 0; i < requirements.length; ++i) {
-                let currentReq = requirements[i];
-                if (Array.isArray(currentReq)) {
-                    rdHtml += '<div class="oritems"><div class="oritf"><p class="idot">•</p>' + displayRequirement(currentReq[0]) + '</div>';
-                    for(let j = 1; j < currentReq; ++j) {
-                        rdHtml += '<div class="orits"><p class="por">or</p>' + displayRequirement(currentReq[j], "itis") + '</div>';
+            for (let requirement of requirements) {
+                if (Array.isArray(requirement)) { // Array => OrReqs
+                    rdHtml += '<div class="oritems bordered">';
+                    for (let orReq of requirement) {
+                        if (orReq instanceof AndRequirements) {
+                            rdHtml += '<div class="separationOr">or</div><div class="bordered insideBordered">'
+                            for (let andReq of orReq.getRequirements()) {
+                                if (Array.isArray(andReq)) { // Array => OrReqs
+                                    rdHtml += '<div class="bordered insideBordered">';
+                                    for (let andOrReq of andReq) 
+                                        rdHtml += '<div class="item"><span class="itemOr">or</span>' + displayRequirement(andOrReq) + '</div>';
+                                    rdHtml += '</div>'; 
+                                }
+                                else 
+                                    rdHtml += '<div class="item"><span>•</span>' + displayRequirement(andReq) + '</div>';
+                            }
+                            rdHtml += '</div>'; 
+                        }
+                        else
+                            rdHtml += '<div class="item"><span class="itemOr">or</span>' + displayRequirement(orReq) + '</div>';
                     }
                     rdHtml += '</div>';
                 }
-                else {
-                    rdHtml += '<div class="item"><p class="idot">•</p>' + displayRequirement(requirements[i]) + '</div>';
-                }
+                else
+                    rdHtml += '<div class="item bordered"><span>•</span>' + displayRequirement(requirement) + '</div>';
             }
             document.getElementById('flagRequirementsDiv').innerHTML = rdHtml;
         }
@@ -231,14 +248,6 @@ class Flag extends Storable{
     loadMarker(position=this.position) {
         if (!this.isShown())
             return;
-        if (selectedGamemode === Gamemodes.Base) {     
-            if (Settings.ChestsContent.isEnabled() && this.isContainer()) 
-                this.marker.options.icon = getIcon(this.item.content.image);         
-        }
-        else {      
-            if (seedIsLoaded && Settings.ChestsContent.isEnabled() && this.randoItem instanceof Container)
-                this.marker.options.icon = getIcon(this.randoItem.content.image);         
-        }
         addMarkerToMap(this.marker, position);
         if (this.isSet())
             this.setVisually();
@@ -278,11 +287,12 @@ class Flag extends Storable{
         }       
     }
     setVisually() {
-        showMarkerAsSet(this.marker);
+        showMarkerAsSet(this.marker, this.getMarkerImage());
         this.marker.off('contextmenu', this.boundSetMarker);
         this.marker.on('contextmenu', this.boundUnsetMarker);
     }
     unsetVisually() {
+        showMarkerAsNotSet(this.marker, this.getMarkerImage());
         if (Settings.TrackerLogic.isEnabled()) {
             let currentReqs;
             if (selectedGamemode === Gamemodes.Base)
@@ -292,8 +302,6 @@ class Flag extends Storable{
             if (!verifyRequirements(currentReqs))
                 showMarkerAsUnobtainable(this.marker);    
         }
-    
-        showMarkerAsNotSet(this.marker, this.getMarkerImage());
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
     }
@@ -2341,7 +2349,7 @@ const flags = new Map([
     ["Snowpeak Ruins Broken Floor Chest", new Flag(chest.with(heartPiece), [-5373, 3541], {
         baseReqs: [cheeseReq, ballAndChainReq],
         baseDesc: "Break the damaged floor and jump down to chest.",
-        glitchedReqs: [[new AndRequirements([cheeseReq, ballAndChainReq]), boomerangReq]],
+        glitchedReqs: [[boomerangReq, new AndRequirements([cheeseReq, ballAndChainReq])]],
         glitchedDesc: "Break the damaged floor and jump down to chest or LJA from the other entrance of the room to the chest.",
     })],
     ["Snowpeak Ruins Ball and Chain", new Flag(ballAndChain, [-4072, 4270], {
@@ -2412,12 +2420,12 @@ const flags = new Map([
     ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
         baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: "Unlock this door to reach Armogohma.",
-        randoReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]]
+        randoReqs: [pastDomRodReq, bowReq, [randoSettingReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
         baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
-        randoReqs: [pastDomRodReq, [new AndRequirements([temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]]), randoSettingReq]],
+        randoReqs: [pastDomRodReq, bowReq, [randoSettingReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],

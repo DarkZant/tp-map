@@ -85,10 +85,10 @@ function layerIsLoaded(marker) {
     return map.hasLayer(marker);
 }
 
-function showMarkerAsSet(marker) {
+function showMarkerAsSet(marker, iconImage) {
     marker.setOpacity(0.7);
-    marker.setZIndexOffset(-1000);
-    marker.setIcon(getIconWithCheckmark(marker.getIcon()));
+    marker.setZIndexOffset(marker._zIndex - 1000);
+    marker.setIcon(getIconWithCheckmark(getIcon(iconImage)));
     if (!layerIsLoaded(marker))
         return;
     marker.getElement().classList.remove("unmarked");
@@ -97,7 +97,7 @@ function showMarkerAsSet(marker) {
 
 function showMarkerAsNotSet(marker, iconImage) {
     marker.setOpacity(1);
-    marker.setZIndexOffset(0);
+    marker.setZIndexOffset(marker._zIndex + 1000);
     marker.setIcon(getIcon(iconImage));
     if (!layerIsLoaded(marker))
         return;
@@ -389,13 +389,6 @@ function clickToZoom(event) {
     map.setView(L.latLng(event.latlng.lat, event.latlng.lng), -2);  
 }
 
-function unsetAllFlags() {
-    for (let dungeon of Object.values(Dungeons))
-        dungeon.unset();
-    for (let province of Object.values(Provinces))
-        province.unset();
-}
-
 function loadMap() {
     map.setView([0, 0], -4);
     map.setMinZoom(-4);
@@ -479,6 +472,13 @@ function hideDetails() {
     }, 100);
     
     map.off('click', hideDetails);
+}
+
+function unsetAllFlags() {
+    for (let dungeon of Object.values(Dungeons))
+        dungeon.unset();
+    for (let province of Object.values(Provinces))
+        province.unset();
 }
 
 function resetMap(button) {
