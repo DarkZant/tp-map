@@ -30,14 +30,16 @@ class Flag extends Storable{
     getImage() {
         return this.item.image;
     }
+    getCurrentItem() {
+        if (seedIsLoaded && selectedGamemode !== Gamemodes.Base)
+            return this.randoItem;
+        else
+            return this.item;
+    }
     getMarkerImage() {
-        if (Settings.ChestsContent.isEnabled() && this.isContainer()) {
-            if (seedIsLoaded && selectedGamemode !== Gamemodes.Base)
-                return this.randoItem.content.image;
-            else
-                return this.item.content.image;
-        }
-        return this.getImage();
+        if (Settings.ChestsContent.isEnabled() && this.isContainer())
+            return this.getCurrentItem().getContentImage();
+        return this.getCurrentItem().getImage();
     }
     setName(name) {
         this.name = name;
@@ -158,10 +160,28 @@ class Flag extends Storable{
             riseOffset: 2000, 
             keyboard: false, 
         });
-        addTooltipToMarker(this.marker, underscoreToSpace(this.name));
         this.marker.on('click', () => this.showDetails());
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
+    }
+    showTooltip() {
+        let tooltipText = Settings.FlagTooltipItemName.isEnabled() ? this.getItemName() : this.getFlagName();
+        addTooltipToMarker(this.marker, tooltipText);
+    }
+    setTooltipToFlagName() {
+        this.marker.setTooltipContent(this.getFlagName());
+    }
+    setTooltipToItemName() {
+        this.marker.setTooltipContent(this.getItemName());
+    }
+    getFlagName() {
+        return underscoreToSpace(this.name);
+    }
+    getItemName() {
+        if (this.isContainer())
+            return this.getCurrentItem().content.name;
+        else 
+            return this.getCurrentItem().name;
     }
     showDetails() {
         let base = this.item;
@@ -691,18 +711,18 @@ const flags = new Map([
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
         baseReqs: [masterSwordReq, blizzetaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.',
-        randoReqs: [[masterSwordReq, randoSettingReq], [boomerangReq, clawshotReq]],
+        randoReqs: [[masterSwordReq, openSacredGroveReq], [boomerangReq, clawshotReq]],
         randoDesc: 'The item is high up where the snail usually is, use a long ranged item to get it.'
     })],
     ["Sacred Grove Temple of Time Owl Statue Poe", new Flag(poeSoul, [-7470, 3618], {
         baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq, shadowCrystalReq],
         baseDesc: 'Move the Owl Statue to reveal the poe.',
-        randoReqs: [[masterSwordReq, randoSettingReq], pastDomRodReq, shadowCrystalReq]
+        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, shadowCrystalReq]
     })],
     ["Sacred Grove Past Owl Statue Chest", new Flag(chest.with(heartPiece), [-7504, 3704], {
         baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq],
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
-        randoReq: [[masterSwordReq, randoSettingReq], pastDomRodReq]
+        randoReq: [[masterSwordReq, openSacredGroveReq], pastDomRodReq]
     })],
     ["North Faron Woods Howling Stone", new Flag(howlingStone, [-7340, 4043], {
         baseReqs: [morpheelReq],
@@ -1177,22 +1197,22 @@ const flags = new Map([
     ["Snowpeak Blizzard Poe", new Flag(poeSoul, [-307, 3521], {
         baseReqs: [coralEarringReq, shadowCrystalReq],
         baseDesc: 'Left of the rock the Reekfish Scent makes you go right of.',
-        randoReqs: [[randoSettingReq, coralEarringReq], shadowCrystalReq]
+        randoReqs: [[snowpeakScentReq, coralEarringReq], shadowCrystalReq]
     })],
     ["Snowpeak Above Freezard Grotto Poe", new Flag(poeSoul, [-432, 3728], {
         baseReqs: [coralEarringReq, shadowCrystalReq],
         baseDesc: 'Above the grotto.',
-        randoReqs: [[randoSettingReq, coralEarringReq], shadowCrystalReq]
+        randoReqs: [[snowpeakScentReq, coralEarringReq], shadowCrystalReq]
     })],
     ["Snowpeak Poe Among Trees", new Flag(nightPoe, [-344, 3334], {
         baseReqs: [coralEarringReq, shadowCrystalReq, nightReq],
         baseDesc: 'Above the grotto, behind the tree.',
-        randoReqs: [[randoSettingReq, coralEarringReq], shadowCrystalReq, nightReq]
+        randoReqs: [[snowpeakScentReq, coralEarringReq], shadowCrystalReq, nightReq]
     })],
     ["Snowpeak Icy Summit Poe", new Flag(poeSoul, [-2985, 1299], {
         baseReqs: [coralEarringReq, shadowCrystalReq],
         baseDesc: 'When in front of the mansion, go back to the snow trail as Wolf Link and climb the spiral structure. The poe is at the top.',
-        randoReqs: [[randoSettingReq, coralEarringReq], shadowCrystalReq]
+        randoReqs: [[snowpeakScentReq, coralEarringReq], shadowCrystalReq]
     })],
     ["Snowboard Racing Prize", new Flag(heartPiece, [-691, 3013], {
         baseReqs: [blizzetaReq],
@@ -1202,12 +1222,12 @@ const flags = new Map([
     ["Snowpeak Cave Ice Poe", new Flag(poeSoul, [-655, 3300], {
         baseReqs: [coralEarringReq, ballAndChainReq, shadowCrystalReq],
         baseDesc: 'In the cave, break the north ice block with the ball and chain to reveal the poe.',
-        randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq],
+        randoReqs: [[coralEarringReq, snowpeakScentReq], ballAndChainReq, shadowCrystalReq],
     })],
     ["Snowpeak Cave Ice Lantern Chest", new Flag(chest.with(Rupees.Orange), [-675, 3275], {
         baseReqs: [coralEarringReq, ballAndChainReq, shadowCrystalReq, lanternReq],
         baseDesc: 'In the cave, break the 2 ice blocks to reveal torches. Light them up to make the chest appear.',
-        randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq, lanternReq],
+        randoReqs: [[coralEarringReq, snowpeakScentReq], ballAndChainReq, shadowCrystalReq, lanternReq],
     })],
     ["Snowpeak Howling Stone", new Flag(howlingStone, [-475, 3393], { 
         baseReqs: [coralEarringReq, shadowCrystalReq],
@@ -1216,7 +1236,7 @@ const flags = new Map([
     ["Snowpeak Freezard Grotto Chest", new Flag(chest.with(Rupees.Orange), [-265, 3631], {
         baseReqs: [coralEarringReq, ballAndChainReq, shadowCrystalReq],
         baseDesc: 'Defeat the furthest Freezard to reveal the chest.',
-        randoReqs: [[coralEarringReq, randoSettingReq], ballAndChainReq, shadowCrystalReq],
+        randoReqs: [[coralEarringReq, snowpeakScentReq], ballAndChainReq, shadowCrystalReq],
     })],
     // Lanayru
     ["Zoras Domain Chest By Mother and Child Isles", new Flag(smallChest.with(Rupees.Yellow), [-610, 4930], {
@@ -1629,7 +1649,10 @@ const flags = new Map([
         baseReqs: [Requirement.fromBoolItem(wallets.getItemByIndex(1)), [Requirement.fromCountItem(rupees, 1798), Requirement.fromCountItem(rupees, 3598)]],
         baseDesc: 'After repairing the Castle Town bridge for 1000 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
                   'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1798 rupees total (or 3598 rupees without GSR).',
-        randoCategory: Categories.ShopItems
+        randoCategory: Categories.ShopItems,
+        randoReqs: [[Requirement.fromBoolItem(wallets.getItemByIndex(1)), walletCapacityReq], [Requirement.fromCountItem(rupees, 1298), Requirement.fromCountItem(rupees, 3098)]],
+        randoDesc: 'After repairing the Castle Town bridge for 500 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
+                  'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1298 rupees total (or 3098 rupees without GSR).'
     })],
     ["Telma Invoice", new Flag(invoice, [-4108, 5062], {
         baseReqs: [Requirement.fromBoolItem(renadosLetter)],
@@ -2420,12 +2443,12 @@ const flags = new Map([
     ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
         baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: "Unlock this door to reach Armogohma.",
-        randoReqs: [pastDomRodReq, bowReq, [randoSettingReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
+        randoReqs: [pastDomRodReq, bowReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
         baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
-        randoReqs: [pastDomRodReq, bowReq, [randoSettingReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
+        randoReqs: [pastDomRodReq, bowReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],

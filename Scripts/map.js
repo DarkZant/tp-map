@@ -127,7 +127,7 @@ function addTooltipToMarker(marker, tooltipText, sticky=false) {
 
 function displayContainer(container) {
     return '<img class="ii iti" src="' + container.getContent().image.src + '">' +
-    '<p class="itp">' + container.displayText + '</p>';
+    '<p class="itp">' + container.getContentName() + '</p>';
 }
 
 function displayItem(item, cSSClass="iti") {
@@ -332,6 +332,48 @@ function toggleSetFlagsVisibility() {
     else
         hideSetFlags();
 }
+
+function getAllFlags() {
+    let flags = [];
+    for (let province of Object.values(Provinces))
+        flags.push(...province.getFlags());
+    for (let dungeon of Object.values(Dungeons))
+        flags.push(...dungeon.getFlags());
+    return flags;
+}
+function getAllTooltipMarkers() {
+    let tooltipMarkers = [];
+    for (let province of Object.values(Provinces))
+        tooltipMarkers.push(...province.getAllTooltipMarkers());
+    for (let dungeon of Object.values(Dungeons))
+        tooltipMarkers.push(...dungeon.getAllTooltipMarkers());
+    return tooltipMarkers;
+}
+Settings.ShowTooltips.setFunction(toggleTooltips);
+function toggleTooltips() {
+    if (Settings.ShowTooltips.isEnabled()) {
+        for (let province of Object.values(Provinces))
+            province.showTooltips();
+        for (let dungeon of Object.values(Dungeons))
+            dungeon.showTooltips();
+    }
+    else {
+        for (let marker of getAllTooltipMarkers())
+            marker.unbindTooltip();
+    }
+}
+Settings.FlagTooltipItemName.setFunction(changeFlagTooltipContent);
+function changeFlagTooltipContent() {
+    if (Settings.FlagTooltipItemName.isEnabled()) {
+        for (let flag of getAllFlags())
+            flag.setTooltipToItemName();
+    }
+    else {
+        for (let flag of getAllFlags())
+            flag.setTooltipToFlagName();
+    }
+}
+
 
 function removeFloorLayer() {
     switch (currentMapState) {

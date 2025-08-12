@@ -123,6 +123,23 @@ class SubmapFloor {
     removeImageOverlay() {
         this.imageOverlay.remove();
     }
+    getAllTooltipMarkers() {
+        let tooltipMarkers = [];
+        for (let c of this.contents)
+            tooltipMarkers.push(c.marker);
+        return tooltipMarkers;
+    }
+    getFlags() {
+        let flags = [];
+        for (let c of this.contents)
+            if (c instanceof Flag)
+                flags.push(c);
+        return flags;
+    }
+    showTooltips() {
+        for (let c of this.contents)
+            c.showTooltip();
+    }
 }
 
 class Submap {
@@ -148,7 +165,6 @@ class Submap {
             riseOffset: 2000, 
             keyboard: false, 
         });
-        addTooltipToMarker(this.marker, this.name);
         this.marker.on('click', () => this.load());
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
@@ -176,7 +192,6 @@ class Submap {
     }
     setName(name) {
         this.name = name;
-        addTooltipToMarker(this.marker, this.name);
     }
     set() {
         for (let floor of this.floors)
@@ -373,6 +388,26 @@ class Submap {
     }
     getControlsOffset() {
         return 100;
+    }
+    getAllTooltipMarkers() {
+        let tooltipMarkers = [this.marker];
+        for (let floor of this.floors)
+            tooltipMarkers.push(...floor.getAllTooltipMarkers());
+        return tooltipMarkers;
+    }
+    getFlags() {
+        let flags = [];
+        for (let floor of this.floors)
+            flags.push(...floor.getFlags());
+        return flags;
+    }
+    showTooltip() {
+        addTooltipToMarker(this.marker, this.name);
+    }
+    showTooltips() {
+        this.showTooltip();
+        for (let floor of this.floors)
+            floor.showTooltips();
     }
 }
 
@@ -875,7 +910,6 @@ class Province {
         this.polygon.on('click', clickToZoom);
         this.boundSetPolygon = this.setPolygon.bind(this);
         this.boundUnsetPolygon = this.unsetPolygon.bind(this);
-        addTooltipToMarker(this.polygon, this.name + " Province", true);
     }
     loadPolygon() {
         addPolygonToMap(this.polygon);
@@ -925,7 +959,42 @@ class Province {
         }
         return count;
     }
-
+    getAllTooltipMarkers() {
+        let tooltipMarkers = [this.polygon];
+        for (let c of this.contents)
+            if (c instanceof Submap)
+                tooltipMarkers.push(...c.getAllTooltipMarkers());
+            else 
+                tooltipMarkers.push(c.marker);
+        return tooltipMarkers;
+    }
+    addTooltipToPolygon() {
+        addTooltipToMarker(this.polygon, this.getTooltipText(), this.tooltipIsSticky());
+    }
+    getTooltipText() {
+        return this.name + ' Province';
+    }
+    showTooltips() {
+        this.addTooltipToPolygon();
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                c.showTooltips();
+            else
+                c.showTooltip();
+        }
+    }
+    tooltipIsSticky() {
+        return true;
+    }
+    getFlags() {
+        let flags = [];
+        for (let c of this.contents)
+            if (c instanceof Flag)
+                flags.push(c);
+            else if (c instanceof Submap)
+                flags.push(...c.getFlags());
+        return flags;
+    }
 
 }
 
@@ -937,7 +1006,6 @@ class DungeonProvince extends Province {
         this.dungeon = dungeon;
         this.polygon.off('click');
         this.polygon.on('click', () => this.dungeon.load());
-        addTooltipToMarker(this.polygon, this.name, false);
     }
     shownFlagsAreSet() {
         return this.dungeon.shownFlagsAreSet();
@@ -952,6 +1020,15 @@ class DungeonProvince extends Province {
     unsetShown() {
         this.dungeon.unsetShown();
         this.unsetVisually();
+    }
+    getTooltipText() {
+        return this.name;
+    }
+    getAllTooltipMarkers() {
+        return [this.polygon];
+    }
+    tooltipIsSticky() {
+        return false;
     }
 }
 
@@ -1206,7 +1283,7 @@ const Dungeons = Object.freeze({
             "Temple of Time Darknut Lock",
             "Temple of Time Darknut Chest",
         ]
-    ], {baseReqs: [blizzetaReq, masterSwordReq], randoReqs: [shadowCrystalReq, [masterSwordReq, randoSettingReq]]}),
+    ], {baseReqs: [blizzetaReq, masterSwordReq], randoReqs: [shadowCrystalReq, [masterSwordReq, openToTReq]]}),
 
     City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
         [    // B3

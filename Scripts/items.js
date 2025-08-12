@@ -28,9 +28,15 @@ function getIconImage(imageName) {
 }
 
 const Gamemodes = Object.freeze({
-    Base: "Base Game",
-    Glitchless: "Glitchless Randomizer",
-    Glitched: "Glitched Randomizer"
+    Base: 0,
+    Glitchless: 1,
+    Glitched: 2
+});
+
+const GameVersions = Object.freeze({
+    Gamecube: 0,
+    Wii: 1,
+    WiiU: 2
 });
 
 // Item & Obtainables Categories Enum
@@ -82,23 +88,34 @@ class Obtainable {
     getCategory() {
         return this.category;
     }
+    getImage() {
+        return this.image;
+    }
 }
 
 class Container {
-    constructor(imageInfo, content=null, amount=1) {
+    constructor(imageInfo, content=null) {
         this.image = getIconImage(imageInfo);
         this.content = content;
-        if (content !== null)
-            this.displayText = amount > 1 ? content.name + "&nbsp × &nbsp" + amount : content.name;
     }
     with(content, amount=1) {
-        return new Container(this.image, content, amount);
+        let item = amount === 1 ? content : new MultiItem(content, amount);
+        return new Container(this.image, item);
     }
     getCategory() {
         return this.content.getCategory();
     }
     getContent() {
-        return this.content;
+        return this.content instanceof MultiItem ? this.content.item : this.content;
+    }
+    getContentName() {
+        return this.content.name;
+    }
+    getContentImage() {
+        return this.content.getImage();
+    }
+    getImage() {
+        return this.image;
     }
 }
 
@@ -149,6 +166,9 @@ class BoolItem {
     hasParentItem() {
         return this.parentItem !== null;
     }
+    getImage() {
+        return this.image;
+    }
  }
 
 class CountItem {
@@ -198,6 +218,9 @@ class CountItem {
     }
     getCategory() {
         return this.category;
+    }
+    getImage() {
+        return this.image;
     }
 }
 
@@ -269,6 +292,9 @@ class ProgressiveItem {
     }
     getCategory() {
         return this.items[0].getCategory();
+    }
+    getImage() {
+        return this.items[this.progress].getImage();
     }
 }
 
@@ -360,11 +386,33 @@ class CountRequiredItem {
     getCategory() {
         return this.getItemByIndex(0).getCategory();
     }
+     getImage() {
+        return this.items[this.itemCounter].getImage();
+    }
 }
+
+class MultiItem {
+    constructor(item, amount) {
+        this.item = item;
+        this.amount = amount;
+        this.name = MultiItem.getNameFormat(item, amount);
+    }
+    getCategory() {
+        return this.item.getCategory();
+    }
+    static getNameFormat(item, amount) {
+        return item.name + "&nbsp&nbsp×&nbsp&nbsp" + amount;;
+    }
+    getImage() {
+        return this.item.getImage();
+    }
+}
+
+
 let bugIndex = 0;
 function makeBugItem(species, gender) {
     return new BoolItem('Bug' + bugIndex++, {
-        name: (gender === 'M' ? '♂' : '♀') + '&nbsp ' + species,
+        name: (gender === 'M' ? '♂' : '♀') + '&nbsp&nbsp' + species,
         category: Categories.Bugs,
     });
 }

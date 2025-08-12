@@ -29,7 +29,7 @@ class Requirement {
     static fromCountItem(item, amount=1) {
         return new Requirement(
             item.image, 
-            amount > 1 ? item.name + "&nbsp&nbsp×&nbsp&nbsp" + amount : item.name, 
+            amount > 1 ? MultiItem.getNameFormat(item, amount) : item.name, 
             () => item.amountIsObtained(amount)
         );
     }
@@ -38,6 +38,20 @@ class Requirement {
             flag.getImage(),
             flag.name,
             () => flag.isSet()
+        );
+    }
+    static fromCheckboxRandoSetting(randoSetting) {
+        return new Requirement(
+            randoSetting.getImage(),
+            randoSetting.getName(),
+            () => randoSetting.isEnabled()
+        );
+    }
+    static fromSelectRandoSetting(randoSetting, value) {
+        return new Requirement(
+            randoSetting.getImage(),
+            randoSetting.getName(),
+            () => randoSetting.valueIsEqualTo(value)
         );
     }
     isMet() {
@@ -166,4 +180,9 @@ let castleBKReq = Requirement.fromBoolItem(castleBK);
 let reekfishScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Reekfish Scent"));
 let medicineScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Medicine Scent"));
 let nightReq = new Requirement('Moon', 'Night Time');
-let randoSettingReq = new Requirement('Settings', 'Rando Setting') //TODO Apply rando setting requirements
+
+let walletCapacityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.WalletCapacity);
+let snowpeakScentReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SnowpeakReekfish);
+let doorOfTimeReq = Requirement.fromCheckboxRandoSetting(RandoSettings.OpenDoT);
+let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open Grove');
+let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');

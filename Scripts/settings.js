@@ -32,6 +32,7 @@ class SelectSetting extends Storable {
     initialize() {
         this.value = this.storageUnit.getFlagAsNumber(this);
         this.element.value = this.value;
+        this.func();
     }
 }
 
@@ -85,7 +86,7 @@ class FunctionSetting extends Setting {
     setFunction(func) {
         this.func = func;
         if (this.active)
-            func();
+            document.addEventListener('DOMContentLoaded', func);
     }
     initialize() {
         this.active = this.storageUnit.getFlagAsBool(this);
@@ -147,7 +148,7 @@ class ParentSetting {
 }
 
 let gamemodeSetting = new SelectSetting('Gamemodes',  function() { 
-    selectedGamemode = this.value;
+    selectedGamemode = parseInt(this.element.value);
     if (selectedGamemode === Gamemodes.Base) {
         document.getElementById('baseFlagsVisibility').style.display = "block";
         document.getElementById('baseFlagCounters').style.display = "block";
@@ -164,7 +165,7 @@ let gamemodeSetting = new SelectSetting('Gamemodes',  function() {
 
 let gameVersionSetting = new SelectSetting('gameVersion', function() {
 
-})
+});
 
 let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
     new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main, 1),
@@ -235,19 +236,21 @@ function verifyCategoryVisibility(category) {
     
 }
 
-const Settings = Object.freeze({ // 12
+const Settings = Object.freeze({ // 14
     TrackerLogic: new Setting('Tracker_Logic', 1),
     HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),
-    AutocompleteTracker: new Setting('Tracker_Autocompletion'),
+    AutocompleteTracker: new Setting('Tracker_Autocompletion', 1),
     EmptySubmaps: new Setting('Empty_Submaps_Visibility', 1),
     SubmapAsMarker: new Setting('Submap_As_One_Marker'),
     ChestsContent: new Setting('Show_Chests_As_Content'),
-    TrackerOverlay: new FunctionSetting('Tracker_Position'),
+    TrackerOverlay: new FunctionSetting('Tracker_Position', 1),
     CountersVisibility: new Setting('Show_Counters', 1),
     CountFlags: new Setting('Count_Flags', 1),
     CountChecks: new Setting('Count_Checks', 1),
     CountNonChecks: new Setting('Count_Non_Checks'),
-    CountNonFlags: new Setting('Count_Non_Flags')
+    CountNonFlags: new Setting('Count_Non_Flags'),
+    ShowTooltips: new FunctionSetting('Show_Tooltips', 1),
+    FlagTooltipItemName: new FunctionSetting('Flag_Tooltip_Item_Name'),
 });
 
 let settingsArray = Object.values(Settings);
@@ -296,6 +299,8 @@ let storableArray =  [
     settingsArray[9],
     settingsArray[10],
     settingsArray[11],
+    settingsArray[12],
+    settingsArray[13],
 ]; // Always add settings at the end to preserve storage IDs
 
 const settingsSU = new StorageUnit('settings', storableArray);

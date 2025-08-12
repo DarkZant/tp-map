@@ -12,6 +12,9 @@ class NonFlag {
     getCategory() {
         return this.category;
     }
+    getImage() {
+        return this.image;
+    }
     // Map
     isShown() {
         return verifyCategoryVisibility(this.category);
@@ -28,11 +31,13 @@ class NonFlag {
             keyboard: false, 
             zIndexOffset: -1100
         });
-        addTooltipToMarker(this.marker, this.name);
     }
     loadMarker(position=this.position) {
         if (this.isShown())
             addMarkerToMap(this.marker, position);
+    }
+    showTooltip() {
+        addTooltipToMarker(this.marker, this.name);
     }
 }
 
