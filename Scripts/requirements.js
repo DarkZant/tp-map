@@ -184,5 +184,6 @@ let nightReq = new Requirement('Moon', 'Night Time');
 let walletCapacityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.WalletCapacity);
 let snowpeakScentReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SnowpeakReekfish);
 let doorOfTimeReq = Requirement.fromCheckboxRandoSetting(RandoSettings.OpenDoT);
+let arbitersCampReq = Requirement.fromCheckboxRandoSetting(RandoSettings.ArbitersCamp);
 let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open Grove');
 let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');

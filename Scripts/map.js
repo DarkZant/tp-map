@@ -5,6 +5,7 @@ let storedMapReload = false;
 let menuDisplacement = 0;
 let currentMapState;
 let loadedSubmap;
+let loadedBackground;
 
 const MapStates = Object.freeze({
     ImageMap: 0,
@@ -13,7 +14,7 @@ const MapStates = Object.freeze({
     Submap: 3,
     FlooredSubmap: 4
 });
-const mapCenter = [-4913, 4257];
+const mapCenter = [-4913, 4257.5];
 const map = L.map('map', {
         zoom: -5,
         minZoom: -5,
@@ -27,7 +28,6 @@ const map = L.map('map', {
         bounds: [[500, -500], [-10836, 10676]],
         dragging: false
 }); 
-
 const tileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
     maxZoom: 0,
     minZoom: -6,
@@ -185,7 +185,7 @@ function reloadImageMapMarkers() {
 function loadTileMap() {
     removeAllLayers();
     currentMapState = MapStates.TileMap;
-    tileLayer.addTo(map);
+    addTileLayerToMap(tileLayer);
     setBoundsToTL(); 
     loadTileMapMarkers();
 }
@@ -251,6 +251,11 @@ function exitToTilemap() {
 function addMarkerToMap(marker, position=null) {
     if (position !== null) 
         marker.setLatLng(position);
+    // if (selectedGameVersion === GameVersions.Wii) {
+    //     let latLng = marker.getLatLng();
+    //     let center = currentMapState === MapStates.TileMap ? mapCenter[1] : loadedBackground.getCenter().lng;
+    //     marker.setLatLng([latLng.lat, -latLng.lng + center * 2]);
+    // }
     marker.addTo(map);
 }
 
@@ -260,6 +265,42 @@ function addPolygonToMap(polygon) {
 
 function addImageOverlayToMap(imageOverlay) {
     imageOverlay.addTo(map);
+    // if (selectedGameVersion === GameVersions.Wii)
+    //     flipImageContainer(imageOverlay.getElement());
+    // loadedBackground = imageOverlay;
+}
+
+function addTileLayerToMap(tileLayer) {
+    tileLayer.addTo(map);
+    // if (selectedGameVersion === GameVersions.Wii)
+    //     flipImageContainer(tileLayer.getContainer());
+}
+document.getElementById("gameVersionSelection").style.display = "none";
+function flipImageContainer(imageContainer) {
+    imageContainer.style.transform += 'rotateY(180deg)';
+    imageContainer.style.transformOrigin = 'center';
+}
+
+function unflipImageContainer(imageContainer) {
+    imageContainer.style.transform = imageContainer.style.transform.replace("rotateY(180deg)", '');
+    imageContainer.style.transformOrigin = null;
+}
+
+function flipCurrentImage() {
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.ImageOverlay)
+            flipImageContainer(layer.getElement());
+        else if (layer instanceof L.TileLayer)
+            flipImageContainer(layer.getContainer());
+    });
+}
+function unflipCurrentImage() {
+     map.eachLayer(function (layer) {
+        if (layer instanceof L.ImageOverlay)
+            unflipImageContainer(layer.getElement());
+        else if (layer instanceof L.TileLayer)
+            unflipImageContainer(layer.getContainer());
+    });
 }
 
 // General Map
@@ -322,7 +363,7 @@ function hideSetFlags() {
     let button = document.getElementById("setFlagsVisibilityButton");
     button.children[1].innerHTML = "Show Set Flags";
     let blockImage = document.createElement('img');
-    blockImage.src = "Icons/Block.png";
+    blockImage.src = "Icons/Block1.png";
     button.children[0].appendChild(blockImage);
     reloadMap();
 }
@@ -480,7 +521,7 @@ function separateTrackerFromMap() {
     if (window.getComputedStyle(tracker).visibility === "hidden") {
         tracker.style.visibility = 'visible';
         document.getElementById('menuicons').style.right = trackerWidth + 'vw';
-        document.getElementById('trackerButton').style.display = 'none';
+        document.getElementById('trackerButton').style.visibility = 'hidden';
         let traX = document.getElementById('traX');
         traX.removeEventListener('click', hideTracker);
         traX.addEventListener('click', clickSeparateTrackerSetting);
@@ -493,7 +534,7 @@ function separateTrackerFromMap() {
     else {
         tracker.style.visibility = 'hidden';
         document.getElementById('menuicons').style.right = '0vw';
-        document.getElementById('trackerButton').style.display = 'inline';
+        document.getElementById('trackerButton').style.visibility = 'visible';
         let traX = document.getElementById('traX');
         traX.removeEventListener('click', clickSeparateTrackerSetting);
         traX.addEventListener('click', hideTracker);

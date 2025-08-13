@@ -15,6 +15,7 @@
     display: grid;
     place-items: center;
     width: 2vw;
+    height: 2vw;
     min-width: 20px;
     aspect-ratio: 1;
     border-style: solid;
@@ -29,16 +30,14 @@
 }
 #menuicons img {
     max-width: 100%;
+    max-height: 100%;
     grid-area: 1 / 1;
 }
 #menuicons span {
     position: absolute;
     right: 115%;
     align-self: center;
-    visibility: hidden;
     opacity: 0%;
-    height: auto;
-    width: auto;
     background-color: #38352e;
     padding: 1vh 0.4vw;
     border-radius: 0.35vw;
@@ -47,7 +46,6 @@
     transition: opacity 0.2s;
 }
 #menuicons > div div:hover + span {
-    visibility: visible;
     opacity: 100%;
 }
 /* General menus */
@@ -221,7 +219,7 @@
     min-width: 50px;
     height: 5.5vmin;
     max-height: 5.5vmin;
-    min-height: 20px;
+    min-height: 40px;
     background-color: #1d1a14;
     color:#c0c0c0;
     border-radius: 7px;
@@ -238,7 +236,7 @@
     padding-bottom: 0.5dvh;
     text-align: center;
 }
-.selectLabel {
+#settings .selectLabel {
     display: block;
     font-size: 1.2dvw;
     font-weight: bold;
@@ -249,11 +247,56 @@ select {
     background-color: #1d1a14;
     color:#c0c0c0;
     height: 4dvh;
-    min-height: 20px;
+    min-height: 40px;
     font-size: 1.05vmax;
     padding: 0 5px;
     cursor: pointer;
 }
+#randoSeed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 2dvh;
+    padding-top: 2dvh;
+    padding-bottom: 1dvh;
+}
+#randoSeedFile {
+    width: 65%;
+    border: 0.1vw dashed #c0c0c0;
+    border-radius: 0.5vw;
+    padding: 4dvh 0;
+    cursor: pointer;
+    transition: background-color 0.1s, border-color 0.1s;
+    user-select: none;
+}
+#randoSeedFile:hover {
+    background-color: #3f3f3f;
+}
+#randoSeedFile:hover p {
+    text-decoration: underline;
+}
+#randoSeedFile.dragover {
+    background-color: #3f3f3f;
+    border-color: #8a8a8a;
+}
+
+#randoSeedFile p {
+    font-size: 0.9vw;
+    padding: 2dvh 1dvw;
+    border-radius: 0.5vw;
+}
+#spoilerLog {
+    display: none;
+    font-size: calc(5px + 0.3vw);
+    width: 6.9dvw;
+}
+#seedSettings {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    row-gap: 0.5dvh;
+}
+
 #settingsCheckboxes {
     text-align: left;
     margin-left: 5%;
@@ -265,27 +308,27 @@ select {
     text-align: center;
     text-decoration: underline;
 }
-#settingsCheckboxes input[type="checkbox"] {
+#settings input[type="checkbox"] {
     height: 0.85vmax;
     aspect-ratio: 1;
     margin-left: 3%;
     margin-top: 2%;
     cursor: pointer;
 }
-#settingsCheckboxes label {
+#settings label {
     font-size: 0.9vmax;
     cursor: pointer;
     white-space: nowrap;
 }
-#settingsCheckboxes .bigSettingCheckboxLabel input {
+#settings .bigSettingCheckboxLabel input {
     height: 0.95vmax;
     margin-top: 2.5%;
     margin-left: 0;
 }
-#settingsCheckboxes .bigSettingCheckboxLabel {
+#settings .bigSettingCheckboxLabel {
     font-size: 1.025vmax;
 }
-#settingsCheckboxes label::after {
+#settings label::after {
     content: "\a";
     white-space: pre;
 }

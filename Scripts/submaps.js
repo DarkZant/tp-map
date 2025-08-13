@@ -644,9 +644,10 @@ class CaveOfOrdeals extends FlooredSubmap {
         let div = document.getElementById('caveofOrdeals');
         div.style.display = 'inline';
         this.exitEvent = () => { 
-            this.exit(); 
             if (map.getZoom() == 0)
                 return;
+            this.exit(); 
+            this.unbindButtons();
             window.removeEventListener('keydown', this.controlsEvent);
             div.style.display = "none";
         } 
@@ -687,6 +688,14 @@ class CaveOfOrdeals extends FlooredSubmap {
         let button = document.getElementById('caveofOrdealsButton');
         button.addEventListener('click', () => this.manageActiveFloor());
         button.addEventListener('contextmenu', () => this.manageActiveFloor());
+    }
+    unbindButtons() {
+        let arrowUp = document.getElementById('caveofOrdealsUpArrow');
+        arrowUp.replaceWith(arrowUp.cloneNode(true));
+        let arrowDown = document.getElementById('caveofOrdealsDownArrow');
+        arrowDown.replaceWith(arrowDown.cloneNode(true));
+        let button = document.getElementById('caveofOrdealsButton');
+        button.replaceWith(button.cloneNode(true));
     }
     controls(event) {
         if (!(event instanceof KeyboardEvent))
@@ -1199,7 +1208,7 @@ const Dungeons = Object.freeze({
             "Arbiters Grounds Dungeon Reward",
             Bottle.Fairy.new([-3828, 4100])
         ]
-    ], {floorOffset: 1, baseReqs: [aurusMemoReq, bulblinKeyReq]}),
+    ], {floorOffset: 1, baseReqs: [aurusMemoReq, bulblinKeyReq], randoReqs: [aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]}),
 
     Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
         [    // 1F

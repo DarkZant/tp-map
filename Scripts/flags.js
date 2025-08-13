@@ -295,12 +295,12 @@ class Flag extends Storable{
     manageItemTracker() {
         if (!Settings.AutocompleteTracker.isEnabled()) 
             return;
-        if (selectedGamemode === Gamemodes.Base) {
+        if (selectedGamemode === Gamemodes.Base || !seedIsLoaded) {
             let itemTracker = this.getItemTracker(this.item);
             if (itemTracker !== null)
                 this.isSet() ? itemTracker.increase() : itemTracker.decrease();
         }
-        else if (seedIsLoaded && selectedGamemode !== Gamemodes.Base) {
+        else {
             let randoItemTracker = this.getItemTracker(this.randoItem);
             if (randoItemTracker !== null)
                 this.isSet() ? randoItemTracker.increase() : randoItemTracker.decrease();
@@ -1453,7 +1453,7 @@ const flags = new Map([
         baseDesc: "Donate 1000 total rupees to Charlo to receive the heart piece.",
         randoCategory: Categories.Gifts,
         randoReqs: [Requirement.fromCountItem(rupees, 500)],
-        randoDesc:  "Donate 1000 total rupees to Charlo to receive the item."
+        randoDesc:  "Donate 500 total rupees to Charlo to receive the item."
     })],
     ["Auru Gift To Fyer", new Flag(aurusMemo, [-5460, 2690], {
         baseDesc: "Climb the tower with the ladder and talk to Auru to obtain the memo.",

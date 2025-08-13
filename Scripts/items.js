@@ -63,7 +63,8 @@ const Categories = Object.freeze({
     Gifts: "Gifts from NPCs",
     ShopItems: "Shop Items",
     Hints: "Randomizer Hints",  
-    NonChecks: "Non-Check Items"
+    NonChecks: "Non-Check Items",
+    Fool: "Foolish Items"
 });
 
 const RandomizerCheckCategories = [
@@ -604,6 +605,7 @@ let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
+let randoFoolishItem = new Obtainable('FoolIce', null, {name: "Foolish Item", category: Categories.Fool});
 
 let chest = new Container('Chest'); 
 let smallChest = new Container('Small Chest');

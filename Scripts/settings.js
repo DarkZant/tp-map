@@ -1,17 +1,19 @@
-let selectedGamemode = Gamemodes.Base;
+let selectedGamemode;
+let selectedGameVersion;
 
 function dispatchSettingsUpdate() {
     document.dispatchEvent(new CustomEvent('settingsUpdated'));
 }
 
 class SelectSetting extends Storable {
-    constructor(name, func, defaultValue=0) {
+    constructor(name, func, startFunc=func, defaultValue=0) {
         super();
         this.name = name;
         this.element = document.getElementById(this.name);
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.func = func;
+        this.startFunc = startFunc;
         this.element.addEventListener('change', () => this.handleChange());
     }
     updateValue() {
@@ -32,7 +34,7 @@ class SelectSetting extends Storable {
     initialize() {
         this.value = this.storageUnit.getFlagAsNumber(this);
         this.element.value = this.value;
-        this.func();
+        this.startFunc();
     }
 }
 
@@ -154,17 +156,31 @@ let gamemodeSetting = new SelectSetting('Gamemodes',  function() {
         document.getElementById('baseFlagCounters').style.display = "block";
         document.getElementById('randoVisibility').style.display = "none";
         document.getElementById('randoFlagCounters').style.display = "none";
+        document.getElementById('randoSeed').style.display = "none";
     }
     else {
         document.getElementById('baseFlagsVisibility').style.display = "none";
         document.getElementById('baseFlagCounters').style.display = "none";
         document.getElementById('randoVisibility').style.display = "block";
         document.getElementById('randoFlagCounters').style.display = "block";
+         document.getElementById('randoSeed').style.display = "flex";
     }
 });
 
 let gameVersionSetting = new SelectSetting('gameVersion', function() {
+    let newGameVersion = parseInt(this.element.value);
+    if (newGameVersion === GameVersions.Wii) {
+        flipCurrentImage();
+        dispatchSettingsUpdate();
+    }
+    else if (selectedGameVersion === GameVersions.Wii) {
+        unflipCurrentImage();
+        dispatchSettingsUpdate();
+    }
+    selectedGameVersion = newGameVersion;
 
+} , function() {
+    selectedGameVersion = parseInt(this.element.value);
 });
 
 let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11

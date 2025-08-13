@@ -49,27 +49,27 @@
                 </div>
                 <span>Controls</span>
             </div>
-            <div id="trackerButton">
-                <div onclick="showRightMenu('tracker', 29)">
-                    <img src="Icons/Tracker.png">
-                </div>
-                <span>Tracker</span>
-            </div>
             <div>
                 <div onclick="showRightMenu('notes')">
                     <img src="Icons/Note.png">
                 </div>
                 <span>Notes</span>
-            </div>
+            </div>      
             <div id="setFlagsVisibilityButton">
                 <div     
                     oncontextmenu="toggleSetFlagsVisibility();" 
                     onmousedown="if (event.button === 0) hideSetFlags()" 
                     onmouseup="if (event.button === 0) showSetFlags()"
                 >
-                    <img src="Icons/Checkmark.png">
+                    <img src="Icons/MenuCheckmark.png">
                 </div>
                 <span>Hide Set Flags</span>
+            </div>
+            <div id="trackerButton">
+                <div onclick="showRightMenu('tracker', 29)">
+                    <img src="Icons/Tracker1.png">
+                </div>
+                <span>Tracker</span>
             </div>
         </div> 
 
@@ -186,6 +186,16 @@
                         <option value="1">Wii</option>
                         <option value="2">Wii U (HD)</option>
                     </select>
+            </div>
+            <div id="randoSeed">
+                <div id="randoSeedFile">
+                    <p>Import Seed Spoiler Log</p>
+                    <input id="spoilerLog" type="file">
+                </div>
+                <div id="seedSettings">
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints</label>
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Spoiler_Log" class="bigSettingCheckbox">Reveal Spoiler Log</label>
+                </div>
             </div>
             <div id="settingsCheckboxes">
                 
@@ -773,6 +783,7 @@
         <script src="Scripts/requirements.js"></script>
         <script src="Scripts/nonflags.js"></script>
         <script src="Scripts/flags.js"></script>
+        <script src="Scripts/randoSeed.js"></script>
         <script src="Scripts/submaps.js"></script>
         <!-- <script src="Scripts/oldMap.js"></script>  -->
         <script src="Scripts/storageCleanup.js"></script>
