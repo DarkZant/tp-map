@@ -15,6 +15,9 @@ class NonFlag {
     getImage() {
         return this.image;
     }
+    getName() {
+        return this.name;
+    }
     // Map
     isShown() {
         return verifyCategoryVisibility(this.category);

@@ -9,14 +9,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 let lastCall = 0;
 let msDelay = 1000;
-function saveWithDelay() {
+function throttleFunc(func) {
     let now = Date.now();
     if (now - lastCall >= msDelay) {
         lastCall = now;
         setTimeout(() => {
-            localStorage.setItem(notesStorageName, this.value);
+            func();
         }, msDelay);
     }
 }
 
-notes.addEventListener('input', saveWithDelay);
+notes.addEventListener('input', () => throttleFunc(() => localStorage.setItem(notesStorageName, notes.value)));

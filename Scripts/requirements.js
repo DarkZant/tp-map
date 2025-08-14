@@ -50,7 +50,7 @@ class Requirement {
     static fromSelectRandoSetting(randoSetting, value) {
         return new Requirement(
             randoSetting.getImage(),
-            randoSetting.getName(),
+            randoSetting.getName() + " is " + value,
             () => randoSetting.valueIsEqualTo(value)
         );
     }
@@ -92,6 +92,18 @@ function verifySubmapRequirements(submap) {
     return verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? submap.randoReqs : submap.glitchedReqs)
 }
 
+function addRandoRequirements(submap, reqs) {
+    let glitchlessReqs = submap.randoReqs;
+    let glitchedReqs = submap.glitchedReqs;
+    if (glitchlessReqs === glitchedReqs)
+        glitchlessReqs.push(...reqs);
+    else {
+        glitchlessReqs.push(...reqs);
+        glitchedReqs.push(...reqs);
+    }
+    submap.reloadMarker();
+}
+
 let clawshotReq = Requirement.fromBoolItem(clawshots.getItemByIndex(0));
 let doubleClawshotReq = Requirement.fromBoolItem(clawshots.getItemByIndex(1));
 let bombBagReq = Requirement.fromCountItem(bombBag);
@@ -122,6 +134,7 @@ let coroKeyReq = Requirement.fromBoolItem(coroKey);
 let gateKeyReq = Requirement.fromBoolItem(gateKey);
 let bulblinKeyReq = Requirement.fromBoolItem(bulblinKey);
 let aurusMemoReq = Requirement.fromBoolItem(aurusMemo);
+let allFusedShadowsReq = Requirement.fromCountItem(fusedShadow, 3);
 let completedMirrorReq = Requirement.fromCountItem(mirrorShard, 4);
 let skybookReq = Requirement.fromBoolItem(skybook.getItemByReq(1));
 let completedSkybookReq = Requirement.fromBoolItem(skybook.getItemByReq(7));
@@ -176,14 +189,21 @@ let castle1SKReq = Requirement.fromCountItem(castleSK);
 let castle2SKReq = Requirement.fromCountItem(castleSK, 2);
 let castle3SKReq = Requirement.fromCountItem(castleSK, 3);
 let castleBKReq = Requirement.fromBoolItem(castleBK);
+let allDungeonsReq = [
+    diababaReq, fyrusReq, morpheelReq, stallordReq, blizzetaReq, armogohmaReq, argorokReq, zantReq
+];
 
 let reekfishScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Reekfish Scent"));
 let medicineScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Medicine Scent"));
 let nightReq = new Requirement('Moon', 'Night Time');
 
+let openMapReq = Requirement.fromCheckboxRandoSetting(RandoSettings.UnlockMapRegions);
+let openWoodsReq = Requirement.fromSelectRandoSetting(RandoSettings.FaronWoodsLogic, 'Open');
 let walletCapacityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.WalletCapacity);
+let lakebedBombsReq = Requirement.fromCheckboxRandoSetting(RandoSettings.LakebedBombs);
 let snowpeakScentReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SnowpeakReekfish);
 let doorOfTimeReq = Requirement.fromCheckboxRandoSetting(RandoSettings.OpenDoT);
 let arbitersCampReq = Requirement.fromCheckboxRandoSetting(RandoSettings.ArbitersCamp);
 let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open Grove');
 let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');
+let openCityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.CitySkybook);

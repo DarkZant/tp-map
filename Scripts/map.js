@@ -1,11 +1,35 @@
-let seedIsLoaded = false;
 let setFlagsHidden = false;
 let blockMapReset = false;
 let storedMapReload = false;
-let menuDisplacement = 0;
 let currentMapState;
 let loadedSubmap;
-let loadedBackground;
+
+let originalWidth = 1600;
+let multWidth = window.innerWidth / originalWidth;
+let originalHeight = 739;
+let multHeight = window.innerHeight / originalHeight;
+
+window.addEventListener('resize', () => {
+    multWidth = window.innerWidth / originalWidth;
+    multHeight = window.innerHeight / originalHeight;
+    throttleFunc(reloadMap);
+});
+
+function getBiggestMult() {
+    return multWidth > multHeight ? multWidth : multHeight;
+}
+
+function scaleLat(lat) {
+    return (lat - mapCenter[0]) * multWidth ;
+}
+
+function scaleLng(lng) {
+    return (lng - mapCenter[1]) * multHeight ;
+}
+
+
+// let loadedBackground;
+
 
 const MapStates = Object.freeze({
     ImageMap: 0,
@@ -16,6 +40,7 @@ const MapStates = Object.freeze({
 });
 const mapCenter = [-4913, 4257.5];
 const map = L.map('map', {
+        trackResize: true,
         zoom: -5,
         minZoom: -5,
         maxZoom: 0,
@@ -42,9 +67,14 @@ function getIcon(image) {
     if (image in icons.keys())
         return icons.get(image);
 
+    let icon = L.icon({iconUrl: image.src, iconSize: getIconDimensions(image)});
+    icons.set(image, icon);
+    return icon; 
+}
+function getIconDimensions(image) {
     let width = image.width;
     let height = image.height;
-    let mult = window.innerWidth <= window.innerHeight ? window.innerWidth / 1600 : window.innerHeight / 739;
+    let mult = getBiggestMult();
     let maxSize = 50 * mult;
     if (maxSize > 60)
         maxSize = 60;
@@ -58,9 +88,7 @@ function getIcon(image) {
         width = width / height * maxSize;
         height = maxSize;
     }
-    let icon = L.icon({iconUrl: image.src, iconSize: [width, height]});
-    icons.set(image, icon);
-    return icon; 
+    return [width, height]
 }
 
 function getIconWithCheckmark(icon) {
@@ -126,13 +154,13 @@ function addTooltipToMarker(marker, tooltipText, sticky=false) {
 }
 
 function displayContainer(container) {
-    return '<img class="ii iti" src="' + container.getContent().image.src + '">' +
+    return '<img class="ii iti" src="' + container.getContent().getImage().src + '">' +
     '<p class="itp">' + container.getContentName() + '</p>';
 }
 
 function displayItem(item, cSSClass="iti") {
-    return '<img class="ii ' + cSSClass + '" src="' + item.image.src + '">' +
-    '<p class="itp">' + item.name + '</p>';
+    return '<img class="ii ' + cSSClass + '" src="' + item.getImage().src + '">' +
+    '<p class="itp">' + item.getName() + '</p>';
 }
 
 function displayRequirement(requirement, cSSClass="iti") {
@@ -255,6 +283,25 @@ function addMarkerToMap(marker, position=null) {
     //     let latLng = marker.getLatLng();
     //     let center = currentMapState === MapStates.TileMap ? mapCenter[1] : loadedBackground.getCenter().lng;
     //     marker.setLatLng([latLng.lat, -latLng.lng + center * 2]);
+    // }
+    // let mult = getBiggestMult();
+    let latLng = marker.getLatLng();
+    let scaledLat = scaleLat(latLng.lat);
+    let scaledLng = scaleLng(latLng.lng);
+    // if (biggestMult === multWidth) {
+    //     scaledLng = (lat / lng) * lat * multWidth;
+    //     scaledLat = lat * multWidth;
+    // }
+    // else {
+    //     scaledLat = (lng / lat) * lng * multHeight;
+    //     scaledLng = lng * multHeight;
+    // }
+    marker.setLatLng([scaledLat, scaledLng]);
+    // if (mult === multWidth) {
+    //     marker.setLatLng([lat * mult, lng]);
+    // }   
+    // else {
+    //     marker.setLatLng([lat, lng * mult]);
     // }
     marker.addTo(map);
 }
@@ -459,7 +506,10 @@ function removeAllLayersExceptTL() {
 
 function getCoordsOnClick(e) {
     if (e.originalEvent.ctrlKey) {
-        navigator.clipboard.writeText("[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]");
+        let text = "[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]";
+        navigator.clipboard.writeText(text);
+        map.openTooltip(text, [e.latlng.lat, e.latlng.lng], {direction: "top"});
+
     }
 }
 
@@ -473,6 +523,7 @@ function clickToZoom(event) {
 }
 
 function loadMap() {
+    checkRandoSeed();
     map.setView([0, 0], -4);
     map.setMinZoom(-4);
     if (window.innerWidth <= 1000 || window.innerHeight <= 700)
@@ -579,6 +630,14 @@ function trackerButton(button) {
     if (!unblockMapReloading())
         dispatchTrackerUpdate();
     resetButtonsFeedback(button, 'Tracker'); 
+}
+function settingsButton(button) {
+    button.innerHTML = "Resetting...";
+    blockMapReloading();
+    resetSettings();
+    if (!unblockMapReloading())
+        dispatchSettingsUpdate();
+    resetButtonsFeedback(button, 'Settings');
 }
 function resetButtonsFeedback(button, text) {
     button.innerHTML = "Reset done!";

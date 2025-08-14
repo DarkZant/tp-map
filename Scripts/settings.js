@@ -20,6 +20,14 @@ class SelectSetting extends Storable {
         this.value = this.element.value;
         this.storageUnit.setFlag(this);
     }
+    setValue(value) {
+        this.element.value = value;
+        this.handleChange();
+    }
+    reset() {
+        this.element.value = this.defaultValue;
+        this.handleChange();
+    }
     handleChange() {
         this.updateValue();
         this.func();   
@@ -61,6 +69,21 @@ class Setting extends Storable {
         if (!fromParent)
             dispatchSettingsUpdate();
     }
+    resetElement() {
+        let defaultVal = this.defaultValue === 0 ? false : true;
+        if (defaultVal === this.element.checked)
+            return false;
+        this.element.checked = defaultVal;
+        return true;
+    }
+    reset() {
+        if (!this.resetElement())
+            return;
+        this.updateActive();
+        if (this.parent)
+            this.parent.update(this.active);
+        dispatchSettingsUpdate();
+    }
     isEnabled() {
         return this.active;
     }
@@ -80,6 +103,10 @@ class Setting extends Storable {
 class FunctionSetting extends Setting {
     constructor(name, defaultValue=0) {
         super(name, defaultValue);
+    }
+    reset() {
+        if (this.resetElement())
+            this.handleClick();
     }
     handleClick() {
         this.updateActive();
@@ -167,6 +194,10 @@ let gamemodeSetting = new SelectSetting('Gamemodes',  function() {
     }
 });
 
+function randoIsActive() {
+    return selectedGamemode !== Gamemodes.Base;
+}
+
 let gameVersionSetting = new SelectSetting('gameVersion', function() {
     let newGameVersion = parseInt(this.element.value);
     if (newGameVersion === GameVersions.Wii) {
@@ -185,16 +216,16 @@ let gameVersionSetting = new SelectSetting('gameVersion', function() {
 
 let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [ // 11
     new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main, 1),
+    new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts, 1),
     new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.PoeSouls, 1),
-    new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters,1 ),
     new CategoryVisibilitySetting('Base_Bugs_Visibility', Categories.Bugs, 1),
     new CategoryVisibilitySetting('Base_Skills_Visibility', Categories.HiddenSkills, 1),
+    new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters,1 ),
     new CategoryVisibilitySetting('Base_Rupees_Visibility', Categories.Rupees),
-    new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts, 1),
     new CategoryVisibilitySetting('Base_Ammunition_Visibility', Categories.Ammo),
-    new CategoryVisibilitySetting('Base_Locks_Visibility', Categories.Locks),
+    new CategoryVisibilitySetting('Base_Bosses_Visibility', Categories.Bosses, 1),
     new CategoryVisibilitySetting('Base_Ooccoo_Visibility', Categories.Ooccoo),
-    new CategoryVisibilitySetting('Base_Bosses_Visibility', Categories.Bosses)
+    new CategoryVisibilitySetting('Base_Locks_Visibility', Categories.Locks),
 ]);
 
 let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Parent', [ // 7
@@ -209,16 +240,17 @@ let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Paren
 
 let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibility_Parent', [ // 6
     new CategoryVisibilitySetting('Rando_Hints_Visibility', Categories.Hints, 1),
-    new CategoryVisibilitySetting('Rando_Bosses_Visibility', Categories.Bosses),
+    new CategoryVisibilitySetting('Rando_Bosses_Visibility', Categories.Bosses, 1),
     new CategoryVisibilitySetting('Rando_Rupees_Visibility', Categories.Rupees),
     new CategoryVisibilitySetting('Rando_Locks_Visibility', Categories.Locks),
     new CategoryVisibilitySetting('Rando_Ooccoo_Visibility', Categories.Ooccoo),
     new CategoryVisibilitySetting('Rando_Non-Check_Visibility', Categories.NonChecks)
 ]);
 
-let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [ // 6
+let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [ // 7
     new CategoryVisibilitySetting('Shop_Visibility', Categories.Shops),
     new CategoryVisibilitySetting('Bottle_Visibility', Categories.Bottle),
+    new CategoryVisibilitySetting('Monster_Rupee', Categories.MonsterRupee),
     new CategoryVisibilitySetting('Grass_Visibility', Categories.Grass),
     new CategoryVisibilitySetting('Postman_Visibility', Categories.Postman),
     new CategoryVisibilitySetting('Fishing_Visibility', Categories.Fishing),
@@ -242,17 +274,17 @@ addChildrenToMap(nonFlagVisibilityParent, randoVisibilitySettings);
 function verifyCategoryVisibility(category) {
     let setting;
     
-    if (selectedGamemode === Gamemodes.Base) 
-        setting = baseVisibilitySettings.get(category);
-    else 
+    if (randoIsActive()) 
         setting = randoVisibilitySettings.get(category);
+    else 
+        setting = baseVisibilitySettings.get(category);
 
     return setting === undefined ? false : setting.isEnabled();
 
     
 }
 
-const Settings = Object.freeze({ // 14
+const Settings = Object.freeze({ // 17
     TrackerLogic: new Setting('Tracker_Logic', 1),
     HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),
     AutocompleteTracker: new Setting('Tracker_Autocompletion', 1),
@@ -267,6 +299,9 @@ const Settings = Object.freeze({ // 14
     CountNonFlags: new Setting('Count_Non_Flags'),
     ShowTooltips: new FunctionSetting('Show_Tooltips', 1),
     FlagTooltipItemName: new FunctionSetting('Flag_Tooltip_Item_Name'),
+    RandoTracker: new Setting("Rando_Item_Tracker"),
+    RevealHints: new Setting("Reveal_Hints"),
+    RevealSpoilerLog: new Setting("Reveal_Spoiler_Log"),
 });
 
 let settingsArray = Object.values(Settings);
@@ -303,6 +338,7 @@ let storableArray =  [
     nonFlagVisibilityParent.getChildByIndex(3),
     nonFlagVisibilityParent.getChildByIndex(4),
     nonFlagVisibilityParent.getChildByIndex(5),
+    nonFlagVisibilityParent.getChildByIndex(6),
     settingsArray[0],
     settingsArray[1],
     settingsArray[2],
@@ -317,9 +353,17 @@ let storableArray =  [
     settingsArray[11],
     settingsArray[12],
     settingsArray[13],
+    settingsArray[14],
+    settingsArray[15],
+    settingsArray[16],
 ]; // Always add settings at the end to preserve storage IDs
 
 const settingsSU = new StorageUnit('settings', storableArray);
 
 for (let setting of storableArray)
     setting.initialize();
+
+function resetSettings() {
+    for (let setting of storableArray)
+        setting.reset();
+}

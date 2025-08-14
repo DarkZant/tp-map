@@ -167,6 +167,7 @@
         <div id="settings" class="menu rightMenu">
             <div id="setX" class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>Settings</h2>
+            <button onclick="settingsButton(this)">Reset Settings</button>
             <div id="settingsButtons">
                 <button onclick="resetMap(this)">Reset Map</button>
                 <button onclick="trackerButton(this)">Reset Tracker</button>
@@ -189,11 +190,19 @@
             </div>
             <div id="randoSeed">
                 <div id="randoSeedFile">
-                    <p>Import Seed Spoiler Log</p>
+                    <p id="randoSeedFileText">
+                        Import Seed Spoiler Log<br>
+                        Drag and drop a file<br>
+                        <i>or</i><br>
+                        Click to select a file
+                        
+                    </p>
                     <input id="spoilerLog" type="file">
                 </div>
+                <button id="Unload_Seed" onclick="unloadSeed()">Unload Seed</button>
                 <div id="seedSettings">
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints</label>
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Item_Tracker" class="bigSettingCheckbox">Autocomplete Tracker with Rando Items</label>
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Spoiler_Log" class="bigSettingCheckbox">Reveal Spoiler Log</label>
                 </div>
             </div>
@@ -250,6 +259,7 @@
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Non_Flag_Visibility_Parent" class="bigSettingCheckbox">Show Non-Flags</label>
                     <label><input type="checkbox" id="Shop_Visibility">Show Shops</label>
                     <label><input type="checkbox" id="Bottle_Visibility">Show Bottle Contents</label>
+                    <label><input type="checkbox" id="Monster_Rupee">Show Monster Rupees</label>
                     <label><input type="checkbox" id="Grass_Visibility">Show Horse & Hawk Grass</label>
                     <label><input type="checkbox" id="Postman_Visibility">Show Postman</label>
                     <label><input type="checkbox" id="Fishing_Visibility">Show Fishing Spots</label>
@@ -324,7 +334,7 @@
             <div id="mainTracker">
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Fishing_Rod0.png" class="timage"> 
+                    <img src="Icons/Progressive_Fishing_Rod0.png" class="timage"> 
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -344,7 +354,7 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Bow0.png" class="timage">
+                    <img src="Icons/Progressive_Bow0.png" class="timage">
                 </div>          
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -361,7 +371,7 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Clawshot0.png" class="timage">
+                    <img src="Icons/Progressive_Clawshot0.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -373,7 +383,7 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Dominion_Rod0.png" class="timage">
+                    <img src="Icons/Progressive_Dominion_Rod0.png" class="timage">
                 </div>
                 <div class="tsubmenuO" onclick="showTrackerSubmenu('tquest')">
                     <img src="Icons/MenuBox.png" class="tbox">
@@ -403,15 +413,15 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Sword0.png" class="timage">
+                    <img src="Icons/Progressive_Sword0.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Shield0.png" class="timage">
+                    <img src="Icons/Progressive_Shield0.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Shield2.png" class="timage">
+                    <img src="Icons/Hylian_Shield.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -423,7 +433,7 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Wallet0.png" class="timage">
+                    <img src="Icons/Progressive_Wallet0.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -441,7 +451,7 @@
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Scent0.png" class="timage">
+                    <img src="Icons/Progressive_Scent0.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
@@ -477,7 +487,7 @@
                     <img src="Icons/Boss_KeyHC.png" class="timage">
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="ForestTemple">Required</span>
                     <div class="tboss titem">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Diababa.png" class="timage">
@@ -493,7 +503,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="GoronMines">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Fyrus.png" class="timage">
@@ -510,7 +520,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="LakebedTemple">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Morpheel.png" class="timage">
@@ -526,7 +536,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="ArbitersGrounds">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Stallord.png" class="timage">
@@ -542,7 +552,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="SnowpeakRuins">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Blizzeta.png" class="timage">
@@ -558,7 +568,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="TempleOfTime">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Armogohma.png" class="timage">
@@ -574,7 +584,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="CityInTheSky">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Argorok.png" class="timage">
@@ -591,7 +601,7 @@
                     </div>
                 </div>
                 <div class="tdungeon">
-                    <span>Required</span>
+                    <span id="PalaceOfTwilight">Required</span>
                     <div class="titem tboss">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Zant.png" class="timage">

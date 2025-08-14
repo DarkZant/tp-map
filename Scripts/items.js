@@ -41,7 +41,7 @@ const GameVersions = Object.freeze({
 
 // Item & Obtainables Categories Enum
 const Categories = Object.freeze({
-    // Game Categories
+    // Flags
     Main: "Main",
     PoeSouls: "Poe Souls",
     SkyCharacters: "Sky Characters",
@@ -53,12 +53,14 @@ const Categories = Object.freeze({
     Locks: "Locked Doors",
     Ooccoo: "Ooccoo",
     Bosses: "Bosses",
+    // Non Flags
     Bottle: "Bottled Items",
     Shops: "Shops",
     Grass: "Horse & Hawk Grass",
     Fishing: "Fishing Spots",
     Minigames: "Minigames",
     Postman: 'Postman',
+    MonsterRupee: "Monster Group Rupees",
     // Randomizer Categories
     Gifts: "Gifts from NPCs",
     ShopItems: "Shop Items",
@@ -70,8 +72,9 @@ const Categories = Object.freeze({
 const RandomizerCheckCategories = [
     Categories.Main,
     Categories.PoeSouls,
-    Categories.SkyCharacters,
     Categories.Bugs,
+    Categories.HiddenSkills,
+    Categories.SkyCharacters,
     Categories.Gifts,
     Categories.ShopItems
 ];
@@ -92,6 +95,14 @@ class Obtainable {
     getImage() {
         return this.image;
     }
+    getName() {
+        return this.name;
+    }
+    getTracker() {
+        if (this.hasItem())
+            return this.item.getTracker();
+        return null;
+    }
 }
 
 class Container {
@@ -110,7 +121,7 @@ class Container {
         return this.content instanceof MultiItem ? this.content.item : this.content;
     }
     getContentName() {
-        return this.content.name;
+        return this.content.getName();
     }
     getContentImage() {
         return this.content.getImage();
@@ -118,30 +129,67 @@ class Container {
     getImage() {
         return this.image;
     }
+    getTracker() {
+        return this.getContent().getTracker();
+    }
 }
 
-class BoolItem {
-    constructor(imageName, {name=imageName, category=Categories.Main}={}) {
-        this.image = getIconImage(imageName);
+class Item {
+    constructor(name, category=Categories.Main, defaultState, maxState) {
         this.name = name;
         this.category = category;
-        this.obtained = false;
-        this.parentItem = null;
+        this.defaultState = defaultState;
+        this.maxState = maxState;
+        this.state = 0;
+    }
+    getCategory() {
+        return this.category;
+    } 
+    getName() {
+        return this.name;
+    }
+    getState() {
+        return this.state;
+    }
+    getMinState() {
+        return this.defaultState;
+    }
+    getMaxState() {
+        return this.maxState;
+    }
+    getImage() {
+        return this.image;
+    }
+    getBaseImageSrc() {
+        return this.getImage().src;
+    }
+    getTracker() {
+        if (this.tracker !== undefined)
+            return this.tracker;
+        return null;
+    }
+}
+
+class BoolItem extends Item {
+    constructor(imageName, {name=imageName, category=Categories.Main, alwaysActive=false}={}) {
+        super(name, category, alwaysActive ? 1 : 0, 1);
+        this.image = getIconImage(imageName);
+        this.state = false;
     }
     increase() {
-        this.obtained = !this.obtained;
+        this.state = !this.state;
     }
     decrease() {
         this.increase();
     }
     reset() {
-        this.obtained = false;
+        this.state = false;
     }
     obtain() {
-        this.obtained = true;
+        this.state = true;
     }
     getState() {
-        return this.obtained ? 1 : 0;
+        return this.state ? 1 : 0;
     }
     setState(state) {
         if (typeof state === "boolean")
@@ -150,92 +198,62 @@ class BoolItem {
             this.state = state === 1 ? true : false;
     }
     isObtained() {
-        return this.obtained;
-    }
-    getMaxState() {
-        return 1;
-    }
-    getMinState() {
-        return 0;
-    }
-    getBaseImageSrc() {
-        return this.image.src;
-    }
-    getCategory() {
-        return this.category;
+        return this.state;
     }
     hasParentItem() {
-        return this.parentItem !== null;
+        return this.parentItem !== undefined;
     }
-    getImage() {
-        return this.image;
+    getTracker() {
+        if (this.hasParentItem())
+            return this.parentItem.getTracker();
+
+        if (this.tracker !== undefined)
+            return this.tracker;
+        return null;
     }
  }
 
-class CountItem {
+class CountItem extends Item {
     constructor(imageName, maxCount, {category=Categories.Main, name=imageName, min=0}={}) {
+        super(name, category, min, maxCount);
         this.image = getIconImage(imageName);
-        this.name = name;
-        this.maxCount = maxCount;
-        this.count = min;
-        this.min = min;
-        this.category = category;
     }
     increase() {
-        if (this.count < this.maxCount)
-            ++this.count;
+        if (this.state < this.maxState)
+            ++this.state;
         else 
             this.reset();
     }
     decrease() {
-        if (this.count > this.min)
-            --this.count;
+        if (this.state > this.defaultState)
+            --this.state;
         else 
             this.setCountToMax();
     }
     reset() {
-        this.count = this.min;
+        this.state = this.defaultState;
     }
     setCountToMax() {
-        this.count = this.maxCount;
+        this.state = this.maxState;
     }
     amountIsObtained(amount) {
-        return this.count >= amount;
+        return this.state >= amount;
     }
     oneIsObtained() {
-        return this.count >= 1;
-    }
-    getState() {
-        return this.count;
-    }
-    getMaxState() {
-        return this.maxCount;
-    }
-    getMinState() {
-        return this.min;
-    }
-    getBaseImageSrc() {
-        return this.image.src;
-    }
-    getCategory() {
-        return this.category;
-    }
-    getImage() {
-        return this.image;
+        return this.state >= 1;
     }
 }
 
-class ProgressiveItem {
-    constructor(baseImageName, names, {category=Categories.Main, min=0}={}) {
+class ProgressiveItem extends Item {
+    constructor(name, itemNames, {category=Categories.Main, min=0}={}) {
+        let maxState = itemNames.length
+        super(name, category, min, maxState)
         this.items = [];
-        this.maxProgress = names.length;
-        for (let i = 0; i < this.maxProgress; ++i) {
-            let boolItem = new BoolItem(baseImageName + i, {name: names[i], category: category});
+        for (let i = 0; i < maxState; ++i) {
+            let boolItem = new BoolItem(name + i, {name: itemNames[i], category: category});
             boolItem.parentItem = this;
             this.items[i] = boolItem;
         }
-        this.progress = 0;
-        this.min = min;
     }
     getItemByIndex(index) {
         return this.items[index];
@@ -254,55 +272,54 @@ class ProgressiveItem {
             item.increase();
     }
     increase() {
-        if (this.progress < this.maxProgress) {
-            ++this.progress;
-            this.items[this.progress - 1].obtain();
+        if (this.state < this.maxState) {
+            ++this.state;
+            this.items[this.state - 1].obtain();
         }
         else 
             this.reset();
     }
     decrease() {
-        if (this.progress > this.min) {
-            this.items[this.progress - 1].reset();
-            --this.progress;
+        if (this.state > this.defaultState) {
+            this.items[this.state - 1].reset();
+            --this.state;
         }       
         else 
             this.setProgressToMax();
     }
     reset() {
-        for (let i = this.progress - 1; i > this.min - 1; --i)
+        for (let i = this.state - 1; i > this.defaultState - 1; --i)
             this.items[i].reset();
-        this.progress = this.min;
+        this.state = this.defaultState;
     }
     setProgressToMax() {
-        for (let i = this.progress; i < this.maxProgress; ++i)
+        for (let i = this.state; i < this.maxState; ++i)
             this.items[i].obtain();
-        this.progress = this.maxProgress;
-    }
-    getState() {
-        return this.progress;
-    }
-    getMaxState() {
-        return this.maxProgress;
-    }
-    getMinState() {
-        return this.min;
+        this.state = this.maxState;
     }
     getBaseImageSrc() {
         return this.items[0].getBaseImageSrc();
     }
-    getCategory() {
-        return this.items[0].getCategory();
+    getNextItemImage() {
+        if (this.state === this.maxState)
+            return this.items[this.state - 1].getImage();
+        return this.items[this.state].getImage();
+    }
+    getCurrentItemImage() {
+        if (this.state === 0)
+            return this.items[this.state].getImage();
+        return this.items[this.state - 1].getImage();
     }
     getImage() {
-        return this.items[this.progress].getImage();
+        return this.getNextItemImage();
     }
 }
 
-class CountRequiredItem {
-    constructor(imageName, maxCount, itemNames, {category=Categories.Main, min=0}={}) {
+class CountRequiredItem extends Item {
+    constructor(name, imageName, maxCount, itemNames, {category=Categories.Main, min=0}={}) {
+        super(name, category, min, maxCount);
         this.image = getIconImage(imageName);
-        this.maxCount = maxCount;
+        this.itemCounter = 0;
         this.items = new Map();
         for (let [req, def] of Object.entries(itemNames)) {
             let name, itemImageName;
@@ -319,9 +336,6 @@ class CountRequiredItem {
             boolItem.parentItem = this;
             this.items.set(req, boolItem);
         }
-        this.counter = 0;
-        this.itemCounter = 0;
-        this.min = min;
     }
     getItemByReq(req) {
         return this.items.get(req.toString());
@@ -339,10 +353,10 @@ class CountRequiredItem {
         return parseInt(Array.from(this.items.keys())[this.itemCounter]);
     }
     increase() {
-        if (this.counter < this.maxCount) {
-            ++this.counter;
-            if (this.counter === this.getNextItemRequirement()) {
-                this.items.get(this.counter.toString()).obtain();
+        if (this.state < this.maxState) {
+            ++this.state;
+            if (this.state === this.getNextItemRequirement()) {
+                this.items.get(this.state.toString()).obtain();
                 ++this.itemCounter;
             }
         }
@@ -350,10 +364,10 @@ class CountRequiredItem {
            this.reset();
     }
     decrease() {
-        if (this.counter > 0) {
-            --this.counter;
-            if (this.counter === this.getNextItemRequirement()) {
-                this.items.get(this.counter.toString()).reset();
+        if (this.state > 0) {
+            --this.state;
+            if (this.state === this.getNextItemRequirement()) {
+                this.items.get(this.state.toString()).reset();
                 --this.itemCounter;
             }
         }
@@ -361,34 +375,16 @@ class CountRequiredItem {
             this.setCountToMax()
     }
     reset() {
-        this.counter = 0;
+        this.state = 0;
         this.itemCounter = 0;
         for (let item in this.items.values())
             item.reset();
     }
     setCountToMax() {
-        this.counter = this.maxCount;
-        this.itemCounter = this.items.keys().length - 1;
+        this.state = this.maxState;
+        this.itemCounter = this.items.size - 1;
         for (let item in this.items.values())
             item.obtain();
-    }
-    getState() {
-        return this.counter;
-    }
-    getMaxState() {
-        return this.maxCount;
-    }
-    getMinState() {
-        return this.min;
-    }
-    getBaseImageSrc() {
-        return this.image.src;
-    }
-    getCategory() {
-        return this.getItemByIndex(0).getCategory();
-    }
-     getImage() {
-        return this.items[this.itemCounter].getImage();
     }
 }
 
@@ -402,10 +398,16 @@ class MultiItem {
         return this.item.getCategory();
     }
     static getNameFormat(item, amount) {
-        return item.name + "&nbsp&nbsp×&nbsp&nbsp" + amount;;
+        return item.name + "&nbsp&nbsp×&nbsp&nbsp" + amount;
     }
     getImage() {
         return this.item.getImage();
+    }
+    getName() {
+        return this.name;
+    }
+    getTracker() {
+        return this.item.getTracker();
     }
 }
 
@@ -419,51 +421,51 @@ function makeBugItem(species, gender) {
 }
 
 // Item Wheel
-var fishingRods = new ProgressiveItem('Fishing Rod', ['Fishing Rod', 'Fishing Rod & Coral Earring']);
+var fishingRods = new ProgressiveItem('Progressive Fishing Rod', ['Fishing Rod', 'Fishing Rod & Coral Earring']);
 var slingshot = new BoolItem('Slingshot');
 var lantern = new BoolItem('Lantern');
 var boomerang = new BoolItem('Gale Boomerang');
 var ironBoots = new BoolItem('Iron Boots');
-var bow = new ProgressiveItem("Bow", [
+var bow = new ProgressiveItem("Progressive Bow", [
     "Hero's Bow", "Hero's Bow & Big Quiver", "Hero's Bow & Giant Quiver"
 ]);
 var hawkeye = new BoolItem('Hawkeye');
 var bombBag = new CountItem('Bomb Bag', 3);
 var giantBombBag = new BoolItem("Giant Bomb Bag");
-var clawshots = new ProgressiveItem("Clawshot", ["Clawshot", "Double Clawshot"]);
+var clawshots = new ProgressiveItem("Progressive Clawshot", ["Clawshot", "Double Clawshot"]);
 var aurusMemo = new BoolItem("Auru's Memo");
 var spinner = new BoolItem("Spinner");
 var asheisSketch = new BoolItem("Ashei's Sketch");
 var ballAndChain = new BoolItem("Ball and Chain");
-var dominionRods = new ProgressiveItem('Dominion Rod', ['Past Dominion Rod', 'Dominion Rod']);
+var dominionRods = new ProgressiveItem('Progressive Dominion Rod', ['Past Dominion Rod', 'Dominion Rod']);
 var horseCall = new BoolItem('Horse Call');
 var iliasCharm = new BoolItem("Ilia's Charm");
 var renadosLetter = new BoolItem("Renado's Letter");
 var invoice = new BoolItem('Invoice');
 var woodenStatue = new BoolItem('Wooden Statue');
 var bottle = new CountItem('Bottle', 4, {name: 'Empty Bottle'});
-var skybook = new CountRequiredItem('Sky Book Character', 7, {
+var skybook = new CountRequiredItem('Progressive Sky Book', 'Sky Book Character', 7, {
     1 : "Ancient Sky Book", 7 : "Filled Sky Book"
 }, {category: Categories.SkyCharacters});
 // Start Menu
-var swords = new ProgressiveItem('Sword', [
+var swords = new ProgressiveItem('Progressive Sword', [
     'Wooden Sword', 'Ordon Sword', 'Master Sword', 'Light Filled Master Sword'
 ]);
-var woodenShields = new ProgressiveItem("Shield", [
+var woodenShields = new ProgressiveItem("Progressive Shield", [
     'Ordon Shield', 'Wooden Shield'
 ]);
-var hylianShield = new BoolItem('Shield2', {name: "Hylian Shield"});
+var hylianShield = new BoolItem("Hylian Shield");
 var zoraArmor = new BoolItem("Zora Armor");
 var magicArmor = new BoolItem("Magic Armor");
 var heartPiece = new CountItem('Heart Piece', 45, {category: Categories.Hearts});
 var heartContainer = new CountItem('Heart Container', 8, {category: Categories.Hearts});
-var wallets = new ProgressiveItem("Wallet", [
+var wallets = new ProgressiveItem("Progressive Wallet", [
     "Wallet", "Big Wallet", "Giant Wallet"
 ], {min: 1}); // We start with the Wallet so min=1
-var scents = new ProgressiveItem("Scent", [
+var scents = new ProgressiveItem("Progressive Scent", [
     "Youths' Scent", "Scent of Ilia", "Poe Scent", "Reekfish Scent", "Medicine Scent"
 ]);
-var hiddenSkills = new CountRequiredItem('Hidden Skill', 7, {
+var hiddenSkills = new CountRequiredItem('Progressive Hidden Skill', 'Hidden Skill', 7, {
     1 : 'Ending Blow', 2 : 'Shield Attack', 3 : 'Back Slice', 4 : 'Helm Splitter',
     5 : 'Mortal Draw', 6 : 'Jump Strike', 7 : "Great Spin"
 }, {category: Categories.HiddenSkills});
@@ -502,6 +504,7 @@ var faronKey = new BoolItem('Small KeyF', {name: 'Faron Woods Key'});
 var bulblinKey = new BoolItem('Small KeyB', {name: 'Bulblin Camp Key'});
 var gateKey = new BoolItem('Small KeyG', {name: 'Gate Keys'});
 var rupees = new CountItem('Rupees', 9999, {category: Categories.Rupees, min: 9999});
+rupees.state = 9999;
 // Dungeon Items
 var forestSK = new CountItem('Small Key', 4, {name: 'Forest Temple Small Key'});
 var forestMap = new BoolItem('Dungeon Map', {name: "Forest Temple Map"});
@@ -512,7 +515,7 @@ var diababa = new BoolItem('Diababa', {category: Categories.Bosses});
 var minesSK = new CountItem('Small Key', 3, {name: 'Goron Mines Small Key'});
 var minesMap = new BoolItem('Dungeon Map', {name: "Goron Mines Map"});
 var minesCompass = new BoolItem("Compass", {name: "Goron Mines Compass"});
-var minesBK = new CountRequiredItem('GBK2', 3, {
+var minesBK = new CountRequiredItem('Goron Mines Key Shard', 'GBK2', 3, {
     3 : {name: "Goron Mines Boss Key", imageName: "GBK3"}
 }); 
 var fyrus = new BoolItem('Fyrus', {category: Categories.Bosses});

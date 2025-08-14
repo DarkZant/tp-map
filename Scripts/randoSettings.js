@@ -21,8 +21,8 @@ class CheckboxRandoSetting extends RandoSetting {
     isEnabled() {
         return this.active;
     }  
-    setActive(active) {
-        this.active = active;
+    set(value) {
+        this.active = value;
     }
 }
 
@@ -37,18 +37,22 @@ class SelectRandoSetting extends RandoSetting {
     getValue() {
         return this.values;
     }  
+    set(value) {
+        this.value = value;
+    }
 }
 
 
 
 const RandoSettings = Object.freeze({
     SkipPrologue: new CheckboxRandoSetting('Skip Prologue'),
+    FaronWoodsLogic: new SelectRandoSetting('Faron Woods Logic'),
     UnlockMapRegions : new CheckboxRandoSetting('Unlock Map Regions'),
     OpenDoT : new CheckboxRandoSetting('Open Door of Time'),
     WalletCapacity : new CheckboxRandoSetting('Increase Wallet Capacity'),
     LakebedBombs : new CheckboxRandoSetting('Lakebed Does Not Require Water Bombs'),
     ArbitersCamp : new CheckboxRandoSetting('Arbiters Does Not Require Bulblin Camp'),
     SnowpeakReekfish : new CheckboxRandoSetting('Snowpeak Does Not Require Reekfish Scent'),
-    CitySkybook : new CheckboxRandoSetting('City Does Not Require Filled Skybook'),
     TempleTime : new SelectRandoSetting('Temple of Time Entrance'),
+    CitySkybook : new CheckboxRandoSetting('City Does Not Require Filled Skybook'),
 });

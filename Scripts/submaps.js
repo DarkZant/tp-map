@@ -919,17 +919,13 @@ class Province {
         this.polygon.on('click', clickToZoom);
         this.boundSetPolygon = this.setPolygon.bind(this);
         this.boundUnsetPolygon = this.unsetPolygon.bind(this);
+        this.marker = L.marker(this.counterPosition, {
+            interactive: false
+        });
     }
     loadPolygon() {
         addPolygonToMap(this.polygon);
         this.polygon.setStyle({ fillOpacity: 0 });
-        if (Settings.CountersVisibility.isEnabled()) {
-            this.marker = L.marker(this.counterPosition, {
-                icon: this.getCounterMarkerIcon(),
-                interactive: false
-            });
-            addMarkerToMap(this.marker);
-        }
         if (this.shownFlagsAreSet())
             this.setVisually();
         else 
@@ -1072,9 +1068,12 @@ const Dungeons = Object.freeze({
         "Forest Temple Diababa",
         "Forest Temple Diababa Heart Container",
         "Forest Temple Dungeon Reward",
-        "Forest_Temple_Sign",
+        "Forest Temple Sign",
         Bottle.Fairy.new([-3920, 4820]),
-    ]], {baseReqs: [lanternReq], randoReqs: []}),
+    ]], {
+        baseReqs: [lanternReq], 
+        randoReqs: []
+    }),
     
     Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
         [   // 1F
@@ -1107,10 +1106,13 @@ const Dungeons = Object.freeze({
             "Goron Mines Fyrus",
             "Goron Mines Fyrus Heart Container",
             "Goron Mines Dungeon Reward",
-            "Goron_Mines_Sign",
+            "Goron Mines Sign",
             Bottle.Fairy.new([-3644, 4560])
         ]
-    ], {}),
+    ], {
+        baseReqs: [ironBootsReq], 
+        randoReqs: [[diababaReq, openWoodsReq], ironBootsReq]
+    }),
 
     Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
         [   // B2
@@ -1134,7 +1136,7 @@ const Dungeons = Object.freeze({
             "Lakebed Temple East Lower Waterwheel Bridge Chest",
             "Lakebed Temple Underwater Maze Small Chest",
             "Lakebed Temple Before Deku Toad Lock",
-            "Lakebed_Temple_Sign",
+            "Lakebed Temple Sign",
         ], [ // 2F
             "Lakebed Temple Lobby Rear Chest",
             "Lakebed Temple Lobby Left Chest",
@@ -1158,7 +1160,10 @@ const Dungeons = Object.freeze({
             "Lakebed Temple West Water Supply Small Chest",
             "Lakebed Temple West Water Supply Chest",
         ]
-    ], {floorOffset: 1, baseReqs: [zoraArmorReq, bombBagReq]}),
+    ], {floorOffset: 1, 
+        baseReqs: [zoraArmorReq, bombBagReq], 
+        randoReqs: [zoraArmor, [bombBagReq, lakebedBombsReq]]
+    }),
 
     Grounds: new Dungeon([-3865, 605], [-4500, 1488], dungeonIconImage, "Arbiter's Grounds", [
         [   // B2
@@ -1188,7 +1193,7 @@ const Dungeons = Object.freeze({
             "Arbiters Grounds West Stalfos West Chest",
             "Arbiters Grounds Big Key Chest",
             "Arbiters Grounds East Turning Room Lock",
-            "Arbiters_Grounds_Sign",
+            "Arbiters Grounds Sign",
             Bottle.Oil.new([-5341, 4446])
 
         ], [ // 2F
@@ -1208,7 +1213,10 @@ const Dungeons = Object.freeze({
             "Arbiters Grounds Dungeon Reward",
             Bottle.Fairy.new([-3828, 4100])
         ]
-    ], {floorOffset: 1, baseReqs: [aurusMemoReq, bulblinKeyReq], randoReqs: [aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]}),
+    ], {floorOffset: 1, 
+        baseReqs: [aurusMemoReq, bulblinKeyReq], 
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
+    }),
 
     Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
         [    // 1F
@@ -1234,7 +1242,7 @@ const Dungeons = Object.freeze({
             "Snowpeak Ruins Ball and Chain",
             "Snowpeak Ruins Chest After Darkhammer",
             "Snowpeak Ruins Armor Bubble Rupee After Darkhammer",
-            "Snowpeak_Ruins_Sign",
+            "Snowpeak Ruins Sign",
             Bottle.Soup.new([-5141, 4911])
         ], [ // 2F
             "Snowpeak Ruins Chapel Chest",
@@ -1250,7 +1258,10 @@ const Dungeons = Object.freeze({
             "Snowpeak Ruins Blizzeta Heart Container",
             "Snowpeak Ruins Dungeon Reward",
         ]
-    ], {baseReqs: [coralEarringReq, reekfishScentReq]}),
+    ], {
+        baseReqs: [coralEarringReq, reekfishScentReq], 
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq], snowpeakScentReq)]]
+    }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
         [    // 1F
@@ -1264,7 +1275,7 @@ const Dungeons = Object.freeze({
             "Temple of Time First Staircase Gohma Gate Chest",
             "Temple of Time Ooccoo",
             "Temple of Time Lobby Lock",
-            "Temple_of_Time_Sign"
+            "Temple of Time Sign"
         ], [ // 3F
             "Temple of Time First Staircase Armos Chest",
             "Temple of Time First Staircase Window Chest",
@@ -1278,7 +1289,7 @@ const Dungeons = Object.freeze({
             "Temple of Time Second Staircase Lock",
             "Temple of Time Moving Wall Beamos Room Chest", 
             "Temple of Time Moving Wall Dinalfos Room Chest", 
-            "Temple_of_Time_Beyond_Point_Sign",
+            "Temple of Time Beyond Point Sign",
         ], [ // 6F
             "Temple of Time Scales Gohma Chest",
         ], [ // 7F
@@ -1292,7 +1303,10 @@ const Dungeons = Object.freeze({
             "Temple of Time Darknut Lock",
             "Temple of Time Darknut Chest",
         ]
-    ], {baseReqs: [blizzetaReq, masterSwordReq], randoReqs: [shadowCrystalReq, [masterSwordReq, openToTReq]]}),
+    ], {
+        baseReqs: [blizzetaReq, masterSwordReq], 
+        randoReqs: [shadowCrystalReq, [masterSwordReq, openToTReq]]
+    }),
 
     City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
         [    // B3
@@ -1314,7 +1328,7 @@ const Dungeons = Object.freeze({
             "City in The Sky West Wing Tile Worm Chest",
             "City in The Sky Chest Behind North Fan",
             "City in The Sky North Aeralfos Rupee",
-            "City_in_the_Sky_Sign",
+            "City in the Sky Sign",
             Bottle.Fairy.new([-4495, 3767])
         ], [ // 2F
             "City in The Sky East Wing After Dinalfos Alcove Chest",
@@ -1343,7 +1357,10 @@ const Dungeons = Object.freeze({
             Bottle.Fairy.new([-3728, 4136]),
             Bottle.BlueChu.new([-3674, 4127])
         ]
-    ], {floorOffset: 0, baseReqs: [clawshotReq, completedSkybookReq]}),
+    ], {floorOffset: 0, 
+        baseReqs: [clawshotReq, completedSkybookReq],
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], clawshotReq, [completedSkybookReq, openCityReq]],
+    }),
 
     Palace: new Dungeon([-3636, 602], [-3800, 1472], "Mirror", 'Palace of Twilight', [
         [    // 1F
@@ -1365,7 +1382,7 @@ const Dungeons = Object.freeze({
             "Palace of Twilight East Wing Second Room Northeast Chest",
             "Palace of Twilight East Wing Second Room Southeast Chest",
             "Palace of Twilight East Wing Second Lock",
-            "Palace_of_Twilight_Sign",
+            "Palace of Twilight Sign",
             Bottle.Fairy.new([-5106, 3727])
         ], [ // 2F
             "Palace of Twilight Central First Room Chest"
@@ -1382,7 +1399,10 @@ const Dungeons = Object.freeze({
             "Palace of Twilight Zant",
             "Palace of Twilight Zant Heart Container",
         ]
-    ], {baseReqs: [stallordReq, completedMirrorReq], randoReqs: [stallordReq]}),
+    ], {
+        baseReqs: [stallordReq, completedMirrorReq], 
+        randoReqs: [stallordReq]
+    }),
 
     Castle: new Dungeon([-3250, 4712], [], 'Castle', 'Hyrule Castle', [
         [    // 1F
@@ -1396,7 +1416,7 @@ const Dungeons = Object.freeze({
             "Hyrule Castle Graveyard Grave Switch Room Back Left Chest",
             "Hyrule Castle Graveyard Grave Switch Room Right Chest",
             "Hyrule Castle Graveyard Owl Statue Chest",
-            "Hyrule_Castle_Sign",
+            "Hyrule Castle Sign",
             Bottle.Oil.new([-3890, 4791])
         ], [ // 2F
             "Hyrule Castle Main Hall Northeast Chest",
@@ -1433,7 +1453,10 @@ const Dungeons = Object.freeze({
             "Hyrule Castle Ganondorf",
             Bottle.Fairy.new([-4957, 4179])
         ]   
-    ], {baseReqs: [zantReq], randoReqs: []})
+    ], {
+        baseReqs: [zantReq], 
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+    })
 });
 
 
@@ -1465,7 +1488,7 @@ const Provinces = Object.freeze({
             "Herding Goats Reward",
             "Rusl's House Orange Rupee",
             "Jaggle House's Purple Rupee",
-            "Ordon_Sign",
+            "Ordon Sign",
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
                 ["Wooden Sword Chest"],
@@ -1530,9 +1553,9 @@ const Provinces = Object.freeze({
             "Coro Lock",
             "Faron Mist Lock",
             "Faron Field Gate Lock",
-            "Faron_Field_Sign",
-            "Faron_Woods_Sign",
-            "Sacred_Grove_Sign",
+            "Faron Field Sign",
+            "Faron Woods Sign",
+            "Sacred Grove Sign",
             horseGrass.new([-7900, 4857]),
             horseGrass.new([-7701, 4803]),
             horseGrass.new([-6666, 4936]),
@@ -1563,7 +1586,10 @@ const Provinces = Object.freeze({
             ])
     ]),
 
-    Eldin: new Province("Eldin", [-4096, 7904], {baseReqs: [diababaReq], randoReqs: []}, [
+    Eldin: new Province("Eldin", [-4096, 7904], {
+            baseReqs: [diababaReq],
+            randoReqs: [[diababaReq, openWoodsReq]]
+        }, [
             [-5952, 6280], [-5936, 7020], [-5904, 7676], [-6044, 8248], [-5952, 8836], [-5612, 9452], [-5212, 9544], [-4584, 9492], 
             [-3932, 9572], [-3340, 9472], [-2956, 9196], [-2460, 9040], [-1972, 8608], [-1404, 8006], [-1228, 7352], [-2164, 7080], 
             [-2772, 7060], [-2989, 7110], [-3281, 6985], [-3432, 6760], [-3580, 6472], [-3748, 6372], [-3932, 6324], [-4276, 6340], 
@@ -1612,13 +1638,13 @@ const Provinces = Object.freeze({
             "Death Mountain Howling Stone",
             "Hidden Village Howling Stone",
             "Kakariko Gorge Gate Lock",
-            "Death_Mountain_Sign",
-            "Eldin_Field_Sign",
-            "Hidden_Village_Sign",
-            "Kakariko_Gorge_Sign",
-            "Kakariko_Graveyard_Sign",
-            "Kakariko_Village_Sign",
-            "North_Eldin_Sign",
+            "Death Mountain Sign",
+            "Eldin Field Sign",
+            "Hidden Village Sign",
+            "Kakariko Gorge Sign",
+            "Kakariko Graveyard Sign",
+            "Kakariko Village Sign",
+            "North Eldin Sign",
             horseGrass.new([-5564, 7612]),
             horseGrass.new([-4716, 6818]),
             horseGrass.new([-5342, 6186]),
@@ -1690,7 +1716,10 @@ const Provinces = Object.freeze({
                 "Skybook From Impaz"
             ]),
     ]),
-    Desert: new Province("Desert", [-5440, 2224], {baseReqs: [Requirement.fromBoolItem(aurusMemo)]}, [
+    Desert: new Province("Desert", [-5440, 2224], {
+            baseReqs: [aurusMemoReq], 
+            randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq]
+        }, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
             [-3804, 2924], [-3840, 3154], [-4984, 3264], [-5116, 3148], [-5280, 3184], [-5472, 3256], [-5640, 3424], [-5953, 3742],
             [-6336, 3736]
@@ -1723,8 +1752,8 @@ const Provinces = Object.freeze({
             "Outside Bulblin Camp Poe",
             "Gerudo Desert Owl Statue Sky Character",
             "Gerudo Desert Owl Statue Chest",
-            "Bulblin_Camp_Sign",
-            "Gerudo_Desert_Sign",
+            "Bulblin Camp Sign",
+            "Gerudo Desert Sign",
             newGrotto(4, [-6060, 2588], "Gerudo Desert Skulltula Grotto", [
                 "Gerudo Desert Skulltula Grotto Chest"
             ]),
@@ -1737,7 +1766,7 @@ const Provinces = Object.freeze({
                 "Gerudo Desert Rock Grotto Lantern Chest"
             ]),
             new CaveOfOrdeals([-6116, 503], entranceIconImage, [
-                ["Cave_of_Ordeals_Sign"], // B1
+                ["Cave of Ordeals Sign"], // B1
                 [], // B2
                 [], // B3
                 [], // B4
@@ -1803,7 +1832,10 @@ const Provinces = Object.freeze({
             ])
     ]),
 
-    Peak: new Province('Peak', [-1744, 3488], {baseReqs: [stallordReq], randoReqs:[]}, [
+    Peak: new Province('Peak', [-1744, 3488], {
+        baseReqs: [stallordReq], 
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+    }, [
         [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
             [-2704, 4220], [-3036, 4080], [-3624, 3880], [-3812, 3184], [-3636, 2272], [-3436, 1720], [-2668, 1568], [-2092, 1804], 
             [-1696, 2288], [-852, 2616], [-620, 3676], [-584, 4612]
@@ -1817,7 +1849,7 @@ const Provinces = Object.freeze({
         "Snowpeak Cave Ice Poe",
         "Snowpeak Cave Ice Lantern Chest",
         "Snowpeak Howling Stone",
-        "Snowpeak_Mountain_Sign",
+        "Snowpeak Mountain Sign",
         newGrotto(4, [-405, 3690], "Snowpeak Freezard Grotto", [
             "Snowpeak Freezard Grotto Chest"
         ]),
@@ -1825,7 +1857,10 @@ const Provinces = Object.freeze({
             Bottle.RareChu.new([-416, 3048])
         ]),
     ]),
-    Lanayru: new Province('Lanayru', [-2192, 5984], {baseReqs: [fyrusReq, bombBagReq], randoReqs: []}, [[
+    Lanayru: new Province('Lanayru', [-2192, 5984], {
+        baseReqs: [fyrusReq, bombBagReq], 
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+    }, [[
         [-5400, 5584], [-5360, 6000], [-5056, 5968], [-4640, 6248], [-4312, 6336], [-3696, 6344], [-3528, 6472], [-3424, 6728], 
         [-3280, 6968], [-2992, 7104], [-2760, 7048], [-2096, 7072], [-1248, 7328], [-800, 7216], [-584, 6768], [-480, 6368], 
         [-504, 5832], [-606, 5444], [-722, 5358], [-1104, 5408], [-1288, 5376], [-1554, 5161], [-1704, 4896], [-1894, 4812], 
@@ -1915,16 +1950,16 @@ const Provinces = Object.freeze({
         "Upper Zoras River Above Water Rupee Boulder",
         "Lake Hylia West Underwater Rupee Boulder",
         "Lake Hylia East Underwater Rupee Boulder",
-        "Agithas_Castle_Sign",
-        "Beside_Castle_Town_Sign",
-        "Castle_Town_Sign",
-        "Great_Bridge_of_Hylia_Sign",
-        "Jovani_House_Sign",
-        "Lake_Hylia_Sign",
-        "Lanayru_Field_Sign",
-        "South_of_Castle_Town_Sign",
-        "Upper_Zoras_River_Sign",
-        "Zoras_Domain_Sign",
+        "Agithas Castle Sign",
+        "Beside Castle Town Sign",
+        "Castle Town Sign",
+        "Great Bridge of Hylia Sign",
+        "Jovani House Sign",
+        "Lake Hylia Sign",
+        "Lanayru Field Sign",
+        "South of Castle Town Sign",
+        "Upper Zoras River Sign",
+        "Zoras Domain Sign",
         horseGrass.new([-4268, 3152]),
         hawkGrass.new([-5218, 2926]),
         hawkGrass.new([-4901, 3895]),
@@ -2028,7 +2063,7 @@ const Provinces = Object.freeze({
             "Lanayru Spring East Double Clawshot Chest",
             "Lanayru Spring Underwater North Rupee Boulder",
             "Lanayru Spring Underwater South Rupee Boulder",
-            "Lanayru_Spring_Sign"
+            "Lanayru Spring Sign"
         ]),
         new SimpleSubmap([-5546, 3134], entranceIconImage, 'Lake Lantern Cave', [
             "Lake Lantern Cave First Chest",
@@ -2049,7 +2084,7 @@ const Provinces = Object.freeze({
             "Lake Lantern Cave Fourteenth Chest",
             "Lake Lantern Cave Final Poe",
             "Lake Lantern Cave End Lantern Chest",
-            "Lake_Lantern_Cave_Sign"
+            "Lake Lantern Cave Sign"
         ]),
         new SimpleSubmap([-2025, 4818], entranceIconImage, 'Lanayru Ice Cave', [
             "Lanayru Ice Block Puzzle Cave Chest"

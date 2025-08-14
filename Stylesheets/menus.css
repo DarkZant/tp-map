@@ -211,9 +211,9 @@
     display: flex;
     justify-content: center;
     column-gap: 2vw;
-    font-family: Courier;
+    padding-top: 1.5dvh;
 }
-#settingsButtons button {
+#settings button {
     width: 8vmax;
     max-width: 8vmax;
     min-width: 50px;
@@ -228,7 +228,7 @@
     margin-bottom: 1vh;
     font-family: Arial, sans-serif;
 }
-#settingsButtons button:hover {
+#settings button:hover {
     background-color: #272727;
 }
 .selectContainer {
@@ -261,10 +261,9 @@ select {
     padding-bottom: 1dvh;
 }
 #randoSeedFile {
-    width: 65%;
+    width: 75%;
     border: 0.1vw dashed #c0c0c0;
     border-radius: 0.5vw;
-    padding: 4dvh 0;
     cursor: pointer;
     transition: background-color 0.1s, border-color 0.1s;
     user-select: none;
@@ -272,7 +271,7 @@ select {
 #randoSeedFile:hover {
     background-color: #3f3f3f;
 }
-#randoSeedFile:hover p {
+#randoSeedFile:hover #randoSeedFileText {
     text-decoration: underline;
 }
 #randoSeedFile.dragover {
@@ -280,21 +279,25 @@ select {
     border-color: #8a8a8a;
 }
 
-#randoSeedFile p {
-    font-size: 0.9vw;
-    padding: 2dvh 1dvw;
+#randoSeedFileText {
+    padding: 6dvh 1dvw;
+    margin: 0;
     border-radius: 0.5vw;
+    font-size: 0.9vw;
+    line-height: 2.5dvh;
 }
 #spoilerLog {
     display: none;
     font-size: calc(5px + 0.3vw);
     width: 6.9dvw;
 }
+#settings #Unload_Seed {
+    display: none;
+    margin: 0;
+}
 #seedSettings {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    row-gap: 0.5dvh;
+    text-align: left;
+    display: none;
 }
 
 #settingsCheckboxes {

@@ -31,15 +31,18 @@ class Flag extends Storable{
         return this.item.image;
     }
     getCurrentItem() {
-        if (seedIsLoaded && selectedGamemode !== Gamemodes.Base)
+        if (Settings.RevealSpoilerLog.isEnabled() && this.hasRandoItem() && randoIsActive())
             return this.randoItem;
         else
             return this.item;
     }
     getMarkerImage() {
+        let item = this.getCurrentItem();
         if (Settings.ChestsContent.isEnabled() && this.isContainer())
-            return this.getCurrentItem().getContentImage();
-        return this.getCurrentItem().getImage();
+            item = item.getContent();
+        if (item instanceof ProgressiveItem) 
+            return this.isSet() ? item.getCurrentItemImage() : item.getNextItemImage();
+        return item.getImage();
     }
     setName(name) {
         this.name = name;
@@ -49,18 +52,22 @@ class Flag extends Storable{
         this.itemCategory = item.getCategory();
         this.marker.setIcon(getIcon(this.getImage()));
     }
+    setRandoItem(item) {
+        if (this.isContainer())
+            this.randoItem = this.item.with(item);
+        else
+            this.randoItem = item;
+        this.randoItemCategory = item.getCategory();
+    }
+    setRandoDescription(description) {
+        this.randoDesc = description;
+        this.glitchedDesc = description;
+    }
     isContainer() {
         return this.item instanceof Container;
     }
-    getItemTracker(item) {
-        item = this.isContainer() ? item.content : item;
-        if (item instanceof Obtainable && item.hasItem())
-            item = item.item;
-        if (item instanceof BoolItem && item.hasParentItem())
-            item = item.parentItem;
-        if (item.tracker !== undefined)
-            return item.tracker
-        return null;
+    hasRandoItem() {
+        return this.randoItem !== undefined;
     }
     set() {
         if (this.isSet())
@@ -89,7 +96,7 @@ class Flag extends Storable{
         return this._set ? 1 : 0;
     }
     isRandomizerCheck() {
-        if (this.item instanceof Obtainable && this.item.item === null)
+        if (this.item === howlingStone)
             return false;
         return RandomizerCheckCategories.includes(this.randoCategory);
     }
@@ -139,10 +146,9 @@ class Flag extends Storable{
         return true;
     }
     isCountable() {
-        if (this.isSet())
+        if (this.isSet() || !this.isShown())
             return false;
-        if (!this.isShown())
-            return false;
+
         if (selectedGamemode === Gamemodes.Base)
             return Settings.CountFlags.isEnabled();
         else {
@@ -175,20 +181,18 @@ class Flag extends Storable{
         this.marker.setTooltipContent(this.getItemName());
     }
     getFlagName() {
-        return underscoreToSpace(this.name);
+        return this.name;
     }
     getItemName() {
         if (this.isContainer())
-            return this.getCurrentItem().content.name;
+            return this.getCurrentItem().getContentName();
         else 
-            return this.getCurrentItem().name;
+            return this.getCurrentItem().getName();
     }
     showDetails() {
-        let base = this.item;
+        let item = this.getCurrentItem();
         let requirements = this.baseReqs;
         let description = this.baseDesc;
-        if (selectedGamemode !== Gamemodes.Base && seedIsLoaded)
-            base = this.randoItem;
 
         switch(selectedGamemode) {
             case Gamemodes.Glitchless : {
@@ -207,11 +211,11 @@ class Flag extends Storable{
         detailsMenu.style.width = "24.4vw";
         setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);    
         document.getElementById("flagName").style.display = "inline";
-        document.getElementById("flagNameDiv").innerHTML = underscoreToSpace(this.name);   
+        document.getElementById("flagNameDiv").innerHTML = this.name;   
         document.getElementById('flagItem').style.display = "inline"; 
         if (this.isContainer()) {
             document.getElementById('flagItemTitle').innerHTML = "Content";
-            document.getElementById('flagItemDiv').innerHTML = displayContainer(base);
+            document.getElementById('flagItemDiv').innerHTML = displayContainer(item);
         }
         else {
             let title = "Item";
@@ -226,7 +230,7 @@ class Flag extends Storable{
                 }
             }
             document.getElementById('flagItemTitle').innerHTML = title;
-            document.getElementById('flagItemDiv').innerHTML = displayItem(base);
+            document.getElementById('flagItemDiv').innerHTML = displayItem(item);
         }
         if (requirements.length > 0) {
             document.getElementById('flagRequirements').style.display = "block";
@@ -261,8 +265,17 @@ class Flag extends Storable{
         }
         else 
             document.getElementById('flagRequirements').style.display = "none";
+
         document.getElementById('flagDescription').style.visibility = "visible";
-        document.getElementById('flagDescriptionDiv').innerHTML = description;
+        let flagDescDiv = document.getElementById('flagDescriptionDiv');
+        if (this.itemCategory === Categories.Hints) {
+            if (Settings.RevealHints.isEnabled())
+                flagDescDiv.innerHTML = description;
+            else
+                flagDescDiv.innerHTML = 'Hints are hidden.<br>Enable the "Reveal Hints" setting to see them.'
+        }
+        else
+           flagDescDiv.innerHTML = description;
         map.on('click', hideDetails);
     }
     loadMarker(position=this.position) {
@@ -292,19 +305,17 @@ class Flag extends Storable{
         this.unset();
         this.unsetVisually();
     }
+    getItemTracker() {
+        if (Settings.RandoTracker.isEnabled() && this.hasRandoItem() && randoIsActive())
+            return this.randoItem.getTracker();
+        return this.item.getTracker();
+    }
     manageItemTracker() {
         if (!Settings.AutocompleteTracker.isEnabled()) 
             return;
-        if (selectedGamemode === Gamemodes.Base || !seedIsLoaded) {
-            let itemTracker = this.getItemTracker(this.item);
-            if (itemTracker !== null)
-                this.isSet() ? itemTracker.increase() : itemTracker.decrease();
-        }
-        else {
-            let randoItemTracker = this.getItemTracker(this.randoItem);
-            if (randoItemTracker !== null)
-                this.isSet() ? randoItemTracker.increase() : randoItemTracker.decrease();
-        }       
+        let itemTracker = this.getItemTracker();
+        if (itemTracker !== null)
+            this.isSet() ? itemTracker.increase() : itemTracker.decrease();
     }
     setVisually() {
         showMarkerAsSet(this.marker, this.getMarkerImage());
@@ -2937,59 +2948,59 @@ const flags = new Map([
         baseDesc: 'Defeat Ganondorf to save Hyrule!'
     })],
     // Rando Hints
-    ["Agithas_Castle_Sign", new Flag(randoHint, [-4155, 4551])],
-    ["Arbiters_Grounds_Sign", new Flag(randoHint, [-4491, 4314], {
+    ["Agithas Castle Sign", new Flag(randoHint, [-4155, 4551])],
+    ["Arbiters Grounds Sign", new Flag(randoHint, [-4491, 4314], {
         baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
     })],
-    ["Beside_Castle_Town_Sign", new Flag(randoHint, [-3883, 4188])],
-    ["Bulblin_Camp_Sign", new Flag(randoHint, [-4151, 531])],
-    ["Castle_Town_Sign", new Flag(randoHint, [-3994, 4707])],
-    ["Cave_of_Ordeals_Sign", new Flag(randoHint, [-6268, 581])],
-    ["City_in_the_Sky_Sign", new Flag(randoHint, [-4589, 4220], {
+    ["Beside Castle Town Sign", new Flag(randoHint, [-3883, 4188])],
+    ["Bulblin Camp Sign", new Flag(randoHint, [-4151, 531])],
+    ["Castle Town Sign", new Flag(randoHint, [-3994, 4707])],
+    ["Cave of Ordeals Sign", new Flag(randoHint, [-6268, 581])],
+    ["City in the Sky Sign", new Flag(randoHint, [-4589, 4220], {
         baseReqs: [clawshotReq]
     })],
-    ["Death_Mountain_Sign", new Flag(randoHint, [-3828, 8247])],
-    ["Eldin_Field_Sign", new Flag(randoHint, [-4282, 5928])],
-    ["Faron_Field_Sign", new Flag(randoHint, [-6202, 4889])],
-    ["Faron_Woods_Sign", new Flag(randoHint, [-7478, 4945])],
-    ["Forest_Temple_Sign", new Flag(randoHint, [-5405, 4055])],
-    ["Gerudo_Desert_Sign", new Flag(randoHint, [-5481, 1185])],
-    ["Goron_Mines_Sign", new Flag(randoHint, [-3723, 5334], {
+    ["Death Mountain Sign", new Flag(randoHint, [-3828, 8247])],
+    ["Eldin Field Sign", new Flag(randoHint, [-4282, 5928])],
+    ["Faron Field Sign", new Flag(randoHint, [-6202, 4889])],
+    ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
+    ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055])],
+    ["Gerudo Desert Sign", new Flag(randoHint, [-5481, 1185])],
+    ["Goron Mines Sign", new Flag(randoHint, [-3723, 5334], {
         baseReqs: [ironBootsReq, mines3SKReq]
     })],
-    ["Great_Bridge_of_Hylia_Sign", new Flag(randoHint, [-4250, 3381])],
-    ["Hidden_Village_Sign", new Flag(randoHint, [-2052, 6668], {
+    ["Great Bridge of Hylia Sign", new Flag(randoHint, [-4250, 3381])],
+    ["Hidden Village Sign", new Flag(randoHint, [-2052, 6668], {
         baseReqs: [woodenStatueReq]
     })],
-    ["Hyrule_Castle_Sign", new Flag(randoHint, [-5856, 4318])],
-    ["Jovani_House_Sign", new Flag(randoHint, [-4110, 4837])],
-    ["Kakariko_Gorge_Sign", new Flag(randoHint, [-4979, 5876])],
-    ["Kakariko_Graveyard_Sign", new Flag(randoHint, [-5475, 8300])],
-    ["Kakariko_Village_Sign", new Flag(randoHint, [-5253, 7455])],
-    ["Lake_Hylia_Sign", new Flag(randoHint, [-4659, 2920])],
-    ["Lake_Lantern_Cave_Sign", new Flag(randoHint, [-5335, 3018], {
+    ["Hyrule Castle Sign", new Flag(randoHint, [-5856, 4318])],
+    ["Jovani House Sign", new Flag(randoHint, [-4110, 4837])],
+    ["Kakariko Gorge Sign", new Flag(randoHint, [-4979, 5876])],
+    ["Kakariko Graveyard Sign", new Flag(randoHint, [-5475, 8300])],
+    ["Kakariko Village Sign", new Flag(randoHint, [-5253, 7455])],
+    ["Lake Hylia Sign", new Flag(randoHint, [-4659, 2920])],
+    ["Lake Lantern Cave Sign", new Flag(randoHint, [-5335, 3018], {
         baseReqs: [[bombBagReq, ballAndChainReq]]
     })],
-    ["Lakebed_Temple_Sign", new Flag(randoHint, [-4392, 3903], {
+    ["Lakebed Temple Sign", new Flag(randoHint, [-4392, 3903], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]]
     })],
-    ["Lanayru_Field_Sign", new Flag(randoHint, [-1891, 4860])],
-    ["Lanayru_Spring_Sign", new Flag(randoHint, [-5238, 3468], {
+    ["Lanayru Field Sign", new Flag(randoHint, [-1891, 4860])],
+    ["Lanayru Spring Sign", new Flag(randoHint, [-5238, 3468], {
         baseReqs: [[ironBootsReq, magicArmorReq]],
     })],
-    ["North_Eldin_Sign", new Flag(randoHint, [-1911, 7257])],
-    ["Ordon_Sign", new Flag(randoHint, [-8842, 4938])],
-    ["Palace_of_Twilight_Sign", new Flag(randoHint, [-5914, 4479])],
-    ["Sacred_Grove_Sign", new Flag(randoHint, [-7214, 3630])],
-    ["Snowpeak_Mountain_Sign", new Flag(randoHint, [-483, 3939])],
-    ["Snowpeak_Ruins_Sign", new Flag(randoHint, [-5035, 4186])],
-    ["South_of_Castle_Town_Sign", new Flag(randoHint, [-4475, 4710])],
-    ["Temple_of_Time_Beyond_Point_Sign", new Flag(randoHint, [-4928, 3970], {
+    ["North Eldin Sign", new Flag(randoHint, [-1911, 7257])],
+    ["Ordon Sign", new Flag(randoHint, [-8842, 4938])],
+    ["Palace of Twilight Sign", new Flag(randoHint, [-5914, 4479])],
+    ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630])],
+    ["Snowpeak Mountain Sign", new Flag(randoHint, [-483, 3939])],
+    ["Snowpeak Ruins Sign", new Flag(randoHint, [-5035, 4186])],
+    ["South of Castle Town Sign", new Flag(randoHint, [-4475, 4710])],
+    ["Temple of Time Beyond Point Sign", new Flag(randoHint, [-4928, 3970], {
         baseReqs: [temple2SKReq, spinnerReq, bowReq]
     })],
-    ["Temple_of_Time_Sign", new Flag(randoHint, [-5721, 4278])],
-    ["Upper_Zoras_River_Sign", new Flag(randoHint, [-590, 5780])],
-    ["Zoras_Domain_Sign", new Flag(randoHint, [-748, 4751])],
+    ["Temple of Time Sign", new Flag(randoHint, [-5721, 4278])],
+    ["Upper Zoras River Sign", new Flag(randoHint, [-590, 5780])],
+    ["Zoras Domain Sign", new Flag(randoHint, [-748, 4751])],
 ]); // Always add flags at the end to preserve storage IDs
 
 // Flag initiliazation

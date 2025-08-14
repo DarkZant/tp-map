@@ -70,7 +70,7 @@ const RandoItemMap = new Map([
     ['Water_Bombs', waterBombs],
     ['Bomblings', bomblings],
     ["Green_Rupee", Rupees.Green],
-    ["Blue_Rupee",, Rupees.Blue],
+    ["Blue_Rupee", Rupees.Blue],
     ["Yellow_Rupee", Rupees.Yellow],
     ["Red_Rupee", Rupees.Red],
     ["Purple_Rupee", Rupees.Purple],
@@ -126,6 +126,7 @@ const RandoItemMap = new Map([
 
 const RandoSettingsMap = new Map([
     ["skipPrologue", RandoSettings.SkipPrologue],
+    ["faronWoodsLogic", RandoSettings.FaronWoodsLogic],
     ["openMap", RandoSettings.UnlockMapRegions],
     ["openDot", RandoSettings.OpenDoT],
     ["increaseWallet", RandoSettings.WalletCapacity],
@@ -137,8 +138,18 @@ const RandoSettingsMap = new Map([
 
 ]);
 
+const RandoRequirementsMap = new Map([
+    ["Open", []],
+    ["Closed", [diababaReq]],
+    ["Fused_Shadows", [allFusedShadowsReq]],
+    ["Mirror_Shards", [completedMirrorReq]],
+    ["Vanilla_PoT?", [argorokReq]],
+    ["Vanilla_HC?", [zantReq]],
+    ["Dungeons?", allDungeonsReq],
+]);
+
 function stringHasNumber(string) {
-  return /\d/.test(string);
+    return /\d/.test(string);
 }
 
 function getRandoItem(itemName) {
@@ -153,41 +164,151 @@ function getRandoItem(itemName) {
 }
 
 let dropZone = document.getElementById('randoSeedFile');
+let dropZoneText = document.getElementById("randoSeedFileText");
 let fileInput = document.getElementById('spoilerLog');
 
 dropZone.addEventListener('click', () => {
-  fileInput.click();
+    fileInput.click();
 });
 
 dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropZone.classList.add('dragover');
+    e.preventDefault();
+    dropZone.classList.add('dragover');
 });
 
 dropZone.addEventListener('dragleave', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-});
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+  });
 dropZone.addEventListener('dragend', (e) => {
-  dropZone.classList.remove('dragover');
+    dropZone.classList.remove('dragover');
 });
 
 dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
 
-  const files = e.dataTransfer.files;
-  loadSpoilerLog(files[0]);
+    let files = e.dataTransfer.files;
+    manageFile(files[0]);
 });
 
-// Handle files selected from input
+function displayInvalidFile(filename) {
+    dropZoneText.innerHTML = filename + "<br>is not a valid spoiler log file!";
+}
+
 fileInput.addEventListener('change', (e) => {
-  const files = e.target.files;
-  loadSpoilerLog(files[0]);
+    let files = e.target.files;
+    manageFile(files[0]);
 });
 
-function loadSpoilerLog(file) {
-  // Example: just log file names
-  console.log(file.name);
-  // You can upload files here or display previews, etc.
+const spoilerLogStorageName = "spoilerLog";
+
+function manageFile(file) {
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        displayInvalidFile(file.name);
+        return;
+    }
+
+    let reader = new FileReader();
+
+    reader.onload = (e) => {
+        try {
+            let textResult = e.target.result;
+            let data = JSON.parse(textResult)
+            if (textResult === localStorage.getItem(spoilerLogStorageName)) {
+                dropZoneText.innerHTML = "<b>This seed is already loaded!</b>";
+                setTimeout(() => {
+                    dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
+                }, 2500)
+                return;
+            }
+            loadSpoilerLog(data);
+            localStorage.setItem(spoilerLogStorageName, textResult);
+            Settings.RevealSpoilerLog.reset();
+        } 
+        catch (error) {
+            displayInvalidFile(file.name)
+            console.log(error);
+        }
+    }
+
+    reader.readAsText(file);
+}
+
+function checkRandoSeed() {
+    let savedLog = localStorage.getItem(spoilerLogStorageName);
+    if (!savedLog)
+        return;
+    loadSpoilerLog(JSON.parse(savedLog), true);
+}
+document.addEventListener("DOMContentLoaded", function () {
+    
+});
+
+function unloadSeed() {
+    dropZoneText.innerHTML = "Seed Unloaded!";
+    seedIsLoaded = false;
+    fileInput.value = '';
+    localStorage.removeItem(spoilerLogStorageName);
+
+    document.getElementById("seedSettings").style.display = "none";
+    let unloadButton = document.getElementById("Unload_Seed");
+    unloadButton.innerHTML = "Seed Unloaded!";
+    setTimeout(() => {
+        unloadButton.style.display = "none";
+        unloadButton.innerHTML = "Unload Seed";
+        dropZoneText.innerHTML = "Import Seed Spoiler Log<br>Drag and drop a file<br><i>or</i><br>Click to select a file";
+    }, 2500);
+}
+
+
+let seedIsLoaded = false;
+
+function loadSpoilerLog(data, start=false) {
+    document.getElementById("Unload_Seed").style.display = "inline";
+    document.getElementById("seedSettings").style.display = "inline";
+
+    let settings = data["settings"];
+
+    // Set Rando Settings
+    for (let [settingName, setting] of RandoSettingsMap.entries()) {
+        setting.set(settings[settingName]);
+    }
+    addRandoRequirements(Dungeons.Castle, RandoRequirementsMap.get(settings["castleRequirements"]));
+    addRandoRequirements(Dungeons.Palace, RandoRequirementsMap.get(settings["palaceRequirements"]));
+
+    // Display Required Dungeons
+    for (let dungeonName of data["requiredDungeons"]) {
+        let requiredElem = document.getElementById(dungeonName);
+        if (window.getComputedStyle(requiredElem).display === 'none')
+            requiredElem.style.display = 'inline';
+    }
+
+    // Set Flag Items
+    for (let [flagName, itemName] of Object.entries(data["itemPlacements"])) {
+        let item = getRandoItem(itemName);
+        flags.get(flagName).setRandoItem(item);
+    }
+
+    // Set Hints
+    for (let [hintName, hintDescriptions] of Object.entries(data["hints"])) {
+        let randoText = "";
+        for (let description of hintDescriptions)
+            randoText += description["text"].replace(/[{}]/g, '') + "<br><br>";
+        flags.get(underscoreToSpace(hintName)).setRandoDescription(randoText);
+    }
+
+    dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
+    seedIsLoaded = true;
+    
+    // Update Gamemode
+    blockMapReloading();
+    if (selectedGamemode !== Gamemodes.Glitchless && settings["logicRules"] === "Glitchless")
+        gamemodeSetting.setValue(Gamemodes.Glitchless);
+    else if (selectedGamemode === Gamemodes.Glitchless && settings["logicRules"] !== "Glitchless")
+        gamemodeSetting.setValue(Gamemodes.Glitched);
+    if (!unblockMapReloading() && !start)
+        reloadMap();
+
+    
 }
