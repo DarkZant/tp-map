@@ -103,7 +103,7 @@
     bottom: 0;
     right: 0.3vw;
     z-index: 1200;
-    padding: 2.5px 5px;
+    padding: 0.35dvh 0.3dvw;
     border-radius: 100vw;
     background-color: #38352e;
     font-size: 0.95vmax;

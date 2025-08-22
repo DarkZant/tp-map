@@ -124,11 +124,55 @@ class TrackerItem extends Storable {
         imgElem.src = imgSrc.slice(0, -5) + 
         (itemState == 0 ? 0 : itemState - 1) + imgSrc.slice(-4); 
     }
+    isInSubmenu() {
+        return this.elem.parentElement.id !== "mainTracker" || this.elem.parentElement.classList.contains('tdungeon');
+    }
+    displayParentSubmenu(func) {
+        let parentElement = this.elem.parentElement;
+        let mainTracker = document.getElementById('mainTracker');
+        if (parentElement.style.visibility === "visible" || parentElement.classList.contains("tdungeon") || window.getComputedStyle(document.getElementById('tracker')).visibility === "hidden") {
+            func();
+            return;
+        }
+
+        let openedSubmenuID = mainTracker.submenuID
+        if (openedSubmenuID !== undefined) 
+            mainTracker.click();
+        
+        showTrackerSubmenu(parentElement.id);
+        setTimeout(func, 1000);
+        setTimeout(() => hideTrackerSubmenu(parentElement), 2000);
+
+        if (openedSubmenuID !== undefined)
+            setTimeout(() => showTrackerSubmenu(openedSubmenuID), 2500);
+    }
+    displayMainTracker(func) {
+        let mainTracker = document.getElementById('mainTracker');
+        let submenuID = mainTracker.submenuID;
+        if (submenuID === undefined) {
+            func();
+            return;
+        }
+        mainTracker.click();
+        setTimeout(func, 1000);
+        setTimeout(() => showTrackerSubmenu(submenuID), 2000);
+    }
+    manageParentSubmenu(func) {
+        if (blockMapReset || Settings.DisableTrackerAnims.isEnabled()) {
+            func();
+            return;
+        }
+
+        if (this.isInSubmenu())
+            this.displayParentSubmenu(func)
+        else 
+            this.displayMainTracker(func);
+    }
     increase() {
-        this.elem.click();
+        this.manageParentSubmenu(() => this.elem.click());  
     }
     decrease() {
-        this.elem.dispatchEvent(new MouseEvent('contextmenu'));
+        this.manageParentSubmenu(() => this.elem.dispatchEvent(new MouseEvent('contextmenu')));
     }
     getDefaultStoreValue() {
         return this.item.getMinState();
@@ -202,6 +246,7 @@ function hideTrackerSubmenu(submenu) {
 
     let mainTracker = document.getElementById('mainTracker');
     mainTracker.style.filter = "none";
+    mainTracker.submenuID = undefined;
     for (let child of mainTracker.children) 
         child.classList.remove('disabled');
 

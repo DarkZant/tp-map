@@ -87,7 +87,7 @@ body img {
     color: #9f2aff;
     background-color: #141414;
     padding: 0.5vh 0.4vw;
-    border-radius: 6px;
+    border-radius: 0.35vw;
     margin: 1.2vh 0 0 0.5vw;
     z-index: 1000;
 }
@@ -194,41 +194,24 @@ body img {
 /* Cave of Ordeals UI */
 #caveofOrdeals {
     display: none;
-    position: relative;
-    top: 35dvh;
+    position: absolute;
+    left: 3vw;
+    top: 12dvh;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 5dvh;
     z-index: 900;
 }
 #caveofOrdealsControls {
-    position: absolute;
-    left: 5vw;
-    text-align: center;
     width: 15.75vw;
     display: flex;
     flex-direction: column;
     align-items: center;
-    row-gap: 20px;
+    row-gap: 2.5dvh;
 }
 #caveofOrdealsButton {
     display: flex;
     filter: brightness(150%);
-    transition: filter 0.15s, transform 0.05s;
-    cursor: pointer;
-}
-#caveofOrdealsButton:hover {
-    filter: brightness(225%) !important;
-    transform: scale(1.05) !important;
-}
-#caveofOrdealsButton img {
-    max-width: 100%;
-}
-#caveofOrdealsButton div {
-    position: absolute;
-    color: #a4a192;
-    text-shadow: #101210 1px 3px 1px;
-    font-family: 'TPLocation', Arial, sans-serif;
-    right: 2vw;
-    top: 0;
-    z-index: 910;
 }
 .caveofOrdealsArrows {
     width: 5.5vw;
@@ -240,8 +223,6 @@ body img {
     transform: scale(1.1) !important;
 }
 #caveofOrdealsFloorText {
-    position: absolute;
-    left: 75dvw;
     width: 17vw;
     font-size: 1vw;
     background-color: rgb(56, 53, 46, 0.85);
@@ -250,7 +231,7 @@ body img {
     border-radius: 10px;
 }
 #caveofOrdealsFloorText ul {
-    padding-inline-start: 20px;
+    padding-inline-start: 12.5%;
 }
 #caveofOrdealsFloorText b {
     text-decoration: underline;
@@ -261,6 +242,17 @@ body img {
 }
 
 /* Map Counters */
+#counter {
+    position: absolute;
+    bottom: 0.5dvh;
+    left: 0.5dvh;
+    visibility: hidden;
+    font-size: 1.5vw;
+    background-color: #141414;
+    padding: 0.5vh 0.4vw;
+    border-radius: 0.35vw;
+    z-index: 900;
+}
 .cpt {
     display: inline-block;
     position: absolute;
@@ -268,14 +260,16 @@ body img {
     left: 50%;  
     transform: translate(-50%, -50%); 
     border-radius: 100vw;
-    padding: 1.25px 5px;
+    padding: 0.25dvh 0.25dvw;
 }
 .subcpt {   
-    font-size: 12px;
+    /* line-height: calc(8px + 0.25vmax); */
+    font-size: calc(8px + 0.25vmax);
     background-color: rgb(56, 53, 46, 0.85);   
 }
 .procpt {
-    font-size: 20px;
+    /* line-height: 3dvh; */
+    font-size: calc(8px + 0.5vmax);
     background-color: rgb(56, 53, 46, 0.9);
 }
 /* Checkmarks */

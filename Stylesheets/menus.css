@@ -377,5 +377,6 @@ select {
     background-color: #1d1a14;
     color: #c0c0c0;
     font-size: 0.75vw;
+    line-height: 2.5dvh;
     resize: none;
 }

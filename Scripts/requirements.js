@@ -134,14 +134,24 @@ let coroKeyReq = Requirement.fromBoolItem(coroKey);
 let gateKeyReq = Requirement.fromBoolItem(gateKey);
 let bulblinKeyReq = Requirement.fromBoolItem(bulblinKey);
 let aurusMemoReq = Requirement.fromBoolItem(aurusMemo);
+let asheisSketchReq = Requirement.fromBoolItem(asheisSketch);
 let allFusedShadowsReq = Requirement.fromCountItem(fusedShadow, 3);
 let completedMirrorReq = Requirement.fromCountItem(mirrorShard, 4);
 let skybookReq = Requirement.fromBoolItem(skybook.getItemByReq(1));
 let completedSkybookReq = Requirement.fromBoolItem(skybook.getItemByReq(7));
 
+let boulderReq = [bombBagReq, ballAndChainReq];
+let webReq = [lanternReq, bombBagReq, ballAndChainReq]
+let stalfosReq = boulderReq;
+
 let diababaReq = Requirement.fromBoss(diababa);
 let forest1SKReq = Requirement.fromCountItem(forestSK);
+let forest2SKReq = Requirement.fromCountItem(forestSK, 2);
+let forest3SKReq = Requirement.fromCountItem(forestSK, 3);
+let forest4SKReq = Requirement.fromCountItem(forestSK, 4);
 let forestBKReq = Requirement.fromBoolItem(forestBK);
+let forestTempleLeftSideReq = [webReq, [forest1SKReq, clawshotReq]];
+
 let fyrusReq = Requirement.fromBoss(fyrus);
 let mines1SKReq = Requirement.fromCountItem(minesSK);
 let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
@@ -207,3 +217,4 @@ let arbitersCampReq = Requirement.fromCheckboxRandoSetting(RandoSettings.Arbiter
 let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open Grove');
 let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');
 let openCityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.CitySkybook);
+let transformAnywhereReq = Requirement.fromCheckboxRandoSetting(RandoSettings.TransformAnywhere);

@@ -55,4 +55,5 @@ const RandoSettings = Object.freeze({
     SnowpeakReekfish : new CheckboxRandoSetting('Snowpeak Does Not Require Reekfish Scent'),
     TempleTime : new SelectRandoSetting('Temple of Time Entrance'),
     CitySkybook : new CheckboxRandoSetting('City Does Not Require Filled Skybook'),
+    TransformAnywhere : new CheckboxRandoSetting('Transform Anywhere')
 });

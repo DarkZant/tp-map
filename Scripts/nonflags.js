@@ -22,8 +22,17 @@ class NonFlag {
     isShown() {
         return verifyCategoryVisibility(this.category);
     }
-    isCountable() {
+    isCounted() {
         return this.isShown() && Settings.CountNonFlags.isEnabled();
+    }
+    isCountable() {
+        return this.isCounted();
+    }
+    countedInTotal() {
+        return this.countsForTotal();
+    }
+    countsForTotal() {
+        return false;
     }
     // Leaflet
     initializeMarker() {
@@ -43,6 +52,32 @@ class NonFlag {
         addTooltipToMarker(this.marker, this.name);
     }
 }
+
+class Shop extends NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        super(image, category, name, position);
+    }
+}
+
+class FishingSpot extends NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        super(image, category, name, position);
+    }
+}
+
+class MonsterRupees extends NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        super(image, category, name, position);
+    }
+}
+
+class Minigame extends NonFlag {
+    constructor(image, category, name=image, position=[]) {
+        super(image, category, name, position);
+    }
+}
+
+
 
 let horseGrass = new NonFlag('Horse Grass', Categories.Grass);
 let hawkGrass = new NonFlag('Hawk Grass', Categories.Grass);

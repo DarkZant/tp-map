@@ -27,18 +27,6 @@ function getIconImage(imageName) {
     return images.get('Icons/' + spaceToUnderscore(imageName) + '.png');
 }
 
-const Gamemodes = Object.freeze({
-    Base: 0,
-    Glitchless: 1,
-    Glitched: 2
-});
-
-const GameVersions = Object.freeze({
-    Gamecube: 0,
-    Wii: 1,
-    WiiU: 2
-});
-
 // Item & Obtainables Categories Enum
 const Categories = Object.freeze({
     // Flags
@@ -349,8 +337,20 @@ class CountRequiredItem extends Item {
                 return item;
         return null;
     }
+    getNextItemCounter() {
+        return this.itemCounter;
+    }
+    getPreviousItemCounter() {
+        return this.itemCounter - 1;
+    }
+    getItemRequirement(itemCounter) {
+        return parseInt(Array.from(this.items.keys())[itemCounter])
+    } 
     getNextItemRequirement() {
-        return parseInt(Array.from(this.items.keys())[this.itemCounter]);
+        return this.getItemRequirement(this.getNextItemCounter());
+    }
+    getPreviousItemRequirement() {
+        return this.getItemRequirement(this.getPreviousItemCounter());
     }
     increase() {
         if (this.state < this.maxState) {
@@ -365,11 +365,11 @@ class CountRequiredItem extends Item {
     }
     decrease() {
         if (this.state > 0) {
-            --this.state;
-            if (this.state === this.getNextItemRequirement()) {
+            if (this.state === this.getPreviousItemRequirement()) {
                 this.items.get(this.state.toString()).reset();
                 --this.itemCounter;
             }
+            --this.state;
         }
         else
             this.setCountToMax()
@@ -377,13 +377,13 @@ class CountRequiredItem extends Item {
     reset() {
         this.state = 0;
         this.itemCounter = 0;
-        for (let item in this.items.values())
+        for (let item of this.items.values())
             item.reset();
     }
     setCountToMax() {
         this.state = this.maxState;
-        this.itemCounter = this.items.size - 1;
-        for (let item in this.items.values())
+        this.itemCounter = this.items.size;
+        for (let item of this.items.values())
             item.obtain();
     }
 }
@@ -507,13 +507,13 @@ var rupees = new CountItem('Rupees', 9999, {category: Categories.Rupees, min: 99
 rupees.state = 9999;
 // Dungeon Items
 var forestSK = new CountItem('Small Key', 4, {name: 'Forest Temple Small Key'});
-var forestMap = new BoolItem('Dungeon Map', {name: "Forest Temple Map"});
+var forestMap = new BoolItem('Dungeon Map', {name: "Forest Temple Dungeon Map"});
 var forestCompass = new BoolItem("Compass", {name: "Forest Temple Compass"});
-var forestBK = new BoolItem('Boss Key', {name: 'Forest Temple Boss Key'}); 
+var forestBK = new BoolItem('Boss Key', {name: 'Forest Temple Big Key'}); 
 var diababa = new BoolItem('Diababa', {category: Categories.Bosses});
 
 var minesSK = new CountItem('Small Key', 3, {name: 'Goron Mines Small Key'});
-var minesMap = new BoolItem('Dungeon Map', {name: "Goron Mines Map"});
+var minesMap = new BoolItem('Dungeon Map', {name: "Goron Mines Dungeon Map"});
 var minesCompass = new BoolItem("Compass", {name: "Goron Mines Compass"});
 var minesBK = new CountRequiredItem('Goron Mines Key Shard', 'GBK2', 3, {
     3 : {name: "Goron Mines Boss Key", imageName: "GBK3"}
@@ -521,19 +521,19 @@ var minesBK = new CountRequiredItem('Goron Mines Key Shard', 'GBK2', 3, {
 var fyrus = new BoolItem('Fyrus', {category: Categories.Bosses});
 
 var lakebedSK = new CountItem('Small Key', 3, {name: 'Lakebed Temple Small Key'});
-var lakebedMap = new BoolItem('Dungeon Map', {name: "Lakebed Temple Map"});
+var lakebedMap = new BoolItem('Dungeon Map', {name: "Lakebed Temple Dungeon Map"});
 var lakebedCompass = new BoolItem("Compass", {name: "Lakebed Temple Compass"});
-var lakebedBK = new BoolItem('Boss Key', {name: 'Lakebed Temple Boss Key'}); 
+var lakebedBK = new BoolItem('Boss Key', {name: 'Lakebed Temple Big Key'}); 
 var morpheel = new BoolItem('Morpheel', {category: Categories.Bosses});
 
 var arbiterSK = new CountItem('Small Key', 5, {name: "Arbiter's Ground Small Key"});
-var arbiterMap = new BoolItem('Dungeon Map', {name: "Arbiter's Ground Map"});
+var arbiterMap = new BoolItem('Dungeon Map', {name: "Arbiter's Ground Dungeon Map"});
 var arbiterCompass = new BoolItem("Compass", {name: "Arbiter's Ground Compass"});
-var arbiterBK = new BoolItem('Boss Key', {name: "Arbiter's Ground Boss Key"}); 
+var arbiterBK = new BoolItem('Boss Key', {name: "Arbiter's Ground Big Key"}); 
 var stallord = new BoolItem('Stallord', {category: Categories.Bosses});
 
 var snowpeakSK = new CountItem('Small Key', 4, {name: "Snowpeak Ruins Small Key"});
-var snowpeakMap = new BoolItem('Dungeon Map', {name: "Snowpeak Ruins Map"});
+var snowpeakMap = new BoolItem('Dungeon Map', {name: "Snowpeak Ruins Dungeon Map"});
 var snowpeakCompass = new BoolItem("Compass", {name: "Snowpeak Ruins Compass"});
 var snowpeakBK = new BoolItem('Bedroom Key'); 
 var pumpkin = new BoolItem('Ordon Pumpkin');
@@ -541,27 +541,27 @@ var cheese = new BoolItem("Ordon Goat Cheese");
 var blizzeta = new BoolItem("Blizzeta", {category: Categories.Bosses});
 
 var templeSK = new CountItem('Small Key', 3, {name: "Temple of Time Small Key"});
-var templeMap = new BoolItem('Dungeon Map', {name: "Temple of Time Map"});
+var templeMap = new BoolItem('Dungeon Map', {name: "Temple of Time Dungeon Map"});
 var templeCompass = new BoolItem("Compass", {name: "Temple of Time Compass"});
-var templeBK = new BoolItem('Boss Key', {name: "Temple of Time Boss Key"}); 
+var templeBK = new BoolItem('Boss Key', {name: "Temple of Time Big Key"}); 
 var armogohma = new BoolItem('Armogohma', {category: Categories.Bosses});
 
 var citySK = new CountItem('Small Key', 1, {name: "City in the Sky Small Key"});
-var cityMap = new BoolItem('Dungeon Map', {name: "City in the Sky Map"});
+var cityMap = new BoolItem('Dungeon Map', {name: "City in the Sky Dungeon Map"});
 var cityCompass = new BoolItem("Compass", {name: "City in the Sky Compass"});
-var cityBK = new BoolItem('Boss Key', {name: "City in the Sky Boss Key"}); 
+var cityBK = new BoolItem('Boss Key', {name: "City in the Sky Big Key"}); 
 var argorok = new BoolItem('Argorok', {category: Categories.Bosses});
 
 var palaceSK = new CountItem('Small Key', 7, {name: "Palace of Twilight Small Key"});
-var palaceMap = new BoolItem('Dungeon Map', {name: "Palace of Twilight Map"});
+var palaceMap = new BoolItem('Dungeon Map', {name: "Palace of Twilight Dungeon Map"});
 var palaceCompass = new BoolItem("Compass", {name: "Palace of Twilight Compass"});
-var palaceBK = new BoolItem('Boss Key', {name: "Palace of Twilight Boss Key"}); 
+var palaceBK = new BoolItem('Boss Key', {name: "Palace of Twilight Big Key"}); 
 var zant = new BoolItem('Zant', {category: Categories.Bosses});
 
 var castleSK = new CountItem('Small KeyHC', 3, {name: 'Hyrule Castle Small Key'});
-var castleMap = new BoolItem('Dungeon Map', {name: "Hyrule Castle Map"});
+var castleMap = new BoolItem('Dungeon Map', {name: "Hyrule Castle Dungeon Map"});
 var castleCompass = new BoolItem("Compass", {name: "Hyrule Castle Compass"});
-var castleBK = new BoolItem("Boss KeyHC", {name: "Hyrule Castle Boss Key"});
+var castleBK = new BoolItem("Boss KeyHC", {name: "Hyrule Castle Big Key"});
 var ganondorf = new BoolItem('Ganondorf', {category: Categories.Bosses});
 
 // Rupees Enum

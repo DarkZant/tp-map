@@ -162,6 +162,9 @@
                     <div id="caveofOrdealsFloorText">Cave of Ordeals</div>                  
                 </div>
             </div>   
+            <div id="counter">
+                0 / 0 (0%)
+            </div>
         </div>
         
         <div id="settings" class="menu rightMenu">
@@ -169,7 +172,7 @@
             <h2>Settings</h2>
             <button onclick="settingsButton(this)">Reset Settings</button>
             <div id="settingsButtons">
-                <button onclick="resetMap(this)">Reset Map</button>
+                <button onclick="resetMap(this)">Reset Flags</button>
                 <button onclick="trackerButton(this)">Reset Tracker</button>
             </div>      
             <div id="gamemodeSelection" class="selectContainer">
@@ -203,6 +206,7 @@
                 <div id="seedSettings">
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints</label>
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Item_Tracker" class="bigSettingCheckbox">Autocomplete Tracker with Rando Items</label>
+                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Set/Junked Flags</label>
                     <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Spoiler_Log" class="bigSettingCheckbox">Reveal Spoiler Log</label>
                 </div>
             </div>
@@ -212,6 +216,7 @@
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Logic" class="bigSettingCheckbox">Enable Tracker Logic</label>
                 <label><input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Tracker Autocompletion</label>
+                <label><input type="checkbox" id="Disable_Tracker_Animations">Disable Tracker Animations</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Empty_Submaps_Visibility" class="bigSettingCheckbox">Show Empty Submaps</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Submap_As_One_Marker" class="bigSettingCheckbox">Single-Marker Submap Shows That Marker</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Show_Chests_As_Content" class="bigSettingCheckbox">Show Chests as their Content</label>
@@ -252,7 +257,7 @@
                         <label><input type="checkbox" id="Rando_Rupees_Visibility">Show Rupees</label>
                         <label><input type="checkbox" id="Rando_Locks_Visibility">Show Locks</label>
                         <label><input type="checkbox" id="Rando_Ooccoo_Visibility">Show Ooccoo</label>
-                        <label style="display: none;"><input type="checkbox" id="Rando_Non-Check_Visibility">Show Non-Check Items</label>
+                        <label><input type="checkbox" id="Rando_Non-Check_Visibility">Show Non-Check Items</label>
                     </div>
                 </div>
                 <div id="nonFlagsVisibility">
@@ -267,7 +272,8 @@
                 </div>
 
                 <h3>Marker Counters</h3>
-                <label class="bigSettingCheckboxLabel"><input type="checkbox" class="bigSettingCheckbox" id="Show_Counters">Show Counters</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" class="bigSettingCheckbox" id="Show_Total_Counter">Show Total Flag Counter</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" class="bigSettingCheckbox" id="Show_Counters">Show Marker Counters</label>
                 <div id="baseFlagCounters">
                     <label><input type="checkbox" id="Count_Flags">Count Flags</label>
                 </div>
@@ -497,7 +503,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="tdkey titem" data-item="Forest Temple Boss Key">
+                    <div class="tdkey titem" data-item="Forest Temple Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -530,7 +536,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="titem tdkey" data-item="Lakebed Temple Boss Key">
+                    <div class="titem tdkey" data-item="Lakebed Temple Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -546,7 +552,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="titem tdkey" data-item="Arbiter's Ground Boss Key">
+                    <div class="titem tdkey" data-item="Arbiter's Ground Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -578,7 +584,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="titem tdkey" data-item="Temple of Time Boss Key">
+                    <div class="titem tdkey" data-item="Temple of Time Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -595,7 +601,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="titem tdkey" data-item="City in the Sky Boss Key">
+                    <div class="titem tdkey" data-item="City in the Sky Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -612,7 +618,7 @@
                         <img src="Icons/Small_Key.png" class="timage">
                         <div class="tcpt">0</div>
                     </div>
-                    <div class="titem tdkey" data-item="Palace of Twilight Boss Key">
+                    <div class="titem tdkey" data-item="Palace of Twilight Big Key">
                         <img src="Icons/ItemBox.png" class="tbox">
                         <img src="Icons/Boss_Key.png" class="timage">
                     </div>
@@ -778,7 +784,7 @@
         <div id="notes" class="menu rightMenu">
             <div class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>Notes</h2>
-            <textarea id="notesInput" placeholder="Write your notes here..."></textarea>
+            <textarea id="notesInput" placeholder="Write your notes here..." spellcheck="false"></textarea>
         </div>
         <!-- Scripts -->
         <script src="Scripts/images.js"></script>

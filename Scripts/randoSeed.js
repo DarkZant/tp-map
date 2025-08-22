@@ -28,6 +28,7 @@ const RandoItemMap = new Map([
     ["Shadow_Crystal", shadowCrystal],
     ['Progressive_Sword', swords],
     ["Ordon_Shield", woodenShields],
+    ["Wooden_Shield", woodenShields],
     ["Hylian_Shield", hylianShield],
     ["Zora_Armor", zoraArmor],
     ["Magic_Armor", magicArmor],
@@ -87,7 +88,7 @@ const RandoItemMap = new Map([
     ["Goron_Mines_Compass", minesCompass],
     ["Goron_Mines_Key_Shard", minesBK],
     ["Lakebed_Temple_Small_Key", lakebedSK],
-    ["Lakebed_Temple_Dungeon_Map", lakebedCompass],
+    ["Lakebed_Temple_Dungeon_Map", lakebedMap],
     ["Lakebed_Temple_Compass", lakebedCompass],
     ["Lakebed_Temple_Big_Key", lakebedBK],
     ["Arbiters_Grounds_Small_Key", arbiterSK],
@@ -135,7 +136,7 @@ const RandoSettingsMap = new Map([
     ["skipSnowpeakEntrance", RandoSettings.SnowpeakReekfish],
     ["totEntrance", RandoSettings.TempleTime],
     ["skipCityEntrance", RandoSettings.CitySkybook],
-
+    ["transformAnywhere", RandoSettings.TransformAnywhere],
 ]);
 
 const RandoRequirementsMap = new Map([
@@ -143,10 +144,14 @@ const RandoRequirementsMap = new Map([
     ["Closed", [diababaReq]],
     ["Fused_Shadows", [allFusedShadowsReq]],
     ["Mirror_Shards", [completedMirrorReq]],
-    ["Vanilla_PoT?", [argorokReq]],
-    ["Vanilla_HC?", [zantReq]],
-    ["Dungeons?", allDungeonsReq],
+    ["All_Dungeons", allDungeonsReq],
 ]);
+
+const HyruleCastleRandoReqs = new Map(RandoRequirementsMap);
+HyruleCastleRandoReqs.set('Vanilla', [zantReq]);
+
+const PalaceOfTwilightRandoReqs = new Map(RandoRequirementsMap);
+PalaceOfTwilightRandoReqs.set('Vanilla', [argorokReq]);
 
 function stringHasNumber(string) {
     return /\d/.test(string);
@@ -224,6 +229,7 @@ function manageFile(file) {
             }
             loadSpoilerLog(data);
             localStorage.setItem(spoilerLogStorageName, textResult);
+            Settings.RevealSetJunkFlags.reset();
             Settings.RevealSpoilerLog.reset();
         } 
         catch (error) {
@@ -253,12 +259,13 @@ function unloadSeed() {
 
     document.getElementById("seedSettings").style.display = "none";
     let unloadButton = document.getElementById("Unload_Seed");
-    unloadButton.innerHTML = "Seed Unloaded!";
+    resetButtonText(unloadButton, "Unloading...");
+    resetButtonsFeedback(unloadButton, "Seed Unloaded!");
+
     setTimeout(() => {
         unloadButton.style.display = "none";
-        unloadButton.innerHTML = "Unload Seed";
         dropZoneText.innerHTML = "Import Seed Spoiler Log<br>Drag and drop a file<br><i>or</i><br>Click to select a file";
-    }, 2500);
+    }, 2000);
 }
 
 
@@ -274,10 +281,13 @@ function loadSpoilerLog(data, start=false) {
     for (let [settingName, setting] of RandoSettingsMap.entries()) {
         setting.set(settings[settingName]);
     }
-    addRandoRequirements(Dungeons.Castle, RandoRequirementsMap.get(settings["castleRequirements"]));
-    addRandoRequirements(Dungeons.Palace, RandoRequirementsMap.get(settings["palaceRequirements"]));
+    addRandoRequirements(Dungeons.Castle, HyruleCastleRandoReqs.get(settings["castleRequirements"]));
+    addRandoRequirements(Dungeons.Palace, PalaceOfTwilightRandoReqs.get(settings["palaceRequirements"]));
 
     // Display Required Dungeons
+    for (let requiredElem of document.querySelectorAll(".tdungeon > span"))
+        requiredElem.style.display = "none";
+
     for (let dungeonName of data["requiredDungeons"]) {
         let requiredElem = document.getElementById(dungeonName);
         if (window.getComputedStyle(requiredElem).display === 'none')
@@ -302,11 +312,13 @@ function loadSpoilerLog(data, start=false) {
     seedIsLoaded = true;
     
     // Update Gamemode
+    if (selectedGamemode === Gamemodes.Base)
+        return;
     blockMapReloading();
     if (selectedGamemode !== Gamemodes.Glitchless && settings["logicRules"] === "Glitchless")
-        gamemodeSetting.setValue(Gamemodes.Glitchless);
+        Settings.Gamemode.setValue(Gamemodes.Glitchless);
     else if (selectedGamemode === Gamemodes.Glitchless && settings["logicRules"] !== "Glitchless")
-        gamemodeSetting.setValue(Gamemodes.Glitched);
+        Settings.Gamemode.setValue(Gamemodes.Glitched);
     if (!unblockMapReloading() && !start)
         reloadMap();
 

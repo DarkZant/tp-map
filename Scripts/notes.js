@@ -7,6 +7,10 @@ window.addEventListener('DOMContentLoaded', () => {
 }
 });
 
+function keyboardEventIsOnNotes(event) {
+    return event.target.tagName === "TEXTAREA";
+}
+
 let lastCall = 0;
 let msDelay = 1000;
 function throttleFunc(func) {

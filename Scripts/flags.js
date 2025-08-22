@@ -22,6 +22,7 @@ class Flag extends Storable{
         this.glitchedDesc = glitchedDesc;
         
         this._set = false;
+        this._junk = false;
     }
     initialize() {
         this._set = this.storageUnit.getFlagAsBool(this);
@@ -31,14 +32,15 @@ class Flag extends Storable{
         return this.item.image;
     }
     getCurrentItem() {
-        if (Settings.RevealSpoilerLog.isEnabled() && this.hasRandoItem() && randoIsActive())
+        if (this.hasRandoItem() && randoIsActive() && this.randoItemIsRevealed()) {
             return this.randoItem;
-        else
-            return this.item;
+        }
+
+        return this.item;
     }
     getMarkerImage() {
         let item = this.getCurrentItem();
-        if (Settings.ChestsContent.isEnabled() && this.isContainer())
+        if (this.isContainer() && (Settings.ChestsContent.isEnabled() || this.randoItemIsRevealed()))
             item = item.getContent();
         if (item instanceof ProgressiveItem) 
             return this.isSet() ? item.getCurrentItemImage() : item.getNextItemImage();
@@ -69,13 +71,14 @@ class Flag extends Storable{
     hasRandoItem() {
         return this.randoItem !== undefined;
     }
+    randoItemIsRevealed() {
+        return Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk())
+    }
     set() {
         if (this.isSet())
             return;
         this._set = true;
-        this.storageUnit.setFlag(this);
-        this.manageItemTracker();
-        this.manageFlagRequirements();
+        this.onSetChange();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
@@ -83,17 +86,32 @@ class Flag extends Storable{
         if (!this.isSet())
             return;
         this._set = false;
+        this.onSetChange();
+        if (this.parentGroup) 
+            this.parentGroup.decreaseAmount();
+    }
+    onSetChange() {
         this.storageUnit.setFlag(this);
         this.manageItemTracker();
         this.manageFlagRequirements();
-        if (this.parentGroup) 
-            this.parentGroup.decreaseAmount();
+        updateTotalCounter();
     }
     isSet() {
         return this._set;
     }
+    setAsJunk() {
+        this._junk = true;
+    }
+    unsetAsJunk() {
+        this._junk = false;
+    }
+    isJunk() {
+        return this._junk;
+    }
     getCurrentStoreValue() {
-        return this._set ? 1 : 0;
+        if (this.isSet())
+            return 1;
+        return this.isJunk() ? 2 : 0;
     }
     isRandomizerCheck() {
         if (this.item === howlingStone)
@@ -119,11 +137,19 @@ class Flag extends Storable{
         // for (let flag of this.requiringFlags)
         //     flag.addMarker();
     }
-    addMarker() {
-        if (layerIsLoaded(this.marker))
-            this.marker.remove();
-        this.loadMarker();
-
+    getItemTracker() {
+        if (Settings.RandoTracker.isEnabled() && this.hasRandoItem() && randoIsActive())
+            return this.randoItem.getTracker();
+        else if (this.item instanceof NonFlag)
+            return null;
+        return this.item.getTracker();
+    }
+    manageItemTracker() {
+        if (!Settings.AutocompleteTracker.isEnabled()) 
+            return;
+        let itemTracker = this.getItemTracker();
+        if (itemTracker !== null)
+            this.isSet() ? itemTracker.increase() : itemTracker.decrease();
     }
     // Map
     isShown() {
@@ -131,24 +157,28 @@ class Flag extends Storable{
             return false;
 
         if (selectedGamemode === Gamemodes.Base) {
-            if (!verifyCategoryVisibility(this.itemCategory))
-                return false;
             if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && !verifyRequirements(this.baseReqs))
                 return false;
         }    
         else {
-            if (!verifyCategoryVisibility(this.randoCategory))
-               return false;
             if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && 
                 !verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs))
                 return false;
         }
-        return true;
+        return this.categoryIsVisible();
+    }
+    categoryIsVisible() {
+        if (randoIsActive())
+            return verifyCategoryVisibility(this.randoCategory)
+        else 
+            return verifyCategoryVisibility(this.itemCategory);
+    }   
+    isCounted() {
+        if (this.isSet() || this.isJunk() || !this.isShown())
+            return false;
+        return this.isCountable();
     }
     isCountable() {
-        if (this.isSet() || !this.isShown())
-            return false;
-
         if (selectedGamemode === Gamemodes.Base)
             return Settings.CountFlags.isEnabled();
         else {
@@ -158,6 +188,12 @@ class Flag extends Storable{
                 return Settings.CountNonChecks.isEnabled();
         }
     }  
+    countedInTotal() {
+        return (this.isSet() || this.isJunk()) && this.countsForTotal();
+    }
+    countsForTotal() {
+        return this.categoryIsVisible() && this.isCountable();
+    }
     // Leaflet
     initializeMarker() {
         this.marker = L.marker(this.position, {
@@ -167,27 +203,108 @@ class Flag extends Storable{
             keyboard: false, 
         });
         this.marker.on('click', () => this.showDetails());
+        this.marker.on("add", () => {
+            let markerElem = this.marker.getElement();
+            if (!markerElem) 
+                return;
+
+            markerElem.addEventListener("auxclick", (e) => {
+                e.preventDefault();
+                if (e.button !== 1) 
+                    return;
+                this._junk = !this._junk;
+                this.reloadMarker();
+                console.log("Middle mouse clicked on " + this.getFlagName());        
+            });
+        });
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
     }
+    addMarker() {
+        if (layerIsLoaded(this.marker))
+            this.marker.remove();
+        this.loadMarker();
+    }
     showTooltip() {
-        let tooltipText = Settings.FlagTooltipItemName.isEnabled() ? this.getItemName() : this.getFlagName();
+        let tooltipText = Settings.FlagTooltipItemName.isEnabled() ? this.getCurrentItemName() : this.getFlagName();
         addTooltipToMarker(this.marker, tooltipText);
     }
     setTooltipToFlagName() {
         this.marker.setTooltipContent(this.getFlagName());
     }
     setTooltipToItemName() {
-        this.marker.setTooltipContent(this.getItemName());
+        this.marker.setTooltipContent(this.getCurrentItemName());
+    }
+    updateTooltipContent() {
+        if (!Settings.FlagTooltipItemName.isEnabled())
+            return;
+        this.setTooltipToItemName();
     }
     getFlagName() {
         return this.name;
     }
-    getItemName() {
+    getCurrentItemName() {
         if (this.isContainer())
             return this.getCurrentItem().getContentName();
         else 
             return this.getCurrentItem().getName();
+    }
+    loadMarker(position=this.position) {
+        if (!this.isShown())
+            return;
+        addMarkerToMap(this.marker, position);
+        if (this.isSet())
+            this.setVisually();
+        else
+            this.unsetVisually();
+    }
+    reloadMarker() {
+        if (!layerIsLoaded(this.marker)) 
+            return;
+        this.marker.remove();
+        this.loadMarker();
+    }
+    setMarker() {
+        this.set();
+        // if (this.hasRandoItem()) {
+        //     let text;
+        //     if (this.isContainer())
+        //         text = (this.randoItem.getContentName());
+        //     else 
+        //         text = (this.randoItem.getName());
+        //     alert(text.replaceAll("&nbsp", " "));
+        // }
+        this.setVisually();    
+        if (setFlagsHidden) {
+            setTimeout(() => this.marker.remove(), 1500);
+            return;
+        }
+
+    }
+    unsetMarker() {
+        this.unset();
+        this.unsetVisually();
+    }
+    setVisually() {
+        showMarkerAsSet(this.marker, this.getMarkerImage());
+        this.updateTooltipContent();
+        this.marker.off('contextmenu', this.boundSetMarker);
+        this.marker.on('contextmenu', this.boundUnsetMarker);
+    }
+    unsetVisually() {
+        showMarkerAsNotSet(this.marker, this.getMarkerImage());
+        this.updateTooltipContent();
+        if (Settings.TrackerLogic.isEnabled()) {
+            let currentReqs;
+            if (selectedGamemode === Gamemodes.Base)
+                currentReqs = this.baseReqs;
+            else 
+                currentReqs = selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs;
+            if (!verifyRequirements(currentReqs))
+                showMarkerAsUnobtainable(this.marker);    
+        }
+        this.marker.off('contextmenu', this.boundUnsetMarker);
+        this.marker.on('contextmenu', this.boundSetMarker);
     }
     showDetails() {
         let item = this.getCurrentItem();
@@ -276,68 +393,8 @@ class Flag extends Storable{
         }
         else
            flagDescDiv.innerHTML = description;
-        map.on('click', hideDetails);
+        LeafletMap.on('click', hideDetails);
     }
-    loadMarker(position=this.position) {
-        if (!this.isShown())
-            return;
-        addMarkerToMap(this.marker, position);
-        if (this.isSet())
-            this.setVisually();
-        else
-            this.unsetVisually();
-    }
-    reloadMarker() {
-        if (!layerIsLoaded(this.marker)) 
-            return;
-        this.marker.remove();
-        this.loadMarker();
-    }
-    setMarker() {
-        this.set();
-        if (setFlagsHidden) {
-            this.marker.remove();
-            return;
-        }
-        this.setVisually();    
-    }
-    unsetMarker() {
-        this.unset();
-        this.unsetVisually();
-    }
-    getItemTracker() {
-        if (Settings.RandoTracker.isEnabled() && this.hasRandoItem() && randoIsActive())
-            return this.randoItem.getTracker();
-        return this.item.getTracker();
-    }
-    manageItemTracker() {
-        if (!Settings.AutocompleteTracker.isEnabled()) 
-            return;
-        let itemTracker = this.getItemTracker();
-        if (itemTracker !== null)
-            this.isSet() ? itemTracker.increase() : itemTracker.decrease();
-    }
-    setVisually() {
-        showMarkerAsSet(this.marker, this.getMarkerImage());
-        this.marker.off('contextmenu', this.boundSetMarker);
-        this.marker.on('contextmenu', this.boundUnsetMarker);
-    }
-    unsetVisually() {
-        showMarkerAsNotSet(this.marker, this.getMarkerImage());
-        if (Settings.TrackerLogic.isEnabled()) {
-            let currentReqs;
-            if (selectedGamemode === Gamemodes.Base)
-                currentReqs = this.baseReqs;
-            else 
-                currentReqs = selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs;
-            if (!verifyRequirements(currentReqs))
-                showMarkerAsUnobtainable(this.marker);    
-        }
-        this.marker.off('contextmenu', this.boundUnsetMarker);
-        this.marker.on('contextmenu', this.boundSetMarker);
-    }
-   
-    
 }
 
 class FlagGroup {
@@ -588,14 +645,16 @@ const flags = new Map([
     })],
     ["Faron Mist Cave Open Chest", new Flag(smallChest.with(faronKey), [-7023, 4805], {
         baseDesc: 'Walk into the cave and open the small chest to obtain the key to the Faron Woods gate.',
-        randoDesc: 'Walk into the cave and open the small chest to obtain the item.'
+        randoDesc: 'Walk into the cave and open the small chest to obtain the item.',
+        randoReqs: [lanternReq]
     })],
     ["Faron Mist Cave Lantern Chest", new Flag(chest.with(heartPiece), [-7023, 4834], {
         baseReqs: [lanternReq],
         baseDesc: 'Light the 2 torches besides the small chest and climb the ledge to open the chest.'
     })],
     ["North Faron Woods Deku Baba Chest", new Flag(smallChest.with(Rupees.Yellow), [-7121, 4136], {
-        baseDesc: 'Defeat the Deku Baba and open the chest behind it.'
+        baseDesc: 'Defeat the Deku Baba and open the chest behind it.',
+        randoReqs: [[lanternReq, shadowCrystalReq]],
     })],
     ["Coro Bottle", new Flag(coroBottle, [-7405, 4885], {
         baseReqs: [Requirement.fromCountItem(rupees, 100)],
@@ -604,7 +663,8 @@ const flags = new Map([
     })],
     ["Faron Woods Golden Wolf", new Flag(goldenWolf, [-7104, 4184], {
         baseDesc: 'Meet the Golden Wolf after clearing the Faron Twilight to learn the Ending Blow.',
-        randoDesc: "The item is lying on the ground where the Golden Wolf usually is."
+        randoDesc: "The item is lying on the ground where the Golden Wolf usually is.",
+        randoReqs: [[lanternReq, shadowCrystalReq]],
     })],    
     ["Faron Mist Stump Chest", new Flag(smallChest.with(Rupees.Red), [-7235, 4518], {
         baseReqs: [lanternReq],
@@ -655,6 +715,7 @@ const flags = new Map([
     ["Sacred Grove Male Snail", new Flag(snailM, [-7184, 3722], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♂ Snail is on the ceiling of the alcove with the broken chest.',
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is on the ceiling of the alcove with the broken chest.' 
     })],
     ["Faron Field Bridge Chest", new Flag(chest.with(Rupees.Orange), [-6135, 4891], {
@@ -672,7 +733,8 @@ const flags = new Map([
     })],
     ["Lost Woods Lantern Chest", new Flag(chest.with(bombs, 30), [-6975, 3273], {
         baseReqs: [lanternReq],
-        baseDesc: 'Light the 2 torches in the back of the area to make the chest appear.'
+        baseDesc: 'Light the 2 torches in the back of the area to make the chest appear.',
+        randoReqs: [shadowCrystalReq, lanternReq]
     })],
     ["Lost Woods Boulder Poe", new Flag(poeSoul, [-7137, 3529], {
         baseReqs: [shadowCrystalReq, [ballAndChainReq, bombBagReq]],
@@ -680,7 +742,8 @@ const flags = new Map([
     })],
     ["Sacred Grove Spinner Chest", new Flag(chest.with(Rupees.Orange), [-7151, 3457], {
         baseReqs: [spinnerReq],
-        baseDesc: 'From the top of the vines, ride the spinner tracks until you reach the chest.'
+        baseDesc: 'From the top of the vines, ride the spinner tracks until you reach the chest.',
+        randoReqs: [shadowCrystalReq, spinnerReq]
     })],
     ["Sacred Grove Master Sword Poe", new Flag(nightPoe, [-6877, 3703], {
         baseReqs: [shadowCrystalReq, nightReq],
@@ -688,22 +751,22 @@ const flags = new Map([
         randoDesc: 'You can find this poe in the bottom right of the Master Sword area.'
     })],
     ["Faron Woods Owl Statue Sky Character", new Flag(skybookChar, [-7222, 4800], {
-        baseReqs: [domRodReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [domRodReq, boulderReq],
         baseDesc: 'Destroy the boulder, then move the Owl Statue in the back to obtain the sky character.',
     })],
     ["Faron Woods Owl Statue Chest", new Flag(chest.with(heartPiece), [-7199, 4672], {
-        baseReqs: [domRodReq, [bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseReqs: [domRodReq, boulderReq, shadowCrystalReq],
         baseDesc: 'Put the Owl Statue in the hole next to the rock, then use Midna Jumps to reach the chest on the other side of the loading zone.'
     })],
     ["Faron Owl Statue Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 17), [-7307, 4866], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Blocking the way to the Owl Statue. Gives 17 rupees.'
     })],
     ["South Faron Cave Chest", new Flag(smallChest.with(Rupees.Yellow), [-7340, 4450], {
         baseDesc: 'Use the lantern to be able to locate the chest more easily.',
         randoDesc: 'The chest is located at the end of the tunnel'
     })],
-    ["Faron Field Corner Grotto Left Chest", new Flag(smallChest.with(Rupees.Yellow), [-6928, 5138], {
+    ["Faron Field Corner Grotto Rear Chest", new Flag(smallChest.with(Rupees.Yellow), [-6928, 5138], {
         baseReqs: [shadowCrystalReq],
         basDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
     })],
@@ -711,12 +774,12 @@ const flags = new Map([
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
     })],
-    ["Faron Field Corner Grotto Rear Chest", new Flag(smallChest.with(Rupees.Red), [-6370, 5050], {
+    ["Faron Field Corner Grotto Left Chest", new Flag(smallChest.with(Rupees.Red), [-6370, 5050], {
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
     })],
     ["Sacred Grove Baba Serpent Grotto Chest", new Flag(chest.with(heartPiece), [-6868, 3472], {
-        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseReqs: [boulderReq, shadowCrystalReq],
         baseDesc: 'Defeat all the 8 Deku Serpents to make the chest appear.'
     })],
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
@@ -765,7 +828,8 @@ const flags = new Map([
     ["Bridge of Eldin Male Phasmid", new Flag(phasmidM, [-3158, 7408], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: "This ♂ Phasmid is too high to reach, so you'll need to use the clawshot or the boomerang to make it come down.",
-        randoDesc: "The item is where the bug usually is and is too high to reach."
+        randoDesc: "The item is where the bug usually is and is too high to reach.",
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]]
     })],
     ["Bridge of Eldin Female Phasmid", new Flag(phasmidF, [-2390, 7561], {
         baseReqs: [[boomerangReq, clawshotReq]],
@@ -798,18 +862,18 @@ const flags = new Map([
         randoCategory: Categories.Gifts
     })],
     ["Kakariko Watchtower Alcove Chest", new Flag(chest.with(Rupees.Orange), [-5053, 7538], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: "Blow up the rock south of the village near the spring, and use the chickens inside the cave (they are near the center of the village if "+
                 "you reload the area) to:<br>1. Climb behind Malo Mart and make the jump to the inn<br>2. Climb on top of the inn and jump towards the top of Barnes' shop<br>" +
                 "3. Climb to the base of the watchtower near the goron<br>" + 
                 "4. Go to the left side of the watchtower, and jump towards the chest with the chicken.<br>The chest is above the path to Death Mountain."
     })],
     ["Eldin Spring Underwater Chest", new Flag(chest.with(heartPiece), [-5847, 7696], {
-        baseReqs: [[bombBagReq, ballAndChainReq], [ironBootsReq, magicArmorReq]],
+        baseReqs: [boulderReq, [ironBootsReq, magicArmorReq]],
         baseDesc: 'Break the rock to enter the cave, then let yourself sink in the water at the end of the cave.'
     })],
     ["Eldin Field Bomb Rock Chest", new Flag(chest.with(heartPiece), [-4399, 6674], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rocks at the bottom of the trail, then start climbing. Once you reach the vines with a rock on top, use a well timed bomb throw or ' +
                 'the ball and chain to destroy the rock and jump to climb the vines. Finally, jump down a few times to reach the chest.'
     })],
@@ -836,11 +900,11 @@ const flags = new Map([
         baseDesc: "Near the graves."
     })],
     ["Death Mountain Trail Poe", new Flag(nightPoe, [-4331, 8118], {
-        baseReqs: [shadowCrystalReq, nightReq],
+        baseReqs: [fyrusReq, shadowCrystalReq, nightReq],
         baseDesc: "Up on the ledge, use a goron or the clawshot to get up."
     })],
     ["Death Mountain Alcove Chest", new Flag(chest.with(heartPiece), [-4049, 8169], {
-        baseReqs: [clawshotReq],
+        baseReqs: [[clawshotReq, fyrusReq]],
         baseDesc: 'Clawshot the vines hanging from the stone bridge and jump down the alcove to the chest.'
     })],
     ["Goron Springwater Rush", new Flag(heartPiece, [-3944, 5550], {
@@ -854,7 +918,7 @@ const flags = new Map([
         baseDesc: "Behind the tree with the crows."
     })],
     ["Gift From Ralis", new Flag(coralEarring, [-5473, 8235], {
-        baseReqs: [Requirement.fromBoolItem(asheisSketch)],
+        baseReqs: [gateKeyReq, asheisSketchReq],
         baseDesc: 'Show the sketch to Ralis to obtain the coral earring.',
         randoCategory: Categories.Gifts,
         randoDesc: 'Show the sketch to Ralis to obtain theitem.'
@@ -899,11 +963,11 @@ const flags = new Map([
         baseDesc: 'Use the Owl Statue as a platform for the first jump, then take control of it right after to set it up for the second jump. Once done, the chest is around the corner.'
     })],
     ["Kakariko Gorge Corner Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 21), [-5380, 5510], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Blow up the rock with a bomb or hit it with the ball and chain to reveal 21 rupees.'
     })],
     ["Kakariko Gorge Owl Statue Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 30), [-5074, 5909], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'The rock is in the middle of the field.'
     })],
     ["Eldin Spring Underwater Rupee Boulder", new Flag(rupeeBoulder.with(Rupees.Purple), [-5840, 7667], {
@@ -911,6 +975,7 @@ const flags = new Map([
         baseDesc: 'The rock is underwater in front of the chest.'
     })],
     ["Death Mountain Trail Red Rupees", new Flag(Rupees.Red, [-4269, 8150], {
+        baseReqs: [[clawshotReq, fyrusReq]],
         baseDesc: 'There are 4 red rupees hidden under rocks near the Poe, for a total of 80 rupees.'
     })],
     ["Kakariko Village Bell Rupee", new Flag(Rupees.Silver, [-5513, 7720], {
@@ -922,7 +987,7 @@ const flags = new Map([
         baseDesc: 'Underwater, right of the Zora shrine.'
     })],
     ["Bridge of Eldin Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 40), [-2391, 7503], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'In the open, below the Eldin Lava Cave entrance.'
     })],
     ["Kakariko Village Female Ant", new Flag(antF, [-5239, 7705], {
@@ -956,9 +1021,9 @@ const flags = new Map([
     })],
     ["Kakariko Village Malo Mart Red Potion", new Flag(Bottle.RedPotion, [-5445, 7400], {
         itemCategory: Categories.ShopItems,
-        baseReqs: [Requirement.fromCountItem(rupees, 30)],
+        baseReqs: [Requirement.fromCountItem(rupees, 230)],
         baseDesc: 'You can buy it after saving Collin for 30 rupees.',
-        randoDesc: "You can buy the item for 30 rupees."
+        randoDesc: "After buying the Hylian Shield for 200 rupees, you can buy the item for 30 rupees."
     })],
     ["Kakariko Village Malo Mart Hawkeye", new Flag(hawkeye, [-5445, 7475], {
         baseReqs: [bowReq, fyrusReq, Requirement.fromCountItem(rupees, 100)],
@@ -1007,7 +1072,7 @@ const flags = new Map([
         baseReqs: [shadowCrystalReq, lanternReq],
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
-    ["Eldin Field Water Bomb Fish Grotto Chest", new Flag(smallChest.with(Rupees.Purple), [-2987, 7192], {
+    ["Eldin Field Water Bomb Fish Grotto Chest", new Flag(smallChest.with(Rupees.Purple), [-3003, 7176], {
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Cross the water to reach the chest. Be careful of the Skullfish and Bombfish.'
     })],
@@ -1032,7 +1097,7 @@ const flags = new Map([
         baseDesc: 'Hidden in the east tall grass, cut it to make the chest easier to see.'
     })],
     ["Eldin Field Stalfos Grotto Stalfos Chest", new Flag(chest.with(heartPiece), [-1282, 6999], {
-        baseReqs: [spinnerReq, shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [spinnerReq, shadowCrystalReq, boulderReq],
         baseDesc: 'Defeat the 3 Stalfos to make the chest appear.'
     })],
     ["Skybook From Impaz", new Flag(skybook.getItemByReq(1), [-2180, 6604], {
@@ -1047,7 +1112,8 @@ const flags = new Map([
     })],
     ["Hidden Village Howling Stone", new Flag(howlingStone, [-2065, 6665], {
         baseReqs: [horseCallReq, shadowCrystalReq],
-        baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.'
+        baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.',
+        randoReqs: [[horseCallReq, transformAnywhereReq], shadowCrystalReq]
     })],
     ["Kakariko Gorge Gate Lock", new Flag(gateLock, [-5253, 6506], {
         baseReqs: [gateKeyReq],
@@ -1161,16 +1227,16 @@ const flags = new Map([
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Defeat all the skulltulas to make the chest appear.'
     })],
-    ["Gerudo Desert Rock Grotto First Poe", new Flag(poeSoul, [-5034, 1627], {
+    ["Gerudo Desert Rock Grotto First Poe", new Flag(poeSoul, [-5038, 1167], {
         baseReqs: [clawshotReq, shadowCrystalReq],
         baseDesc: 'The poe can faze through the rocks to come attack you, just wait it out at the entrance.'
     })],
-    ["Gerudo Desert Rock Grotto Second Poe", new Flag(poeSoul, [-4986, 1168], {
+    ["Gerudo Desert Rock Grotto Second Poe", new Flag(poeSoul, [-4941, 1335], {
         baseReqs: [clawshotReq, shadowCrystalReq],
         baseDesc: 'The poe can faze through the rocks to come attack you, just wait it out at the entrance.'
     })],
     ["Gerudo Desert Rock Grotto Lantern Chest", new Flag(chest.with(Rupees.Orange), [-4812, 1381], {
-        baseReqs: [clawshotReq, shadowCrystalReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, boulderReq, lanternReq],
         baseDesc: 'Destroy the rocks blocking the way, then light 3 torches to make the chest appear.'
     })],
     ["Cave of Ordeals Floor 14 Orange Rupee", new Flag(Rupees.Orange, [-5934, 564], {
@@ -1264,16 +1330,19 @@ const flags = new Map([
     ["Lake Hylia Bridge Male Mantis", new Flag(mantisM, [-4604, 3418], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♂ Mantis is on the side of the bridge above the void. If you do not have a long ranged item, wait for it to fly near you.',
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is above the void, use a long ranged item to get it.'
     })],
     ["Lake Hylia Bridge Female Mantis", new Flag(mantisF, [-5459, 3559], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Mantis is too high to reach, use a long ranged item.',
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is high above the ground, use a long ranged item to get it.'
     })],
     ["West Hyrule Field Female Butterfly", new Flag(butterflyF, [-3658, 3845], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Butterfly is on a higher ledge hiding in the purples flowers. Clawshot the vines to climb the ledge or grab it from below.',
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is on a higher ledge hiding in the purples flowers. Clawshot the vines to climb the ledge or grab it from below.'
     })],
     ["West Hyrule Field Male Butterfly", new Flag(butterflyM, [-4158, 3966], {
@@ -1283,6 +1352,7 @@ const flags = new Map([
     ["Lanayru Field Male Stag Beetle", new Flag(stagBeetleM, [-2589, 4365], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♂ Stag Beetle is on the trunk of a tree, a bit too high to reach.',
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: "The item is on the trunk of a tree, a bit too high to reach."
     })],
     ["Lanayru Field Female Stag Beetle", new Flag(stagBeetleF, [-2005, 4790], {
@@ -1474,7 +1544,7 @@ const flags = new Map([
         randoDesc: "Climb the tower with the ladder and talk to Auru to obtain the item."
     })],
     ["Lanayru Field Spinner Track Chest", new Flag(chest.with(heartPiece), [-3349, 3595], {
-        baseReqs: [[bombBagReq, ballAndChainReq], spinnerReq],
+        baseReqs: [boulderReq, spinnerReq],
         baseDesc: 'Destroy the boulders blocking the way, then use the spinner tracks to reach the chest.'
     })],
     ["Hyrule Field Amphitheater Poe", new Flag(nightPoe, [-4314, 3790], {
@@ -1521,31 +1591,31 @@ const flags = new Map([
         baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
     })],
     ["Lake Hylia Bridge South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Hidden between two larger stone structures.'
     })],
     ["Lake Hylia Bridge North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-4333, 3548], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Out in the open, east of the Owl Statue.'
     })],
     ["West Hyrule Field East Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 35), [-3637, 4089], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Out in the open, defeat the Bulblins to make it easier to destroy.'
     })],
     ["West Hyrule Field North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 38), [-3412, 4111], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Hidden in the corner.'
     })],
     ["Lanayru Field West Corner Rupee Boulder", new Flag(rupeeBoulder.with(Rupees.Purple), [-2564, 4084], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Out in the open in the corner.'
     })],
     ["Zoras Domain Tunnel East Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 21), [-477, 4725], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.'
     })],
     ["Zoras Domain Tunnel West Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 17), [-475, 4702], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.'
     })],
     ["Zoras Domain Underwater North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 60), [-515, 4850], {
@@ -1581,19 +1651,19 @@ const flags = new Map([
         baseDesc: "Underwater, south of the bridge."
     })],
     ["Lanayru Field Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 30), [-2601, 3974], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'These boulders are blocking the north entrance to the spinner area.'
     })],
     ["Lake Hylia Bridge Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-3816, 3385], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'These boulders are blocking the south entrance to the spinner area.'
     })],
     ["Outside South Castle Town Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 38), [-4422, 4873], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Out in the open.'
     })],
     ["Upper Zoras River Above Water Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 31), [-808, 5851], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'In the open near the howling stone.'
     })],
     ["Lake Hylia West Underwater Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 36), [-4847, 3363], {
@@ -1679,11 +1749,11 @@ const flags = new Map([
         baseReqs: [shadowCrystalReq, lanternReq],
         baseDesc:  'Light the 3 torches separated by the wooden barriers to make the chest appear.'
     })],
-    ["Lanayru Field Poe Grotto Left Poe", new Flag(poeSoul, [-2351, 4111], {
+    ["Lanayru Field Poe Grotto Right Poe", new Flag(poeSoul, [-2351, 4111], {
         baseReqs: [shadowCrystalReq],
         baseDesc: 'On the elevated platform.'
     })],
-    ["Lanayru Field Poe Grotto Right Poe", new Flag(poeSoul, [-2378, 4211], {
+    ["Lanayru Field Poe Grotto Left Poe", new Flag(poeSoul, [-2378, 4211], {
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Right of the elevated platform.'
     })],
@@ -1741,75 +1811,75 @@ const flags = new Map([
         baseDesc: "Underwater, in the back."
     })],
     ["Lake Lantern Cave First Chest", new Flag(smallChest.with(bombs, 5), [-5696, 3100], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock on the left to reveal the chest.'
-    })], // TODO Verify if not switched
+    })],
     ["Lake Lantern Cave Second Chest", new Flag(smallChest.with(Rupees.Yellow), [-5665, 3145], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back and defeat the Keese.'
     })],
     ["Lake Lantern Cave Third Chest", new Flag(smallChest.with(Rupees.Red), [-5631, 3200], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock on the left to reveal the chest.'
     })],
     ["Lake Lantern Cave First Poe", new Flag(poeSoul, [-5632, 3440], {
-        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseReqs: [boulderReq, shadowCrystalReq],
         baseDesc: 'Near the torch in the middle of the room.'
     })],
     ["Lake Lantern Cave Fourth Chest", new Flag(smallChest.with(arrows, 10), [-5631, 3487], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
     })],
     ["Lake Lantern Cave Fifth Chest", new Flag(smallChest.with(Rupees.Red), [-5381, 3422], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
     })],
     ["Lake Lantern Cave Sixth Chest", new Flag(chest.with(Rupees.Orange), [-5418, 3185], {
-        baseReqs: [[bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [boulderReq, lanternReq],
         baseDesc: 'Light the 2 torches to make the chest appear.'
-    })], // TODO Verify if not switched
+    })],
     ["Lake Lantern Cave Seventh Chest", new Flag(smallChest.with(Rupees.Red), [-5386, 3183], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock on the right to reveal the chest.'
     })],
     ["Lake Lantern Cave Eighth Chest", new Flag(smallChest.with(bombs, 5), [-5308, 3098], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back and defeat the Tektites.'
     })],
     ["Lake Lantern Cave Ninth Chest", new Flag(smallChest.with(arrows, 10), [-5375, 2828], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock on the left and defeat the Keese.'
-    })], // TODO Verify if not switched
+    })], 
     ["Lake Lantern Cave Tenth Chest", new Flag(chest.with(Rupees.Purple), [-5341, 2779], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
     })],
     ["Lake Lantern Cave Second Poe", new Flag(poeSoul, [-5260, 3181], {
-        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseReqs: [boulderReq, shadowCrystalReq],
         baseDesc: 'Near the torch in the middle of the room.'
     })],
-    ["Lake Lantern Cave Eleventh Chest", new Flag(chest.with(Rupees.Purple), [-5229, 3182], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
-        baseDesc: 'Destroy the rock on the left to reveal the chest.'
-    })], // TODO Verify if not switched
-    ["Lake Lantern Cave Twelfth Chest", new Flag(smallChest.with(bombs, 10), [-5262, 3231], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+    ["Lake Lantern Cave Eleventh Chest", new Flag(smallChest.with(bombs, 10), [-5262, 3231], {
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
     })],
+    ["Lake Lantern Cave Twelfth Chest", new Flag(chest.with(Rupees.Purple), [-5229, 3182], {
+        baseReqs: [boulderReq],
+        baseDesc: 'Destroy the rock on the left to reveal the chest.'
+    })],
     ["Lake Lantern Cave Thirteenth Chest", new Flag(smallChest.with(seeds, 50), [-5303, 3268], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock on the left to reveal the chest.'
     })],
     ["Lake Lantern Cave Fourteenth Chest", new Flag(chest.with(Rupees.Orange), [-5333, 3426], {
-        baseReqs: [[bombBagReq, ballAndChainReq]],
+        baseReqs: [boulderReq],
         baseDesc: 'Destroy the rock in the back to reveal the chest.'
     })],
     ["Lake Lantern Cave Final Poe", new Flag(poeSoul, [-5523, 3363], {
-        baseReqs: [[bombBagReq, ballAndChainReq], shadowCrystalReq],
+        baseReqs: [boulderReq, shadowCrystalReq],
         baseDesc: 'At the entrance of the room.'
     })],
     ["Lake Lantern Cave End Lantern Chest", new Flag(chest.with(heartPiece), [-5555, 3364], {
-        baseReqs: [[bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [boulderReq, lanternReq],
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
     ["Lanayru Ice Block Puzzle Cave Chest", new Flag(chest.with(heartPiece), [-1725, 4818], {
@@ -1839,24 +1909,35 @@ const flags = new Map([
         baseDesc: 'The chest is under the wooden structure.'
     })],
     ["Forest Temple Big Baba Key", new Flag(forestSK, [-5624, 3749], {
-        baseDesc: 'Defeat the Big Baba to obtain the key. Use the Bomblings if you do not have any weapons.'
+        baseReqs: [forest1SKReq],
+        baseDesc: 'Defeat the Big Baba to obtain the key. Use the Bomblings if you do not have any weapons.',
+        randoReqs: [...forestTempleLeftSideReq],
+        randoDesc: 'Defeat the Big Baba to obtain the item. Use the Bomblings if you do not have any weapons.'
     })],
     ["Forest Temple West Deku Like Chest", new Flag(chest.with(heartPiece), [-5467, 3901], {
-        baseDesc: 'Defeat the Deku Like that blocks the way to access the chest.'
+        baseReqs: [forest1SKReq],
+        baseDesc: 'Defeat the Deku Like that blocks the way to access the chest.',
+        randoReqs: [...forestTempleLeftSideReq],
     })],
     ["Forest Temple Totem Pole Chest", new Flag(chest.with(forestSK), [-5277, 3498], {
-        baseDesc: 'Roll into the pillar to make the chest fall.'
+        baseReqs: [forest1SKReq],
+        baseDesc: 'Roll into the pillar to make the chest fall.',
+        randoReqs: [...forestTempleLeftSideReq],
     })],
     ["Forest Temple West Tile Worm Room Vines Chest", new Flag(smallChest.with(Rupees.Red), [-5224, 3241], {
-        baseDesc: 'Climb the vines to reach the chest.'
+        baseReqs: [forest1SKReq],
+        baseDesc: 'Climb the vines to reach the chest.',
+        randoReqs: [...forestTempleLeftSideReq]
     })],
     ["Forest Temple Gale Boomerang", new Flag(boomerang, [-4508, 4262], {
-        baseReqs: [[woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
-        baseDesc: 'Defeat Ook to obtain the Gale Boomerang.'
+        baseReqs: [forest3SKReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
+        baseDesc: 'Defeat Ook to obtain the Gale Boomerang.',
+        randoReqs: [[forest3SKReq, new AndRequirements([boomerangReq, ...forestTempleLeftSideReq])], [woodenSwordReq, shadowCrystalReq, ballAndChainReq, bombBagReq, bowReq]]
     })],
     ["Forest Temple West Tile Worm Chest Behind Stairs", new Flag(chest.with(heartPiece), [-5304, 3050], {
-        baseReqs: [boomerangReq],
-        baseDesc: 'Extinguish all the torches to retract the stairs blocking the chest.'
+        baseReqs: [forest1SKReq, boomerangReq],
+        baseDesc: 'Extinguish all the torches to retract the stairs blocking the chest.',
+        randoReqs: [...forestTempleLeftSideReq, boomerangReq]
     })],
     ["Forest Temple Central Chest Hanging From Web", new Flag(chest.with(forestCompass), [-5386, 4242], {
         baseReqs: [[boomerangReq, bowReq, clawshotReq, ballAndChainReq]],
@@ -1887,19 +1968,21 @@ const flags = new Map([
         randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
     })],
     ["Forest Temple Diababa", new Flag(diababa, [-3651, 4870], {
-        baseReqs: [forestBKReq, boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq]],
+        baseReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         baseDesc: 'Defeat Diababa to clear out the Forest Temple.'
     })],
     ["Forest Temple Ooccoo", new Flag(ooccooPot, [-5250, 4565], {
         baseDesc: 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'
     })],
     ["Forest Temple Tile Worm Monkey Lock", new Flag(lock, [-5309, 2943], {
-        baseReqs: [forest1SKReq, lanternReq],
-        baseDesc: 'Unlock this door to free the west wing monkey.'
+        baseReqs: [forest2SKReq, lanternReq],
+        baseDesc: 'Unlock this door to free the west wing monkey.',
+        randoReqs: [webReq, [forest2SKReq, new AndRequirements([clawshotReq, forest1SKReq])]]
     })],
     ["Forest Temple Big Baba Monkey Lock", new Flag(lock, [-5869, 3747], {
-        baseReqs: [forest1SKReq],
-        baseDesc: 'Unlock this door to free the Big Baba Monkey'
+        baseReqs: [forest2SKReq, lanternReq],
+        baseDesc: 'Unlock this door to free the Big Baba Monkey',
+        randoReqs: [webReq, [forest2SKReq, new AndRequirements([clawshotReq, forest1SKReq])]]
     })],
     ["Forest Temple Totem Pole Monkey Lock", new Flag(lock, [-5224, 5140], {
         baseReqs: [forest1SKReq],
@@ -1910,7 +1993,7 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the Northeastern Tile Worm Room."
     })],
     ["Forest Temple Boss Lock", new Flag(bossLock, [-3858, 4868], {
-        baseReqs: [forestBKReq, boomerangReq],
+        baseReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq]],
         baseDesc: "Unlock this door to reach Diababa.",
     })],
     // Goron Mines
@@ -1928,7 +2011,7 @@ const flags = new Map([
         randoCategory: Categories.Gifts,
         randoDesc: 'Talk to Gor Amoto to obtain the item.'
     })],
-    ["Goron Mines Gor Amato Chest", new Flag(chest.with(minesMap), [-4971, 2973], {
+    ["Goron Mines Gor Amato Chest", new Flag(chest.with(minesMap), [-4999, 2966], {
         baseReqs: [ironBootsReq, mines1SKReq],
         baseDesc: 'The chest is behind the goron elder.'
     })],
@@ -2251,51 +2334,51 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the chandelier in the torch room."
     })],
     ["Arbiters Grounds West Poe", new Flag(poeSoul, [-5186, 3780], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, lanternReq],
         baseDesc: "Defeat the poe easily by using Midna's charge attack."
     })],
     ["Arbiters Grounds North Turning Room Chest", new Flag(chest.with(arbiterSK), [-4257, 4786], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, lanternReq],
         baseDesc: 'Enter the tunnel from the entrance with no spikes, then go to the end of it to find the chest.'
     })],
     ["Arbiters Grounds North Turning Room Lock", new Flag(lock, [-4325, 4791], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, lanternReq],
         baseDesc: "Unlock this door to reach the spikes room."
     })],
     ["Arbiters Grounds Ooccoo", new Flag(ooccooPot, [-5201, 4240], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, lanternReq],
         baseDesc: 'Pick up or break the pot where Ooccoo is hiding for her to join you.'
     })],
     ["Arbiters Grounds Death Sword Chest", new Flag(chest.with(spinner), [-3598, 4239], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, lanternReq],
         baseDesc: 'Defeat Death Sword to obtain the Spinner.'
     })],
     ["Arbiters Grounds Spinner Room First Small Chest", new Flag(smallChest.with(bombs, 10), [-4490, 3311], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, spinnerReq, lanternReq],
         baseDesc: 'Use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Second Small Chest", new Flag(smallChest.with(Rupees.Red), [-4486, 3078], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, spinnerReq, lanternReq],
         baseDesc: 'From the previous chest, use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Lower Central Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-4307, 2997], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, spinnerReq, lanternReq],
         baseDesc: 'Hidden under the spinner ramp, use the spinner to float above the quicksand and reach the chest.'
     })],
     ["Arbiters Grounds Spinner Room Stalfos Alcove Chest", new Flag(chest.with(heartPiece), [-4369, 3666], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, spinnerReq, lanternReq],
         baseDesc: 'Use the spinner ramp and defeat the Stalfos to reach this chest.'
     })],
     ["Arbiters Grounds Spinner Room Lower North Chest", new Flag(smallChest.with(Rupees.Yellow), [-4156, 3605], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, [bombBagReq, ballAndChainReq], spinnerReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter5SKReq, stalfosReq, spinnerReq, lanternReq],
         baseDesc: 'Use the spinner ramp and defeat the 2 stalfos that are guarding the chest to open it.'
     })],
     ["Arbiters Grounds Boss Lock", new Flag(bossLock, [-4276, 4326], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, spinnerReq, arbiterBKReq, lanternReq],
         baseDesc: "Unlock this door to reach Stallord."
     })],
     ["Arbiters Grounds Stallord", new Flag(stallord, [-4530, 4332], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, [bombBagReq, ballAndChainReq], spinnerReq, arbiterBKReq, lanternReq],
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, spinnerReq, arbiterBKReq, lanternReq],
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
@@ -2361,7 +2444,7 @@ const flags = new Map([
         baseDesc: "Use the cannon or the ball and chain to break the ice that is blocking the chest."
     })],
     ["Snowpeak Ruins Courtyard West Lock", new Flag(snowpeakLock, [-4611, 3842], {
-        baseReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, snowpeak1SKReq])]],
+        baseReqs: [snowpeak1SKReq, [ballAndChainReq, pumpkinReq]],
         baseDesc: "Unlock this door to reach the cannonballs of the western corridor."
     })],
     ["Snowpeak Ruins West Cannon Room Central Chest", new Flag(smallChest.with(Rupees.Red), [-4157, 3214], {
@@ -2452,14 +2535,14 @@ const flags = new Map([
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
     ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
-        baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: "Unlock this door to reach Armogohma.",
-        randoReqs: [pastDomRodReq, bowReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
-        baseReqs: [pastDomRodReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
-        randoReqs: [pastDomRodReq, bowReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],
@@ -2731,12 +2814,10 @@ const flags = new Map([
         baseDesc: 'Make your way across the moving platforms to reach the chest.'
     })],
     ["Palace of Twilight East Wing First Room West Alcove", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
-        baseReqs: [[lightMasterSwordReq, new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
-        baseDesc: 'Use the Sol or the Light Filled Master Sword to activate the evelator with the switch in the fog, then simply ride it until it brings you to the chest.'
+        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Room East Alcove", new Flag(chest.with(heartPiece), [-5420, 4902], {
-        baseReqs: [[lightMasterSwordReq, new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
-        baseDesc: 'Use the Sol or the Light Filled Master Sword to activate the evelator with the switch in the fog, then simply ride it until it brings you to the chest.'
+        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Lock", new Flag(lock, [-5209, 4773], {
         baseReqs: [clawshotReq, palace1SKReq],
@@ -2763,39 +2844,39 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the east Sol."
     })],
     ["Palace of Twilight Central First Room Chest", new Flag(chest.with(palaceSK), [-4994, 4469], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace4SKReq],
+        baseReqs: [lightMasterSwordReq],
         baseDesc: 'Defeat all the Zant Masks to make the chest appear.'
     })],
     ["Palace of Twilight Big Key Chest", new Flag(bossChest.with(palaceBK), [-4762, 4101], {
-        baseReqs: [lightMasterSwordReq, palace5SKReq, doubleClawshotReq],
+        baseReqs: [lightMasterSwordReq, palace1SKReq, doubleClawshotReq],
         baseDesc: 'Clear out the fog cascade, then clawshot your way up to the chest.'
     })],
     ["Palace of Twilight Central Outdoor Chest", new Flag(chest.with(palaceSK), [-4562, 4007], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace5SKReq],
+        baseReqs: [lightMasterSwordReq, palace1SKReq],
         baseDesc: 'Defeat all the Zant Masks (the first one is on the isolated south platform) to make the chest appear.'
     })],
     ["Palace of Twilight Central Tower Chest", new Flag(chest.with(palaceSK), [-4640, 4251], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace6SKReq],
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace2SKReq],
         baseDesc: 'Defeat the two Zant Masks on both sides of the room to make the chest appear.'
     })],
     ["Palace of Twilight Central First Room Lock", new Flag(lock, [-4886, 4108], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace5SKReq],
+        baseReqs: [lightMasterSwordReq, palace1SKReq],
         baseDesc: "Unlock this door to reach the central outdoor area."
     })],
     ["Palace of Twilight Central Outdoor Lock", new Flag(lock, [-4627, 4116], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace6SKReq],
+        baseReqs: [lightMasterSwordReq, palace2SKReq],
         baseDesc: "Unlock this door to reach the tower climbing room."
     })],
     ["Palace of Twilight Before Zant Lock", new Flag(lock, [-4334, 4326], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq],
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace3SKReq],
         baseDesc: "Unlock this door to reach the Twilit Messenger fight before Zant."
     })],
     ["Palace of Twilight Boss Lock", new Flag(bossLock, [-3907, 4326], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq, palaceBKReq],
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace3SKReq, palaceBKReq],
         baseDesc: "Unlock this door to reach Zant."
     })],
     ["Palace of Twilight Zant", new Flag(zant, [-3721, 4325], {
-        baseReqs: [clawshotReq, lightMasterSwordReq, palace7SKReq, palaceBKReq, boomerangReq, zoraArmorReq, [ironBootsReq, magicArmorReq], ballAndChainReq],
+        baseReqs: [clawshotReq, lightMasterSwordReq, palace3SKReq, palaceBKReq, boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
         baseDesc: 'Defeat Zant to clear out the Palace of Twilight.'
     })],
     ["Palace of Twilight Zant Heart Container", new Flag(heartContainer, [-3620, 4324], {
@@ -2829,22 +2910,22 @@ const flags = new Map([
     })],
     ["Hyrule Castle East Wing Boomerang Puzzle Chest", new Flag(chest.with(castleMap), [-4283, 4456], {
         baseReqs: [boomerangReq, [woodenSwordReq, bowReq, bombBagReq, ballAndChainReq, shadowCrystalReq]],
-        baseDesc: "Boomerang the windmills in this order or it's inverse: Left, Middle Top, Middle Bottom, Right Middle to open the gate and reach the chest."
+        baseDesc: "Boomerang the windmills in this order or it's inverse: Bottom Center, Middle Left, Middle Right, Top to open the gate and reach the chest."
     })],
     ["Hyrule Castle Graveyard Grave Switch Room Front Left Chest", new Flag(smallChest.with(Rupees.Green), [-3832, 4708], {
-        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [shadowCrystalReq, boulderReq],
         baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
     })],
     ["Hyrule Castle Graveyard Grave Switch Room Back Left Chest", new Flag(smallChest.with(Rupees.Red), [-3832, 4761], {
-        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [shadowCrystalReq, boulderReq],
         baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
     })],
     ["Hyrule Castle Graveyard Grave Switch Room Right Chest", new Flag(chest.with(Rupees.Orange), [-3923, 4748], {
-        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq]],
+        baseReqs: [shadowCrystalReq, boulderReq],
         baseDesc: 'Destroy the rock on the ground before a tree and step on the pressure plate to open the gate blocking the chest.'
     })],
     ["Hyrule Castle Graveyard Owl Statue Chest", new Flag(chest.with(castleSK), [-4297, 4310], {
-        baseReqs: [shadowCrystalReq, [bombBagReq, ballAndChainReq], lanternReq, domRodReq],
+        baseReqs: [shadowCrystalReq, boulderReq, lanternReq, domRodReq],
         baseDesc: 'In the room with the 3 chests, light the torch to stop the rain. Then, quickly make your way to the gate ' + 
                   'blocking the Howl Statues, and light the 2 torches on both sides of the gate. Bring the 2 Howl Statues to ' +
                   'their pedestal south of the area, then jump across them. Finally, pull the chain to open the gate and acces the chest.'
@@ -2911,35 +2992,35 @@ const flags = new Map([
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Fifth from the left of the north row.'
     })],
-    ["Hyrule Castle Treasure Room First Small Chest", new Flag(smallChest.with(Rupees.Blue), [-5190, 4674], {
+    ["Hyrule Castle Treasure Room Eighth Small Chest", new Flag(smallChest.with(Rupees.Blue), [-5190, 4674], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'First from the left of the south row.'
     })],
-    ["Hyrule Castle Treasure Room Second Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-5173, 4695], {
+    ["Hyrule Castle Treasure Room Seventh Small Chest", new Flag(smallChest.with(Rupees.Yellow), [-5173, 4695], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Second from the left of the south row.'
     })],
-    ["Hyrule Castle Treasure Room Third Small Chest", new Flag(smallChest.with(Rupees.Red), [-5156, 4716], {
+    ["Hyrule Castle Treasure Room Sixth Small Chest", new Flag(smallChest.with(Rupees.Red), [-5156, 4716], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Third from the left of the south row.'
     })],
-    ["Hyrule Castle Treasure Room Fourth Small Chest", new Flag(smallChest.with(bombs, 20), [-5139, 4737], {
+    ["Hyrule Castle Treasure Room Fifth Small Chest", new Flag(smallChest.with(bombs, 20), [-5139, 4737], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'First from the bottom of the east column.'
     })],
-    ["Hyrule Castle Treasure Room Fifth Small Chest", new Flag(smallChest.with(arrows, 20), [-5120, 4737], {
+    ["Hyrule Castle Treasure Room Fourth Small Chest", new Flag(smallChest.with(arrows, 20), [-5120, 4737], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Second from the bottom of the east column.'
     })],
-    ["Hyrule Castle Treasure Room Sixth Small Chest", new Flag(smallChest.with(bombs, 20), [-5090, 4737], {
+    ["Hyrule Castle Treasure Room Third Small Chest", new Flag(smallChest.with(bombs, 20), [-5090, 4737], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Third from the bottom of the east column.'
     })],
-    ["Hyrule Castle Treasure Room Seventh Small Chest", new Flag(smallChest.with(Rupees.Green), [-5065, 4737], {
+    ["Hyrule Castle Treasure Room Second Small Chest", new Flag(smallChest.with(Rupees.Green), [-5065, 4737], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Fourth from the bottom of the east column.'
     })],
-    ["Hyrule Castle Treasure Room Eighth Small Chest", new Flag(smallChest.with(arrows, 30), [-5040, 4737], {
+    ["Hyrule Castle Treasure Room First Small Chest", new Flag(smallChest.with(arrows, 30), [-5040, 4737], {
         baseReqs: [castle3SKReq, doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq],
         baseDesc: 'Fifth from the bottom of the east column.'
     })],
@@ -2963,23 +3044,31 @@ const flags = new Map([
     ["Eldin Field Sign", new Flag(randoHint, [-4282, 5928])],
     ["Faron Field Sign", new Flag(randoHint, [-6202, 4889])],
     ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
-    ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055])],
+    ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055], {
+        randoReqs: [[forest1SKReq, clawshotReq]]
+    })],
     ["Gerudo Desert Sign", new Flag(randoHint, [-5481, 1185])],
     ["Goron Mines Sign", new Flag(randoHint, [-3723, 5334], {
         baseReqs: [ironBootsReq, mines3SKReq]
     })],
-    ["Great Bridge of Hylia Sign", new Flag(randoHint, [-4250, 3381])],
+    ["Great Bridge of Hylia Sign", new Flag(randoHint, [-4250, 3381], {
+        randoReqs: [clawshotReq]
+    })],
     ["Hidden Village Sign", new Flag(randoHint, [-2052, 6668], {
         baseReqs: [woodenStatueReq]
     })],
     ["Hyrule Castle Sign", new Flag(randoHint, [-5856, 4318])],
     ["Jovani House Sign", new Flag(randoHint, [-4110, 4837])],
     ["Kakariko Gorge Sign", new Flag(randoHint, [-4979, 5876])],
-    ["Kakariko Graveyard Sign", new Flag(randoHint, [-5475, 8300])],
-    ["Kakariko Village Sign", new Flag(randoHint, [-5253, 7455])],
+    ["Kakariko Graveyard Sign", new Flag(randoHint, [-5475, 8300], {
+        randoReqs: [gateKeyReq]
+    })],
+    ["Kakariko Village Sign", new Flag(randoHint, [-5253, 7455], {
+        randoReqs: [boulderReq]
+    })],
     ["Lake Hylia Sign", new Flag(randoHint, [-4659, 2920])],
     ["Lake Lantern Cave Sign", new Flag(randoHint, [-5335, 3018], {
-        baseReqs: [[bombBagReq, ballAndChainReq]]
+        baseReqs: [boulderReq]
     })],
     ["Lakebed Temple Sign", new Flag(randoHint, [-4392, 3903], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]]
@@ -2991,7 +3080,9 @@ const flags = new Map([
     ["North Eldin Sign", new Flag(randoHint, [-1911, 7257])],
     ["Ordon Sign", new Flag(randoHint, [-8842, 4938])],
     ["Palace of Twilight Sign", new Flag(randoHint, [-5914, 4479])],
-    ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630])],
+    ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630], {
+        randoReqs: [shadowCrystalReq]
+    })],
     ["Snowpeak Mountain Sign", new Flag(randoHint, [-483, 3939])],
     ["Snowpeak Ruins Sign", new Flag(randoHint, [-5035, 4186])],
     ["South of Castle Town Sign", new Flag(randoHint, [-4475, 4710])],
@@ -3020,3 +3111,7 @@ flags.get("Outside South Castle Town Golden Wolf").addFlagRequirement(flags.get(
 flags.get("Gerudo Desert Golden Wolf").addFlagRequirement(flags.get("Lake Hylia Howling Stone"));
 flags.get("Kakariko Graveyard Golden Wolf").addFlagRequirement(flags.get("Snowpeak Howling Stone"));
 flags.get("North Castle Town Golden Wolf").addFlagRequirement(flags.get("Hidden Village Howling Stone"));
+flags.get("Castle Town Malo Mart Magic Armor").addFlagRequirement(flags.get("Goron Springwater Rush"));
+let collectBothSolsFlag = flags.get("Palace of Twilight Collect Both Sols");
+flags.get("Palace of Twilight East Wing First Room West Alcove").addFlagRequirement(collectBothSolsFlag);
+flags.get("Palace of Twilight East Wing First Room East Alcove").addFlagRequirement(collectBothSolsFlag);

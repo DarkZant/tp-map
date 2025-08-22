@@ -75,7 +75,7 @@ class SubmapFloor {
     }
     manageContent() {
         if (this.shownFlagsAreSet())
-            this.unsetMarkerShown();
+            this.unset();
         else
             this.setMarkerShown();
         removeFloorLayer();
@@ -91,7 +91,23 @@ class SubmapFloor {
     count() {
         let count = 0;
         for (let c of this.contents) {
-            if (c.isCountable())
+            if (c.isCounted())
+                ++count;
+        }
+        return count;
+    }
+    countForTotal() {
+        let count = 0;
+        for (let c of this.contents) {
+            if (c.countedInTotal())
+                ++count;
+        }
+        return count;
+    }
+    totalCount() {
+        let count = 0;
+        for (let c of this.contents) {
+            if (c.countsForTotal())
                 ++count;
         }
         return count;
@@ -172,10 +188,10 @@ class Submap {
     initializeImages() {
         let width = this.floors[0].image.width;
         let height = this.floors[0].image.height;
-         if (height > 330) {
+        if (height > 330) {
             width = 330 / height * width;
             height = 330;
-    }
+        }
         let topLeftCornerPosition = [
             this.position[0] + height, 
             this.position[1] - width
@@ -184,11 +200,12 @@ class Submap {
             this.position[0] - height, 
             this.position[1] + width
         ];
-        for (let floor of this.floors) {
-            floor.imageOverlay = L.imageOverlay(floor.image.src, [
-                topLeftCornerPosition, bottomRightCornerPosition
-            ]);
-        }
+        this.assignImagesToFloors(L.latLngBounds(topLeftCornerPosition, bottomRightCornerPosition));
+        
+    }
+    assignImagesToFloors(bounds) {
+        for (let floor of this.floors)
+            floor.imageOverlay = L.imageOverlay(floor.image.src, bounds);
     }
     setName(name) {
         this.name = name;
@@ -284,6 +301,18 @@ class Submap {
             count += floor.count();
         return count;
     }
+    countForTotal() {
+        let count = 0;
+        for (let floor of this.floors)
+            count += floor.countForTotal();
+        return count;
+    }
+    totalCount() {
+        let count = 0;
+        for (let floor of this.floors)
+            count += floor.totalCount();
+        return count;
+    }
     getUniqueShownMarker() {
         let shownMarkerFound = null;
         for (let floor of this.floors) {
@@ -347,7 +376,7 @@ class Submap {
         currentMapState = MapStates.Submap;
         this.prepareMap();
         this.exitEvent = () => this.exit();
-        map.on('zoomend', this.exitEvent);
+        LeafletMap.on('zoomend', this.exitEvent);
         loadedSubmap = this;
         this.floors[0].load();  
     }
@@ -355,25 +384,20 @@ class Submap {
         this.floors[0].reload();
     }
     exit() {
-        if (map.getZoom() == 0)
+        if (LeafletMap.getZoom() == 0)
             return;
-        map.off('zoomend', this.exitEvent);  
+        LeafletMap.off('zoomend', this.exitEvent);  
         document.getElementById('submapName').style.display = "none";
         exitToTilemap();
     }
+    getControlsOffset() {
+        return 100;
+    }
+    getBaseOffset() {
+        return 100;
+    }
     prepareMap() {
-        map.setView(this.position, 0);     
-        if (window.innerWidth >= 1400 && window.innerHeight >= 600)
-            map.dragging.disable();
-        else {
-            let bounds = this.floors[0].imageOverlay.getBounds();
-            let nwp = bounds.getNorthWest();
-            let sep = bounds.getSouthEast();
-            let controlsOffset = this.getControlsOffset();
-            setTimeout(function() {
-                map.setMaxBounds(L.latLngBounds([[nwp.lat + 100, nwp.lng - controlsOffset], [sep.lat - 100, sep.lng + 100]]));
-            }, 200);  
-        }
+        LeafletMap.setView(this.position, 0);     
         let subName = document.getElementById('submapName');
         subName.style.display = "flex";
         let fontSize = 2.25;
@@ -383,11 +407,8 @@ class Submap {
         //     subName.style.width = this.name.length * 2 + 'vw';
         subName.children[1].style.fontSize = fontSize + 'vw';
         subName.children[1].innerHTML = this.name;
-        tileLayer.setOpacity(0.2);
+        TileLayer.setOpacity(0.2);
         removeAllLayersExceptTL();
-    }
-    getControlsOffset() {
-        return 100;
     }
     getAllTooltipMarkers() {
         let tooltipMarkers = [this.marker];
@@ -417,6 +438,7 @@ class SimpleSubmap extends Submap {
     ) {
         let floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name), "1F", contents);
         super(position, iconImage, name, [floor], {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.boundsOffset = [100, 100];
     }
 }
 
@@ -437,12 +459,12 @@ class FlooredSubmap extends Submap {
         // document.getElementById('floors').style.display = 'inline'
         this.exitEvent = () => {
             this.exit();
-            if (map.getZoom() == 0)
+            if (LeafletMap.getZoom() == 0)
                 return;
             this.hideFloorUI();
             window.removeEventListener('keydown', this.controlsEvent);
         } 
-        map.on('zoomend', this.exitEvent);
+        LeafletMap.on('zoomend', this.exitEvent);
         this.controlsEvent = (e) => this.controls(e);
         window.addEventListener('keydown', this.controlsEvent);
         this.setupFloors();
@@ -498,7 +520,7 @@ class FlooredSubmap extends Submap {
         this.activeFloor.reload();
     }
     controls(event) {
-        if (!(event instanceof KeyboardEvent))
+        if (!(event instanceof KeyboardEvent) || keyboardEventIsOnNotes(event))
             return;
         let key = event.key == undefined ? event.originalEvent.key : event.key;
         if (key == 'e' || key == "ArrowRight") {
@@ -537,6 +559,7 @@ class SimpleFlooredSubmap extends FlooredSubmap {
             floors[i].index = i;
         }
         super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
+        this.boundsOffset = [200, 100];
     }
 }
 
@@ -549,11 +572,15 @@ class CaveOfOrdeals extends FlooredSubmap {
         for(let i = 1; i < contents.length - 1; ++i)
             floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1), "B" + (i + 1), contents[i]));
         floors.push(new SubmapFloor(path + '5', "B" + (contents.length), contents[contents.length - 1]));
-        super(position, iconImage, name, floors);
+        super(position, iconImage, name, floors, {baseReqs: [clawshotReq]});
+        this.boundsOffset = [400, 200];
         for (let i = 0; i < this.floors.length; ++i)
             this.floors[i].index = i;
-
-
+        let floorsText = this.getFloorsText();
+        for (let i = 0; i < this.floors.length; ++i)
+            this.floors[i].text = floorsText[i];
+    }
+    getFloorsText() {
         let gEL = (enemies) => { // Get Enemy List Formatting
             let text = "<b>Enemies</b><ul>";
             for(let i = 0; i < enemies.length; ++i)
@@ -633,25 +660,24 @@ class CaveOfOrdeals extends FlooredSubmap {
             gf('Gives you Great Fairy Tears everytime you visit her. Also enables the ability to get Great Fairy Tears at ' +
                 'Spirit Springs if you do not have any.')  
         ];
-        for (let i= 0; i < this.floors.length; ++i)
-            this.floors[i].text = floorsText[i];
+        return floorsText;
     }
     load() {
         currentMapState = MapStates.FlooredSubmap;
         this.prepareMap();
-        map.dragging.enable();
+        LeafletMap.dragging.enable();
         loadedSubmap = this;
         let div = document.getElementById('caveofOrdeals');
-        div.style.display = 'inline';
+        div.style.display = 'flex';
         this.exitEvent = () => { 
-            if (map.getZoom() == 0)
+            if (LeafletMap.getZoom() == 0)
                 return;
             this.exit(); 
             this.unbindButtons();
             window.removeEventListener('keydown', this.controlsEvent);
             div.style.display = "none";
         } 
-        map.on('zoomend', this.exitEvent);
+        LeafletMap.on('zoomend', this.exitEvent);
         this.controlsEvent = (e) => this.controls(e);
         window.addEventListener('keydown', this.controlsEvent);
         this.setupButtons();
@@ -698,7 +724,7 @@ class CaveOfOrdeals extends FlooredSubmap {
         button.replaceWith(button.cloneNode(true));
     }
     controls(event) {
-        if (!(event instanceof KeyboardEvent))
+        if (!(event instanceof KeyboardEvent) || keyboardEventIsOnNotes(event))
             return;
         let key = event.key == undefined ? event.originalEvent.key : event.key;
 
@@ -745,7 +771,8 @@ class Dungeon extends FlooredSubmap {
         super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
         this.floorOffset = floorOffset;
         this.imagedPosition = imagedPosition;
-        this.marker.setZIndexOffset(1000);
+        this.marker.setZIndexOffset(2000);
+        this.boundsOffset = [1500, 300];
     }
     initializeImages() {
         let width = this.floors[0].image.width;
@@ -758,23 +785,23 @@ class Dungeon extends FlooredSubmap {
             height = 2300 / width * height;
             width = 2300;
         }
+        let center = getTileLayerCenter();
+        let centerLat = center.lat;
+        let centerLng = center.lng;
         let topLeftCornerPosition = [
-            mapCenter[0] + height, 
-            mapCenter[1] - width
+            centerLat + height, 
+            centerLng - width
         ];
         let bottomRightCornerPosition = [
-            mapCenter[0] - height, 
-            mapCenter[1] + width
+            centerLat - height, 
+            centerLng + width
         ];
-        for (let floor of this.floors) {
-            floor.imageOverlay = L.imageOverlay(floor.image.src, [
-                topLeftCornerPosition, bottomRightCornerPosition
-            ]);
-        }
+        let bounds = L.latLngBounds(topLeftCornerPosition, bottomRightCornerPosition);
+        this.assignImagesToFloors(bounds);
         if (this.floors.length > 1) {
             this.backgroundImageOverlay = L.imageOverlay(
                 'Dungeons/' + spaceToUnderscore(this.name) + '/Background.png',
-                [topLeftCornerPosition, bottomRightCornerPosition]
+                bounds
             );
         }
     }
@@ -794,14 +821,15 @@ class Dungeon extends FlooredSubmap {
     }
     load() {
         removeAllLayers();
-        map.setView(mapCenter, -2); // Center, min dungeon zoom
         if (currentMapState === MapStates.ImageMap) {
-            map.setMinZoom(-5);
+            setMapCenterToTileLayer();
+            LeafletMap.setMinZoom(-5);
             document.getElementById('credit').style.display = 'none';
-            map.off('zoomend');
-            map.dragging.enable();       
-            map.on('zoomend', loadImageMapFromTileMap);  
+            LeafletMap.off('zoomend');
+            LeafletMap.dragging.enable();       
+            LeafletMap.on('zoomend', loadImageMapFromTileMap);  
         }
+        LeafletMap.setView(mapCenter, -2); // Center, min dungeon zoom
         currentMapState = MapStates.Dungeon;
         loadedSubmap = this;
         let dungeonName = document.getElementById("dungeonName");
@@ -810,20 +838,26 @@ class Dungeon extends FlooredSubmap {
         this.controlsEvent = (e) => this.controls(e);
         window.addEventListener('keydown', this.controlsEvent);
         this.exitEvent = () => this.exit();
-        map.on('zoomend', this.exitEvent);
+        LeafletMap.on('zoomend', this.exitEvent);
         if (this.floors.length > 1)
             addImageOverlayToMap(this.backgroundImageOverlay);
         this.setupFloors();
     }
     exit() {
-        if (map.getZoom() >= -2)
+        if (LeafletMap.getZoom() >= -2)
             return;
         this.hideFloorUI();
         document.getElementById('dungeonName').style.display = 'none';
         removeAllLayers();
         window.removeEventListener('keydown', this.controlsEvent);
-        map.off('zoomend', this.exitEvent);
+        LeafletMap.off('zoomend', this.exitEvent);
         loadTileMap();
+    }
+    getBaseOffset() {
+        return 300;
+    }
+    getControlsOffset() {
+        return 1500;
     }
 
 }
@@ -940,7 +974,7 @@ class Province {
         if (!Settings.CountersVisibility.isEnabled())
             return;
         if (!this.marker._map)
-            addMarkerToMap(this.marker);
+            addMarkerToMap(this.marker, this.counterPosition);
         this.marker.setIcon(this.getCounterMarkerIcon());
     }
     getCounterMarkerIcon() {
@@ -959,7 +993,27 @@ class Province {
         for (let c of this.contents) {
             if (c instanceof Submap)
                 count += c.count();
-            else if (c.isCountable()) // Flags & NonFlags
+            else if (c.isCounted()) // Flags & NonFlags
+                ++count;
+        }
+        return count;
+    }
+    countForTotal() {
+        let count = 0;
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                count += c.countForTotal();
+            else if (c.countedInTotal()) // Flags & NonFlags
+                ++count;
+        }
+        return count;
+    }
+    totalCount() {
+        let count = 0;
+        for (let c of this.contents) {
+            if (c instanceof Submap)
+                count += c.totalCount();
+            else if (c.countsForTotal()) // Flags & NonFlags
                 ++count;
         }
         return count;
@@ -1018,6 +1072,12 @@ class DungeonProvince extends Province {
     count() {
         return this.dungeon.count();
     }
+    countForTotal() {
+        return this.dungeon.countForTotal();
+    }
+    totalCount() {
+        return this.dungeon.totalCount();
+    }
     setShown() {
         this.dungeon.setShown();
         this.setVisually();
@@ -1072,7 +1132,7 @@ const Dungeons = Object.freeze({
         Bottle.Fairy.new([-3920, 4820]),
     ]], {
         baseReqs: [lanternReq], 
-        randoReqs: []
+        randoReqs: [[lanternReq, shadowCrystalReq]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
     }),
     
     Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
@@ -1162,10 +1222,10 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 1, 
         baseReqs: [zoraArmorReq, bombBagReq], 
-        randoReqs: [zoraArmor, [bombBagReq, lakebedBombsReq]]
+        randoReqs: [zoraArmorReq, [bombBagReq, lakebedBombsReq]]
     }),
 
-    Grounds: new Dungeon([-3865, 605], [-4500, 1488], dungeonIconImage, "Arbiter's Grounds", [
+    Grounds: new Dungeon([-3865, 605], [-4500, 1520], dungeonIconImage, "Arbiter's Grounds", [
         [   // B2
             "Arbiters Grounds North Turning Room Lock",
             "Arbiters Grounds Ooccoo",
@@ -1260,7 +1320,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [coralEarringReq, reekfishScentReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq], snowpeakScentReq)]]
+        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1362,7 +1422,7 @@ const Dungeons = Object.freeze({
         randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], clawshotReq, [completedSkybookReq, openCityReq]],
     }),
 
-    Palace: new Dungeon([-3636, 602], [-3800, 1472], "Mirror", 'Palace of Twilight', [
+    Palace: new Dungeon([-3636, 602], [-3800, 1520], "Mirror", 'Palace of Twilight', [
         [    // 1F
             "Palace of Twilight Collect Both Sols",
             "Palace of Twilight West Wing Chest Behind Wall of Darkness",
@@ -1465,7 +1525,10 @@ let doorIconImage = getIconImage('Door');
 let entranceIconImage = getIconImage('Entrance');
 
 function newGrotto(id, position, name, contents) {
-    let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto_' + id, contents);
+    let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto_' + id, contents, {
+        baseReqs: [],
+        randoReqs: [shadowCrystalReq]
+    });
     grotto.setName(name);
     return grotto;
 }
@@ -1516,6 +1579,7 @@ const Provinces = Object.freeze({
             hawkGrass.new([-8940, 5001]),
             hawkGrass.new([-9169, 4934]),
             Bottle.BeeLarva.new([-9035, 4848]),
+            postman.new([-9494, 4751])
     ]),
 
     Faron: new Province('Faron', [-6512, 5536], {}, [
@@ -1583,7 +1647,10 @@ const Provinces = Object.freeze({
                 "Sacred Grove Female Snail",
                 "Sacred Grove Temple of Time Owl Statue Poe",
                 "Sacred Grove Past Owl Statue Chest",
-            ])
+            ], {
+                baseReqs: [masterSwordReq],
+                randoReqs: [[masterSwordReq, openSacredGroveReq, openToTReq]]
+            })
     ]),
 
     Eldin: new Province("Eldin", [-4096, 7904], {
@@ -1684,7 +1751,7 @@ const Provinces = Object.freeze({
                 "Eldin Lantern Cave Lantern Chest",
                 "Eldin Lantern Cave Poe",
                 Bottle.YellowChu.new([-5604, 5704])
-            ]),
+            ], {baseReqs: [boulderReq]}),
             newGrotto(2, [-5607, 6282], "Kakariko Gorge Keese Grotto", [
 
             ]),
@@ -1695,7 +1762,7 @@ const Provinces = Object.freeze({
                 Bottle.Worm.new([-3796, 6315])
             ]),
             newGrotto(5, [-3249, 7223], "Eldin Field Fishing Grotto", [
-                "Eldin Field Bomskit Grotto Lantern Chest",
+                "Eldin Field Water Bomb Fish Grotto Chest",
                 Bottle.BeeLarva.new([-2941, 7190])
             ]),
             new SimpleFlooredSubmap([-2400, 7597], entranceIconImage, "Eldin Stockcave", [
@@ -2085,10 +2152,14 @@ const Provinces = Object.freeze({
             "Lake Lantern Cave Final Poe",
             "Lake Lantern Cave End Lantern Chest",
             "Lake Lantern Cave Sign"
-        ]),
+        ], {
+            baseReqs: [boulderReq]
+        }),
         new SimpleSubmap([-2025, 4818], entranceIconImage, 'Lanayru Ice Cave', [
             "Lanayru Ice Block Puzzle Cave Chest"
-        ]),
+        ], {
+            baseReqs: [boulderReq]
+        }),
     ]),
     Castle: new DungeonProvince(Dungeons.Castle, [-3584, 5440], hyruleCastlePolygonPoints)
 });

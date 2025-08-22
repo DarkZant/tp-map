@@ -1,7 +1,6 @@
 let setFlagsHidden = false;
 let blockMapReset = false;
 let storedMapReload = false;
-let currentMapState;
 let loadedSubmap;
 
 let originalWidth = 1600;
@@ -9,26 +8,46 @@ let multWidth = window.innerWidth / originalWidth;
 let originalHeight = 739;
 let multHeight = window.innerHeight / originalHeight;
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', () => throttleFunc(() => {
     multWidth = window.innerWidth / originalWidth;
     multHeight = window.innerHeight / originalHeight;
-    throttleFunc(reloadMap);
-});
+    reloadEntireMap();
+}));
 
 function getBiggestMult() {
-    return multWidth > multHeight ? multWidth : multHeight;
+    return Math.max(multWidth, multHeight);
 }
 
 function scaleLat(lat) {
-    return (lat - mapCenter[0]) * multWidth ;
+    let centerLat = getCenterLat();
+    return centerLat + getBiggestMult() * (lat - centerLat);
 }
 
 function scaleLng(lng) {
-    return (lng - mapCenter[1]) * multHeight ;
+    let centerLng = getCenterLng();
+    if (selectedGameVersion === GameVersions.Wii)
+        lng =  centerLng * 2 - lng;
+    return centerLng + getBiggestMult() * (lng - centerLng);
 }
 
+function scaleLatLng(latLng) {
+    return L.latLng(scaleLat(latLng.lat), scaleLng(latLng.lng));
+}
 
-// let loadedBackground;
+function scaleLatLngBounds(latLngBounds) {
+    return L.latLngBounds(
+        scaleLatLng(latLngBounds.getNorthWest()),
+        scaleLatLng(latLngBounds.getSouthEast())
+    );
+}
+
+function getCenterLat() {
+    return mapCenter.lat;
+}
+
+function getCenterLng() {
+    return mapCenter.lng;
+}
 
 
 const MapStates = Object.freeze({
@@ -38,8 +57,13 @@ const MapStates = Object.freeze({
     Submap: 3,
     FlooredSubmap: 4
 });
-const mapCenter = [-4913, 4257.5];
-const map = L.map('map', {
+let currentMapState = MapStates.ImageMap;
+
+const ImageOverlayBounds = L.latLngBounds([[0, 0], [-10336, 10176]]);
+const ImageMapOverlay = L.imageOverlay('Submaps/GameMap.png', ImageOverlayBounds);
+let mapCenter = ImageMapOverlay.getCenter();
+
+const LeafletMap = L.map('map', {
         trackResize: true,
         zoom: -5,
         minZoom: -5,
@@ -53,22 +77,24 @@ const map = L.map('map', {
         bounds: [[500, -500], [-10836, 10676]],
         dragging: false
 }); 
-const tileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
+
+const TileLayerBounds = L.latLngBounds([0, 0], [-9826, 8515]);
+const TileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
     maxZoom: 0,
     minZoom: -6,
     zoomOffset: 6,
     crs: L.CRS.Simple,
-    bounds: [[0, 0], [-9826, 8515]] 
+    bounds: TileLayerBounds
 });
 
 // Markers and Icons
-const icons = new Map();
+const Icons = new Map();
 function getIcon(image) {
-    if (image in icons.keys())
-        return icons.get(image);
+    if (Icons.has(image))
+        return Icons.get(image);
 
     let icon = L.icon({iconUrl: image.src, iconSize: getIconDimensions(image)});
-    icons.set(image, icon);
+    Icons.set(image, icon);
     return icon; 
 }
 function getIconDimensions(image) {
@@ -76,8 +102,8 @@ function getIconDimensions(image) {
     let height = image.height;
     let mult = getBiggestMult();
     let maxSize = 50 * mult;
-    if (maxSize > 60)
-        maxSize = 60;
+    if (maxSize > 65)
+        maxSize = 65;
     else if (maxSize < 30)
         maxSize = 30;
     if (width >= height) {
@@ -88,15 +114,19 @@ function getIconDimensions(image) {
         width = width / height * maxSize;
         height = maxSize;
     }
-    return [width, height]
+    return [width, height];
+}
+
+function scaleIconDimensions(icon) {
+    return getIconDimensions({width: icon.options.iconSize[0], height: icon.options.iconSize[1]});
 }
 
 function getIconWithCheckmark(icon) {
      return L.divIcon({ 
         iconUrl: icon.options.iconUrl,
         iconSize: icon.options.iconSize,
-        html: '<img src="' + icon.options.iconUrl + '" width="' + icon.options.iconSize[0] + 'px"' +
-              'height="' + icon.options.iconSize[1] + '"><img src="Icons/Checkmark.png" class="checkmark">'
+        className: "checkmarkIcon",
+        html: getIconImgElement(icon) + '<img src="Icons/Checkmark.png" class="checkmark">'
     });
 }
 
@@ -104,13 +134,40 @@ function getCounterIcon(icon, num) {
     return L.divIcon({ 
         iconUrl: icon.options.iconUrl,
         iconSize: icon.options.iconSize,
-        html: '<img src="' + icon.options.iconUrl + '" width="' + icon.options.iconSize[0] + 'px"' +
-              'height="' + icon.options.iconSize[1] + '"><div class="cpt subcpt">' + num + '</div>'
+        className: "submapDivIcon",
+        html: getIconImgElement(icon) + '<div class="cpt subcpt">' + num + '</div>'
     });
 }
 
+function getIconImgElement(icon) {
+    return '<img src="' + icon.options.iconUrl + '" style="' +
+            'width: ' + icon.options.iconSize[0] + 'px; ' +
+            'height: ' + icon.options.iconSize[1] + 'px">';
+}
+
+function updateDivIconSize(marker) {
+    let markerElement = marker.getElement();
+    let img = markerElement.querySelector("img");
+    if (img === null)
+        return;
+
+    let icon = marker.getIcon();
+    let newIconSize = scaleIconDimensions(icon);
+    icon.options.iconSize = newIconSize;
+
+    if (markerElement.classList.contains("submapDivIcon")) {
+        let counterNumber = markerElement.querySelector('div').innerHTML;
+        marker.setIcon(getCounterIcon(icon, counterNumber));
+    }
+    else if (markerElement.classList.contains("checkmarkIcon"))
+        marker.setIcon(getIconWithCheckmark(icon));
+
+    marker.remove();
+    reAddMarkerToMap(marker);
+}
+
 function layerIsLoaded(marker) {
-    return map.hasLayer(marker);
+    return LeafletMap.hasLayer(marker);
 }
 
 function showMarkerAsSet(marker, iconImage) {
@@ -134,7 +191,7 @@ function showMarkerAsNotSet(marker, iconImage) {
 }
 
 function showMarkerAsUnobtainable(marker) {
-    marker.setZIndexOffset(-500);
+    marker.setZIndexOffset(marker._zIndex - 500);
     if (!layerIsLoaded(marker))
         return;
     marker.getElement().classList.add("unobtainable");
@@ -171,15 +228,15 @@ function displayRequirement(requirement, cSSClass="iti") {
 
 // Image Map
 function loadImageMapFromTileMap() {
-    if (map.getZoom() != -5)
+    if (LeafletMap.getZoom() != -5)
         return;
     document.getElementById('credit').style.display = 'block';   
-    map.setView([0, 0], -4);
-    map.setMinZoom(-4);
+    LeafletMap.setView([0, 0], -4);
+    LeafletMap.setMinZoom(-4);
     if (window.innerWidth >= 1000 && window.innerHeight >= 700)
-        map.dragging.disable();
-    map.setMaxBounds([[500, -500], [-10836, 10676]]); 
-    map.off('zoomend', loadImageMapFromTileMap);    
+        LeafletMap.dragging.disable();
+    LeafletMap.setMaxBounds([[500, -500], [-10836, 10676]]); 
+    LeafletMap.off('zoomend', loadImageMapFromTileMap);    
     if (document.getElementById('flagDetails').style.visibility == 'visible')
         hideDetails(); 
     loadImageMap(); 
@@ -188,8 +245,8 @@ function loadImageMapFromTileMap() {
 function loadImageMap() {
     removeAllLayers();
     currentMapState = MapStates.ImageMap;
-    map.on("zoomend", loadTilemapFromImageMap);
-    addImageOverlayToMap(L.imageOverlay('Submaps/GameMap.png', [[0, 0], [-10336, 10176]]));
+    LeafletMap.on("zoomend", loadTilemapFromImageMap);
+    addImageOverlayToMap(ImageMapOverlay);
     loadImageMapMarkers();
 }
 function loadImageMapMarkers() {
@@ -213,30 +270,29 @@ function reloadImageMapMarkers() {
 function loadTileMap() {
     removeAllLayers();
     currentMapState = MapStates.TileMap;
-    addTileLayerToMap(tileLayer);
+    addTileLayerToMap(TileLayer);
     setBoundsToTL(); 
     loadTileMapMarkers();
 }
 
 function loadTilemapFromImageMap() {
-    if (map.getZoom() <= -4)
+    if (LeafletMap.getZoom() <= -4)
         return;
     document.getElementById('credit').style.display = 'none'; 
-    map.dragging.enable();             
-    map.setMinZoom(-5);
-    map.off('zoomend', loadTilemapFromImageMap);
-    map.on('zoomend', loadImageMapFromTileMap); 
+    LeafletMap.dragging.enable();             
+    LeafletMap.setMinZoom(-5);
+    LeafletMap.off('zoomend', loadTilemapFromImageMap);
+    LeafletMap.on('zoomend', loadImageMapFromTileMap); 
     loadTileMap();
 
     let cpt = 0;
-    map.eachLayer(function(_){
+    LeafletMap.eachLayer(function(_){
         ++cpt; 
     });
-    console.log('Number of Markers on Tilemap: ' + --cpt);
 }
 
 function loadTilemapFromDungeon() {
-    if (map.getZoom() <= -4)
+    if (LeafletMap.getZoom() <= -4)
         return;
     loadTileMap();
 }
@@ -249,79 +305,98 @@ function loadTileMapMarkers() {
 }
 
 function setBoundsToTL() {
-    map.setMaxBounds([[500, -500], [-10000, 9000]]); 
-}
-
-function exitSubmap() {
-    if (map.getZoom() == 0)
-        return;
-    map.off('zoomend', exitSubmap);  
-    removeAllLayersExceptTL();
-    map.setMinZoom(-5);
-    setBoundsToTL();
-    map.dragging.enable();
-    currentMapState = MapStates.TileMap;
-    tileLayer.setOpacity(1);
-    loadTileMapMarkers();
+    LeafletMap.setMaxBounds([[500, -500], [-10000, 9000]]); 
 }
 
 function exitToTilemap() {
     removeAllLayersExceptTL();
-    map.setMinZoom(-5);
+    LeafletMap.setMinZoom(-5);
     setBoundsToTL();
-    map.dragging.enable();
+    LeafletMap.dragging.enable();
     currentMapState = MapStates.TileMap;
-    tileLayer.setOpacity(1);
+    TileLayer.setOpacity(1);
+    setMapCenterToTileLayer();
     loadTileMapMarkers();
 }
 
+function getTileLayerCenter() {
+    return TileLayerBounds.getCenter();
+}
+
+function setMapCenterToTileLayer() {
+    mapCenter = getTileLayerCenter();
+}
+
+function updateMapBounds(bounds) {
+    setTimeout(() => {
+        LeafletMap.setMaxBounds(bounds);
+    }, 200);
+}
+
 // Adding layers to the map
-function addMarkerToMap(marker, position=null) {
-    if (position !== null) 
+function addMarkerToMap(marker, position) {
+    if (marker.currentPosition !== position || marker.currentPosition === undefined)
+        marker.currentPosition = position;
+
+    position = L.latLng(position);
+    if (currentMapState !== MapStates.TileMap)
+        marker.setLatLng(scaleLatLng(position));
+    else 
         marker.setLatLng(position);
-    // if (selectedGameVersion === GameVersions.Wii) {
-    //     let latLng = marker.getLatLng();
-    //     let center = currentMapState === MapStates.TileMap ? mapCenter[1] : loadedBackground.getCenter().lng;
-    //     marker.setLatLng([latLng.lat, -latLng.lng + center * 2]);
-    // }
-    // let mult = getBiggestMult();
-    let latLng = marker.getLatLng();
-    let scaledLat = scaleLat(latLng.lat);
-    let scaledLng = scaleLng(latLng.lng);
-    // if (biggestMult === multWidth) {
-    //     scaledLng = (lat / lng) * lat * multWidth;
-    //     scaledLat = lat * multWidth;
-    // }
-    // else {
-    //     scaledLat = (lng / lat) * lng * multHeight;
-    //     scaledLng = lng * multHeight;
-    // }
-    marker.setLatLng([scaledLat, scaledLng]);
-    // if (mult === multWidth) {
-    //     marker.setLatLng([lat * mult, lng]);
-    // }   
-    // else {
-    //     marker.setLatLng([lat, lng * mult]);
-    // }
-    marker.addTo(map);
+    marker.addTo(LeafletMap);
+}
+
+function reAddMarkerToMap(marker) {
+    addMarkerToMap(marker, marker.currentPosition);
 }
 
 function addPolygonToMap(polygon) {
-    polygon.addTo(map);
+    if (polygon.originalPoints === undefined)
+        polygon.originalPoints = polygon.getLatLngs();
+
+    let scaledPolygonPoints = [];
+    for (let pointArray of polygon.originalPoints) {
+        let scaledArray = [];
+        for (let point of pointArray)
+            scaledArray.push(scaleLatLng(point));
+        scaledPolygonPoints.push(scaledArray);
+    }
+    polygon.setLatLngs(scaledPolygonPoints);
+
+    polygon.addTo(LeafletMap);
 }
 
 function addImageOverlayToMap(imageOverlay) {
-    imageOverlay.addTo(map);
-    // if (selectedGameVersion === GameVersions.Wii)
-    //     flipImageContainer(imageOverlay.getElement());
-    // loadedBackground = imageOverlay;
+    if (imageOverlay.originalBounds === undefined)
+        imageOverlay.originalBounds = imageOverlay.getBounds();
+
+    let imageBounds = imageOverlay.originalBounds;
+    mapCenter = imageOverlay.getCenter();
+
+    let scaledBounds = scaleLatLngBounds(imageBounds);
+    imageOverlay.setBounds(scaledBounds);
+
+    if (currentMapState !== MapStates.ImageMap) {
+        let controlBoundsOffset = loadedSubmap.boundsOffset[0];
+        let otherBoundsOffset = loadedSubmap.boundsOffset[1];
+        let nwp = imageBounds.getNorthWest();
+        let sep = imageBounds.getSouthEast();
+        let mapBounds = L.latLngBounds([
+            [nwp.lat + otherBoundsOffset, nwp.lng - controlBoundsOffset], 
+            [sep.lat - otherBoundsOffset, sep.lng + otherBoundsOffset]
+        ]);
+        updateMapBounds(scaleLatLngBounds(mapBounds));
+    }
+    
+    imageOverlay.addTo(LeafletMap);
 }
 
 function addTileLayerToMap(tileLayer) {
-    tileLayer.addTo(map);
-    // if (selectedGameVersion === GameVersions.Wii)
-    //     flipImageContainer(tileLayer.getContainer());
+    setMapCenterToTileLayer();
+    tileLayer.addTo(LeafletMap);
 }
+
+// TODO
 document.getElementById("gameVersionSelection").style.display = "none";
 function flipImageContainer(imageContainer) {
     imageContainer.style.transform += 'rotateY(180deg)';
@@ -334,7 +409,7 @@ function unflipImageContainer(imageContainer) {
 }
 
 function flipCurrentImage() {
-    map.eachLayer(function (layer) {
+    LeafletMap.eachLayer(function (layer) {
         if (layer instanceof L.ImageOverlay)
             flipImageContainer(layer.getElement());
         else if (layer instanceof L.TileLayer)
@@ -342,7 +417,7 @@ function flipCurrentImage() {
     });
 }
 function unflipCurrentImage() {
-     map.eachLayer(function (layer) {
+     LeafletMap.eachLayer(function (layer) {
         if (layer instanceof L.ImageOverlay)
             unflipImageContainer(layer.getElement());
         else if (layer instanceof L.TileLayer)
@@ -376,6 +451,29 @@ function reloadMap() {
     }
 }
 
+function reloadEntireMap() {
+    let loadedLayers = [];
+    LeafletMap.eachLayer((layer) => {
+        loadedLayers.push(layer);
+        layer.remove();
+    });
+    for (let layer of loadedLayers) {
+        if (layer instanceof L.ImageOverlay) addImageOverlayToMap(layer);
+        else if (layer instanceof L.TileLayer) addTileLayerToMap(layer);
+    }
+    for (let [image, icon] of Icons.entries()) {
+        icon.options.iconSize = getIconDimensions(image);
+    }
+    for (let layer of loadedLayers) {
+        if (layer instanceof L.Marker) {
+            reAddMarkerToMap(layer);
+            if (layer.options.icon instanceof L.DivIcon)
+                updateDivIconSize(layer);
+        }
+        else if (layer instanceof L.Polygon) addPolygonToMap(layer);
+    }
+}
+
 function blockMapReloading() {
     blockMapReset = true;
 }
@@ -396,6 +494,8 @@ document.addEventListener('trackerUpdated', function(event) {
 
 document.addEventListener('settingsUpdated', function(event) {
     reloadMap();
+    if (Settings.ShowTotalCounter.isEnabled())
+        updateTotalCounter();
 });
 
 function showSetFlags() {
@@ -406,12 +506,14 @@ function showSetFlags() {
     reloadMap();
 }
 function hideSetFlags() {
+    if (!setFlagsHidden) {
+        let button = document.getElementById("setFlagsVisibilityButton");
+        button.children[1].innerHTML = "Show Set Flags";
+        let blockImage = document.createElement('img');
+        blockImage.src = "Icons/Block1.png";
+        button.children[0].appendChild(blockImage);
+    }
     setFlagsHidden = true;
-    let button = document.getElementById("setFlagsVisibilityButton");
-    button.children[1].innerHTML = "Show Set Flags";
-    let blockImage = document.createElement('img');
-    blockImage.src = "Icons/Block1.png";
-    button.children[0].appendChild(blockImage);
     reloadMap();
 }
 function toggleSetFlagsVisibility() {
@@ -462,6 +564,35 @@ function changeFlagTooltipContent() {
     }
 }
 
+Settings.ShowTotalCounter.setFunction(toggleTotalCounterVisibility)
+function toggleTotalCounterVisibility() {
+    let totalCounter = document.getElementById('counter');
+    if (window.getComputedStyle(totalCounter).visibility === "hidden") {
+        totalCounter.style.visibility = "visible";
+        updateTotalCounter();
+    }
+    else 
+        totalCounter.style.visibility = "hidden";
+}
+
+function updateTotalCounter() {
+    let counted = 0;
+    let total = 0;
+    for (let province of Object.values(Provinces)) {
+        if (province instanceof DungeonProvince)
+            continue;
+        counted += province.countForTotal();
+        total += province.totalCount();
+    }
+    for (let dungeon of Object.values(Dungeons)) {
+        counted += dungeon.countForTotal();
+        total += dungeon.totalCount();
+    }
+    let countText = counted + " / " + total;
+    let percentText = "(" + (total === 0 ? 0 :  + (Math.round(counted / total * 100))) + "%)"
+    document.getElementById('counter').innerHTML = countText + " " + percentText;
+}
+
 
 function removeFloorLayer() {
     switch (currentMapState) {
@@ -478,58 +609,63 @@ function removeFloorLayer() {
 }
 
 function removeAllMarkers() {
-    map.eachLayer(function (layer) {
+    LeafletMap.eachLayer(function (layer) {
         if (layer instanceof L.Marker)
             layer.remove();
     })
 }
 
 function removeAllMarkersExceptPolygons() {
-    map.eachLayer(function (layer) {
+    LeafletMap.eachLayer(function (layer) {
         if (layer instanceof L.Marker && !(layer instanceof L.Polygon))
             layer.remove();
     });
 }
 
 function removeAllLayers() {
-    map.eachLayer(function(l) {
-        map.removeLayer(l);
+    LeafletMap.eachLayer(function(layer) {
+        layer.remove();
     });
 }
 
 function removeAllLayersExceptTL() {
-    map.eachLayer(function(layer) {
-        if (layer !== tileLayer)
-            map.removeLayer(layer);
+    LeafletMap.eachLayer(function(layer) {
+        if (layer !== TileLayer)
+            layer.remove();
     });
 }  
 
+function openPositionTooltip(lat, lng) {
+    let text = "[" + Math.round(lat * 100) / 100 + ", " + Math.round(lng * 100) / 100 + "]";
+    LeafletMap.openTooltip(text, [lat, lng], {direction: "top"});
+    return text;
+}
+
 function getCoordsOnClick(e) {
     if (e.originalEvent.ctrlKey) {
-        let text = "[" + Math.round(e.latlng.lat) + ", " + Math.round(e.latlng.lng) + "]";
+        let text = openPositionTooltip(e.latlng.lat, e.latlng.lng);
         navigator.clipboard.writeText(text);
-        map.openTooltip(text, [e.latlng.lat, e.latlng.lng], {direction: "top"});
-
+        
     }
 }
 
 function updateMapSize(width) {
-    map.getContainer().style.width = width;
-    map.invalidateSize();
+    LeafletMap.getContainer().style.width = width;
+    LeafletMap.invalidateSize();
 }
 
 function clickToZoom(event) {
-    map.setView(L.latLng(event.latlng.lat, event.latlng.lng), -2);  
+    LeafletMap.setView(L.latLng(event.latlng.lat, event.latlng.lng), -2);  
 }
 
 function loadMap() {
     checkRandoSeed();
-    map.setView([0, 0], -4);
-    map.setMinZoom(-4);
+    LeafletMap.setView([0, 0], -4);
+    LeafletMap.setMinZoom(-4);
     if (window.innerWidth <= 1000 || window.innerHeight <= 700)
-        map.dragging.enable();
+        LeafletMap.dragging.enable();
     loadImageMap();
-    map.on('click', getCoordsOnClick);
+    LeafletMap.on('click', getCoordsOnClick);
 }
 
 // Menus
@@ -605,7 +741,7 @@ function hideDetails() {
         flagDetails.style.visibility = "hidden";
     }, 100);
     
-    map.off('click', hideDetails);
+    LeafletMap.off('click', hideDetails);
 }
 
 function unsetAllFlags() {
@@ -616,39 +752,55 @@ function unsetAllFlags() {
 }
 
 function resetMap(button) {
-    button.innerHTML = "Resetting...";
+    resetButtonText(button);
+
     blockMapReloading();
     unsetAllFlags();
     if (!unblockMapReloading())
         reloadMap();
-    resetButtonsFeedback(button, 'Map');
+
+    resetButtonsFeedback(button);
 }
 function trackerButton(button) {
-    button.innerHTML = "Resetting...";
+    resetButtonText(button);
+
     blockMapReloading();
     resetTracker();
     if (!unblockMapReloading())
         dispatchTrackerUpdate();
-    resetButtonsFeedback(button, 'Tracker'); 
+
+    resetButtonsFeedback(button); 
 }
 function settingsButton(button) {
-    button.innerHTML = "Resetting...";
+    resetButtonText(button);
+
     blockMapReloading();
     resetSettings();
     if (!unblockMapReloading())
         dispatchSettingsUpdate();
-    resetButtonsFeedback(button, 'Settings');
+
+    resetButtonsFeedback(button);
 }
-function resetButtonsFeedback(button, text) {
-    button.innerHTML = "Reset done!";
+
+function resetButtonText(button, text="Resetting...") {
+    if (button.originalText === undefined)
+        button.originalText = button.innerHTML;
+    button.innerHTML = text;
+}
+function resetButtonsFeedback(button, text="Reset done!") {
+    button.innerHTML = text;
     button.disabled = true;
     button.classList.remove('setbh');
     button.style.cursor = 'default';
+    button.style.pointerEvents = "none";
+
     setTimeout(function() {
-        button.innerHTML = "Reset " + text;
+        button.innerHTML = button.originalText;
         button.disabled = false;
         button.classList.add('setbh');
         button.style.cursor = 'pointer';
-    }, 1500);
+        button.style.pointerEvents = "";
+    }, 2000);
 }
+
 
