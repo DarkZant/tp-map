@@ -1243,7 +1243,7 @@ const flags = new Map([
         baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq],
         baseDesc: 'Buried in the ground, use sense to dig it up.'
     })],
-    ["Cave of Ordeals Floor 17 Poe", new Flag(poeSoul, [-6295, 742], {
+    ["Cave of Ordeals Floor 17 Poe", new Flag(poeSoul, [-6294, 735], {
         baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq],
         baseDesc: 'In the middle of the room.'
     })],

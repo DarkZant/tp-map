@@ -93,14 +93,20 @@ function verifySubmapRequirements(submap) {
 }
 
 function addRandoRequirements(submap, reqs) {
-    let glitchlessReqs = submap.randoReqs;
-    let glitchedReqs = submap.glitchedReqs;
-    if (glitchlessReqs === glitchedReqs)
-        glitchlessReqs.push(...reqs);
-    else {
-        glitchlessReqs.push(...reqs);
-        glitchedReqs.push(...reqs);
+    if (submap.origRandoReqs === undefined) {
+        submap.origRandoReqs = submap.randoReqs;
+        submap.origGlitchedReqs = submap.glitchedReqs;
     }
+
+    let glitchlessReqs = submap.origRandoReqs.slice();
+    let glitchedReqs = submap.origGlitchedReqs.slice();
+    
+    glitchlessReqs.push(...reqs);
+    glitchedReqs.push(...reqs);
+
+    submap.randoReqs = glitchlessReqs;
+    submap.glitchedReqs = glitchedReqs;
+    
     submap.reloadMarker();
 }
 

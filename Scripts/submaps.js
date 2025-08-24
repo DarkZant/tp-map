@@ -573,7 +573,7 @@ class CaveOfOrdeals extends FlooredSubmap {
             floors.push(new SubmapFloor(path + (((i - 1)  % 4) + 1), "B" + (i + 1), contents[i]));
         floors.push(new SubmapFloor(path + '5', "B" + (contents.length), contents[contents.length - 1]));
         super(position, iconImage, name, floors, {baseReqs: [clawshotReq]});
-        this.boundsOffset = [400, 200];
+        this.boundsOffset = [600, 200];
         for (let i = 0; i < this.floors.length; ++i)
             this.floors[i].index = i;
         let floorsText = this.getFloorsText();
@@ -700,16 +700,44 @@ class CaveOfOrdeals extends FlooredSubmap {
         this.activeFloor = this.floors[newFloorIndex];
         this.loadActiveFloor();
     }
-    manageActiveFloor() {
+    ascendToNextShownFloor() {
+        for (let i = 1; i < this.floors.length - 1; ++i) {
+            let newFloorIndex = this.activeFloor.index - i; 
+            if (newFloorIndex < 0)
+                newFloorIndex = this.floors.length + newFloorIndex;
+
+            let newFloor = this.floors[newFloorIndex];
+            if (newFloor.hasShownContent()) {
+                this.activeFloor = newFloor;
+                this.loadActiveFloor();
+                break;
+            }
+        }
+    }
+    descendToNextShownFloor() {
+        for (let i = 1; i < this.floors.length - 1; ++i) {
+            let newFloorIndex = this.activeFloor.index + i; 
+            if (newFloorIndex > this.floors.length - 1)
+                newFloorIndex = newFloorIndex - this.floors.length;
+
+            let newFloor = this.floors[newFloorIndex];
+            if (newFloor.hasShownContent()) {
+                this.activeFloor = newFloor;
+                this.loadActiveFloor();
+                break;
+            }
+        }
+    }
+    manageActiveFloor() { 
         this.activeFloor.manageContent();
     }
     setupButtons() {
         let arrowUp = document.getElementById('caveofOrdealsUpArrow');
         let arrowDown = document.getElementById('caveofOrdealsDownArrow');
         arrowUp.addEventListener('click', () => this.ascend());
-        arrowUp.addEventListener('contextmenu', () => this.ascend());
+        arrowUp.addEventListener('contextmenu', () => this.ascendToNextShownFloor());
         arrowDown.addEventListener('click', () => this.descend());
-        arrowDown.addEventListener('contextmenu', () => this.descend());
+        arrowDown.addEventListener('contextmenu', () => this.descendToNextShownFloor());
 
         let button = document.getElementById('caveofOrdealsButton');
         button.addEventListener('click', () => this.manageActiveFloor());
@@ -728,20 +756,31 @@ class CaveOfOrdeals extends FlooredSubmap {
             return;
         let key = event.key == undefined ? event.originalEvent.key : event.key;
 
-        if (key == 'e' || key == "ArrowRight") {
+        if (key == 'e' || key == " " || event.code === "Numpad0") {
             this.manageActiveFloor();
             return;
         }
 
         let arrow;
+        let upArrow = document.getElementById('caveofOrdealsUpArrow');
+        let downArrow = document.getElementById('caveofOrdealsDownArrow');
         if (key == "ArrowUp" || key == 'w') {
             this.ascend();
-            arrow = document.getElementById('caveofOrdealsUpArrow');
+            arrow = upArrow;
         }
         else if (key == 'ArrowDown' || key == 's') {
             this.descend();
-            arrow = document.getElementById('caveofOrdealsDownArrow');
+            arrow = downArrow;
         }      
+        else if (key === "ArrowRight" || key === "d") {
+            this.descendToNextShownFloor();
+            arrow = downArrow;
+        }
+        else if (key === "ArrowLeft" || key === "a") {
+            this.ascendToNextShownFloor();
+            arrow = upArrow;
+        }
+
         arrow.style.filter = 'brightness(125%)';
         arrow.style.transform = 'scale(1.1)';
         setTimeout(function () {

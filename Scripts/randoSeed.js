@@ -118,6 +118,8 @@ const RandoItemMap = new Map([
     ["Hyrule_Castle_Compass", castleCompass],
     ["Hyrule_Castle_Big_Key", castleBK],
 
+    ["North_Faron_Woods_Gate_Key", faronKey],
+    ["Coro_Gate_Key", coroKey],
     ["Gerudo_Desert_Bulblin_Camp_Key", bulblinKey],
     ["Gate_Keys", gateKey],
 
@@ -297,6 +299,10 @@ function loadSpoilerLog(data, start=false) {
     // Set Flag Items
     for (let [flagName, itemName] of Object.entries(data["itemPlacements"])) {
         let item = getRandoItem(itemName);
+        if (item === undefined) {
+            console.log(itemName + " is not in RandoItemMap");
+            continue;
+        }
         flags.get(flagName).setRandoItem(item);
     }
 
