@@ -5,9 +5,11 @@ Uses and extends [Leaflet](https://leafletjs.com/index.html) for rendering the m
 The maps are all handmade using an image editing software by modifying screenshots of the game's minimaps and map screen.  
 Special thanks to Dajianne Mitchell-Bouchard for making the art for the rupees, doors and cave entrances.
 ## Functionalities
-- Every modification you make on the map (Settings, Tracker, Item Marking) is saved through browser sessions with local storage
+- Every modification you make on the map (Settings, Tracker, Flags, Notes, Randomizer Seed) is saved through browser sessions with local storage
+- Randomizer Seed importation to autocomplete the Tracker or visualize the Spoiler Log
 - Variety of settings to customize the map to your liking or to your Randomizer settings
 - Efficient mouse controls and shortcuts to manage submaps with many obtainables inside
 - Keyboard controls for efficient navigation of submaps with multiple floors
 - Every single obtainable in the game is present on the map, with its requirements and a description of its location and how to obtain it
 - Tracker for every item, which is connected to the obtainables to show you which ones you can obtain with your current items
+
