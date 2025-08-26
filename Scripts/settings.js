@@ -226,8 +226,8 @@ function gameVersionStartFunction() {
     selectedGameVersion = parseInt(this.element.value);
 }
 
-const Settings = Object.freeze({ // 17
-    Gamemode: new SelectSetting('Gamemodes',  gamemodeFunction),
+const Settings = Object.freeze({
+    Gamemode: new SelectSetting('Gamemodes',  gamemodeFunction), // Keep in 1st for rando link to work
     GameVersion: new SelectSetting('gameVersion', gameVersionFunction, gameVersionStartFunction),
     TrackerLogic: new Setting('Tracker_Logic', 1),
     HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),

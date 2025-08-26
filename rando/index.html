@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+        <title>Twilight Princess Interactive Map</title>
+        <link rel="icon" href="Icons/Midna.png">
+        
+        <!-- Meta Tags -->
+        <meta name="keywords" content="tp, map, tracker, interactive, twilight, princess, zelda">
+        <meta name="description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer.">
+        <meta name="author" content="Etienne Mitchell-Bouchard">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+         <!-- Open Graph -->
+        <meta property="og:image" content="../Submaps/Preview.png" />
+        <meta property="og:title" content="Twilight Princess Interactive Map" />
+        <meta property="og:description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer." />
+</head>
+<body>
+    <a id="toMap" href="../">To Map</a>
+    <script>
+        let settingsStorageName = 'settings';
+        let settingsStorage = localStorage.getItem(settingsStorageName);
+
+        if (settingsStorage === null)
+            settingsStorage = "1";
+        else if (settingsStorage[0] === "0") 
+            settingsStorage = "1" + settingsStorage.substring(1, settingsStorage.length);
+
+        localStorage.setItem(settingsStorageName, settingsStorage);
+
+        document.getElementById('toMap').click();
+    </script>
+</body>
+</html>

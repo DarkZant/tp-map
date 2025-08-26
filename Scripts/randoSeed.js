@@ -27,8 +27,8 @@ const RandoItemMap = new Map([
 
     ["Shadow_Crystal", shadowCrystal],
     ['Progressive_Sword', swords],
-    ["Ordon_Shield", woodenShields],
-    ["Wooden_Shield", woodenShields],
+    ["Ordon_Shield", woodenShields.getItemByIndex(0)],
+    ["Wooden_Shield", woodenShields.getItemByIndex(1)],
     ["Hylian_Shield", hylianShield],
     ["Zora_Armor", zoraArmor],
     ["Magic_Armor", magicArmor],
@@ -229,6 +229,7 @@ function manageFile(file) {
                 }, 2500)
                 return;
             }
+            resetRandoItems();
             loadSpoilerLog(data);
             localStorage.setItem(spoilerLogStorageName, textResult);
             Settings.RevealSetJunkFlags.reset();
@@ -249,16 +250,24 @@ function checkRandoSeed() {
         return;
     loadSpoilerLog(JSON.parse(savedLog), true);
 }
-document.addEventListener("DOMContentLoaded", function () {
-    
-});
+
+function resetRandoItems() {
+    if (!seedIsLoaded)
+        return;
+
+    for (let flag of flags.values())
+        flag.resetRandoItem();
+}
 
 function unloadSeed() {
-    dropZoneText.innerHTML = "Seed Unloaded!";
+    resetRandoItems();
+    localStorage.removeItem(spoilerLogStorageName);
     seedIsLoaded = false;
     fileInput.value = '';
-    localStorage.removeItem(spoilerLogStorageName);
+    reloadMap();
 
+    
+    dropZoneText.innerHTML = "Seed Unloaded!";
     document.getElementById("seedSettings").style.display = "none";
     let unloadButton = document.getElementById("Unload_Seed");
     resetButtonText(unloadButton, "Unloading...");

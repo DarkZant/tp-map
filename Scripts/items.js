@@ -40,7 +40,9 @@ const Categories = Object.freeze({
     Ammo: "Ammunition",
     Locks: "Locked Doors",
     Ooccoo: "Ooccoo",
+    Portals: "Warp Portals",
     Bosses: "Bosses",
+    Minibosses: "Minibosses",
     // Non Flags
     Bottle: "Bottled Items",
     Shops: "Shops",
@@ -85,6 +87,16 @@ class Obtainable {
     }
     getName() {
         return this.name;
+    }
+    obtain() {
+        if (!this.hasItem())
+            return;
+        this.item.obtain();
+    }
+    reset() {
+        if (!this.hasItem())
+            return;
+        this.item.reset();
     }
     getTracker() {
         if (this.hasItem())
@@ -166,9 +178,13 @@ class BoolItem extends Item {
     }
     increase() {
         this.state = !this.state;
+        if (this.hasParentItem() && this.parentItem instanceof OrItem)
+            this.parentItem.obtainItem(this);
     }
     decrease() {
-        this.increase();
+        this.state = !this.state;
+        if (this.hasParentItem() && this.parentItem instanceof OrItem)
+            this.parentItem.unobtainItem(this);
     }
     reset() {
         this.state = false;
@@ -190,6 +206,11 @@ class BoolItem extends Item {
     }
     hasParentItem() {
         return this.parentItem !== undefined;
+    }
+    getParentItem() {
+        if (!this.hasParentItem())
+            return null;
+        return this.parentItem;
     }
     getTracker() {
         if (this.hasParentItem())
@@ -243,8 +264,20 @@ class ProgressiveItem extends Item {
             this.items[i] = boolItem;
         }
     }
+    getItems() {
+        return this.items;
+    }
     getItemByIndex(index) {
         return this.items[index];
+    }
+    updateStateToHighestObtainedItem() {
+        for (let i = this.items.length - 1; i >= 0; --i) {
+            if (this.items[i].isObtained()) {
+                this.state = i + 1;
+                return;
+            }
+        }
+        this.state = 0;
     }
     getItemByName(name) {
         for (let item of this.items)
@@ -301,6 +334,89 @@ class ProgressiveItem extends Item {
     getImage() {
         return this.getNextItemImage();
     }
+}
+
+class OrItem extends ProgressiveItem {
+    constructor(name, itemNames, {category=Categories.Main, min=0}={}) {
+        super(name, itemNames, {category: category, min: min});
+    }
+    increase() {
+        if (this.state < this.maxState) {
+            this.items[this.state].obtain();
+            ++this.state;
+            if (this.state > 1)
+                this.items[this.state - 2].reset();
+        }
+        else 
+            this.reset();
+    }
+    decrease() {
+        if (this.state > this.defaultState) {
+            this.items[this.state - 1].reset();
+            --this.state;
+            if (this.state > 0)
+                this.items[this.state - 1].obtain();
+            
+        }       
+        else 
+            this.setProgressToMax();
+    }
+    obtainItem(obtainedItem) {
+        for (let i = 0; i < this.items.length; ++i) {
+            let currentItem = this.items[i];
+            if (currentItem === obtainedItem) {
+                this.state = i + 1;
+                currentItem.obtain();
+            }
+            else 
+                currentItem.reset();
+        }
+    }
+    unobtainItem(unobtainedItem) {
+        if (unobtainedItem.isObtained()) {
+            unobtainedItem.reset();
+            this.state = this.defaultState;
+        }
+    }
+    setProgressToMax() {
+        this.items[this.items.length - 1].obtain();
+        this.state = this.maxState;
+    }
+    logItemStates() {
+        for (let item of this.items) {
+            console.log(item.getName() + ": " + item.isObtained());
+        }
+    }
+
+}
+
+class ExclusiveOrItem extends OrItem {
+    constructor(name, itemNames, {category=Categories.Main, min=0}={}) {
+        super(name, itemNames, {category: category, min: min});
+    }
+    obtainItem(obtainedItem) {
+        for (let i = 0; i < this.items.length; ++i) {
+            let currentItem = this.items[i];
+            if (currentItem.isObtained() && currentItem !== obtainedItem) {
+                obtainedItem.reset();
+                return;
+
+            }
+        }
+        obtainedItem.obtain();
+        for (let i = 0; i < this.items.length; ++i) {
+            if (this.items[i] === obtainedItem) {
+                this.state = i + 1;
+                break;
+            }
+        }
+    }
+    // unobtainItem(unobtainedItem) {
+    //     if (unobtainedItem.isObtained()) {
+    //         unobtainedItem.reset();
+    //         this.state = this.defaultState;
+    //     }
+    // }
 }
 
 class CountRequiredItem extends Item {
@@ -451,7 +567,7 @@ var skybook = new CountRequiredItem('Progressive Sky Book', 'Sky Book Character'
 var swords = new ProgressiveItem('Progressive Sword', [
     'Wooden Sword', 'Ordon Sword', 'Master Sword', 'Light Filled Master Sword'
 ]);
-var woodenShields = new ProgressiveItem("Progressive Shield", [
+var woodenShields = new ExclusiveOrItem("Progressive Shield", [
     'Ordon Shield', 'Wooden Shield'
 ]);
 var hylianShield = new BoolItem("Hylian Shield");
@@ -462,7 +578,7 @@ var heartContainer = new CountItem('Heart Container', 8, {category: Categories.H
 var wallets = new ProgressiveItem("Progressive Wallet", [
     "Wallet", "Big Wallet", "Giant Wallet"
 ], {min: 1}); // We start with the Wallet so min=1
-var scents = new ProgressiveItem("Progressive Scent", [
+var scents = new OrItem("Progressive Scent", [
     "Youths' Scent", "Scent of Ilia", "Poe Scent", "Reekfish Scent", "Medicine Scent"
 ]);
 var hiddenSkills = new CountRequiredItem('Progressive Hidden Skill', 'Hidden Skill', 7, {
@@ -578,12 +694,12 @@ const Rupees = Object.freeze({
 let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
 let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.HiddenSkills});
 let skybookChar = new Obtainable("Sky Book Character", skybook);
-let coralEarring = new Obtainable("Coral Earring", fishingRods);
+let coralEarring = new Obtainable("Coral Earring", fishingRods.getItemByIndex(1));
 let coroBottle = new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"});
 let seraBottle = new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"});
 let jovaniBottle = new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"});
-let bigQuiver = new Obtainable("Quiver1", bow, {name: "Big Quiver"});
-let giantQuiver = new Obtainable("Quiver2", bow, {name: "Giant Quiver"});
+let bigQuiver = new Obtainable("Quiver1", bow.getItemByIndex(1), {name: "Big Quiver"});
+let giantQuiver = new Obtainable("Quiver2", bow.getItemByIndex(2), {name: "Giant Quiver"});
 let minesBKAmoto = new Obtainable("GBK0", minesBK, {name: "Gor Amato Key Shard"});
 let minesBKEbizo = new Obtainable("GBK1", minesBK, {name: "Gor Ebizo Key Shard"});
 let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"});

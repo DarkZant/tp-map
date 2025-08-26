@@ -122,11 +122,20 @@ function scaleIconDimensions(icon) {
 }
 
 function getIconWithCheckmark(icon) {
-     return L.divIcon({ 
+    return L.divIcon({ 
         iconUrl: icon.options.iconUrl,
         iconSize: icon.options.iconSize,
         className: "checkmarkIcon",
         html: getIconImgElement(icon) + '<img src="Icons/Checkmark.png" class="checkmark">'
+    });
+}
+
+function getIconWithJunk(icon) {
+    return L.divIcon({ 
+        iconUrl: icon.options.iconUrl,
+        iconSize: icon.options.iconSize,
+        className: "junkIcon",
+        html: getIconImgElement(icon) + '<img src="Icons/Junk.png" class="junk">'
     });
 }
 
@@ -180,6 +189,16 @@ function showMarkerAsSet(marker, iconImage) {
     marker.getElement().classList.add("marked");
 }
 
+function showMarkerAsJunk(marker, iconImage) {
+    marker.setOpacity(0.9);
+    marker.setZIndexOffset(marker._zIndex - 500);
+    marker.setIcon(getIconWithJunk(getIcon(iconImage)));
+    if (!layerIsLoaded(marker))
+        return;
+    marker.getElement().classList.remove("unmarked");
+    marker.getElement().classList.add("junked");
+}
+
 function showMarkerAsNotSet(marker, iconImage) {
     marker.setOpacity(1);
     marker.setZIndexOffset(marker._zIndex + 1000);
@@ -187,6 +206,7 @@ function showMarkerAsNotSet(marker, iconImage) {
     if (!layerIsLoaded(marker))
         return;
     marker.getElement().classList.remove("marked");
+    marker.getElement().classList.remove("junked");
     marker.getElement().classList.add("unmarked");
 }
 
@@ -432,7 +452,7 @@ function reloadMap() {
             storedMapReload = true;
         return;
     }
-    console.log('Reloading Map');
+    // console.log('Reloading Map');
     switch (currentMapState) {
         case MapStates.ImageMap : {
             removeAllMarkersExceptPolygons();
@@ -510,7 +530,7 @@ function hideSetFlags() {
         let button = document.getElementById("setFlagsVisibilityButton");
         button.children[1].innerHTML = "Show Set Flags";
         let blockImage = document.createElement('img');
-        blockImage.src = "Icons/Block1.png";
+        blockImage.src = "Icons/Block.png";
         button.children[0].appendChild(blockImage);
     }
     setFlagsHidden = true;
@@ -588,8 +608,16 @@ function updateTotalCounter() {
         counted += dungeon.countForTotal();
         total += dungeon.totalCount();
     }
+    let percent;
+    if (total === 0)
+        percent = 0;
+    else 
+        percent = Math.round(counted / total * 100);
+    if (percent === 100 && counted !== total)
+        percent = 99;
+    
     let countText = counted + " / " + total;
-    let percentText = "(" + (total === 0 ? 0 :  + (Math.round(counted / total * 100))) + "%)"
+    let percentText = "(" + percent + "%)"
     document.getElementById('counter').innerHTML = countText + " " + percentText;
 }
 
@@ -636,7 +664,7 @@ function removeAllLayersExceptTL() {
 }  
 
 function openPositionTooltip(lat, lng) {
-    let text = "[" + Math.round(lat * 100) / 100 + ", " + Math.round(lng * 100) / 100 + "]";
+    let text = "[" + Math.round(lat) + ", " + Math.round(lng) + "]";
     LeafletMap.openTooltip(text, [lat, lng], {direction: "top"});
     return text;
 }
@@ -691,15 +719,32 @@ function updateMenuXPosition(menuX) {
 function resetMenuXPosition(menuX) {
     menuX.style.right = menuX.oldPosition;
 }
-function hideTracker() {
-    document.getElementById('menuicons').style.display = "flex";
-    document.getElementById('tracker').style.visibility = "hidden";  
+function showTracker() {
+    if (Settings.TrackerOverlay.isEnabled()) {
+        separateTrackerFromMap();
+    }
+    else {
+        showRightMenu('tracker', 29);
+    }
 }
-function clickSeparateTrackerSetting() {
-    document.getElementById('Tracker_Position').click();
+function hideTracker() {
+    if (Settings.TrackerOverlay.isEnabled()) {
+        separateTrackerFromMap();
+    }
+    else {
+        document.getElementById('menuicons').style.display = "flex";
+        document.getElementById('tracker').style.visibility = "hidden";  
+    }
 }
 
-Settings.TrackerOverlay.setFunction(separateTrackerFromMap);
+Settings.TrackerOverlay.setFunction(trackerOverlaySetting);
+function trackerOverlaySetting() {
+    if (Settings.TrackerOverlay.isEnabled())
+        separateTrackerFromMap();
+    else if (window.getComputedStyle(tracker).visibility === 'visible')
+        separateTrackerFromMap();
+
+}
 document.getElementById('traX').addEventListener('click', hideTracker);
 
 function separateTrackerFromMap() {
@@ -709,9 +754,6 @@ function separateTrackerFromMap() {
         tracker.style.visibility = 'visible';
         document.getElementById('menuicons').style.right = trackerWidth + 'vw';
         document.getElementById('trackerButton').style.visibility = 'hidden';
-        let traX = document.getElementById('traX');
-        traX.removeEventListener('click', hideTracker);
-        traX.addEventListener('click', clickSeparateTrackerSetting);
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = trackerWidth + 'vw';
         for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
@@ -722,9 +764,6 @@ function separateTrackerFromMap() {
         tracker.style.visibility = 'hidden';
         document.getElementById('menuicons').style.right = '0vw';
         document.getElementById('trackerButton').style.visibility = 'visible';
-        let traX = document.getElementById('traX');
-        traX.removeEventListener('click', clickSeparateTrackerSetting);
-        traX.addEventListener('click', hideTracker);
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = '0vw';
         for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))

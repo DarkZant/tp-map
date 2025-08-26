@@ -86,7 +86,7 @@ class TrackerItem extends Storable {
         if (currentItemState == 0) {
             this.elem.style.filter = "brightness(50%)";
         }   
-        else if (currentItemState == 1 || currentItemState == this.item.getMaxState()) {
+        else {
             this.elem.style.filter = "none";
         }
     }
@@ -113,6 +113,10 @@ class TrackerItem extends Storable {
             this.elem.children[2].style.color = "#c0c0c0"; // Set color to white
         }
     }
+    showHighestObtained() {
+        this.item.updateStateToHighestObtainedItem();
+        this.update();
+    }
     reset() {
         this.item.reset();
         this.update();
@@ -127,6 +131,16 @@ class TrackerItem extends Storable {
     isInSubmenu() {
         return this.elem.parentElement.id !== "mainTracker" || this.elem.parentElement.classList.contains('tdungeon');
     }
+    getDefaultStoreValue() {
+        return this.item.getMinState();
+    }
+    getCurrentStoreValue() {
+        return this.item.getState();
+    }
+    getMaxStoreValue() {
+        return this.item.getMaxState();
+    }
+    // Map Features
     displayParentSubmenu(func) {
         let parentElement = this.elem.parentElement;
         let mainTracker = document.getElementById('mainTracker');
@@ -174,14 +188,36 @@ class TrackerItem extends Storable {
     decrease() {
         this.manageParentSubmenu(() => this.elem.dispatchEvent(new MouseEvent('contextmenu')));
     }
-    getDefaultStoreValue() {
-        return this.item.getMinState();
+    itemIsProgressiveInBaseGame() {
+        return !randoIsActive() && this.item.constructor === ProgressiveItem; // False if Subclass of ProgressiveItem
     }
-    getCurrentStoreValue() {
-        return this.item.getState();
+    obtainItem(obtainedItem) {
+        if (this.item instanceof OrItem) {
+            this.manageParentSubmenu(() => {
+                this.item.obtainItem(obtainedItem); 
+                this.update();
+            });
+        }
+        else if (this.itemIsProgressiveInBaseGame()) {
+            obtainedItem.obtain();
+            this.manageParentSubmenu(() => this.showHighestObtained());
+        }
+        else 
+            this.increase();
     }
-    getMaxStoreValue() {
-        return this.item.getMaxState();
+    unobtainItem(unobtainedItem) {
+        if (this.item instanceof OrItem) {
+            this.manageParentSubmenu(() => {
+                this.item.unobtainItem(unobtainedItem); 
+                this.update();
+            });
+        }
+        else if (this.itemIsProgressiveInBaseGame()) {
+            unobtainedItem.reset();
+            this.manageParentSubmenu(() => this.showHighestObtained());
+        }
+        else 
+            this.decrease();
     }
 }
 

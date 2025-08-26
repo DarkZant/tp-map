@@ -15,6 +15,9 @@
 .marked {
     filter: brightness(60%)
 }
+.junked {
+    filter: brightness(80%);
+}
 .unmarked {
     filter: brightness(100%);
 }
@@ -273,7 +276,7 @@ body img {
     background-color: rgb(56, 53, 46, 0.9);
 }
 /* Checkmarks */
-.checkmark {
+.checkmark, .junk {
     width: 1.25dvw;
     height: 1.25dvw;
     position: absolute;

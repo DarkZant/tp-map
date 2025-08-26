@@ -25,7 +25,11 @@ class Flag extends Storable{
         this._junk = false;
     }
     initialize() {
-        this._set = this.storageUnit.getFlagAsBool(this);
+        let storedValue = this.storageUnit.getFlagAsNumber(this);
+        if (storedValue === 2)
+            this._junk = true;
+        else 
+            this._set = storedValue === 1;         
         this.initializeMarker();
     }
     getImage() {
@@ -61,6 +65,10 @@ class Flag extends Storable{
             this.randoItem = item;
         this.randoItemCategory = item.getCategory();
     }
+    resetRandoItem() {
+        if (this.hasRandoItem())
+            this.randoItem = undefined;
+    }
     setRandoDescription(description) {
         this.randoDesc = description;
         this.glitchedDesc = description;
@@ -77,12 +85,19 @@ class Flag extends Storable{
     set() {
         if (this.isSet())
             return;
+        if (this.isJunk())
+            this._junk = false;
         this._set = true;
         this.onSetChange();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
     unset() {
+        if (this.isJunk()) {
+            this._junk = false;
+            this.onJunkChange();
+            return;
+        }
         if (!this.isSet())
             return;
         this._set = false;
@@ -100,10 +115,20 @@ class Flag extends Storable{
         return this._set;
     }
     setAsJunk() {
+        if (this.isJunk() || this.isSet())
+            return;
         this._junk = true;
+        this.onJunkChange();
     }
     unsetAsJunk() {
+        if (!this.isJunk() || this.isSet())
+            return;
         this._junk = false;
+        this.onJunkChange();
+    }
+    onJunkChange() {
+        this.storageUnit.setFlag(this);
+        updateTotalCounter();
     }
     isJunk() {
         return this._junk;
@@ -116,6 +141,9 @@ class Flag extends Storable{
     isRandomizerCheck() {
         if (this.item === howlingStone)
             return false;
+        else if (this.item instanceof BoolItem && this.item.getParentItem() === scents)
+            return false;
+
         return RandomizerCheckCategories.includes(this.randoCategory);
     }
     addFlagRequirement(flag) {
@@ -137,19 +165,24 @@ class Flag extends Storable{
         // for (let flag of this.requiringFlags)
         //     flag.addMarker();
     }
-    getItemTracker() {
-        if (Settings.RandoTracker.isEnabled() && this.hasRandoItem() && randoIsActive())
-            return this.randoItem.getTracker();
-        else if (this.item instanceof NonFlag)
+    getItemTracker(item) {
+        if (item instanceof NonFlag)
             return null;
-        return this.item.getTracker();
+        return item.getTracker();
     }
     manageItemTracker() {
         if (!Settings.AutocompleteTracker.isEnabled()) 
             return;
-        let itemTracker = this.getItemTracker();
+
+        let item = this.item;
+        if (Settings.RandoTracker.isEnabled() && this.hasRandoItem() && randoIsActive())
+            item = this.randoItem;
+        if (item instanceof Container)
+            item = item.getContent();
+
+        let itemTracker = this.getItemTracker(item);
         if (itemTracker !== null)
-            this.isSet() ? itemTracker.increase() : itemTracker.decrease();
+            this.isSet() ? itemTracker.obtainItem(item) : itemTracker.unobtainItem(item);
     }
     // Map
     isShown() {
@@ -203,22 +236,10 @@ class Flag extends Storable{
             keyboard: false, 
         });
         this.marker.on('click', () => this.showDetails());
-        this.marker.on("add", () => {
-            let markerElem = this.marker.getElement();
-            if (!markerElem) 
-                return;
-
-            markerElem.addEventListener("auxclick", (e) => {
-                e.preventDefault();
-                if (e.button !== 1) 
-                    return;
-                this._junk = !this._junk;
-                this.reloadMarker();
-                console.log("Middle mouse clicked on " + this.getFlagName());        
-            });
-        });
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
+        this.boundJunkMarker = this.junkMarker.bind(this);
+        this.boundUnjunkMarker = this.unjunkMarker.bind(this);
     }
     addMarker() {
         if (layerIsLoaded(this.marker))
@@ -253,6 +274,10 @@ class Flag extends Storable{
         if (!this.isShown())
             return;
         addMarkerToMap(this.marker, position);
+        if (this.isJunk()) {
+            this.junkVisually();
+            return;
+        }
         if (this.isSet())
             this.setVisually();
         else
@@ -266,14 +291,6 @@ class Flag extends Storable{
     }
     setMarker() {
         this.set();
-        // if (this.hasRandoItem()) {
-        //     let text;
-        //     if (this.isContainer())
-        //         text = (this.randoItem.getContentName());
-        //     else 
-        //         text = (this.randoItem.getName());
-        //     alert(text.replaceAll("&nbsp", " "));
-        // }
         this.setVisually();    
         if (setFlagsHidden) {
             setTimeout(() => this.marker.remove(), 1500);
@@ -282,6 +299,8 @@ class Flag extends Storable{
 
     }
     unsetMarker() {
+        if (this.isJunk())
+            return;
         this.unset();
         this.unsetVisually();
     }
@@ -305,6 +324,38 @@ class Flag extends Storable{
         }
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
+        this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
+    }
+    junkMarker(e) {
+        if (e !== undefined) {
+            e.preventDefault();
+            if (e.button !== 1) 
+                return;
+
+        }
+        if (this.isSet())
+            return;
+        this.setAsJunk();
+        this.junkVisually();
+    }
+    unjunkMarker(e) {
+         if (e !== undefined) {
+            e.preventDefault();
+            if (e.button !== 1) 
+                return;
+
+        }
+        if (this.isSet())
+            return;
+        this.unsetAsJunk();
+        this.unsetVisually();
+    }
+    junkVisually() {
+        showMarkerAsJunk(this.marker, this.getMarkerImage());
+        this.marker.on('contextmenu', this.boundSetMarker);
+        this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
     }
     showDetails() {
         let item = this.getCurrentItem();
@@ -3092,6 +3143,26 @@ const flags = new Map([
     ["Temple of Time Sign", new Flag(randoHint, [-5721, 4278])],
     ["Upper Zoras River Sign", new Flag(randoHint, [-590, 5780])],
     ["Zoras Domain Sign", new Flag(randoHint, [-748, 4751])],
+    ["Arbiters Grounds Poe Scent", new Flag(scents.getItemByIndex(2), [-4656, 4329], {
+        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
+        baseDesc: "After defeating the poe, activate your senses to learn the Poe Scent.",
+    })],
+    ["Zoras Domain Reekfish Scent", new Flag(scents.getItemByIndex(3), [-705, 4947], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "After catching a Reekfish, transform into Wolf and use your senses to learn the Reekfish Scent.",
+    })],
+    ["Doctors Office Medicine Scent", new Flag(scents.getItemByIndex(4), [-3750, 4917], {
+        baseReqs: [invoiceReq, shadowCrystalReq],
+        baseDesc: "After giving the invoice to the doctor, transform into Wolf and push the box to reveal the Medicine Scent.",
+    })],
+    ["Kakariko Gorge Youths Scent", new Flag(scents.getItemByIndex(0), [-5772, 5762], {
+        baseDesc: "After entering the Eldin Twilight, use your senses near the wooden sword on the ground to learn the Youths' Scent. The wooden sword disappears after clearing the Twilight."
+    })],
+    ["Lanayru Field Scent of Ilia", new Flag(scents.getItemByIndex(1), [-2093, 6116], {
+        baseDesc: "After entering the Lanayru Twilight, use your senses near the purse on the ground to learn the Scent of Ilia. The purse disappears after clearing the Twilight."
+    })],
+
+
 ]); // Always add flags at the end to preserve storage IDs
 
 // Flag initiliazation

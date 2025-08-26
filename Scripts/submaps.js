@@ -27,9 +27,15 @@ class SubmapFloor {
         }
     }
     setMarkerShown() {
-         for (let c of this.contents) {
+        for (let c of this.contents) {
             if (c instanceof Flag && c.isShown())
                 c.setMarker();
+        }
+    }
+    junkMarkerShown() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
+                c.junkMarker();
         }
     }
     unset() {
@@ -50,6 +56,12 @@ class SubmapFloor {
                 c.unsetMarker();
         }
     }
+    unjunkMarkerShown() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown())
+                c.unjunkMarker();
+        }
+    }
     isSet() {
         for (let c of this.contents) {
             if (c instanceof Flag && !c.isSet())
@@ -64,6 +76,13 @@ class SubmapFloor {
         }
         return true;
     }
+    shownFlagsAreJunk() {
+         for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown() && !c.isJunk())
+                return false;
+        }
+        return true;
+    }
     hasCountableNonFlag() {
         if (!Settings.CountNonFlags.isEnabled())
             return false;
@@ -74,12 +93,21 @@ class SubmapFloor {
         return false;
     }
     manageContent() {
+        blockMapReloading();
         if (this.shownFlagsAreSet())
             this.unset();
         else
             this.setMarkerShown();
-        removeFloorLayer();
-        this.load();
+        if (!unblockMapReloading()) {
+            removeFloorLayer();
+            this.load();
+        }
+    }
+    manageJunkContent() {
+        if (this.shownFlagsAreJunk())
+            this.unjunkMarkerShown();
+        else
+            this.junkMarkerShown();
     }
     hasShownContent() {
         for (let c of this.contents) {
@@ -527,6 +555,10 @@ class FlooredSubmap extends Submap {
             this.activeFloor.manageContent();
             return;
         }
+        else if (key === 'q' || key === "ArrowLeft") {
+            this.activeFloor.manageJunkContent();
+            return;
+        }
 
         let newFloorIndex = this.activeFloor.index;
         if (key == "ArrowDown" || key == 's') 
@@ -758,6 +790,10 @@ class CaveOfOrdeals extends FlooredSubmap {
 
         if (key == 'e' || key == " " || event.code === "Numpad0") {
             this.manageActiveFloor();
+            return;
+        }
+        else if (key === 'q' || event.code === "NumpadDecimal") {
+            this.activeFloor.manageJunkContent();
             return;
         }
 
@@ -1283,6 +1319,7 @@ const Dungeons = Object.freeze({
             "Arbiters Grounds Entrance Chest",
             "Arbiters Grounds Entrance Lock",
             "Arbiters Grounds Torch Room Poe",
+            "Arbiters Grounds Poe Scent",
             "Arbiters Grounds Torch Room East Chest",
             "Arbiters Grounds Torch Room West Chest",
             "Arbiters Grounds West Small Chest Behind Block",
@@ -1701,6 +1738,7 @@ const Provinces = Object.freeze({
             [-2772, 7060], [-2989, 7110], [-3281, 6985], [-3432, 6760], [-3580, 6472], [-3748, 6372], [-3932, 6324], [-4276, 6340], 
             [-4419, 6316], [-4680, 6260], [-5060, 5972], [-5332, 6004],
         ], [
+            "Kakariko Gorge Youths Scent",
             "Kakariko Graveyard Lantern Chest",
             "Kakariko Graveyard Male Ant",
             "Eldin Field Male Grasshopper",
@@ -1973,8 +2011,10 @@ const Provinces = Object.freeze({
         [-2077, 4634], [-2539, 4431], [-2749, 4205], [-3632, 3892], [-3764, 3420], [-3820, 3180], [-4288, 3200], [-4974, 3290],
         [-5081, 3201], [-5319, 3218], [-5592, 3400], [-5936, 3768], [-5813, 4728], [-5776, 4750], [-5624, 4872], [-5552, 5096]
     ], hyruleCastlePolygonPoints], [
+        "Lanayru Field Scent of Ilia",
         "Zoras Domain Chest By Mother and Child Isles",
         "Zoras Domain Chest Behind Waterfall",
+        "Zoras Domain Reekfish Scent",
         "Lake Hylia Underwater Chest",
         "Lake Hylia Bridge Male Mantis",
         "Lake Hylia Bridge Female Mantis",
@@ -2120,7 +2160,7 @@ const Provinces = Object.freeze({
             []
         ]),
         new SimpleSubmap([-3940, 4930], doorIconImage, "Doctor's Office", [
-
+            "Doctors Office Medicine Scent"
         ]),
         new SimpleFlooredSubmap([-4090, 4656], doorIconImage, 'Castle Goron Merchants', [
             [],
