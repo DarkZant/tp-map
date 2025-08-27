@@ -65,6 +65,17 @@
                 </div>
                 <span>Hide Set Flags</span>
             </div>
+            <div id="requirementVisibilityButton" style="visibility: hidden;">
+                <div     
+                    oncontextmenu="toggleNoRequirementsVisibility();" 
+                    onmousedown="if (event.button === 0) hideNoRequirements()" 
+                    onmouseup="if (event.button === 0) showNoRequirements()"
+                >
+                    <img src="Icons/Requirements.png">
+                </div>
+                <span>Hide Flags Without Requirements</span>
+            </div>
+
             <div id="trackerButton">
                 <div onclick="showTracker()">
                     <img src="Icons/Tracker.png">
@@ -214,7 +225,7 @@
                 
                 <h3>General Settings</h3>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Logic" class="bigSettingCheckbox">Enable Tracker Logic</label>
-                <label><input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements</label>
+                <label style="display: none;"><input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Tracker Autocompletion</label>
                 <label><input type="checkbox" id="Disable_Tracker_Animations">Disable Tracker Animations</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Empty_Submaps_Visibility" class="bigSettingCheckbox">Show Empty Submaps</label>

@@ -32,6 +32,12 @@ class SubmapFloor {
                 c.setMarker();
         }
     }
+    setJunk() {
+        for (let c of this.contents) {
+            if (c instanceof Flag)
+                c.setAsJunk();
+        }
+    }
     junkMarkerShown() {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown())
@@ -56,6 +62,12 @@ class SubmapFloor {
                 c.unsetMarker();
         }
     }
+    unsetJunk() {
+        for (let c of this.contents) {
+            if (c instanceof Flag)
+                c.unsetAsJunk();
+        }
+    }
     unjunkMarkerShown() {
         for (let c of this.contents) {
             if (c instanceof Flag && c.isShown())
@@ -78,7 +90,7 @@ class SubmapFloor {
     }
     shownFlagsAreJunk() {
          for (let c of this.contents) {
-            if (c instanceof Flag && c.isShown() && !c.isJunk())
+            if (c instanceof Flag && c.isShown() && !c.isSet() && !c.isJunk())
                 return false;
         }
         return true;
@@ -104,6 +116,8 @@ class SubmapFloor {
         }
     }
     manageJunkContent() {
+        if (!randoIsActive())
+            return;
         if (this.shownFlagsAreJunk())
             this.unjunkMarkerShown();
         else
@@ -212,6 +226,8 @@ class Submap {
         this.marker.on('click', () => this.load());
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
+        this.boundJunkMarker = this.junkMarker.bind(this);
+        this.boundUnjunkMarker = this.unjunkMarker.bind(this);
     }
     initializeImages() {
         let width = this.floors[0].image.width;
@@ -254,22 +270,58 @@ class Submap {
         for (let floor of this.floors)
             floor.unsetShown();    
     } 
+    setJunk() {
+        for (let floor of this.floors)
+            floor.setJunk();
+    }
+    unsetJunk() {
+        for (let floor of this.floors)
+            floor.unsetJunk();
+    }
     setMarker() {
         blockMapReloading();
         this.setShown();
         this.setVisually();
+
+        blockMarkerReload(this.marker);
+        unblockMapReloading();
+        unblockMarkerReload(this.marker);
+
         this.reloadMarkerWithDelay();
-        if (unblockMapReloading())
-            return;
-        this.setMarkerEvents();
     }
     unsetMarker() {
         blockMapReloading();
         this.unset();
-        if (unblockMapReloading())
-            return;
+
+        blockMarkerReload(this.marker);
+        unblockMapReloading();
+        unblockMarkerReload(this.marker);
+
         this.reloadMarker();
-        this.unsetMarkerEvents();
+    }
+    junkMarker(e) {
+        e.preventDefault();
+        if (e.button !== 1 || !randoIsActive() || this.shownFlagsAreSet()) 
+            return;
+        this.setJunk();
+        this.junkVisually();
+    }
+    unjunkMarker(e) {
+        e.preventDefault();
+        if (e.button !== 1 || !randoIsActive()) 
+            return;
+        this.unsetJunk();
+        this.unjunkVisually();
+    }
+    junkVisually() {
+        showMarkerAsJunk(this.marker, this.iconImage);
+        this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+    }
+    unjunkVisually() {
+        this.unsetVisually();
+        this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
     }
     setVisually() {
         // if (Settings.CountersVisibility.isEnabled())
@@ -290,6 +342,7 @@ class Submap {
     unsetMarkerEvents() {
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
     }
     isSet() {
         for (let floor of this.floors) {
@@ -301,6 +354,13 @@ class Submap {
     shownFlagsAreSet() {
         for (let floor of this.floors) {
             if (!floor.shownFlagsAreSet())
+                return false;
+        }
+        return true;
+    }
+    shownFlagsAreJunkOrSet() {
+        for (let floor of this.floors) {
+            if (!floor.shownFlagsAreJunk())
                 return false;
         }
         return true;
@@ -357,7 +417,7 @@ class Submap {
         return shownMarkerFound;
     }
     loadMarker(position=this.position) {
-        if (!this.isShown())
+        if (!this.isShown() || layerCannotReload(this.marker))
             return;
         let requirementsAreMet = verifySubmapRequirements(this);
         if (Settings.SubmapAsMarker.isEnabled() && requirementsAreMet) {
@@ -384,9 +444,13 @@ class Submap {
             else 
                 this.unsetVisually();
         }
+        else if (this.shownFlagsAreJunkOrSet()) {
+            this.junkVisually()
+            return;
+        }
         else {
-            this.unsetMarkerEvents();
             this.unsetVisually();
+            this.unsetMarkerEvents();
         }
     }
     reloadMarker() {
@@ -881,6 +945,8 @@ class Dungeon extends FlooredSubmap {
         }
     }
     loadImageMapMarker() {
+        if (layerCannotReload(this.marker))
+            return;
         addMarkerToMap(this.marker, this.imagedPosition);
         this.loadMarkerVisuals();
     }
@@ -1178,75 +1244,101 @@ let dungeonIconImage = getIconImage('Dungeon Star');
 const Dungeons = Object.freeze({
     Forest: new Dungeon([-6915, 4098], [-6950, 4900], dungeonIconImage, 'Forest Temple', [
         [   // 1F
+        // Entrance Room
         "Forest Temple Entrance Vines Chest",
+        // Central Room
         "Forest Temple Central Chest Behind Stairs",
         "Forest Temple Central North Chest",
-        "Forest Temple Windless Bridge Chest",
+        "Forest Temple Central Chest Hanging From Web",
+        "Forest Temple Sign",
+        // South Water Room
+        "Forest Temple Ooccoo",
         "Forest Temple East Water Cave Chest",
+        "Forest Temple Big Key Chest",
+        "Forest Temple Totem Pole Monkey Lock",
+        // Totem Pole Monkey Room
         "Forest Temple Second Monkey Under Bridge Chest",
-        "Forest Temple Big Baba Key",
+        // West Room
         "Forest Temple West Deku Like Chest",
+        // Big Baba Room
+        "Forest Temple Big Baba Key",
+        "Forest Temple Big Baba Monkey Lock",
+        // West Tile Worm Room
         "Forest Temple Totem Pole Chest",
         "Forest Temple West Tile Worm Room Vines Chest",
-        "Forest Temple Gale Boomerang",
         "Forest Temple West Tile Worm Chest Behind Stairs",
-        "Forest Temple Central Chest Hanging From Web",
-        "Forest Temple Big Key Chest",
-        "Forest Temple North Deku Like Chest",
-        "Forest Temple East Tile Worm Chest",
-        "Forest Temple Ooccoo",
         "Forest Temple Tile Worm Monkey Lock",
-        "Forest Temple Big Baba Monkey Lock",
-        "Forest Temple Totem Pole Monkey Lock",
+        // Ook Room
+        "Forest Temple Gale Boomerang",
+        // Windless Bridge Room
+        "Forest Temple Windless Bridge Chest",
         "Forest Temple Windless Bridge Lock",
+        // East Tile Worm Room
+        "Forest Temple East Tile Worm Chest",
+        // Before Boss Room
+        Bottle.Fairy.new([-3920, 4820]),
         "Forest Temple Boss Lock",
+        // North Water Room
+        "Forest Temple North Deku Like Chest",
+        // Diababa Room
         "Forest Temple Diababa",
         "Forest Temple Diababa Heart Container",
         "Forest Temple Dungeon Reward",
-        "Forest Temple Sign",
-        Bottle.Fairy.new([-3920, 4820]),
     ]], {
         baseReqs: [lanternReq], 
-        randoReqs: [[lanternReq, shadowCrystalReq]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
+        randoReqs: [[lanternReq, shadowCrystalReq, new AndRequirements([prologueNotSkippedReq, boulderReq])]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
     }),
     
     Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
         [   // 1F
+            // Entrance Room
             "Goron Mines Entrance Chest",
+            // Main Room
             "Goron Mines Main Magnet Room Bottom Chest",
+            "Goron Mines First Floor Lock",
+            // Magnet Maze Room
+            "Goron Mines Magnet Maze Chest",
+            // Gor Amato Room
             "Goron Mines Gor Amato Key Shard",
             "Goron Mines Gor Amato Chest",
             "Goron Mines Gor Amato Small Chest",
-            "Goron Mines Magnet Maze Chest",
             "Goron Mines Ooccoo",
-            "Goron Mines First Floor Lock",
         ], [ // 2F
+            // Crystal Water Room
             "Goron Mines Crystal Switch Room Underwater Chest",
             "Goron Mines Crystal Switch Room Small Chest",
             "Goron Mines After Crystal Switch Room Magnet Wall Chest",
             "Goron Mines Double Beamos Lock",
+            // Outdoor Water Room
             "Goron Mines Outside Beamos Chest",
             "Goron Mines Outside Underwater Chest",
             "Goron Mines Outside Clawshot Chest",
             "Goron Mines Outside Lock",
+            Bottle.Fairy.new([-3644, 4560]),
+            // Rotation Magnet Water Room
+            "Goron Mines Chest Before Dangoro",
+            // Gor Ebizo Room
+            "Goron Mines Sign",
             "Goron Mines Gor Ebizo Key Shard",
             "Goron Mines Gor Ebizo Chest",
-            "Goron Mines Chest Before Dangoro",
+            // Beamos Room
             "Goron Mines Dangoro Chest",
             "Goron Mines Beamos Room Chest",
+            // Gor Liggs Room
             "Goron Mines Gor Liggs Key Shard",
             "Goron Mines Gor Liggs Chest",
+            // Main Room
             "Goron Mines Main Magnet Room Top Chest",
+            // Before Fyrus Room
             "Goron Mines Boss Lock",    
+            // Fyrus Room
             "Goron Mines Fyrus",
             "Goron Mines Fyrus Heart Container",
             "Goron Mines Dungeon Reward",
-            "Goron Mines Sign",
-            Bottle.Fairy.new([-3644, 4560])
         ]
     ], {
         baseReqs: [ironBootsReq], 
-        randoReqs: [[diababaReq, openWoodsReq], ironBootsReq]
+        randoReqs: [leaveFaronWoodsReq, ironBootsReq]
     }),
 
     Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
@@ -1255,43 +1347,60 @@ const Dungeons = Object.freeze({
             "Lakebed Temple Morpheel Heart Container",
             "Lakebed Temple Dungeon Reward"
         ], [ // B1
+            // Main Room
             "Lakebed Temple Central Room Spire Chest",
+            "Lakebed Temple Boss Lock",
+            Bottle.Fairy.new([-4365, 4362]),
+            // Before Deku Toad Room
             "Lakebed Temple Before Deku Toad Underwater Right Chest",
             "Lakebed Temple Before Deku Toad Underwater Left Chest",
+            // Big Key Room
             "Lakebed Temple Big Key Chest",
-            "Lakebed Temple Boss Lock",
-            Bottle.Fairy.new([-4365, 4362])
         ], [ // 1F
+            // Central Room
             "Lakebed Temple Central Room Small Chest",
             "Lakebed Temple Central Room Chest",
-            "Lakebed Temple East Lower Waterwheel Stalactite Chest",
-            "Lakebed Temple Before Deku Toad Alcove Chest",
-            "Lakebed Temple Deku Toad Chest",
-            "Lakebed Temple West Lower Small Chest",
-            "Lakebed Temple East Lower Waterwheel Bridge Chest",
-            "Lakebed Temple Underwater Maze Small Chest",
-            "Lakebed Temple Before Deku Toad Lock",
             "Lakebed Temple Sign",
+            // East Lower Room
+            "Lakebed Temple East Lower Waterwheel Stalactite Chest",
+            "Lakebed Temple East Lower Waterwheel Bridge Chest",
+            // Before Deku Toad Room
+            "Lakebed Temple Before Deku Toad Alcove Chest",
+            "Lakebed Temple Before Deku Toad Lock",
+            // Deku Toad Room
+            "Lakebed Temple Deku Toad Chest",
+            // West Lower Room
+            "Lakebed Temple West Lower Small Chest",
+            // Water Maze Room
+            "Lakebed Temple Underwater Maze Small Chest",
         ], [ // 2F
+            // Entrance Room
             "Lakebed Temple Lobby Rear Chest",
             "Lakebed Temple Lobby Left Chest",
+            // Stalactite 
             "Lakebed Temple Stalactite Room Chest",
+            // Main Room
+            "Lakebed Temple Ooccoo",
+            "Lakebed Temple Main Room Lock",
+            "Lakebed Temple Chandelier Chest",
+            // East Upper Room
             "Lakebed Temple East Second Floor Southwest Chest",
             "Lakebed Temple East Second Floor Southeast Chest",
-            "Lakebed Temple Chandelier Chest",
+            Bottle.Fairy.new([-4533, 5253]),
+            // East Supply 
+            "Lakebed Temple East Water Supply Lock",
+            // West Upper Room
             "Lakebed Temple West Second Floor Central Small Chest",
             "Lakebed Temple West Second Floor Northeast Chest",
             "Lakebed Temple West Second Floor Southwest Underwater Chest",
             "Lakebed Temple West Second Floor Southeast Chest",
-            "Lakebed Temple Ooccoo",
-            "Lakebed Temple Main Room Lock",
-            "Lakebed Temple East Water Supply Lock",
-            Bottle.Fairy.new([-4533, 5253])
         ], [ // 3F
 
         ], [ // 4F
+            // East Supply Top
             "Lakebed Temple East Water Supply Small Chest",
             "Lakebed Temple East Water Supply Clawshot Chest",
+            // West Supply Top
             "Lakebed Temple West Water Supply Small Chest",
             "Lakebed Temple West Water Supply Chest",
         ]
@@ -1351,7 +1460,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 1, 
         baseReqs: [aurusMemoReq, bulblinKeyReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
     }),
 
     Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
@@ -1396,7 +1505,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [coralEarringReq, reekfishScentReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1441,7 +1550,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [blizzetaReq, masterSwordReq], 
-        randoReqs: [shadowCrystalReq, [masterSwordReq, openToTReq]]
+        randoReqs: [shadowCrystalReq, skullKidReq, [masterSwordReq, openToTReq]]
     }),
 
     City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
@@ -1495,7 +1604,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 0, 
         baseReqs: [clawshotReq, completedSkybookReq],
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], clawshotReq, [completedSkybookReq, openCityReq]],
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], clawshotReq, [completedSkybookReq, openCityReq]],
     }),
 
     Palace: new Dungeon([-3636, 602], [-3800, 1520], "Mirror", 'Palace of Twilight', [
@@ -1591,7 +1700,7 @@ const Dungeons = Object.freeze({
         ]   
     ], {
         baseReqs: [zantReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
     })
 });
 
@@ -1725,13 +1834,13 @@ const Provinces = Object.freeze({
                 "Sacred Grove Past Owl Statue Chest",
             ], {
                 baseReqs: [masterSwordReq],
-                randoReqs: [[masterSwordReq, openSacredGroveReq, openToTReq]]
+                randoReqs: [shadowCrystalReq, skullKidReq, [masterSwordReq, openSacredGroveReq, openToTReq]]
             })
     ]),
 
     Eldin: new Province("Eldin", [-4096, 7904], {
             baseReqs: [diababaReq],
-            randoReqs: [[diababaReq, openWoodsReq]]
+            randoReqs: [leaveFaronWoodsReq]
         }, [
             [-5952, 6280], [-5936, 7020], [-5904, 7676], [-6044, 8248], [-5952, 8836], [-5612, 9452], [-5212, 9544], [-4584, 9492], 
             [-3932, 9572], [-3340, 9472], [-2956, 9196], [-2460, 9040], [-1972, 8608], [-1404, 8006], [-1228, 7352], [-2164, 7080], 
@@ -1862,7 +1971,7 @@ const Provinces = Object.freeze({
     ]),
     Desert: new Province("Desert", [-5440, 2224], {
             baseReqs: [aurusMemoReq], 
-            randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq]
+            randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq]
         }, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
             [-3804, 2924], [-3840, 3154], [-4984, 3264], [-5116, 3148], [-5280, 3184], [-5472, 3256], [-5640, 3424], [-5953, 3742],
@@ -1978,7 +2087,7 @@ const Provinces = Object.freeze({
 
     Peak: new Province('Peak', [-1744, 3488], {
         baseReqs: [stallordReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
     }, [
         [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
             [-2704, 4220], [-3036, 4080], [-3624, 3880], [-3812, 3184], [-3636, 2272], [-3436, 1720], [-2668, 1568], [-2092, 1804], 
@@ -2003,7 +2112,7 @@ const Provinces = Object.freeze({
     ]),
     Lanayru: new Province('Lanayru', [-2192, 5984], {
         baseReqs: [fyrusReq, bombBagReq], 
-        randoReqs: [[diababaReq, openWoodsReq], [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
     }, [[
         [-5400, 5584], [-5360, 6000], [-5056, 5968], [-4640, 6248], [-4312, 6336], [-3696, 6344], [-3528, 6472], [-3424, 6728], 
         [-3280, 6968], [-2992, 7104], [-2760, 7048], [-2096, 7072], [-1248, 7328], [-800, 7216], [-584, 6768], [-480, 6368], 

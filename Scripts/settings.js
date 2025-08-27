@@ -86,7 +86,7 @@ class Setting extends Storable {
     }
     resetElement() {
         let defaultVal = this.defaultValue === 0 ? false : true;
-        if (defaultVal === this.element.checked)
+        if (defaultVal === this.active)
             return false;
         this.element.checked = defaultVal;
         return true;
@@ -98,6 +98,14 @@ class Setting extends Storable {
         if (this.parent)
             this.parent.update(this.active);
         dispatchSettingsUpdate();
+    }
+    activate() {
+        this.active = true;
+        this.storageUnit.setFlag(this);
+    }
+    deactivate() {
+        this.active = false;
+        this.storageUnit.setFlag(this);
     }
     isEnabled() {
         return this.active;
@@ -229,8 +237,8 @@ function gameVersionStartFunction() {
 const Settings = Object.freeze({
     Gamemode: new SelectSetting('Gamemodes',  gamemodeFunction), // Keep in 1st for rando link to work
     GameVersion: new SelectSetting('gameVersion', gameVersionFunction, gameVersionStartFunction),
-    TrackerLogic: new Setting('Tracker_Logic', 1),
-    HideNoReqs: new Setting('Hide_Flag_Without_Requirement'),
+    TrackerLogic: new FunctionSetting('Tracker_Logic', 1),
+    HideNoReqs: new FunctionSetting('Hide_Flag_Without_Requirement'),
     AutocompleteTracker: new Setting('Tracker_Autocompletion', 1),
     DisableTrackerAnims: new Setting('Disable_Tracker_Animations'),
     EmptySubmaps: new Setting('Empty_Submaps_Visibility', 1),

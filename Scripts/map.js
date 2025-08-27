@@ -11,7 +11,7 @@ let multHeight = window.innerHeight / originalHeight;
 window.addEventListener('resize', () => throttleFunc(() => {
     multWidth = window.innerWidth / originalWidth;
     multHeight = window.innerHeight / originalHeight;
-    reloadEntireMap();
+    reloadAllMapLayers();
 }));
 
 function getBiggestMult() {
@@ -471,7 +471,23 @@ function reloadMap() {
     }
 }
 
-function reloadEntireMap() {
+function blockMarkerReload(marker) {
+    marker.noReload = true;
+}
+
+function unblockMarkerReload(marker) {
+    marker.noReload = undefined;
+}
+
+function layerCanReload(layer) {
+    return layer.noReload === undefined;
+}
+
+function layerCannotReload(layer) {
+    return layer.noReload === true;
+}
+
+function reloadAllMapLayers() {
     let loadedLayers = [];
     LeafletMap.eachLayer((layer) => {
         loadedLayers.push(layer);
@@ -507,6 +523,49 @@ function unblockMapReloading() {
     return false;
 }
 
+function removeFloorLayer() {
+    removeAllMarkers();
+    loadedSubmap.removeActiveFloorImageOverlay();
+    // switch (currentMapState) {
+    //     case MapStates.Dungeon : {
+    //         removeAllMarkers();
+    //         loadedSubmap.removeActiveFloorImageOverlay();
+    //         break;
+    //     }
+    //     case MapStates.FlooredSubmap : {
+    //         removeAllLayersExceptTL();
+    //         break;
+    //     }
+    // }
+}
+
+function removeAllMarkers() {
+    LeafletMap.eachLayer(function (layer) {
+        if (layer instanceof L.Marker && layerCanReload(layer))
+            layer.remove();
+    })
+}
+
+function removeAllMarkersExceptPolygons() {
+    LeafletMap.eachLayer(function (layer) {
+        if (layer instanceof L.Marker && !(layer instanceof L.Polygon) && layerCanReload(layer))
+            layer.remove();
+    });
+}
+
+function removeAllLayers() {
+    LeafletMap.eachLayer(function(layer) {
+        layer.remove();
+    });
+}
+
+function removeAllLayersExceptTL() {
+    LeafletMap.eachLayer(function(layer) {
+        if (layer !== TileLayer && layerCanReload(layer))
+            layer.remove();
+    });
+}  
+
 document.addEventListener('trackerUpdated', function(event) {
     if (Settings.TrackerLogic.isEnabled())
         reloadMap();
@@ -518,21 +577,28 @@ document.addEventListener('settingsUpdated', function(event) {
         updateTotalCounter();
 });
 
+function blockMenuIcon(menuIcon) {
+    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Hide", "Show");
+    let blockImage = document.createElement('img');
+    blockImage.src = "Icons/Block.png";
+    menuIcon.children[0].appendChild(blockImage);
+}
+
+function unblockMenuIcon(menuIcon) {
+    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Show", "Hide");
+    if (menuIcon.children[0].children[1] !== null)
+        menuIcon.children[0].children[1].remove();
+}
+
 function showSetFlags() {
     setFlagsHidden = false;
-    let button = document.getElementById("setFlagsVisibilityButton");
-    button.children[1].innerHTML = "Hide Set Flags";
-    button.children[0].children[1].remove();
+    unblockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
     reloadMap();
 }
 function hideSetFlags() {
-    if (!setFlagsHidden) {
-        let button = document.getElementById("setFlagsVisibilityButton");
-        button.children[1].innerHTML = "Show Set Flags";
-        let blockImage = document.createElement('img');
-        blockImage.src = "Icons/Block.png";
-        button.children[0].appendChild(blockImage);
-    }
+    if (!setFlagsHidden)
+        blockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
+
     setFlagsHidden = true;
     reloadMap();
 }
@@ -542,6 +608,47 @@ function toggleSetFlagsVisibility() {
     else
         hideSetFlags();
 }
+
+
+let noReqVisMenuIcon = document.getElementById("requirementVisibilityButton");
+function showNoRequirements() {
+    Settings.HideNoReqs.deactivate();
+    unblockMenuIcon(noReqVisMenuIcon);
+    reloadMap();
+}
+function hideNoRequirements() {
+    if (!Settings.HideNoReqs.isEnabled()) 
+        blockMenuIcon(noReqVisMenuIcon);
+
+    Settings.HideNoReqs.activate();
+    reloadMap();
+}
+function toggleNoRequirementsVisibility() {
+    if (Settings.HideNoReqs.isEnabled())
+        showNoRequirements();
+    else
+        hideNoRequirements();
+}
+
+function toggleNoRequirementsBlock() {
+    if (Settings.HideNoReqs.isEnabled())
+        blockMenuIcon(noReqVisMenuIcon);
+    else 
+        unblockMenuIcon(noReqVisMenuIcon);
+}
+
+Settings.HideNoReqs.setFunction(toggleNoRequirementsBlock);
+Settings.TrackerLogic.setFunction(showRequirementVisibilityButton);
+
+function showRequirementVisibilityButton() {
+    if (Settings.TrackerLogic.isEnabled())
+        noReqVisMenuIcon.style.visibility = "visible";
+    else 
+        noReqVisMenuIcon.style.visibility = "hidden";
+    dispatchSettingsUpdate();
+}
+
+
 
 function getAllFlags() {
     let flags = [];
@@ -620,48 +727,6 @@ function updateTotalCounter() {
     let percentText = "(" + percent + "%)"
     document.getElementById('counter').innerHTML = countText + " " + percentText;
 }
-
-
-function removeFloorLayer() {
-    switch (currentMapState) {
-        case MapStates.Dungeon : {
-            removeAllMarkers();
-            loadedSubmap.removeActiveFloorImageOverlay();
-            break;
-        }
-        case MapStates.FlooredSubmap : {
-            removeAllLayersExceptTL();
-            break;
-        }
-    }
-}
-
-function removeAllMarkers() {
-    LeafletMap.eachLayer(function (layer) {
-        if (layer instanceof L.Marker)
-            layer.remove();
-    })
-}
-
-function removeAllMarkersExceptPolygons() {
-    LeafletMap.eachLayer(function (layer) {
-        if (layer instanceof L.Marker && !(layer instanceof L.Polygon))
-            layer.remove();
-    });
-}
-
-function removeAllLayers() {
-    LeafletMap.eachLayer(function(layer) {
-        layer.remove();
-    });
-}
-
-function removeAllLayersExceptTL() {
-    LeafletMap.eachLayer(function(layer) {
-        if (layer !== TileLayer)
-            layer.remove();
-    });
-}  
 
 function openPositionTooltip(lat, lng) {
     let text = "[" + Math.round(lat) + ", " + Math.round(lng) + "]";

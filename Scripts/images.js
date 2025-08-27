@@ -227,6 +227,7 @@ const imageSizes = new Map([
   ["Icons/Quiver2.png", [114, 128]],
   ["Icons/Red_Rupee.png", [624, 1064]],
   ["Icons/Renado's_Letter.png", [128, 107]],
+  ["Icons/Requirements.png", [512, 512]],
   ["Icons/Rupees.png", [1947, 1437]],
   ["Icons/Rupee_Boulder.png", [2209, 1702]],
   ["Icons/Seeds.png", [124, 125]],

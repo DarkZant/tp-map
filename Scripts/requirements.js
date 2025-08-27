@@ -40,11 +40,12 @@ class Requirement {
             () => flag.isSet()
         );
     }
-    static fromCheckboxRandoSetting(randoSetting) {
+    static fromCheckboxRandoSetting(randoSetting, enabled=true) {
+        let condition = () => enabled ? randoSetting.isEnabled() : !randoSetting.isEnabled();
         return new Requirement(
             randoSetting.getImage(),
-            randoSetting.getName(),
-            () => randoSetting.isEnabled()
+            randoSetting.getName() + (!enabled ? " Disabled" : ""),
+            condition
         );
     }
     static fromSelectRandoSetting(randoSetting, value) {
@@ -213,6 +214,7 @@ let reekfishScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("R
 let medicineScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Medicine Scent"));
 let nightReq = new Requirement('Moon', 'Night Time');
 
+let prologueNotSkippedReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SkipPrologue, false);
 let openMapReq = Requirement.fromCheckboxRandoSetting(RandoSettings.UnlockMapRegions);
 let openWoodsReq = Requirement.fromSelectRandoSetting(RandoSettings.FaronWoodsLogic, 'Open');
 let walletCapacityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.WalletCapacity);
@@ -224,3 +226,7 @@ let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.Temple
 let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');
 let openCityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.CitySkybook);
 let transformAnywhereReq = Requirement.fromCheckboxRandoSetting(RandoSettings.TransformAnywhere);
+
+let skullKidReq = [openMapReq, bowReq, new AndRequirements([ballAndChainReq, boomerangReq, bombBagReq])];
+let leaveFaronWoodsReq = [diababaReq, openWoodsReq];
+

@@ -1,6 +1,6 @@
 class Flag extends Storable{
     constructor(item, position, { 
-            itemCategory=item.getCategory(), baseReqs=[], baseDesc="Randomizer seed not loaded.", 
+            itemCategory=item.getCategory(), baseReqs=[], baseDesc="No description given", 
             randoCategory=itemCategory, randoReqs=baseReqs, randoDesc=baseDesc,
             glitchedReqs=randoReqs, glitchedDesc=randoDesc
         } = {}
@@ -115,7 +115,7 @@ class Flag extends Storable{
         return this._set;
     }
     setAsJunk() {
-        if (this.isJunk() || this.isSet())
+        if (this.isJunk() || this.isSet() || !this.isRandomizerCheck())
             return;
         this._junk = true;
         this.onJunkChange();
@@ -271,7 +271,7 @@ class Flag extends Storable{
             return this.getCurrentItem().getName();
     }
     loadMarker(position=this.position) {
-        if (!this.isShown())
+        if (!this.isShown() || layerCannotReload(this.marker))
             return;
         addMarkerToMap(this.marker, position);
         if (this.isJunk()) {
@@ -290,8 +290,10 @@ class Flag extends Storable{
         this.loadMarker();
     }
     setMarker() {
+        blockMarkerReload(this.marker);
         this.set();
         this.setVisually();    
+        unblockMarkerReload(this.marker);
         if (setFlagsHidden) {
             setTimeout(() => this.marker.remove(), 1500);
             return;
@@ -299,10 +301,13 @@ class Flag extends Storable{
 
     }
     unsetMarker() {
+        blockMarkerReload(this.marker);
         if (this.isJunk())
             return;
         this.unset();
         this.unsetVisually();
+        unblockMarkerReload(this.marker);
+
     }
     setVisually() {
         showMarkerAsSet(this.marker, this.getMarkerImage());
@@ -334,7 +339,7 @@ class Flag extends Storable{
                 return;
 
         }
-        if (this.isSet())
+        if (this.isSet() || !randoIsActive() || !this.isRandomizerCheck())
             return;
         this.setAsJunk();
         this.junkVisually();
@@ -353,6 +358,7 @@ class Flag extends Storable{
     }
     junkVisually() {
         showMarkerAsJunk(this.marker, this.getMarkerImage());
+        this.updateTooltipContent();
         this.marker.on('contextmenu', this.boundSetMarker);
         this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
         this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
@@ -697,7 +703,7 @@ const flags = new Map([
     ["Faron Mist Cave Open Chest", new Flag(smallChest.with(faronKey), [-7023, 4805], {
         baseDesc: 'Walk into the cave and open the small chest to obtain the key to the Faron Woods gate.',
         randoDesc: 'Walk into the cave and open the small chest to obtain the item.',
-        randoReqs: [lanternReq]
+        randoReqs: [[lanternReq, prologueNotSkippedReq]]
     })],
     ["Faron Mist Cave Lantern Chest", new Flag(chest.with(heartPiece), [-7023, 4834], {
         baseReqs: [lanternReq],
@@ -705,7 +711,7 @@ const flags = new Map([
     })],
     ["North Faron Woods Deku Baba Chest", new Flag(smallChest.with(Rupees.Yellow), [-7121, 4136], {
         baseDesc: 'Defeat the Deku Baba and open the chest behind it.',
-        randoReqs: [[lanternReq, shadowCrystalReq]],
+        randoReqs: [[lanternReq, shadowCrystalReq, prologueNotSkippedReq]],
     })],
     ["Coro Bottle", new Flag(coroBottle, [-7405, 4885], {
         baseReqs: [Requirement.fromCountItem(rupees, 100)],
@@ -733,18 +739,22 @@ const flags = new Map([
         randoCategory: Categories.Main
     })],
     ["Faron Field Tree Heart Piece", new Flag(heartPiece, [-6278, 4930], {
-        baseReqs: [[boomerangReq, clawshotReq]],
+        baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'The heart piece is on the leaves of a tree and can be grabbed with a long ranged item.',
         randoCategory: Categories.Main,
+        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq]],
         randoDesc: 'The item is on the leaves of a tree and can be grabbed with a long ranged item.'
     })],
     ["Faron Field Male Beetle", new Flag(beetleM, [-6344, 4764], {
+        baseReqs: [diababaReq],
         baseDesc: 'This ♂ Beetle is on a tree trunk, simply pick it up.',
+        randoReqs: [leaveFaronWoodsReq],
         randoDesc: "The item is on the ground near the tree where the beetle usually is.",
     })],
     ["Faron Field Female Beetle", new Flag(beetleF, [-5985, 5151], {
-        baseReqs: [[boomerangReq, clawshotReq]],
+        baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Beetle is on an elevated tree trunk, use the boomerang or the clawshot to bring it closer.',
+        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq]],
         randoDesc: 'The item is on an elevated tree trunk, use the boomerang or the clawshot to grab it.'
     })],
     ["Faron Mist Poe", new Flag(poeSoul, [-7184, 4515], {
@@ -752,30 +762,32 @@ const flags = new Map([
         baseDesc: 'Use Midna jumps to reach the tree base where the poe is.'
     })], 
     ["Sacred Grove Pedestal Master Sword", new Flag(swords.getItemByIndex(2), [-6801, 3677], {
-        baseReqs: [Requirement.fromBoolItem(morpheel)],
+        baseReqs: [morpheelReq],
         baseDesc: 'After clearing the Lakebed Temple, go to the Sacred Grove and pull the Master Sword from its pedestal.',
-        randoReqs: [shadowCrystalReq],
+        randoReqs: [shadowCrystalReq, skullKidReq],
         randoDesc: 'Press A on the Master Sword to obtain the item.'
     })],
     ["Sacred Grove Pedestal Shadow Crystal", new Flag(shadowCrystal, [-6850, 3677], {
-        baseReqs: [Requirement.fromBoolItem(morpheel)],
+        baseReqs: [morpheelReq],
         baseDesc: 'After clearing the Lakebed Temple, go to the Sacred Grove and pull the Master Sword from its pedestal to obtain the Shadow Crystal.',
-        randoReqs: [shadowCrystalReq],
+        randoReqs: [shadowCrystalReq, skullKidReq],
         randoDesc: 'Press A on the Master Sword to obtain the item.'
     })],
     ["Sacred Grove Male Snail", new Flag(snailM, [-7184, 3722], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♂ Snail is on the ceiling of the alcove with the broken chest.',
-        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
+        randoReqs: [shadowCrystalReq, [boomerangReq, clawshotReq, ballAndChainReq], skullKidReq],
         randoDesc: 'The item is on the ceiling of the alcove with the broken chest.' 
     })],
     ["Faron Field Bridge Chest", new Flag(chest.with(Rupees.Orange), [-6135, 4891], {
-        baseReqs: [clawshotReq],
-        baseDesc: 'The chest is under the bridge. Clawshot the target above the chest to reach it.'
+        baseReqs: [diababaReq, clawshotReq],
+        baseDesc: 'The chest is under the bridge. Clawshot the target above the chest to reach it.',
+        randoReqs: [leaveFaronWoodsReq, clawshotReq]
     })],
     ["Faron Field Poe", new Flag(nightPoe, [-5953, 4955], {
-        baseReqs: [nightReq, shadowCrystalReq],
-        baseDesc: 'Above the flower patch on the elevated ledge.'
+        baseReqs: [diababaReq, nightReq, shadowCrystalReq],
+        baseDesc: 'Above the flower patch on the elevated ledge.',
+        randoReqs: [leaveFaronWoodsReq, nightReq, shadowCrystalReq]
     })],
     ["Lost Woods Waterfall Poe", new Flag(nightPoe, [-7172, 3043], {
         baseReqs: [nightReq, shadowCrystalReq],
@@ -788,18 +800,19 @@ const flags = new Map([
         randoReqs: [shadowCrystalReq, lanternReq]
     })],
     ["Lost Woods Boulder Poe", new Flag(poeSoul, [-7137, 3529], {
-        baseReqs: [shadowCrystalReq, [ballAndChainReq, bombBagReq]],
+        baseReqs: [shadowCrystalReq, [ballAndChainReq, bombBagReq], skullKidReq],
         baseDesc: 'Destroy the rock above the grotto to make the poe appear.'
     })],
     ["Sacred Grove Spinner Chest", new Flag(chest.with(Rupees.Orange), [-7151, 3457], {
         baseReqs: [spinnerReq],
         baseDesc: 'From the top of the vines, ride the spinner tracks until you reach the chest.',
-        randoReqs: [shadowCrystalReq, spinnerReq]
+        randoReqs: [shadowCrystalReq, spinnerReq, skullKidReq]
     })],
     ["Sacred Grove Master Sword Poe", new Flag(nightPoe, [-6877, 3703], {
         baseReqs: [shadowCrystalReq, nightReq],
         baseDesc: 'After defeating Skull Kid for the 2nd time, you can find this poe in the bottom right of the Master Sword area.',
-        randoDesc: 'You can find this poe in the bottom right of the Master Sword area.'
+        randoDesc: 'You can find this poe in the bottom right of the Master Sword area.',
+        randoReqs: [shadowCrystalReq, nightReq, skullKidReq],
     })],
     ["Faron Woods Owl Statue Sky Character", new Flag(skybookChar, [-7222, 4800], {
         baseReqs: [domRodReq, boulderReq],
@@ -818,36 +831,40 @@ const flags = new Map([
         randoDesc: 'The chest is located at the end of the tunnel'
     })],
     ["Faron Field Corner Grotto Rear Chest", new Flag(smallChest.with(Rupees.Yellow), [-6928, 5138], {
-        baseReqs: [shadowCrystalReq],
-        basDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
+        baseReqs: [diababaReq, shadowCrystalReq],
+        baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
+        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Faron Field Corner Grotto Right Chest", new Flag(smallChest.with(Rupees.Red), [-6533, 5308], {
-        baseReqs: [shadowCrystalReq],
-        baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
+        baseReqs: [diababaReq, shadowCrystalReq],
+        baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
+        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Faron Field Corner Grotto Left Chest", new Flag(smallChest.with(Rupees.Red), [-6370, 5050], {
-        baseReqs: [shadowCrystalReq],
-        baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.'
+        baseReqs: [diababaReq, shadowCrystalReq],
+        baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
+        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Sacred Grove Baba Serpent Grotto Chest", new Flag(chest.with(heartPiece), [-6868, 3472], {
         baseReqs: [boulderReq, shadowCrystalReq],
-        baseDesc: 'Defeat all the 8 Deku Serpents to make the chest appear.'
+        baseDesc: 'Defeat all the 8 Deku Serpents to make the chest appear.',
+        randoReqs: [shadowCrystalReq, boulderReq, skullKidReq]
     })],
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
         baseReqs: [masterSwordReq, blizzetaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.',
-        randoReqs: [[masterSwordReq, openSacredGroveReq], [boomerangReq, clawshotReq]],
+        randoReqs: [[masterSwordReq, openSacredGroveReq], [boomerangReq, clawshotReq], skullKidReq],
         randoDesc: 'The item is high up where the snail usually is, use a long ranged item to get it.'
     })],
     ["Sacred Grove Temple of Time Owl Statue Poe", new Flag(poeSoul, [-7470, 3618], {
         baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq, shadowCrystalReq],
         baseDesc: 'Move the Owl Statue to reveal the poe.',
-        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, shadowCrystalReq]
+        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, shadowCrystalReq, skullKidReq]
     })],
     ["Sacred Grove Past Owl Statue Chest", new Flag(chest.with(heartPiece), [-7504, 3704], {
         baseReqs: [masterSwordReq, blizzetaReq, pastDomRodReq],
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
-        randoReq: [[masterSwordReq, openSacredGroveReq], pastDomRodReq]
+        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, skullKidReq]
     })],
     ["North Faron Woods Howling Stone", new Flag(howlingStone, [-7340, 4043], {
         baseReqs: [morpheelReq],
@@ -1058,19 +1075,19 @@ const flags = new Map([
     ["Kakariko Watchtower Chest", new Flag(chest.with(Rupees.Purple), [-5181, 7310], {
         baseDesc: 'Climb the ladder to reach the chest.'
     })],
-    ["Kakariko Village Malo Mart Hylian Shield", new Flag(hylianShield, [-5445, 7250], {
+    ["Kakariko Village Malo Mart Hylian Shield", new Flag(hylianShield, [-5445, 7325], {
         baseReqs: [Requirement.fromCountItem(rupees, 200)],
         baseDesc: 'You can buy it after saving Collin for 200 rupees.',
         randoCategory: Categories.ShopItems,
         randoDesc: "You can buy the item for 200 rupees."
     })],
-    ["Kakariko Village Malo Mart Wooden Shield", new Flag(woodenShields.getItemByIndex(1), [-5445, 7325], {
+    ["Kakariko Village Malo Mart Wooden Shield", new Flag(woodenShields.getItemByIndex(1), [-5445, 7400], {
         baseReqs: [Requirement.fromCountItem(rupees, 50)],
         baseDesc: 'You can buy it after saving Collin for 50 rupees.',
         randoCategory: Categories.ShopItems,
         randoDesc: "You can buy the item for 50 rupees."
     })],
-    ["Kakariko Village Malo Mart Red Potion", new Flag(Bottle.RedPotion, [-5445, 7400], {
+    ["Kakariko Village Malo Mart Red Potion", new Flag(Bottle.RedPotion, [-5445, 7250], { 
         itemCategory: Categories.ShopItems,
         baseReqs: [Requirement.fromCountItem(rupees, 230)],
         baseDesc: 'You can buy it after saving Collin for 30 rupees.',
@@ -1164,7 +1181,7 @@ const flags = new Map([
     ["Hidden Village Howling Stone", new Flag(howlingStone, [-2065, 6665], {
         baseReqs: [horseCallReq, shadowCrystalReq],
         baseDesc: 'Summons the Hyrule Castle Golden Wolf, accessible when you first get into the Hidden Village.',
-        randoReqs: [[horseCallReq, transformAnywhereReq], shadowCrystalReq]
+        randoReqs: [woodenStatueReq, [horseCallReq, transformAnywhereReq], shadowCrystalReq]
     })],
     ["Kakariko Gorge Gate Lock", new Flag(gateLock, [-5253, 6506], {
         baseReqs: [gateKeyReq],
@@ -1412,7 +1429,7 @@ const flags = new Map([
         randoDesc: 'The item is above the entrance of the ice block cave, and is too high too reach.'
     })],
     ["Lanayru Field Behind Gate Underwater Chest", new Flag(chest.with(Rupees.Orange), [-2910, 4880], {
-        baseReqs: [[boomerangReq, clawshotReq]],
+        baseReqs: [[ironBootsReq, magicArmorReq]],
         baseDesc: 'The chest is in the cage underwater.'
     })],
     ["Zoras Domain Extinguish All Torches Chest", new Flag(chest.with(Rupees.Purple), [-206, 4830], {
@@ -2011,16 +2028,19 @@ const flags = new Map([
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the item.'
     })],
     ["Forest Temple Dungeon Reward", new Flag(fusedShadow, [-3796, 4777], {
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Fused Shadow.',
+        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
     })],
     ["Forest Temple Diababa", new Flag(diababa, [-3651, 4870], {
-        baseReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
-        baseDesc: 'Defeat Diababa to clear out the Forest Temple.'
+        baseReqs: [forest4SKReq, boomerangReq, forestBKReq, ordonSwordReq],
+        baseDesc: 'Defeat Diababa to clear out the Forest Temple.',
+        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]]
     })],
     ["Forest Temple Ooccoo", new Flag(ooccooPot, [-5250, 4565], {
         baseDesc: 'Use the Bombling to blow up the rocks, then pick up or break the pot containing Ooccoo.'
@@ -2158,13 +2178,13 @@ const flags = new Map([
         baseDesc: 'Defeat Fyrus to clear out the Goron Mines.'
     })],
     ["Goron Mines Fyrus Heart Container", new Flag(heartContainer, [-4252, 3815], {
-        baseReqs: [fyrusReq],
+        baseReqs: [ironBootsReq, mines2SKReq, minesBKReq, bowReq],
         baseDesc: 'Defeat Fyrus to obtain the Heart Container.',
         randoCategory: Categories.Main,
         randoDesc: 'Defeat Fyrus to obtain the item.'
     })],
     ["Goron Mines Dungeon Reward", new Flag(fusedShadow, [-4276, 3884], {
-        baseReqs: [fyrusReq],
+        baseReqs: [ironBootsReq, mines2SKReq, minesBKReq, bowReq],
         baseDesc: 'Defeat Fyrus to obtain the Fused Shadow.',
         randoDesc: 'Defeat Fyrus to obtain the dungeon reward.'
     })],
@@ -2297,13 +2317,13 @@ const flags = new Map([
         baseDesc: 'Defeat Morpheel to clear out the Lakebed Temple.'
     })],
     ["Lakebed Temple Morpheel Heart Container", new Flag(heartContainer, [-4402, 5200], {
-        baseReqs: [morpheelReq],
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, lakebedBKReq],
         baseDesc: 'Defeat Morpheel to obtain the Heart Container.',
         randoCategory: Categories.Main,
         randoDesc: 'Defeat Morpheel to obtain the item.'
     })],
     ["Lakebed Temple Dungeon Reward", new Flag(fusedShadow, [-4520, 5050], {
-        baseReqs: [morpheelReq],
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed2SKReq, clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, lakebedBKReq],
         baseDesc: 'Defeat Morpheel to obtain the third and last Fused Shadow.',
         randoDesc: 'Defeat Morpheel to obtain the dungeon reward.'
     })],
@@ -2433,13 +2453,13 @@ const flags = new Map([
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
-        baseReqs: [stallordReq],
+        baseReqs: [clawshotReq, lanternReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, spinnerReq, arbiterBKReq],
         baseDesc: 'Defeat Stallord to obtain the Heart Container.',
         randoCategory: Categories.Main,
         randoDesc: 'Defeat Stallord to obtain the item.'
     })],
     ["Arbiters Grounds Dungeon Reward", new Flag(mirrorShard, [-4726, 4334], {
-        baseReqs: [stallordReq],
+        baseReqs: [clawshotReq, lanternReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, spinnerReq, arbiterBKReq],
         baseDesc: 'Defeat Stallord to obtain the dungeon reward.'
     })],
     // Snowpeak Ruins
@@ -2570,13 +2590,13 @@ const flags = new Map([
         baseDesc: 'Defeat Blizzeta to clear out the Snowpeak Ruins.'
     })],
     ["Snowpeak Ruins Blizzeta Heart Container", new Flag(heartContainer, [-3963, 4358], {
-        baseReqs: [blizzetaReq],
+        baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq, bedroomKeyReq],
         baseDesc: "Defeat Blizzeta to obtain the Heart Container.",
         randoCategory: Categories.Main,
         randoDesc: "Defeat Blizzeta to obtain the item."
     })],
     ["Snowpeak Ruins Dungeon Reward", new Flag(mirrorShard, [-4066, 4170], {
-        baseReqs: [blizzetaReq],
+        baseReqs: [ballAndChainReq, bombBagReq, snowpeak2SKReq, cheeseReq, bedroomKeyReq],
         baseDesc: "Defeat Blizzeta to obtain the Mirror Shard.",
         randoDesc: "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the item."
     })],
@@ -2586,12 +2606,12 @@ const flags = new Map([
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
     ["Temple of Time Boss Lock", new Flag(bossLock, [-4197, 4350], {
-        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, masterSwordReq],
         baseDesc: "Unlock this door to reach Armogohma.",
         randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
-        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        baseReqs: [pastDomRodReq, templeBKReq, temple3SKReq, spinnerReq, bowReq, masterSwordReq],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
         randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
@@ -2599,11 +2619,13 @@ const flags = new Map([
         baseReqs: [armogohmaReq],
         baseDesc: 'Defeat Armogohma to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
         randoDesc: 'Defeat Armogohma to obtain the item.'
     })],
     ["Temple of Time Dungeon Reward", new Flag(mirrorShard, [-3880, 4350], {
         baseReqs: [armogohmaReq],
         baseDesc: 'Defeat Armogohma to obtain the Mirror Shard.',
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
         randoDesc: "Defeat Armogohma to obtain the dungeon reward."
     })],
     ["Temple of Time First Staircase Gohma Gate Chest", new Flag(smallChest.with(arrows, 30), [-6173, 4351], {
@@ -2816,11 +2838,13 @@ const flags = new Map([
         baseReqs: [argorokReq],
         baseDesc: 'Defeat Argorok to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, cityBKReq, woodenSwordReq],
         randoDesc: 'Defeat Argorok to obtain the item.',
     })],
     ["City in The Sky Dungeon Reward", new Flag(mirrorShard, [-3789, 3712], {
         baseReqs: [argorokReq],
         baseDesc: "Defeat Argorok to obtain the Mirror Shard.",
+        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, cityBKReq, woodenSwordReq],
         randoDesc: "Defeat Argorok to obtain the dungeon reward."
     })],
     // Palace of Twilight
@@ -2934,6 +2958,7 @@ const flags = new Map([
         baseReqs: [zantReq],
         baseDesc: 'Defeat Zant to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [clawshotReq, lightMasterSwordReq, palace3SKReq, palaceBKReq, boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
         randoDesc: 'Defeat Zant to obtain the item.'
     })],
     // Hyrule Castle
@@ -3093,7 +3118,9 @@ const flags = new Map([
     })],
     ["Death Mountain Sign", new Flag(randoHint, [-3828, 8247])],
     ["Eldin Field Sign", new Flag(randoHint, [-4282, 5928])],
-    ["Faron Field Sign", new Flag(randoHint, [-6202, 4889])],
+    ["Faron Field Sign", new Flag(randoHint, [-6202, 4889], {
+        randoReqs: [leaveFaronWoodsReq]
+    })],
     ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
     ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055], {
         randoReqs: [[forest1SKReq, clawshotReq]]
@@ -3132,7 +3159,7 @@ const flags = new Map([
     ["Ordon Sign", new Flag(randoHint, [-8842, 4938])],
     ["Palace of Twilight Sign", new Flag(randoHint, [-5914, 4479])],
     ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630], {
-        randoReqs: [shadowCrystalReq]
+        randoReqs: [shadowCrystalReq, skullKidReq]
     })],
     ["Snowpeak Mountain Sign", new Flag(randoHint, [-483, 3939])],
     ["Snowpeak Ruins Sign", new Flag(randoHint, [-5035, 4186])],
@@ -3186,3 +3213,4 @@ flags.get("Castle Town Malo Mart Magic Armor").addFlagRequirement(flags.get("Gor
 let collectBothSolsFlag = flags.get("Palace of Twilight Collect Both Sols");
 flags.get("Palace of Twilight East Wing First Room West Alcove").addFlagRequirement(collectBothSolsFlag);
 flags.get("Palace of Twilight East Wing First Room East Alcove").addFlagRequirement(collectBothSolsFlag);
+flags.get("Kakariko Village Malo Mart Red Potion").addFlagRequirement(flags.get("Kakariko Village Malo Mart Hylian Shield"));
