@@ -115,7 +115,7 @@ class Flag extends Storable{
         return this._set;
     }
     setAsJunk() {
-        if (this.isJunk() || this.isSet() || !this.isRandomizerCheck())
+        if (this.isJunk() || !this.isJunkable())
             return;
         this._junk = true;
         this.onJunkChange();
@@ -132,6 +132,9 @@ class Flag extends Storable{
     }
     isJunk() {
         return this._junk;
+    }
+    isJunkable() {
+        return !this.isSet() && randoIsActive() && this.isRandomizerCheck()
     }
     getCurrentStoreValue() {
         if (this.isSet())
@@ -339,7 +342,7 @@ class Flag extends Storable{
                 return;
 
         }
-        if (this.isSet() || !randoIsActive() || !this.isRandomizerCheck())
+        if (!this.isJunkable())
             return;
         this.setAsJunk();
         this.junkVisually();

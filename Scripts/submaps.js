@@ -90,7 +90,7 @@ class SubmapFloor {
     }
     shownFlagsAreJunk() {
          for (let c of this.contents) {
-            if (c instanceof Flag && c.isShown() && !c.isSet() && !c.isJunk())
+            if (c instanceof Flag && c.isShown() && c.isJunkable() && !c.isJunk())
                 return false;
         }
         return true;
