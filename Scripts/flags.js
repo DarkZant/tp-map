@@ -134,7 +134,7 @@ class Flag extends Storable{
         return this._junk;
     }
     isJunkable() {
-        return !this.isSet() && randoIsActive() && this.isRandomizerCheck()
+        return !this.isSet() && randoIsActive() && this.isRandomizerCheck();
     }
     getCurrentStoreValue() {
         if (this.isSet())
@@ -209,8 +209,11 @@ class Flag extends Storable{
         else 
             return verifyCategoryVisibility(this.itemCategory);
     }   
+    countsAsJunk() {
+        return randoIsActive() && this.isJunk();
+    }
     isCounted() {
-        if (this.isSet() || this.isJunk() || !this.isShown())
+        if (this.isSet() || this.countsAsJunk() || !this.isShown())
             return false;
         return this.isCountable();
     }
@@ -225,7 +228,7 @@ class Flag extends Storable{
         }
     }  
     countedInTotal() {
-        return (this.isSet() || this.isJunk()) && this.countsForTotal();
+        return (this.isSet() || this.countsAsJunk()) && this.countsForTotal();
     }
     countsForTotal() {
         return this.categoryIsVisible() && this.isCountable();
@@ -277,7 +280,7 @@ class Flag extends Storable{
         if (!this.isShown() || layerCannotReload(this.marker))
             return;
         addMarkerToMap(this.marker, position);
-        if (this.isJunk()) {
+        if (this.isJunk() && randoIsActive()) {
             this.junkVisually();
             return;
         }

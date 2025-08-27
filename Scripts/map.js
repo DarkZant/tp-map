@@ -318,10 +318,10 @@ function loadTilemapFromDungeon() {
 }
 
 function loadTileMapMarkers() {
-    for (let province of Object.values(Provinces))
-        province.loadMarkers();
     for (let dungeon of Object.values(Dungeons)) 
         dungeon.loadMarker();
+    for (let province of Object.values(Provinces))
+        province.loadMarkers();
 }
 
 function setBoundsToTL() {

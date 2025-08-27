@@ -89,7 +89,7 @@ class SubmapFloor {
         return true;
     }
     shownFlagsAreJunk() {
-         for (let c of this.contents) {
+        for (let c of this.contents) {
             if (c instanceof Flag && c.isShown() && c.isJunkable() && !c.isJunk())
                 return false;
         }
@@ -100,6 +100,15 @@ class SubmapFloor {
             return false;
         for (let c of this.contents) {
             if (c instanceof NonFlag && c.isShown())
+                return true;
+        }
+        return false;
+    }
+    hasCountableNonCheck() {
+        if (!Settings.CountNonChecks.isEnabled())
+            return;
+        for (let c of this.contents) {
+            if (c instanceof Flag && !c.isRandomizerCheck() && c.isShown())
                 return true;
         }
         return false;
@@ -305,23 +314,22 @@ class Submap {
             return;
         this.setJunk();
         this.junkVisually();
+
+        this.reloadMarkerWithDelay();
     }
     unjunkMarker(e) {
         e.preventDefault();
         if (e.button !== 1 || !randoIsActive()) 
             return;
         this.unsetJunk();
-        this.unjunkVisually();
+        
+        this.reloadMarker();
     }
     junkVisually() {
-        showMarkerAsJunk(this.marker, this.iconImage);
-        this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
-        this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+        showMarkerAsJunk(this.marker, this.iconImage);        
     }
     unjunkVisually() {
-        this.unsetVisually();
-        this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
-        this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
+        this.unsetVisually();        
     }
     setVisually() {
         // if (Settings.CountersVisibility.isEnabled())
@@ -342,6 +350,13 @@ class Submap {
     unsetMarkerEvents() {
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
+    }
+    junkMarkerEvents() {
+        this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
+        this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+    }
+    unjunkMarkerEvents() {
+        this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
         this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
     }
     isSet() {
@@ -359,6 +374,9 @@ class Submap {
         return true;
     }
     shownFlagsAreJunkOrSet() {
+        if (!randoIsActive())
+            return false;
+
         for (let floor of this.floors) {
             if (!floor.shownFlagsAreJunk())
                 return false;
@@ -368,6 +386,13 @@ class Submap {
     hasCountableNonFlag() {
         for (let floor of this.floors) {
             if (floor.hasCountableNonFlag())
+                return true;
+        }
+        return false;
+    }
+    hasCountableNonCheck() {
+        for (let floor of this.floors) {
+            if (floor.hasCountableNonCheck())
                 return true;
         }
         return false;
@@ -445,11 +470,16 @@ class Submap {
                 this.unsetVisually();
         }
         else if (this.shownFlagsAreJunkOrSet()) {
-            this.junkVisually()
-            return;
+            if (!this.hasCountableNonFlag() && !this.hasCountableNonCheck())
+                this.junkVisually();
+            else 
+                this.unjunkVisually();
+            this.junkMarkerEvents();
+            this.unsetMarkerEvents();
         }
         else {
             this.unsetVisually();
+            this.unjunkMarkerEvents();
             this.unsetMarkerEvents();
         }
     }
