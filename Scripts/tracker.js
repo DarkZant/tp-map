@@ -1,4 +1,4 @@
-var trackedItems = [
+let trackedItems = [
     fishingRods, slingshot, lantern, boomerang, ironBoots, bow, hawkeye, 
     bombBag, giantBombBag,  clawshots, aurusMemo, spinner, asheisSketch, 
     ballAndChain, dominionRods, horseCall, iliasCharm, renadosLetter, invoice,
@@ -58,8 +58,13 @@ class TrackerItem extends Storable {
             }); 
         }
     }
-    initialize() {
-        let storedValue = this.storageUnit.getFlagAsNumber(this);
+    initialize(storedValue=this.storageUnit.getFlagAsNumber(this)) {
+        if (this.item.state === storedValue) {
+            this.update();
+            this.initialized = true;
+            return;
+        }
+        
         let maxValue = this.item.getMaxState();
         if (storedValue < maxValue / 2) {
             for (let _ = 0; _ < storedValue; ++_)
@@ -77,9 +82,13 @@ class TrackerItem extends Storable {
             this.updateElementImage();
         else if (this.item instanceof CountItem || this.item instanceof CountRequiredItem)
             this.updateElementCounter();
-        if (this.initialized) 
-            this.storageUnit.setFlag(this);
-        dispatchTrackerUpdate();
+        if (this.initialized) {
+            dispatchTrackerUpdate();
+            this.save();
+        }
+    }
+    save() {
+        this.storageUnit.setFlag(this);
     }
     updateElementBrightness() {
         let currentItemState = this.item.getState();
@@ -117,8 +126,11 @@ class TrackerItem extends Storable {
         this.item.updateStateToHighestObtainedItem();
         this.update();
     }
-    reset() {
+    resetItem() {
         this.item.reset();
+    }
+    reset() {
+        this.resetItem();
         this.update();
     }
     updateElementImage() {
@@ -221,31 +233,34 @@ class TrackerItem extends Storable {
     }
 }
 
-// Assign Items to TrackerItems
-var trackerItems = new Map();
-for (let item of trackedItems) {
-    let imageSrc = item.getBaseImageSrc();
-    // Harcoded exceptions for items with duplicate images
-    // Should use item names for all but too lazy to put data-item on all .titem Divs
-    if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png'))
-        trackerItems.set(item.name, new TrackerItem(item));   
-    else
-        trackerItems.set(imageSrc, new TrackerItem(item));       
-}
-// Assign .titem Divs to TrackerItems
-for (let titemDiv of document.querySelectorAll('.titem')) {
-    // Check if titemDiv has assigned item
-    if ("item" in titemDiv.dataset) 
-        trackerItems.get(titemDiv.dataset.item).setElem(titemDiv);
-    else {
-        trackerItems.get("Icons/" + titemDiv.getElementsByClassName('timage')[0].src.split("Icons/")[1]).setElem(titemDiv);
+let trackerItems = new Map();
+let trackerSUName = "tracker";
+function initializeMapTracker() {
+    // Assign Items to TrackerItems
+    for (let item of trackedItems) {
+        let imageSrc = item.getBaseImageSrc();
+        // Harcoded exceptions for items with duplicate images
+        // Should use item names for all but too lazy to put data-item on all .titem Divs
+        if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png'))
+            trackerItems.set(item.name, new TrackerItem(item));   
+        else
+            trackerItems.set(imageSrc, new TrackerItem(item));       
     }
+    // Assign .titem Divs to TrackerItems
+    for (let titemDiv of document.querySelectorAll('.titem')) {
+        // Check if titemDiv has assigned item
+        if ("item" in titemDiv.dataset) 
+            trackerItems.get(titemDiv.dataset.item).setElem(titemDiv);
+        else {
+            trackerItems.get("Icons/" + titemDiv.getElementsByClassName('timage')[0].src.split("Icons/")[1]).setElem(titemDiv);
+        }
+    }
+    trackerSU = new StorageUnit(trackerSUName, trackerItems.values());
+    // Create StorageUnit for TrackerItems
+    // Initialize TrackerItems
+    for (let trackerItem of trackerItems.values()) 
+        trackerItem.initialize();
 }
-// Create StorageUnit for TrackerItems
-var trackerSU = new StorageUnit("tracker", trackerItems.values());
-// Initialize TrackerItems
-for (let trackerItem of trackerItems.values()) 
-    trackerItem.initialize();
 
 
 function showTrackerSubmenu(submenuID) {

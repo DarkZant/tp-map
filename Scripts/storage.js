@@ -4,7 +4,7 @@ class StorageUnit {
         let defaultConfig = '';
         let index = 0;
         for (let storable of storables) {
-            let defaultValue = this.convertStoreValue(storable.getDefaultStoreValue(), storable.getMaxStoreValue());
+            let defaultValue = this.convertNumberToStoreValue(storable.getDefaultStoreValue(), storable.getMaxStoreValue());
             defaultConfig += defaultValue;
             storable.index = index++;
             storable.storageUnit = this;
@@ -24,14 +24,17 @@ class StorageUnit {
     getFlagAsBool(storable) {
         return this.getAllFlags()[storable.index] === '1';
     }
-    getFlagAsNumber(storable) {
-        let value = this.getAllFlags()[storable.index];
-        if (storable.getMaxStoreValue() >= 10) 
+    convertStoredValueToNumber(value, maxStoreValue) {
+         if (maxStoreValue >= 10) 
             return value.charCodeAt(0);
         else 
             return parseInt(value);
     }
-    convertStoreValue(value, maxValue) {
+    getFlagAsNumber(storable) {
+        let value = this.getAllFlags()[storable.index];
+        return this.convertStoredValueToNumber(value, storable.getMaxStoreValue());       
+    }
+    convertNumberToStoreValue(value, maxValue) {
         if (maxValue >= 10) 
             return String.fromCharCode(value);
         else 
@@ -40,7 +43,7 @@ class StorageUnit {
     setFlag(storable) {
         let flags = this.getAllFlags();
         flags = flags.substring(0, storable.index) + 
-            this.convertStoreValue(storable.getCurrentStoreValue(), storable.getMaxStoreValue()) +
+            this.convertNumberToStoreValue(storable.getCurrentStoreValue(), storable.getMaxStoreValue()) +
             flags.substring(storable.index + 1);
         localStorage.setItem(this.name, flags);
     }

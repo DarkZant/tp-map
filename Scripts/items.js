@@ -140,7 +140,7 @@ class Item {
         this.category = category;
         this.defaultState = defaultState;
         this.maxState = maxState;
-        this.state = 0;
+        this.state = defaultState;
     }
     getCategory() {
         return this.category;
@@ -642,10 +642,10 @@ var lakebedCompass = new BoolItem("Compass", {name: "Lakebed Temple Compass"});
 var lakebedBK = new BoolItem('Boss Key', {name: 'Lakebed Temple Big Key'}); 
 var morpheel = new BoolItem('Morpheel', {category: Categories.Bosses});
 
-var arbiterSK = new CountItem('Small Key', 5, {name: "Arbiter's Ground Small Key"});
-var arbiterMap = new BoolItem('Dungeon Map', {name: "Arbiter's Ground Dungeon Map"});
-var arbiterCompass = new BoolItem("Compass", {name: "Arbiter's Ground Compass"});
-var arbiterBK = new BoolItem('Boss Key', {name: "Arbiter's Ground Big Key"}); 
+var arbiterSK = new CountItem('Small Key', 5, {name: "Arbiter's Grounds Small Key"});
+var arbiterMap = new BoolItem('Dungeon Map', {name: "Arbiter's Grounds Dungeon Map"});
+var arbiterCompass = new BoolItem("Compass", {name: "Arbiter's Grounds Compass"});
+var arbiterBK = new BoolItem('Boss Key', {name: "Arbiter's Grounds Big Key"}); 
 var stallord = new BoolItem('Stallord', {category: Categories.Bosses});
 
 var snowpeakSK = new CountItem('Small Key', 4, {name: "Snowpeak Ruins Small Key"});

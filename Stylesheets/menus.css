@@ -82,7 +82,7 @@
     width: 1.4vw;
     height: 1.4vw; 
 }
-.menuX:hover {
+.xButton:hover {
     color: #585858;
 }
 @supports not selector(::-webkit-scrollbar) {

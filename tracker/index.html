@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Twilight Princess Interactive Map</title>
+        <link rel="icon" href="../Icons/Midna.png">
+
+        <link rel="stylesheet" href="tracker.css">
+        
+        <!-- Meta Tags -->
+        <meta name="keywords" content="tp, tracker, interactive, twilight, princess, zelda">
+        <meta name="description" content="Tracker for the game The Legend of Zelda: Twilight Princess and its Randomizer.">
+        <meta name="author" content="Etienne Mitchell-Bouchard">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-6MQ2R4MNQC"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-6MQ2R4MNQC');
+        </script>
+
+        <!-- Open Graph -->
+        <meta property="og:image" content="Preview.png" />
+        <meta property="og:title" content="Twilight Princess Item Tracker" />
+        <meta property="og:description" content="Tracker for the game The Legend of Zelda: Twilight Princess and its Randomizer." />
+    </head>
+    <body oncontextmenu="return false;">
+        <div id="tracker">            
+            <div id="itemWheel">
+                <h2>Item Wheel</h2>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Fishing_Rod0.png" class="timage"> 
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Slingshot.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Lantern.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Gale_Boomerang.png" class="timage" >
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Iron_Boots.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Bow0.png" class="timage">
+                </div>          
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Hawkeye.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bomb_Bag.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Giant_Bomb_Bag.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Clawshot0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Spinner.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Ball_and_Chain.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Dominion_Rod0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Auru's_Memo.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Ashei's_Sketch.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Renado's_Letter.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Invoice.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Wooden_Statue.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Ilia's_Charm.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Horse_Call.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Sky_Book_Character.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div> 
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bottle.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+            </div>
+              
+
+            <div id="overworldKeys">
+                <h2>Overworld Keys</h2>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Small_KeyC.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Small_KeyF.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Small_KeyB.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Small_KeyG.png" class="timage">
+                </div>
+            </div>
+             <div id="buttons">
+                <button id="syncButton" onclick="syncWithMapButton(this)">Sync With Map Tracker</button>
+                <button onclick="showControls()">Controls</button>
+                <button onclick="resetButton(this)">Reset Tracker</button>
+                <button onclick="toMap()">Go To Map</button>
+            </div>   
+
+            <div id="pauseMenu">
+                <h2>Pause Menu</h2>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Shadow_Crystal.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Sword0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Shield0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Hylian_Shield.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Zora_Armor.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Magic_Armor.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Wallet0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Hidden_Skill.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Poe_Soul.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Progressive_Scent0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Heart_Piece.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Heart_Container.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Fused_Shadow.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Mirror_Shard.png" class="timage">
+                    <div class="tcpt">0</div>
+                </div>
+            </div>
+            
+            <div id="goldenBugs">
+                <h2>Golden Bugs</h2>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug0.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug1.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug2.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug3.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug4.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug5.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug6.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug7.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug8.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug9.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug10.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug11.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug12.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug13.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug14.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug15.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug16.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug17.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug18.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug19.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug20.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug21.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug22.png" class="timage">
+                </div>
+                <div class="titem">
+                    <img src="../Icons/ItemBox.png" class="tbox">
+                    <img src="../Icons/Bug23.png" class="timage">
+                </div>
+            </div>
+             
+            <div id="dungeons">
+                <div class="tdungeon">
+                    <h2>Forest Temple</h2>
+                    <span id="ForestTemple">Required</span>
+                    <div class="tboss titem">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Diababa.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="tdkey titem" data-item="Forest Temple Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="tdkey titem" data-item="Forest Temple Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Forest Temple Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Forest Temple Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>Goron Mines</h2>
+                    <span id="GoronMines">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Fyrus.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Goron Mines Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/GBK2.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem" data-item="Goron Mines Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Goron Mines Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>Lakebed Temple</h2>
+                    <span id="LakebedTemple">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Morpheel.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Lakebed Temple Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey" data-item="Lakebed Temple Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Lakebed Temple Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Lakebed Temple Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>Arbiter's Grounds</h2>
+                    <span id="ArbitersGrounds">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Stallord.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Arbiter's Grounds Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey" data-item="Arbiter's Grounds Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Arbiter's Grounds Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Arbiter's Grounds Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon" id="ruins">
+                    <h2>Snowpeak Ruins</h2>
+                    <span id="SnowpeakRuins">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Blizzeta.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Snowpeak Ruins Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Bedroom_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Snowpeak Ruins Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Snowpeak Ruins Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                        <div class="titem">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Ordon_Pumpkin.png" class="timage">
+                        </div>
+                        <div class="titem">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Ordon_Goat_Cheese.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>Temple of Time</h2>
+                    <span id="TempleOfTime">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Armogohma.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Temple of Time Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey" data-item="Temple of Time Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Temple of Time Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Temple of Time Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>City in the Sky</h2>
+                    <span id="CityInTheSky">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Argorok.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="City in the Sky Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey" data-item="City in the Sky Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="City in the Sky Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="City in the Sky Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>
+                <div class="tdungeon">
+                    <h2>Palace of Twilight</h2>
+                    <span id="PalaceOfTwilight">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Zant.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey" data-item="Palace of Twilight Small Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_Key.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey" data-item="Palace of Twilight Big Key">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_Key.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Palace of Twilight Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Palace of Twilight Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>
+                    </div>
+                </div>   
+                <div class="tdungeon">
+                    <h2>Hyrule Castle</h2>
+                    <span id="PalaceOfTwilight">Required</span>
+                    <div class="titem tboss">
+                        <img src="../Icons/ItemBox.png" class="tbox">
+                        <img src="../Icons/Ganondorf.png" class="timage">
+                    </div>
+                    <div class="dungeonItems">
+                        <div class="titem tdkey">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Small_KeyHC.png" class="timage">
+                            <div class="tcpt">0</div>
+                        </div>
+                        <div class="titem tdkey">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Boss_KeyHC.png" class="timage">
+                        </div>  
+                        <div class="titem" data-item="Hyrule Castle Dungeon Map">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Dungeon_Map.png" class="timage">
+                        </div>
+                        <div class="titem" data-item="Hyrule Castle Compass">
+                            <img src="../Icons/ItemBox.png" class="tbox">
+                            <img src="../Icons/Compass.png" class="timage">
+                        </div>          
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="controls">
+            <span id="controlsX" class="xButton" onclick="hideControls()">×</span>
+            <h2>Tracker Controls</h2>
+            <ul>
+                <li><b>Click</b> on an item to <i>Increase</i> its state</li>
+                <li><b>Right Click</b> on an item to <i>Decrease</i> its state</li>
+                <li><b>Middle Click</b> on an item to <i>Reset</i> it</li>
+                <li><b>Middle Click</b> on a boss to mark it as <i>Required</i></li>
+                <li><b>Left Click</b> on the Sync button to <i>Sync Once / Stop Syncing</i></li>
+                <li><b>Right Click</b> on the Sync button to <i>Sync Continuously / Stop Syncing</i>
+            </ul>
+        </div>
+
+        <!-- Scripts -->
+        <script src="../Scripts/images.js"></script>
+        <script src="../Scripts/items.js"></script>
+        <script src="../Scripts/storage.js"></script>
+        <script src="../Scripts/tracker.js"></script>
+        <script src="tracker.js"></script>
+    </body>
+</html>

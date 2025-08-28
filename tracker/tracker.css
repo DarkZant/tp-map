@@ -1,0 +1,207 @@
+body {
+    overflow: hidden;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #c0c0c0;
+    background-color: #1d1a14;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: none;
+}
+body img {
+    -webkit-user-drag: none;
+}
+#tracker {
+    width: 99dvw;
+    height: 99dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 3%;
+}
+#tracker > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.8dvw;
+    row-gap: 2dvh;
+}
+#itemWheel {
+    width: 25%;
+}
+#overworldKeys {
+    width: 25%;
+}
+#pauseMenu {
+    width: 30%;
+}
+#goldenBugs {
+    width: 30%;
+}
+#tracker #dungeons {
+    width: 45%;
+}
+#tracker h2 {
+    text-decoration: underline;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    font-size: 1.5dvw;
+}
+.titem {
+    position: relative;
+    width: 4vmax;
+    min-width: 20px;
+    aspect-ratio: 1;
+    cursor: pointer;
+    filter: brightness(50%);
+}
+
+.titem:hover .tbox {
+    filter: brightness(150%);
+}
+.tbox, .timage {
+    position: absolute;
+    top: 50%; 
+    left: 50%;  
+    transform: translate(-50%, -50%);  
+    max-width: 100%;
+    max-height: 100%;
+}
+.timage {
+    max-width: 90%; 
+    max-height: 90%;
+    z-index: 1100;
+}
+.tdungeon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    column-gap: 0.1vw;
+    row-gap: 0.5vh;
+    width: 30%;
+}
+#ruins {
+    width: 35%;
+}
+#tracker .tdungeon h2 {
+    top: 50%;
+    width: 100%;
+}
+.dungeonItems {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: 0.5dvh;
+    column-gap: 0.5dvw;
+    width: 75%;
+}
+.tdungeon span {
+    position: absolute;
+    margin-bottom: 1.5%;
+    z-index: 1500;
+    color: #ffffff;
+    display: none;
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 0.94dvw;
+}
+.tdungeon .titem {
+    width: 3.5dvw;
+}
+.tdungeon .tboss {
+    width: 5dvw;
+}
+.tcpt {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    right: 0.3vw;
+    z-index: 1200;
+    padding: 0.35dvh 0.3dvw;
+    border-radius: 100vw;
+    background-color: #38352e;
+    font-size: 1.1dvw;
+}
+#buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 20%;
+}
+#buttons button {
+    width: 9dvw;
+    max-width: 12vmax;
+    min-width: 50px;
+    height: 5.5vmin;
+    max-height: 5.5vmin;
+    min-height: 40px;
+    background-color: #272521;
+    color:#c0c0c0;
+    border-radius: 7px;
+    font-size: 1vmax;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+}
+#buttons button:hover {
+    background-color: #131313 !important;
+    /* text-decoration: underline; */
+}
+#controls {
+    position: absolute;
+    top: 50%; 
+    left: 50%;  
+    transform: translate(-50%, -50%);  
+    visibility: hidden;
+    background-color: #38352e;
+    text-align: center;
+    font-size: 1.5vmax;
+    z-index: 2000;
+    padding: 2dvh 2dvw;
+    border-radius: 1dvw;
+    white-space: nowrap;
+}
+#controls h2 {
+    font-size: 2vmax;
+    text-decoration: underline;
+}
+#controls ul {
+    text-align: left;
+}
+#controls li {
+    line-height: 5dvh;
+}
+#controls b, #controls i {
+    color: rgb(212, 212, 212);
+    font-weight: bold;
+}
+.xButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    color: #757575;
+    font: 2vmax Tahoma, Verdana, sans-serif;
+    font-weight: bolder;
+    cursor: pointer;
+    z-index: 1500;
+}
+.xButton:hover {
+    color: #535151;
+}
+#controlsX {
+    position: absolute;
+    top: 3%;
+    right: 3%;
+}

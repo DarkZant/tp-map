@@ -802,6 +802,7 @@ function hideTracker() {
     }
 }
 
+initializeMapTracker();
 Settings.TrackerOverlay.setFunction(trackerOverlaySetting);
 function trackerOverlaySetting() {
     if (Settings.TrackerOverlay.isEnabled())

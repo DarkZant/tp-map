@@ -89,10 +89,13 @@ body img {
     font-family: "TPLocation", Arial, sans-serif;
     color: #9f2aff;
     background-color: #141414;
-    padding: 0.5vh 0.4vw;
+    padding: 1dvh 0.4vw;
     border-radius: 0.35vw;
     margin: 1.2vh 0 0 0.5vw;
     z-index: 1000;
+}
+#credit hr {
+    border-color: #9f2aff;
 }
 #credit a {
     color: #9f2aff;
