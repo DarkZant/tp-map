@@ -227,6 +227,8 @@ let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'O
 let openCityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.CitySkybook);
 let transformAnywhereReq = Requirement.fromCheckboxRandoSetting(RandoSettings.TransformAnywhere);
 
+let goronMinesFirstRoomReq = [ironBootsReq, [shadowCrystalReq, woodenSwordReq, ballAndChainReq, bombBagReq]] // TODO Test spinner on wooden barriers
 let skullKidReq = [openMapReq, bowReq, new AndRequirements([ballAndChainReq, boomerangReq, bombBagReq])];
 let leaveFaronWoodsReq = [diababaReq, openWoodsReq];
+let lanayruRandoReq = [bombBagReq, ballAndChainReq, gateKeyReq, new AndRequirements([shadowCrystalReq, openMapReq])];
 

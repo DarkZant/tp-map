@@ -115,14 +115,17 @@ class SubmapFloor {
     }
     manageContent() {
         blockMapReloading();
-        if (this.shownFlagsAreSet())
+        let shownFlagsAreSet = this.shownFlagsAreSet();
+        if (shownFlagsAreSet)
             this.unset();
         else
             this.setMarkerShown();
-        if (!unblockMapReloading()) {
-            removeFloorLayer();
-            this.load();
-        }
+
+        if (setFlagsHidden && !shownFlagsAreSet) 
+            setTimeout(unblockMapReloading, 1500);
+        else 
+            if (!unblockMapReloading())
+                this.reload();
     }
     manageJunkContent() {
         if (!randoIsActive())
@@ -400,6 +403,8 @@ class Submap {
     isShown() {
         if (Settings.EmptySubmaps.isEnabled())
             return true;
+        if (!verifySubmapRequirements(this) && Settings.HideNoReqs.isEnabled())
+            return false;
         for (let floor of this.floors) {
             if (floor.hasShownContent())
                 return true;
@@ -497,17 +502,28 @@ class Submap {
     load() {
         currentMapState = MapStates.Submap;
         this.prepareMap();
-        this.exitEvent = () => this.exit();
+        this.exitEvent = () => {
+            if (this.stillZoomingInFromLoad())
+                return;
+
+            this.exit();
+            this.disableKeyboardControls();
+        } 
         LeafletMap.on('zoomend', this.exitEvent);
         loadedSubmap = this;
-        this.floors[0].load();  
+        this.enableKeyboardControls();
+        this.activeFloor = this.floors[0];
+        this.activeFloor.load();  
+    }
+    stillZoomingInFromLoad() {
+        if (LeafletMap.getZoom() == 0)
+            return true;
+        return false;
     }
     reload() {
-        this.floors[0].reload();
+        this.activeFloor.reload();
     }
     exit() {
-        if (LeafletMap.getZoom() == 0)
-            return;
         LeafletMap.off('zoomend', this.exitEvent);  
         document.getElementById('submapName').style.display = "none";
         exitToTilemap();
@@ -552,6 +568,26 @@ class Submap {
         for (let floor of this.floors)
             floor.showTooltips();
     }
+    enableKeyboardControls() {
+        this.controlsEvent = (e) => this.controls(e);
+        window.addEventListener('keydown', this.controlsEvent);
+    }
+    disableKeyboardControls() {
+        window.removeEventListener('keydown', this.controlsEvent);
+    }
+    controls(event) {
+        if (!(event instanceof KeyboardEvent) || keyboardEventIsOnNotes(event))
+            return;
+        let key = event.key == undefined ? event.originalEvent.key : event.key;
+        if (key == 'e' || key == "ArrowRight") {
+            this.activeFloor.manageContent();
+            return;
+        }
+        else if (key === 'q' || key === "ArrowLeft") {
+            this.activeFloor.manageJunkContent();
+            return;
+        }
+    }
 }
 
 class SimpleSubmap extends Submap {
@@ -578,17 +614,16 @@ class FlooredSubmap extends Submap {
         currentMapState = MapStates.FlooredSubmap;
         this.prepareMap();
         loadedSubmap = this;
-        // document.getElementById('floors').style.display = 'inline'
         this.exitEvent = () => {
-            this.exit();
-            if (LeafletMap.getZoom() == 0)
+             if (this.stillZoomingInFromLoad())
                 return;
+
+            this.exit();
             this.hideFloorUI();
-            window.removeEventListener('keydown', this.controlsEvent);
+            this.disableKeyboardControls();
         } 
         LeafletMap.on('zoomend', this.exitEvent);
-        this.controlsEvent = (e) => this.controls(e);
-        window.addEventListener('keydown', this.controlsEvent);
+        this.enableKeyboardControls();
         this.setupFloors();
     }
     setupFloors() {
@@ -637,9 +672,6 @@ class FlooredSubmap extends Submap {
         let floorButton = document.getElementById(this.activeFloor.label);
         floorButton.style.filter = 'brightness(100%)';
         floorButton.style.transform = "none";
-    }
-    reload() {
-        this.activeFloor.reload();
     }
     controls(event) {
         if (!(event instanceof KeyboardEvent) || keyboardEventIsOnNotes(event))
@@ -747,7 +779,7 @@ class CaveOfOrdeals extends FlooredSubmap {
             gEL(['Stalchildren 25']),
             gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily.'),
             gEL(['Bulblin Archers 3 ', 'Bulblins 8 ']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
-                'as he can shoot you from the other floor.'),
+                ' as he can shoot you from the other floor.'),
             gEL(['Stalfos 3 ']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
             gEL(['Skulltulas 3 ', 'Bubbles 6 ']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a Heart' + 
                 ' buried near the west wall.'),
@@ -796,16 +828,16 @@ class CaveOfOrdeals extends FlooredSubmap {
         let div = document.getElementById('caveofOrdeals');
         div.style.display = 'flex';
         this.exitEvent = () => { 
-            if (LeafletMap.getZoom() == 0)
+            if (this.stillZoomingInFromLoad())
                 return;
+
             this.exit(); 
             this.unbindButtons();
-            window.removeEventListener('keydown', this.controlsEvent);
+            this.disableKeyboardControls();
             div.style.display = "none";
         } 
         LeafletMap.on('zoomend', this.exitEvent);
-        this.controlsEvent = (e) => this.controls(e);
-        window.addEventListener('keydown', this.controlsEvent);
+        this.enableKeyboardControls();
         this.setupButtons();
         this.activeFloor = this.floors[0];
         this.loadActiveFloor();
@@ -1006,8 +1038,7 @@ class Dungeon extends FlooredSubmap {
         let dungeonName = document.getElementById("dungeonName");
         dungeonName.style.display = "grid";
         dungeonName.children[1].innerHTML = this.name; 
-        this.controlsEvent = (e) => this.controls(e);
-        window.addEventListener('keydown', this.controlsEvent);
+        this.enableKeyboardControls();
         this.exitEvent = () => this.exit();
         LeafletMap.on('zoomend', this.exitEvent);
         if (this.floors.length > 1)
@@ -1020,7 +1051,7 @@ class Dungeon extends FlooredSubmap {
         this.hideFloorUI();
         document.getElementById('dungeonName').style.display = 'none';
         removeAllLayers();
-        window.removeEventListener('keydown', this.controlsEvent);
+        this.disableKeyboardControls();
         LeafletMap.off('zoomend', this.exitEvent);
         loadTileMap();
     }
@@ -1435,8 +1466,8 @@ const Dungeons = Object.freeze({
             "Lakebed Temple West Water Supply Chest",
         ]
     ], {floorOffset: 1, 
-        baseReqs: [zoraArmorReq, bombBagReq], 
-        randoReqs: [zoraArmorReq, [bombBagReq, lakebedBombsReq]]
+        baseReqs: [zoraArmorReq, bombBagReq, ironBootsReq], 
+        randoReqs: [zoraArmorReq, [lakebedBombsReq, new AndRequirements([bombBagReq, ironBootsReq])]]
     }),
 
     Grounds: new Dungeon([-3865, 605], [-4500, 1520], dungeonIconImage, "Arbiter's Grounds", [
@@ -1490,7 +1521,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 1, 
         baseReqs: [aurusMemoReq, bulblinKeyReq], 
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
     }),
 
     Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
@@ -1535,7 +1566,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [coralEarringReq, reekfishScentReq], 
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1634,7 +1665,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 0, 
         baseReqs: [clawshotReq, completedSkybookReq],
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], clawshotReq, [completedSkybookReq, openCityReq]],
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, clawshotReq, [completedSkybookReq, openCityReq]],
     }),
 
     Palace: new Dungeon([-3636, 602], [-3800, 1520], "Mirror", 'Palace of Twilight', [
@@ -1730,7 +1761,7 @@ const Dungeons = Object.freeze({
         ]   
     ], {
         baseReqs: [zantReq], 
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
     })
 });
 
@@ -2001,7 +2032,7 @@ const Provinces = Object.freeze({
     ]),
     Desert: new Province("Desert", [-5440, 2224], {
             baseReqs: [aurusMemoReq], 
-            randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq], aurusMemoReq]
+            randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq]
         }, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
             [-3804, 2924], [-3840, 3154], [-4984, 3264], [-5116, 3148], [-5280, 3184], [-5472, 3256], [-5640, 3424], [-5953, 3742],
@@ -2117,7 +2148,7 @@ const Provinces = Object.freeze({
 
     Peak: new Province('Peak', [-1744, 3488], {
         baseReqs: [stallordReq], 
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
     }, [
         [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
             [-2704, 4220], [-3036, 4080], [-3624, 3880], [-3812, 3184], [-3636, 2272], [-3436, 1720], [-2668, 1568], [-2092, 1804], 
@@ -2142,7 +2173,7 @@ const Provinces = Object.freeze({
     ]),
     Lanayru: new Province('Lanayru', [-2192, 5984], {
         baseReqs: [fyrusReq, bombBagReq], 
-        randoReqs: [leaveFaronWoodsReq, [bombBagReq, ballAndChainReq, gateKeyReq]]
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
     }, [[
         [-5400, 5584], [-5360, 6000], [-5056, 5968], [-4640, 6248], [-4312, 6336], [-3696, 6344], [-3528, 6472], [-3424, 6728], 
         [-3280, 6968], [-2992, 7104], [-2760, 7048], [-2096, 7072], [-1248, 7328], [-800, 7216], [-584, 6768], [-480, 6368], 

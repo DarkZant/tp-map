@@ -292,8 +292,13 @@ class Flag extends Storable{
     reloadMarker() {
         if (!layerIsLoaded(this.marker)) 
             return;
-        this.marker.remove();
-        this.loadMarker();
+
+       if (setFlagsHidden) {
+           setTimeout(() => {
+                this.marker.remove(); 
+                this.loadMarker();
+            }, 1500);             
+        }
     }
     setMarker() {
         blockMarkerReload(this.marker);
@@ -492,6 +497,9 @@ class FlagGroup {
         return this.obtainedAmount >= amount;
     }
     updateFlags() {
+        if (randoIsActive())
+            return;
+
         for (let [req, item] of Object.entries(this.items)) {
             if (this.count === req - 1) {
                 this.updateFlagItems(item, false);
@@ -509,7 +517,7 @@ class FlagGroup {
         for (let flag of this.flags) {
             if (flag instanceof FlagGroup)
                 flag.updateFlagItems(item, updateSetFlags);
-            else {
+            else if (flag instanceof Flag) {
                 if (!updateSetFlags && flag.isSet())
                     continue;
                 else if (updateSetFlags && !flag.isSet())
@@ -748,7 +756,7 @@ const flags = new Map([
         baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'The heart piece is on the leaves of a tree and can be grabbed with a long ranged item.',
         randoCategory: Categories.Main,
-        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq]],
+        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is on the leaves of a tree and can be grabbed with a long ranged item.'
     })],
     ["Faron Field Male Beetle", new Flag(beetleM, [-6344, 4764], {
@@ -1840,7 +1848,7 @@ const flags = new Map([
         baseDesc: 'Defeat all the Toadpolis to make the chest appear. Tip: You can reflect their projectiles with Wolf Link attacks.'
     })],
     ["Lake Hylia Shell Blade Grotto Chest", new Flag(chest.with(Rupees.Orange), [-4354, 2828], {
-        baseReqs: [Requirement.fromCountItem(rupees, 20), shadowCrystalReq, [woodenSwordReq, bombBagReq]],
+        baseReqs: [Requirement.fromCountItem(rupees, 20), shadowCrystalReq, [bombBagReq, new AndRequirements([woodenSwordReq, ironBootsReq])]],
         baseDesc: "The grotto is on the platform under Fowl's house. Play the Flight By Fowl minigame (20 rupees) and use " + 
                   "the Cucco to reach the platform. Once inside, defeat all 4 Shellblades with a sword or water bombs to make the chest appear."
     })],
@@ -3148,7 +3156,7 @@ const flags = new Map([
         randoReqs: [gateKeyReq]
     })],
     ["Kakariko Village Sign", new Flag(randoHint, [-5253, 7455], {
-        randoReqs: [boulderReq]
+        randoReqs: [[...boulderReq, fyrusReq]]
     })],
     ["Lake Hylia Sign", new Flag(randoHint, [-4659, 2920])],
     ["Lake Lantern Cave Sign", new Flag(randoHint, [-5335, 3018], {
@@ -3161,7 +3169,9 @@ const flags = new Map([
     ["Lanayru Spring Sign", new Flag(randoHint, [-5238, 3468], {
         baseReqs: [[ironBootsReq, magicArmorReq]],
     })],
-    ["North Eldin Sign", new Flag(randoHint, [-1911, 7257])],
+    ["North Eldin Sign", new Flag(randoHint, [-1911, 7257], {
+        randoReqs: [lanayruRandoReq]
+    })],
     ["Ordon Sign", new Flag(randoHint, [-8842, 4938])],
     ["Palace of Twilight Sign", new Flag(randoHint, [-5914, 4479])],
     ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630], {
@@ -3175,7 +3185,9 @@ const flags = new Map([
     })],
     ["Temple of Time Sign", new Flag(randoHint, [-5721, 4278])],
     ["Upper Zoras River Sign", new Flag(randoHint, [-590, 5780])],
-    ["Zoras Domain Sign", new Flag(randoHint, [-748, 4751])],
+    ["Zoras Domain Sign", new Flag(randoHint, [-748, 4751], {
+        randoReqs: [[shadowCrystalReq, ...boulderReq]]
+    })],
     ["Arbiters Grounds Poe Scent", new Flag(scents.getItemByIndex(2), [-4656, 4329], {
         baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: "After defeating the poe, activate your senses to learn the Poe Scent.",

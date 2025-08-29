@@ -5,7 +5,7 @@ trackedItems.push(...[
     castleMap, castleCompass
 ]); // Always add items at the end to preserve storage IDs
 
-let trackerModified = false;
+let trackerModified = true;
 document.addEventListener('trackerUpdated', function () {
     if (!trackerModified)
         trackerModified = true;

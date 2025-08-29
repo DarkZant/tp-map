@@ -15,7 +15,7 @@
 .disabled {
     pointer-events: none;
 }
-#tracker > div:nth-child(n + 4) {
+#tracker > div:nth-child(n + 3) {
     display: none;
 }
 #tracker > div {
