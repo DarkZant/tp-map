@@ -269,6 +269,7 @@ function unloadSeed() {
     
     dropZoneText.innerHTML = "Seed Unloaded!";
     document.getElementById("seedSettings").style.display = "none";
+    document.getElementById("seedLink").style.display = "none";
     let unloadButton = document.getElementById("Unload_Seed");
     resetButtonText(unloadButton, "Unloading...");
     resetButtonsFeedback(unloadButton, "Seed Unloaded!");
@@ -285,6 +286,10 @@ let seedIsLoaded = false;
 function loadSpoilerLog(data, start=false) {
     document.getElementById("Unload_Seed").style.display = "inline";
     document.getElementById("seedSettings").style.display = "inline";
+
+    let seedLink = document.getElementById("seedLink");
+    seedLink.style.display = "flex";
+    seedLink.href = "https://generator.tprandomizer.com/s/" + data['meta']['seedId'];
 
     let settings = data["settings"];
 

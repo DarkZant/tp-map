@@ -253,6 +253,9 @@ select {
     padding: 0 5px;
     cursor: pointer;
 }
+select:hover {
+    background-color: #272727;
+}
 #randoSeed {
     display: flex;
     flex-direction: column;
@@ -270,13 +273,13 @@ select {
     user-select: none;
 }
 #randoSeedFile:hover {
-    background-color: #3f3f3f;
+    background-color: #1d1a14;
 }
 #randoSeedFile:hover #randoSeedFileText {
     text-decoration: underline;
 }
 #randoSeedFile.dragover {
-    background-color: #3f3f3f;
+    background-color: #1d1a14;
     border-color: #8a8a8a;
 }
 
@@ -292,6 +295,27 @@ select {
     font-size: calc(5px + 0.3vw);
     width: 6.9dvw;
 }
+
+#seedLink {
+    font-size: 1.025vmax;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 1dvh 1dvw;
+    border: solid #c0c0c0 0.1dvw;
+    border-radius: 0.5dvw;
+    text-decoration: none;
+    color: #c0c0c0;
+}
+#seedLink img {
+    padding-left: 0.5dvw;
+    max-width: 1.5dvw;
+}
+#seedLink:hover {
+    text-decoration: underline;
+    background-color: #1d1a14;
+}
+
 #settings #Unload_Seed {
     display: none;
     margin: 0;
@@ -319,6 +343,9 @@ select {
     margin-top: 2%;
     cursor: pointer;
 }
+#settings label:has(input[type="checkbox"]:hover) {
+    text-decoration: underline;
+}
 #settings label {
     font-size: 0.9vmax;
     cursor: pointer;
@@ -331,6 +358,10 @@ select {
 }
 #settings .bigSettingCheckboxLabel {
     font-size: 1.025vmax;
+}
+#settings .bigSettingCheckboxLabel:hover {
+    text-decoration: underline;
+
 }
 #settings label::after {
     content: "\a";
