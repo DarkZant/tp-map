@@ -859,7 +859,7 @@ class CaveOfOrdeals extends FlooredSubmap {
         this.loadActiveFloor();
     }
     ascendToNextShownFloor() {
-        for (let i = 1; i < this.floors.length - 1; ++i) {
+        for (let i = 1; i < this.floors.length; ++i) {
             let newFloorIndex = this.activeFloor.index - i; 
             if (newFloorIndex < 0)
                 newFloorIndex = this.floors.length + newFloorIndex;
@@ -873,7 +873,7 @@ class CaveOfOrdeals extends FlooredSubmap {
         }
     }
     descendToNextShownFloor() {
-        for (let i = 1; i < this.floors.length - 1; ++i) {
+        for (let i = 1; i < this.floors.length; ++i) {
             let newFloorIndex = this.activeFloor.index + i; 
             if (newFloorIndex > this.floors.length - 1)
                 newFloorIndex = newFloorIndex - this.floors.length;
@@ -1969,7 +1969,10 @@ const Provinces = Object.freeze({
                 "Kakariko Village Female Ant"
             ]),
             new SimpleFlooredSubmap([-5283, 7580], doorIconImage, 'Kakariko Inn', [
-                ["Kakariko Inn Chest"],
+                [
+                    "Kakariko Inn Chest",
+                    postman.new([-5491, 7117]),
+                ],
                 []
             ]),
             new SimpleSubmap([-5162, 7670], doorIconImage, "Barnes' Shop", [
@@ -2142,7 +2145,10 @@ const Provinces = Object.freeze({
                 [], // B47
                 [], // B48
                 [], // B49
-                ["Cave of Ordeals Great Fairy Reward"], // B50  
+                [   // B50  
+                    "Cave of Ordeals Great Fairy Reward",
+                    postman.new([-6066, 687])
+                ], 
             ])
     ]),
 
@@ -2185,6 +2191,8 @@ const Provinces = Object.freeze({
         "Zoras Domain Chest By Mother and Child Isles",
         "Zoras Domain Chest Behind Waterfall",
         "Zoras Domain Reekfish Scent",
+        postman.new([-93, 4849]),
+        postman.new([-4608, 5364]),
         "Lake Hylia Underwater Chest",
         "Lake Hylia Bridge Male Mantis",
         "Lake Hylia Bridge Female Mantis",

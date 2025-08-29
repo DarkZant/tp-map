@@ -121,6 +121,9 @@ class Setting extends Storable {
         if (this.active)
             this.element.click();
     }
+    changeElementDisplay(display) {
+        this.element.parentElement.style.display = display;
+    }
 }
 
 class FunctionSetting extends Setting {
@@ -372,3 +375,11 @@ function verifyCategoryVisibility(category) {
 
 for (let setting of Object.values(Settings))
     setting.initialize();
+
+if (Settings.Rando_Non_Check_Visibility.isEnabled())
+    Settings.Rando_Non_Check_Visibility.reset();
+Settings.Rando_Non_Check_Visibility.changeElementDisplay("none");
+Settings.Shop_Visibility.changeElementDisplay('none');
+Settings.Monster_Rupee.changeElementDisplay('none');
+Settings.Minigames_Visibility.changeElementDisplay('none');
+Settings.Fishing_Visibility.changeElementDisplay('none');

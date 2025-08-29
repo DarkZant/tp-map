@@ -577,78 +577,6 @@ document.addEventListener('settingsUpdated', function(event) {
         updateTotalCounter();
 });
 
-function blockMenuIcon(menuIcon) {
-    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Hide", "Show");
-    let blockImage = document.createElement('img');
-    blockImage.src = "Icons/Block.png";
-    menuIcon.children[0].appendChild(blockImage);
-}
-
-function unblockMenuIcon(menuIcon) {
-    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Show", "Hide");
-    if (menuIcon.children[0].children[1] !== null)
-        menuIcon.children[0].children[1].remove();
-}
-
-function showSetFlags() {
-    setFlagsHidden = false;
-    unblockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
-    reloadMap();
-}
-function hideSetFlags() {
-    if (!setFlagsHidden)
-        blockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
-
-    setFlagsHidden = true;
-    reloadMap();
-}
-function toggleSetFlagsVisibility() {
-    if (setFlagsHidden)
-        showSetFlags();
-    else
-        hideSetFlags();
-}
-
-
-let noReqVisMenuIcon = document.getElementById("requirementVisibilityButton");
-function showNoRequirements() {
-    Settings.HideNoReqs.deactivate();
-    unblockMenuIcon(noReqVisMenuIcon);
-    reloadMap();
-}
-function hideNoRequirements() {
-    if (!Settings.HideNoReqs.isEnabled()) 
-        blockMenuIcon(noReqVisMenuIcon);
-
-    Settings.HideNoReqs.activate();
-    reloadMap();
-}
-function toggleNoRequirementsVisibility() {
-    if (Settings.HideNoReqs.isEnabled())
-        showNoRequirements();
-    else
-        hideNoRequirements();
-}
-
-function toggleNoRequirementsBlock() {
-    if (Settings.HideNoReqs.isEnabled())
-        blockMenuIcon(noReqVisMenuIcon);
-    else 
-        unblockMenuIcon(noReqVisMenuIcon);
-}
-
-Settings.HideNoReqs.setFunction(toggleNoRequirementsBlock);
-Settings.TrackerLogic.setFunction(showRequirementVisibilityButton);
-
-function showRequirementVisibilityButton() {
-    if (Settings.TrackerLogic.isEnabled())
-        noReqVisMenuIcon.style.visibility = "visible";
-    else 
-        noReqVisMenuIcon.style.visibility = "hidden";
-    dispatchSettingsUpdate();
-}
-
-
 
 function getAllFlags() {
     let flags = [];
@@ -819,7 +747,7 @@ function separateTrackerFromMap() {
     if (window.getComputedStyle(tracker).visibility === "hidden") {
         tracker.style.visibility = 'visible';
         document.getElementById('menuicons').style.right = trackerWidth + 'vw';
-        document.getElementById('trackerButton').style.visibility = 'hidden';
+        document.getElementById('trackerButton').style.display = 'none';
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = trackerWidth + 'vw';
         for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
@@ -829,7 +757,7 @@ function separateTrackerFromMap() {
     else {
         tracker.style.visibility = 'hidden';
         document.getElementById('menuicons').style.right = '0vw';
-        document.getElementById('trackerButton').style.visibility = 'visible';
+        document.getElementById('trackerButton').style.display = 'flex';
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = '0vw';
         for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
@@ -837,6 +765,77 @@ function separateTrackerFromMap() {
         updateMapSize('100vw');
     }
 }
+function blockMenuIcon(menuIcon) {
+    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Hide", "Show");
+    let blockImage = document.createElement('img');
+    blockImage.src = "Icons/Block.png";
+    menuIcon.children[0].appendChild(blockImage);
+}
+
+function unblockMenuIcon(menuIcon) {
+    menuIcon.children[1].innerHTML = menuIcon.children[1].innerHTML.replace("Show", "Hide");
+    if (menuIcon.children[0].children[1] !== null)
+        menuIcon.children[0].children[1].remove();
+}
+
+function showSetFlags() {
+    setFlagsHidden = false;
+    unblockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
+    reloadMap();
+}
+function hideSetFlags() {
+    if (!setFlagsHidden)
+        blockMenuIcon(document.getElementById("setFlagsVisibilityButton"));
+
+    setFlagsHidden = true;
+    reloadMap();
+}
+function toggleSetFlagsVisibility() {
+    if (setFlagsHidden)
+        showSetFlags();
+    else
+        hideSetFlags();
+}
+
+
+let noReqVisMenuIcon = document.getElementById("requirementVisibilityButton");
+function showNoRequirements() {
+    Settings.HideNoReqs.deactivate();
+    unblockMenuIcon(noReqVisMenuIcon);
+    reloadMap();
+}
+function hideNoRequirements() {
+    if (!Settings.HideNoReqs.isEnabled()) 
+        blockMenuIcon(noReqVisMenuIcon);
+
+    Settings.HideNoReqs.activate();
+    reloadMap();
+}
+function toggleNoRequirementsVisibility() {
+    if (Settings.HideNoReqs.isEnabled())
+        showNoRequirements();
+    else
+        hideNoRequirements();
+}
+
+function toggleNoRequirementsBlock() {
+    if (Settings.HideNoReqs.isEnabled())
+        blockMenuIcon(noReqVisMenuIcon);
+    else 
+        unblockMenuIcon(noReqVisMenuIcon);
+}
+
+Settings.HideNoReqs.setFunction(toggleNoRequirementsBlock);
+Settings.TrackerLogic.setFunction(showRequirementVisibilityButton);
+
+function showRequirementVisibilityButton() {
+    if (Settings.TrackerLogic.isEnabled())
+        noReqVisMenuIcon.style.display = "flex";
+    else 
+        noReqVisMenuIcon.style.display = "none";
+    dispatchSettingsUpdate();
+}
+
 
 function hideDetails() {
     document.getElementById('flagDetailsX').style.visibility = "hidden"; 

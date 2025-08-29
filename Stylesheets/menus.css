@@ -298,7 +298,7 @@ select:hover {
 
 #seedLink {
     font-size: 1.025vmax;
-    display: flex;
+    display: none;
     align-items: center;
     cursor: pointer;
     padding: 1dvh 1dvw;
