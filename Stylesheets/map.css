@@ -236,6 +236,10 @@ body img {
     padding: 1vw 0.75vw;
     border-radius: 10px;
 }
+#caveofOrdealsFloorText img{
+    width: 1.1dvw;
+    padding: 0 0.2dvw;
+}
 #caveofOrdealsFloorText ul {
     padding-inline-start: 12.5%;
 }

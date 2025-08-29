@@ -747,16 +747,18 @@ class CaveOfOrdeals extends FlooredSubmap {
         }
         let tip = (text) => "<u>Tip</u><br>" + text;
         let gf = (text) => "<b>Great Fairy</b><br>" + text;
+        let heart = "<img src=Icons/Heart.png>";
+        let hearts3 = "3&nbsp×&nbsp" + heart;
         let floorsText = [
             gEL(['Blue / Red Bokoblin 1 ']),
             gEL(['Keese 3 ', 'Rats 3 ']),
             gEL(['Baba Serpents 4 ']) + tip('You can make the ceiling ones fall with either the ' +
-            'Slingshot, Clawshot, Boomerang or Bow.<br>There is also a Heart buried under the grounded Baba Serpent.'),
+            `Slingshot, Clawshot, Boomerang or Bow.<br>There is also a ${heart} buried under the grounded Baba Serpent.`),
             gEL(['Skulltulas 3 ']),
             gEL(['Bulblin Archers 3 ']) + tip('Collect the arrows they miss to fill up your quiver.'),
             gEL(['Torchs Slugs 9 ']) + tip('Defeating the ceiling ones with a long ranged weapon' +
             ' makes the room a lot easier.'),
-            gEL(["Dodongos 2 ", 'Fire Keese 5 ']) + 'Three Hearts are buried next to the west wall.',
+            gEL(["Dodongos 2 ", 'Fire Keese 5 ']) + hearts3 + ' are buried next to the west wall.',
             gEL(['Blue Tektites 2 ', 'Red Tektikes 5 ']),
             gEL(['Bulblin Archers 2 ', 'Lizalfos 2 ']) + tip('The Bulblin Archers are hidden under ' +
             'the ledge, take them out first.'),
@@ -769,19 +771,19 @@ class CaveOfOrdeals extends FlooredSubmap {
             gEL(['Bulblins 10']),
             gEL(['Rats 6 ', 'Keese 6 ']),
             gEL(['Poe 1 ', 'Stalhounds 10']) + tip('Defeat the Stalhounds in human form and then defeat the Poe.'),
-            gEL(['Leevers 8 ']) + tip('Wait for them to get close then use a Spin Attack.<br> There is a Heart buried under the ledge.'),
+            gEL(['Leevers 8 ']) + tip(`Wait for them to get close then use a Spin Attack.<br> There is a ${heart} buried under the ledge.`),
             gEL(['Purple Chus 36', 'Blue Chu 2 ', 'Red Chu 1 ', 'Rare / Yellow Chu 1 ']) + tip('The Purple Chus merge with Non-Purple ' +
                 'Chus first, so you have to be quick is you wanna collect Chu Jelly.'),
             gf('Releases fairies into the Faron Spring.'),
             gEL(['Bokoblins 5 ', 'Ice Keese 5 ']) + tip("The Ball and Chain is required to go further."),
-            gEL(['Ghoul Rats 10', 'Keese 5 ', 'Rats 5 ']) + tip('Use Wolf Link and his senses to defeat the Ghoul Rats.<br>Three Hearts' +
+            gEL(['Ghoul Rats 10', 'Keese 5 ', 'Rats 5 ']) + tip(`Use Wolf Link and his senses to defeat the Ghoul Rats.<br>${hearts3}` +
                 ' are buried in the center of the room.'),
             gEL(['Stalchildren 25']),
             gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily.'),
             gEL(['Bulblin Archers 3 ', 'Bulblins 8 ']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
                 ' as he can shoot you from the other floor.'),
             gEL(['Stalfos 3 ']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
-            gEL(['Skulltulas 3 ', 'Bubbles 6 ']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a Heart' + 
+            gEL(['Skulltulas 3 ', 'Bubbles 6 ']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a ' + heart + 
                 ' buried near the west wall.'),
             gEL(['Masked Lizalfos 2 ', 'Red Bokoblins 6 ']),
             gEL(['Stalfos 2 ', 'Fire Bubbles 3 ', 'Stalchildren 12']),
@@ -792,7 +794,7 @@ class CaveOfOrdeals extends FlooredSubmap {
                 'going down to make the room easier.'),
             gEL(['Poe 1 ', 'Gibdos 4 ']) + tip('Defeat the closest Gibdo, then the Poe, then the other Gibdos.'),
             gEL(['Ghoul Rats 10', 'Purple Chus 7 ', 'Red Chu 1 ', 'Yellow Chu 1 ']) + tip('Defeat the Ghoul Rats as Wolf Link, then ' +
-                'transform back into human to defeat the Chus.<br>There is a Heart buried next to the south-west wall.'),
+                `transform back into human to defeat the Chus.<br>There is a ${heart} buried next to the south-west wall.`),
             gEL(['Ice Keese 6 ', 'Freezard 1 ']),
             gEL(['Chilfos 4 ']),
             gEL(['Leevers 8 ', 'Bubbles 4 ', 'Ice Bubbles 4 ']),
@@ -808,7 +810,7 @@ class CaveOfOrdeals extends FlooredSubmap {
                 'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down.'),
             gEL(['Poe 1 ', 'Dynalfos 4 ']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
             gEL(['Bulblin Archers 2 ', 'Gibdos 2 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
-                'they are on towers and can shoot you from the other room.<br>Three Hearts are buried under the ledge.'),
+                `they are on towers and can shoot you from the other room.<br>${hearts3} are buried under the ledge.`),
             gEL(['Freezards 2 ', 'Chilfos 3 ', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
                 'avoid the Freezard under the ledge.'),
             gEL(['Rats 17', 'Stalchildren 9 ', 'Blue Bokoblin 1 ']) + tip('Be careful of the Rats that are under the ledge.'),
