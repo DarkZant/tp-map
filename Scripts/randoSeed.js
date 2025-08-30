@@ -264,6 +264,8 @@ function unloadSeed() {
     localStorage.removeItem(spoilerLogStorageName);
     seedIsLoaded = false;
     fileInput.value = '';
+    Settings.RevealSetJunkFlags.reset();
+    Settings.RevealSpoilerLog.reset();
     reloadMap();
 
     

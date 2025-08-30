@@ -454,6 +454,10 @@ class Flag extends Storable{
         document.getElementById('flagDescription').style.visibility = "visible";
         let flagDescDiv = document.getElementById('flagDescriptionDiv');
         if (this.itemCategory === Categories.Hints) {
+            if (!seedIsLoaded) {
+                flagDescDiv.innerHTML = "No seed loaded, hint content unknown.";
+                return;
+            }
             if (Settings.RevealHints.isEnabled())
                 flagDescDiv.innerHTML = description;
             else
