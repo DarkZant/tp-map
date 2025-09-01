@@ -255,7 +255,7 @@ function loadImageMapFromTileMap() {
     LeafletMap.setMinZoom(-4);
     if (window.innerWidth >= 1000 && window.innerHeight >= 700)
         LeafletMap.dragging.disable();
-    LeafletMap.setMaxBounds([[500, -500], [-10836, 10676]]); 
+    setBoundsToImageMap();
     LeafletMap.off('zoomend', loadImageMapFromTileMap);    
     if (document.getElementById('flagDetails').style.visibility == 'visible')
         hideDetails(); 
@@ -284,6 +284,10 @@ function reloadImageMapMarkers() {
         if (dungeon !== Dungeons.Castle)
             dungeon.loadImageMapMarker();
     }  
+}
+
+function setBoundsToImageMap() {
+    LeafletMap.setMaxBounds([[500, -500], [-10836, 10676]]); 
 }
 
 // TileLayer Map
@@ -526,17 +530,6 @@ function unblockMapReloading() {
 function removeFloorLayer() {
     removeAllMarkers();
     loadedSubmap.removeActiveFloorImageOverlay();
-    // switch (currentMapState) {
-    //     case MapStates.Dungeon : {
-    //         removeAllMarkers();
-    //         loadedSubmap.removeActiveFloorImageOverlay();
-    //         break;
-    //     }
-    //     case MapStates.FlooredSubmap : {
-    //         removeAllLayersExceptTL();
-    //         break;
-    //     }
-    // }
 }
 
 function removeAllMarkers() {
@@ -683,8 +676,10 @@ function loadMap() {
     checkRandoSeed();
     LeafletMap.setView([0, 0], -4);
     LeafletMap.setMinZoom(-4);
-    if (window.innerWidth <= 1000 || window.innerHeight <= 700)
+    if (window.innerWidth <= 1000 || window.innerHeight <= 700) {
         LeafletMap.dragging.enable();
+        setBoundsToImageMap();
+    }
     loadImageMap();
     LeafletMap.on('click', getCoordsOnClick);
 }

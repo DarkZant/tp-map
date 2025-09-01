@@ -80,7 +80,7 @@ class Flag extends Storable{
         return this.randoItem !== undefined;
     }
     randoItemIsRevealed() {
-        return Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk())
+        return randoIsActive() && Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk())
     }
     set() {
         if (this.isSet())
