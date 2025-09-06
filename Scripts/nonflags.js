@@ -43,6 +43,7 @@ class NonFlag {
             keyboard: false, 
             zIndexOffset: -1100
         });
+        assignGAClickEventToMarker(this.marker);
     }
     loadMarker(position=this.position) {
         if (this.isShown())

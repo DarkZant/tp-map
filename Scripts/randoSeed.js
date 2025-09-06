@@ -234,6 +234,7 @@ function manageFile(file) {
             localStorage.setItem(spoilerLogStorageName, textResult);
             Settings.RevealSetJunkFlags.reset();
             Settings.RevealSpoilerLog.reset();
+            pushGAEvent('seed_import', {seed_id: data['meta']['seedId']});
         } 
         catch (error) {
             displayInvalidFile(file.name)

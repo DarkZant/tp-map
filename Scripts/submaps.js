@@ -236,6 +236,7 @@ class Submap {
             keyboard: false, 
         });
         this.marker.on('click', () => this.load());
+        assignGAClickEventToMarker(this.marker);
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
         this.boundJunkMarker = this.junkMarker.bind(this);
@@ -1185,8 +1186,17 @@ class Province {
         return L.divIcon({ html: '<div class="cpt procpt">' + this.count() + '</div>'});
     }
     loadMarkers() {
-         if (!verifySubmapRequirements(this))
+        if (!verifySubmapRequirements(this)) {
+            if (Settings.HideNoReqs.isEnabled())
+                return;
+            for (let c of this.contents) {
+                if (c instanceof Flag)
+                    c.loadMarkerAsUnobtainable();
+                else 
+                    c.loadMarker();
+            }
             return;
+        }
         for (let c of this.contents)
             c.loadMarker();
     }
@@ -1718,7 +1728,6 @@ const Dungeons = Object.freeze({
             "Hyrule Castle West Courtyard Central Small Chest",
             "Hyrule Castle King Bulblin Key",
             "Hyrule Castle West Courtyard North Small Chest",
-            "Hyrule Castle East Wing Balcony Chest",
             "Hyrule Castle East Wing Boomerang Puzzle Chest",
             "Hyrule Castle Graveyard Grave Switch Room Front Left Chest",
             "Hyrule Castle Graveyard Grave Switch Room Back Left Chest",
@@ -1727,6 +1736,7 @@ const Dungeons = Object.freeze({
             "Hyrule Castle Sign",
             Bottle.Oil.new([-3890, 4791])
         ], [ // 2F
+            "Hyrule Castle East Wing Balcony Chest",
             "Hyrule Castle Main Hall Northeast Chest",
             "Hyrule Castle Main Hall Northwest Chest",
             "Hyrule Castle Main Hall Southwest Chest",
@@ -1988,7 +1998,9 @@ const Provinces = Object.freeze({
                 "Kakariko Village Malo Mart Hylian Shield",
                 "Kakariko Village Malo Mart Wooden Shield",
                 "Kakariko Village Malo Mart Red Potion",
-                "Kakariko Village Malo Mart Hawkeye"
+                "Kakariko Village Malo Mart Hawkeye",
+                "Kakariko Village Malo Mart Bridge Repaired",
+                "Kakariko Village Malo Mart Castle Town Shop",
             ]),
             new SimpleFlooredSubmap([-5491, 7699], doorIconImage, 'Kakariko Sanctuary', [
                 ["Shad Dominion Rod"],

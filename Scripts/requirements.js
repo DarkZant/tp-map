@@ -60,6 +60,19 @@ class Requirement {
     }
 }
 
+class FlagRequirement {
+    constructor() { }
+    initialize(flagName) {
+        let flag = flags.get(flagName);
+        this.image = flag.getImage();
+        this.text = flag.getFlagName();
+        this.condition = () => flag.isSet();
+    }
+    isMet() {
+        return this.condition();
+    }
+}
+
 class AndRequirements {
     constructor(requirements) {
         this.requirements = requirements;
@@ -74,13 +87,14 @@ class AndRequirements {
 
 function verifyRequirements(requirements) {
     for (let req of requirements) {
-        if (req instanceof Requirement && !req.isMet())
-            return false;
-        else if (Array.isArray(req) && !req.some(orReq => orReq.isMet())) {
-            return false;
+        if (Array.isArray(req)) {
+            if (!req.some(orReq => orReq.isMet()))
+                return false;
+            else 
+                continue;
         }
-        else if (req instanceof AndRequirements && !req.isMet())
-            return false
+        else if (!req.isMet())
+            return false;
     }
     return true;
 }
@@ -227,8 +241,34 @@ let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'O
 let openCityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.CitySkybook);
 let transformAnywhereReq = Requirement.fromCheckboxRandoSetting(RandoSettings.TransformAnywhere);
 
+
+const FlagRequirements = new Map();
+
+function createNewFlagReq(flagName) {
+    let flagReq = new FlagRequirement();
+    FlagRequirements.set(flagName, flagReq);
+    return flagReq;
+}
+
+function initializeFlagRequirements() {
+    for (let [flagName, flagReq] of FlagRequirements.entries())
+        flagReq.initialize(flagName);
+}
+
+function getFlagReq(flagName) {
+    let flagReq = FlagRequirements.get(flagName);
+    if (flagReq === undefined)
+        flagReq = createNewFlagReq(flagName);
+    return flagReq;
+}
+
+function flagReqExists(flagName) {
+    return FlagRequirements.has(flagName);
+}
+
+let groundsFirstRoomReq = [clawshotReq, shadowCrystalReq];
 let goronMinesFirstRoomReq = [ironBootsReq, [shadowCrystalReq, woodenSwordReq, ballAndChainReq, bombBagReq]] // TODO Test spinner on wooden barriers
 let skullKidReq = [openMapReq, bowReq, new AndRequirements([ballAndChainReq, boomerangReq, bombBagReq])];
 let leaveFaronWoodsReq = [diababaReq, openWoodsReq];
-let lanayruRandoReq = [bombBagReq, ballAndChainReq, gateKeyReq, new AndRequirements([shadowCrystalReq, openMapReq])];
+let lanayruRandoReq = [...boulderReq, gateKeyReq, new AndRequirements([shadowCrystalReq, openMapReq]), getFlagReq("Kakariko Village Malo Mart Bridge Repaired")];
 

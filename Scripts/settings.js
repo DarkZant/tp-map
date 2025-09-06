@@ -294,7 +294,10 @@ const Settings = Object.freeze({
     Grass_Visibility: new CategoryVisibilitySetting('Grass_Visibility', Categories.Grass),
     Postman_Visibility: new CategoryVisibilitySetting('Postman_Visibility', Categories.Postman),
     Fishing_Visibility: new CategoryVisibilitySetting('Fishing_Visibility', Categories.Fishing),
-    Minigames_Visibility: new CategoryVisibilitySetting('Minigames_Visibility', Categories.Minigames)
+    Minigames_Visibility: new CategoryVisibilitySetting('Minigames_Visibility', Categories.Minigames),
+    // New Settings
+    Base_Quest_Visibility: new CategoryVisibilitySetting('Base_Quest_Visibility', Categories.Quest, 1),
+    Rando_Quest_Visibility: new CategoryVisibilitySetting('Rando_Quest_Visibility', Categories.Quest, 1)
 }); // Always add settings at the end to preserve storage IDs
 
 const settingsSU = new StorageUnit('settings', Object.values(Settings));
@@ -314,6 +317,7 @@ let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [
     Settings.Base_Characters_Visibility,
     Settings.Base_Rupees_Visibility,
     Settings.Base_Ammunition_Visibility,
+    Settings.Base_Quest_Visibility,
     Settings.Base_Bosses_Visibility,
     Settings.Base_Ooccoo_Visibility,
     Settings.Base_Locks_Visibility,
@@ -332,6 +336,7 @@ let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Paren
 let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibility_Parent', [ 
     Settings.Rando_Hints_Visibility,
     Settings.Rando_Bosses_Visibility,
+    Settings.Rando_Quest_Visibility,
     Settings.Rando_Rupees_Visibility,
     Settings.Rando_Locks_Visibility,
     Settings.Rando_Ooccoo_Visibility,

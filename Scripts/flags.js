@@ -162,11 +162,9 @@ class Flag extends Storable{
             flag.requiringFlags = [this];
     }
     manageFlagRequirements() {
-        if (this.requiringFlags === undefined || !Settings.TrackerLogic.isEnabled())
+        if (!Settings.TrackerLogic.isEnabled() || !flagReqExists(this.name))
             return;
         reloadMap();
-        // for (let flag of this.requiringFlags)
-        //     flag.addMarker();
     }
     getItemTracker(item) {
         if (item instanceof NonFlag)
@@ -189,19 +187,19 @@ class Flag extends Storable{
     }
     // Map
     isShown() {
-        if (setFlagsHidden && this.isSet())
+        if (setFlagsHidden && this.isSet() || !this.categoryIsVisible())
             return false;
 
+        if (!Settings.TrackerLogic.isEnabled() || !Settings.HideNoReqs.isEnabled())
+            return true;
+
+
         if (selectedGamemode === Gamemodes.Base) {
-            if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && !verifyRequirements(this.baseReqs))
-                return false;
+            return verifyRequirements(this.baseReqs);
         }    
         else {
-            if (Settings.TrackerLogic.isEnabled() && Settings.HideNoReqs.isEnabled() && 
-                !verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs))
-                return false;
+            return verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs);
         }
-        return this.categoryIsVisible();
     }
     categoryIsVisible() {
         if (randoIsActive())
@@ -242,6 +240,7 @@ class Flag extends Storable{
             keyboard: false, 
         });
         this.marker.on('click', () => this.showDetails());
+        assignGAClickEventToMarker(this.marker);
         this.boundSetMarker = this.setMarker.bind(this);
         this.boundUnsetMarker = this.unsetMarker.bind(this);
         this.boundJunkMarker = this.junkMarker.bind(this);
@@ -288,6 +287,11 @@ class Flag extends Storable{
             this.setVisually();
         else
             this.unsetVisually();
+    }
+    loadMarkerAsUnobtainable(position=this.position) {
+        this.loadMarker(position);
+        if (!this.markerIsShownAsUnobtainable())
+            showMarkerAsUnobtainable(this.marker);
     }
     reloadMarker() {
         if (!layerIsLoaded(this.marker)) 
@@ -343,6 +347,12 @@ class Flag extends Storable{
         this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
         this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
     }
+    markerIsShownAsUnobtainable() {
+        let markerElement = this.marker.getElement();
+        if (markerElement === undefined)
+            return true;
+        return markerElement.classList.contains('unobtainable');
+    }
     junkMarker(e) {
         if (e !== undefined) {
             e.preventDefault();
@@ -391,6 +401,7 @@ class Flag extends Storable{
                 break;
             }
         }
+        LeafletMap.on('click', hideDetails);
         let detailsMenu = document.getElementById('flagDetails');
         detailsMenu.style.visibility = "visible";
         detailsMenu.style.width = "24.4vw";
@@ -465,7 +476,6 @@ class Flag extends Storable{
         }
         else
            flagDescDiv.innerHTML = description;
-        LeafletMap.on('click', hideDetails);
     }
 }
 
@@ -638,6 +648,7 @@ const flags = new Map([
         randoCategory: Categories.Gifts
     })],
     ["Ordon Spring Golden Wolf", new Flag(goldenWolf, [-8542, 4795], {
+        baseReqs: [getFlagReq("Death Mountain Howling Stone")],
         baseDesc: 'Summoned by the Death Mountain howling stone.',
         randoDesc: 'Summoned by the Death Mountain howling stone. The item is lying on the ground where the Golden Wolf usually is.'
     })],
@@ -1010,6 +1021,7 @@ const flags = new Map([
         randoDesc: 'Show the sketch to Ralis to obtain theitem.'
     })],
     ["Kakariko Graveyard Golden Wolf", new Flag(goldenWolf, [-5479, 8140], {
+        baseReqs: [getFlagReq("Snowpeak Howling Stone")],
         baseDesc: 'Summoned by the Snowpeak Howling Stone.'
     })],
     ["Kakariko Graveyard Grave Poe", new Flag(nightPoe, [-5493, 7987], {
@@ -1107,7 +1119,7 @@ const flags = new Map([
     })],
     ["Kakariko Village Malo Mart Red Potion", new Flag(Bottle.RedPotion, [-5445, 7250], { 
         itemCategory: Categories.ShopItems,
-        baseReqs: [Requirement.fromCountItem(rupees, 230)],
+        baseReqs: [getFlagReq("Kakariko Village Malo Mart Hylian Shield"), Requirement.fromCountItem(rupees, 30)],
         baseDesc: 'You can buy it after saving Collin for 30 rupees.',
         randoDesc: "After buying the Hylian Shield for 200 rupees, you can buy the item for 30 rupees."
     })],
@@ -1208,6 +1220,7 @@ const flags = new Map([
     })],
     // Gerudo 
     ["Gerudo Desert Golden Wolf", new Flag(goldenWolf, [-4664, 582], {
+        baseReqs: [getFlagReq("Lake Hylia Howling Stone")],
         baseDesc: 'Summoned by the Lake Hylia Howling Stone.'
     })],
     ["Gerudo Desert East Poe", new Flag(nightPoe, [-6110, 2588], {
@@ -1483,7 +1496,7 @@ const flags = new Map([
         randoDesc: 'Help Iza by blowing up all of the rocks blocking the river to receive the item.'
     })],
     ["Iza Raging Rapids Minigame", new Flag(giantBombBag, [-904, 6064], {
-        baseReqs: [bowReq],
+        baseReqs: [getFlagReq("Iza Helping Hand"), bowReq],
         baseDesc: "Play Iza's Raging Rapids minigame and get atleast 25 points to obtain the giant bomb bag.",
         randoCategory: Categories.Gifts,
         randoDesc: "Play Iza's Raging Rapids minigame and get atleast 25 points to obtain the item."
@@ -1497,6 +1510,7 @@ const flags = new Map([
         randoDesc: 'The item is in the flowers on the ground.'
     })],
     ["West Hyrule Field Golden Wolf", new Flag(goldenWolf, [-3917, 4177], {
+        baseReqs: [getFlagReq("Upper Zoras River Howling Stone")],
         baseDesc: "Summoned by the Upper Zora's River Howling Stone."
     })],
     ["East Castle Town Bridge Poe", new Flag(nightPoe, [-3967, 5062], {
@@ -1557,6 +1571,7 @@ const flags = new Map([
                 "the chest on the other statue and only play the minigame once"
     })],
     ["Outside South Castle Town Golden Wolf", new Flag(goldenWolf, [-4430, 4591], {
+        baseReqs: [getFlagReq("North Faron Woods Howling Stone")],
         baseDesc: 'Summoned by the Faron Woods Howling Stone.'
     })],
     ["Plumm Fruit Balloon Minigame", new Flag(heartPiece, [-4905, 3923], {
@@ -1646,6 +1661,7 @@ const flags = new Map([
         baseDesc: 'After collecting the Medicine Scent and talking to Louise, defeat all of the Stallhounds at Night to receive the wooden statue.',
     })],
     ["North Castle Town Golden Wolf", new Flag(goldenWolf, [-3701, 4709], {
+        baseReqs: [getFlagReq("Hidden Village Howling Stone")],
         baseDesc: 'Summoned by the Hidden Village Howling Stone.'
     })],
     ["Lake Hylia Bridge Owl Statue Sky Character", new Flag(skybookChar, [-4220, 3378], {
@@ -1807,17 +1823,17 @@ const flags = new Map([
         randoDesc: 'Pay 10 rupees to play the first STAR minigame and win it to receive the reward.'
     })],
     ["STAR Prize 2", new Flag(giantQuiver, [-4128, 4479], {
-        baseReqs: [doubleClawshotReq, Requirement.fromCountItem(rupees, 15)],
+        baseReqs: [getFlagReq("STAR Prize 1"), doubleClawshotReq, Requirement.fromCountItem(rupees, 15)],
         baseDesc: 'Pay 15 rupees to play the second STAR minigame and win it to receive the giant quiver.',
         randoCategory: Categories.Gifts,
         randoDesc: 'Pay 15 rupees to play the second STAR minigame and win it to receive the reward.'
     })],
     ["Castle Town Malo Mart Magic Armor", new Flag(magicArmor, [-4231, 4706], {
-        baseReqs: [Requirement.fromBoolItem(wallets.getItemByIndex(1)), [Requirement.fromCountItem(rupees, 1798), Requirement.fromCountItem(rupees, 3598)]],
+        baseReqs: [getFlagReq("Kakariko Village Malo Mart Castle Town Shop"), Requirement.fromBoolItem(wallets.getItemByIndex(1)), Requirement.fromCountItem(rupees, 598)],
         baseDesc: 'After repairing the Castle Town bridge for 1000 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
                   'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1798 rupees total (or 3598 rupees without GSR).',
         randoCategory: Categories.ShopItems,
-        randoReqs: [[Requirement.fromBoolItem(wallets.getItemByIndex(1)), walletCapacityReq], [Requirement.fromCountItem(rupees, 1298), Requirement.fromCountItem(rupees, 3098)]],
+        randoReqs: [getFlagReq("Kakariko Village Malo Mart Castle Town Shop"), [Requirement.fromBoolItem(wallets.getItemByIndex(1)), walletCapacityReq], Requirement.fromCountItem(rupees, 598)],
         randoDesc: 'After repairing the Castle Town bridge for 500 rupees, pay 200 rupees (2000 rupees if you did not do the Goron Springwater ' +
                   'Rush quest) to open the Castle Town Branch of Malo Mart. You can then buy the Magic Armor for 598 rupees. This item costs 1298 rupees total (or 3098 rupees without GSR).'
     })],
@@ -2261,7 +2277,7 @@ const flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq]],
         baseDesc: 'The chest is accessible when you first get into the room, go down the stairs and take a left.'
     })],
-    ["Lakebed Temple Central Room Chest", new Flag(chest.with(lakebedMap), [-4224, 4513], {
+    ["Lakebed Temple Central Room Chest", new Flag(chest.with(lakebedMap), [-4256, 4558], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]],
         baseDesc: 'The chest is accessible when you first get into the room, manipulate the stairs to reach it.'
     })],
@@ -2347,27 +2363,27 @@ const flags = new Map([
     })],
     // Arbiter's Grounds
     ["Arbiters Grounds Entrance Chest", new Flag(chest.with(arbiterSK), [-5336, 3974], {
-        baseReqs: [clawshotReq],
+        baseReqs: [groundsFirstRoomReq],
         baseDesc: 'Break the wooden barrier and jump across to the chest.'
     })],
     ["Arbiters Grounds Entrance Lock", new Flag(lock, [-5277, 4323], {
-        baseReqs: [clawshotReq, arbiter1SKReq],
+        baseReqs: [groundsFirstRoomReq, arbiter1SKReq],
         baseDesc: "Unlock this door to reach the main room of the dungeon."
     })],
     ["Arbiters Grounds Torch Room Poe", new Flag(poeSoul, [-4763, 4329], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: 'The first of the 4 poes, waits in the middle of the room after the cutscene.'
     })],
     ["Arbiters Grounds Torch Room East Chest", new Flag(chest.with(heartPiece), [-4562, 4481], {
-        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Walk across the platforms or use the clawshot to have a way back.'
     })],
     ["Arbiters Grounds Torch Room West Chest", new Flag(chest.with(arbiterMap), [-4561, 4171], {
-        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Walk across the quicksand using the sinking platform to reach the chest.'
     })],
     ["Arbiters Grounds West Small Chest Behind Block", new Flag(smallChest.with(Rupees.Red), [-4576, 3840], {
-        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Upon entering the room, follow the path to the right to reach the chest.'
     })],
     ["Arbiters Grounds East Turning Room Poe", new Flag(poeSoul, [-4337, 4831], {
@@ -2375,15 +2391,15 @@ const flags = new Map([
         baseDesc: 'When the room below is spun, clawshot up through the opening, then go in the poe room to defeat it.'
     })],
     ["Arbiters Grounds West Chandelier Chest", new Flag(chest.with(Rupees.Red), [-4920, 3766], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Pull the chain to raise the chandelier, then cross under it to reach the chest.'
     })],
     ["Arbiters Grounds West Stalfos Northeast Chest", new Flag(smallChest.with(bombs, 5), [-4707, 3322], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier and go to the north-east area to reach the chest.'
     })],
     ["Arbiters Grounds West Stalfos West Chest", new Flag(smallChest.with(bombs, 5), [-4767, 3108], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier and go to the west area to reach the chest.'
     })],
     ["Arbiters Grounds Big Key Chest", new Flag(bossChest.with(arbiterBK), [-4156, 3911], {
@@ -2391,39 +2407,39 @@ const flags = new Map([
         baseDesc: 'After clearing the room with the spinner ramps, access to the chest is granted upon entering the next room.'
     })],
     ["Arbiters Grounds East Turning Room Lock", new Flag(lock, [-4766, 5081], {
-        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter2SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the eastern wing."
     })],
     ["Arbiters Grounds East Lower Turnable Redead Chest", new Flag(smallChest.with(arbiterSK), [-4626, 4836], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: 'Dig the sand spot to reveal the lever, then pull it to access the stairs. then, spin the room to gain access to the chest.'
     })],
     ["Arbiters Grounds East Upper Turnable Chest", new Flag(chest.with(arbiterCompass), [-5358, 5475], {
-        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter2SKReq, lanternReq],
         baseDesc: 'Walk up the stairs to find the chest in the area behind the statue.'
     })],
     ["Arbiters Grounds East Upper Turnable Redead Chest", new Flag(chest.with(arbiterSK), [-5241, 5831], {
-        baseReqs: [clawshotReq, arbiter2SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter2SKReq, lanternReq],
         baseDesc: 'Break the wooden barrier then defeat the Redead to easily open the chest.'
     })],
     ["Arbiters Grounds East Upper Turnable Lock", new Flag(lock, [-5240, 5251], {
-        baseReqs: [clawshotReq, arbiter3SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter3SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the 3rd poe."
     })],
     ["Arbiters Grounds Hidden Wall Poe", new Flag(poeSoul, [-5240, 5021], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter3SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter3SKReq, lanternReq],
         baseDesc: 'Dig to reveal a lever, then pull it to gain access to the room where the poe awaits.'
     })],
     ["Arbiters Grounds Ghoul Rat Room Chest", new Flag(smallChest.with(arbiterSK), [-4883, 4834], {
-        baseReqs: [clawshotReq, arbiter3SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter3SKReq, lanternReq],
         baseDesc: 'The chest is below the ring platform.'
     })],
     ["Arbiters Grounds Ghoul Rat Room Lock", new Flag(lock, [-4767, 4551], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter4SKReq, lanternReq],
         baseDesc: "Unlock this door to reach the chandelier in the torch room."
     })],
     ["Arbiters Grounds West Poe", new Flag(poeSoul, [-5186, 3780], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter4SKReq, stalfosReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter4SKReq, stalfosReq, lanternReq],
         baseDesc: "Defeat the poe easily by using Midna's charge attack."
     })],
     ["Arbiters Grounds North Turning Room Chest", new Flag(chest.with(arbiterSK), [-4257, 4786], {
@@ -2907,9 +2923,11 @@ const flags = new Map([
         baseDesc: 'Make your way across the moving platforms to reach the chest.'
     })],
     ["Palace of Twilight East Wing First Room West Alcove", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
+        baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
         baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Room East Alcove", new Flag(chest.with(heartPiece), [-5420, 4902], {
+        baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
         baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Lock", new Flag(lock, [-5209, 4773], {
@@ -3125,7 +3143,7 @@ const flags = new Map([
     // Rando Hints
     ["Agithas Castle Sign", new Flag(randoHint, [-4155, 4551])],
     ["Arbiters Grounds Sign", new Flag(randoHint, [-4491, 4314], {
-        baseReqs: [clawshotReq, arbiter1SKReq, lanternReq],
+        baseReqs: [groundsFirstRoomReq, arbiter1SKReq, lanternReq],
     })],
     ["Beside Castle Town Sign", new Flag(randoHint, [-3883, 4188])],
     ["Bulblin Camp Sign", new Flag(randoHint, [-4151, 531])],
@@ -3193,7 +3211,7 @@ const flags = new Map([
         randoReqs: [[shadowCrystalReq, ...boulderReq]]
     })],
     ["Arbiters Grounds Poe Scent", new Flag(scents.getItemByIndex(2), [-4656, 4329], {
-        baseReqs: [clawshotReq, shadowCrystalReq, arbiter1SKReq, lanternReq],
+        baseReqs: [shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: "After defeating the poe, activate your senses to learn the Poe Scent.",
     })],
     ["Zoras Domain Reekfish Scent", new Flag(scents.getItemByIndex(3), [-705, 4947], {
@@ -3210,6 +3228,18 @@ const flags = new Map([
     ["Lanayru Field Scent of Ilia", new Flag(scents.getItemByIndex(1), [-2093, 6116], {
         baseDesc: "After entering the Lanayru Twilight, use your senses near the purse on the ground to learn the Scent of Ilia. The purse disappears after clearing the Twilight."
     })],
+    ["Kakariko Village Malo Mart Bridge Repaired", new Flag(gorEbizoDonation, [-5187, 7340], {
+        baseReqs: [Requirement.fromCountItem(rupees, 1000)],
+        baseDesc: "Donate 1000 Rupees to Gor Ebizo to have the bridge repaired.",
+        randoReqs: [Requirement.fromCountItem(rupees, 500)],
+        randoDesc: "Donate 500 Rupees to Gor Ebizo to have the bridge repaired.",
+    })],
+    ["Kakariko Village Malo Mart Castle Town Shop", new Flag(gorEbizoDonation, [-5248, 7221], {
+        baseReqs: [getFlagReq("Kakariko Village Malo Mart Bridge Repaired"), 
+                    [Requirement.fromCountItem(rupees, 2000), 
+                    new AndRequirements([getFlagReq("Goron Springwater Rush"), Requirement.fromCountItem(rupees, 200)])]],
+        baseDesc: "Donate 2000 Rupees (or 200 rupees if the Goron Springwater Rush quest is completed) to Gor Ebizo to unlock the Castle Town shop."
+    })],
 
 
 ]); // Always add flags at the end to preserve storage IDs
@@ -3224,15 +3254,5 @@ for (let [name, flag] of flags.entries()) {
 // Flag groups initialization
 agithaRewards.initialize();
 
-// Flag requirements 
-flags.get("Ordon Spring Golden Wolf").addFlagRequirement(flags.get("Death Mountain Howling Stone"));
-flags.get("West Hyrule Field Golden Wolf").addFlagRequirement(flags.get("Upper Zoras River Howling Stone"));
-flags.get("Outside South Castle Town Golden Wolf").addFlagRequirement(flags.get("North Faron Woods Howling Stone"));
-flags.get("Gerudo Desert Golden Wolf").addFlagRequirement(flags.get("Lake Hylia Howling Stone"));
-flags.get("Kakariko Graveyard Golden Wolf").addFlagRequirement(flags.get("Snowpeak Howling Stone"));
-flags.get("North Castle Town Golden Wolf").addFlagRequirement(flags.get("Hidden Village Howling Stone"));
-flags.get("Castle Town Malo Mart Magic Armor").addFlagRequirement(flags.get("Goron Springwater Rush"));
-let collectBothSolsFlag = flags.get("Palace of Twilight Collect Both Sols");
-flags.get("Palace of Twilight East Wing First Room West Alcove").addFlagRequirement(collectBothSolsFlag);
-flags.get("Palace of Twilight East Wing First Room East Alcove").addFlagRequirement(collectBothSolsFlag);
-flags.get("Kakariko Village Malo Mart Red Potion").addFlagRequirement(flags.get("Kakariko Village Malo Mart Hylian Shield"));
+// Flag Requirements initialization
+initializeFlagRequirements();

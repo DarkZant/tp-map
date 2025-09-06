@@ -20,6 +20,7 @@ function throttleFunc(func) {
         setTimeout(() => {
             func();
         }, msDelay);
+        pushGAEvent('notes_edit');
     }
 }
 

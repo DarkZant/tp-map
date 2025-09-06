@@ -87,6 +87,17 @@ const TileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
     bounds: TileLayerBounds
 });
 
+LeafletMap.on('zoomend', () => { pushGAEvent('leaflet_zoom'); });
+for (let elem of document.querySelectorAll('input[type="checkbox"]'))
+    elem.addEventListener('click', () => pushGAEvent('settings_click'));
+
+function pushGAEvent(eventName, eventParams={}) {
+    window.dataLayer.push({
+        'event': eventName,
+        ...eventParams
+    });
+}
+
 // Markers and Icons
 const Icons = new Map();
 function getIcon(image) {
@@ -170,6 +181,8 @@ function updateDivIconSize(marker) {
     }
     else if (markerElement.classList.contains("checkmarkIcon"))
         marker.setIcon(getIconWithCheckmark(icon));
+    else if (markerElement.classList.contains("junkIcon")) 
+        marker.setIcon(getIconWithJunk(icon));
 
     marker.remove();
     reAddMarkerToMap(marker);
@@ -368,6 +381,15 @@ function addMarkerToMap(marker, position) {
     else 
         marker.setLatLng(position);
     marker.addTo(LeafletMap);
+}
+
+function assignGAClickEventToMarker(marker) {
+    marker.on('click', (e) => {
+        pushGAEvent('leaflet_marker_click');
+    });
+    marker.on('contextmenu', (e) => {
+        pushGAEvent('leaflet_marker_click');
+    });
 }
 
 function reAddMarkerToMap(marker) {

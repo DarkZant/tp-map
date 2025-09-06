@@ -29,18 +29,18 @@ class TrackerItem extends Storable {
     }
     setElem(elem) {
         this.elem = elem;
-        elem.addEventListener('click', () => { 
-            this.item.increase(); 
-            this.update();
+        elem.addEventListener('click', () => {
+            this.increase();
+            pushGAEvent('tracker_click');
         });
-        elem.addEventListener('contextmenu', () => { 
-            this.item.decrease(); 
-            this.update();
+        elem.addEventListener('contextmenu', () => {
+            this.decrease();
+            pushGAEvent('tracker_click');
         });
         if (elem.classList.contains('tboss')) {
             elem.addEventListener('auxclick', (e) => { 
                 if (e.button == 1) {
-                    e.preventDefault();
+                    pushGAEvent('tracker_click');
                     let requiredElem = elem.parentElement.getElementsByTagName('span')[0];
                     if (requiredElem.style.display === 'inline')
                         requiredElem.style.display = 'none';
@@ -52,11 +52,19 @@ class TrackerItem extends Storable {
         else {
             elem.addEventListener('auxclick', (e) => { 
                 if (e.button == 1) {
-                    e.preventDefault();
+                    pushGAEvent('tracker_click');
                     this.reset();
                 }
             }); 
         }
+    }
+    increase() {
+        this.item.increase(); 
+        this.update();
+    }
+    decrease() {
+        this.item.decrease(); 
+        this.update();
     }
     initialize(storedValue=this.storageUnit.getFlagAsNumber(this)) {
         if (this.item.state === storedValue) {
@@ -68,11 +76,11 @@ class TrackerItem extends Storable {
         let maxValue = this.item.getMaxState();
         if (storedValue < maxValue / 2) {
             for (let _ = 0; _ < storedValue; ++_)
-                this.elem.dispatchEvent(new MouseEvent('click')); //Simulate click
+                this.increase();
         }
         else {
             for (let _ = maxValue; _ >= storedValue; --_)
-                this.elem.dispatchEvent(new MouseEvent('contextmenu')); //Simulate right click
+                this.decrease();
         }
         this.initialized = true;
     }
@@ -156,7 +164,8 @@ class TrackerItem extends Storable {
     displayParentSubmenu(func) {
         let parentElement = this.elem.parentElement;
         let mainTracker = document.getElementById('mainTracker');
-        if (parentElement.style.visibility === "visible" || parentElement.classList.contains("tdungeon") || window.getComputedStyle(document.getElementById('tracker')).visibility === "hidden") {
+        if (parentElement.style.visibility === "visible" || parentElement.classList.contains("tdungeon") || 
+            window.getComputedStyle(document.getElementById('tracker')).visibility === "hidden") {
             func();
             return;
         }
@@ -194,11 +203,11 @@ class TrackerItem extends Storable {
         else 
             this.displayMainTracker(func);
     }
-    increase() {
-        this.manageParentSubmenu(() => this.elem.click());  
+    mapIncrease() {
+        this.manageParentSubmenu(() => this.increase());  
     }
-    decrease() {
-        this.manageParentSubmenu(() => this.elem.dispatchEvent(new MouseEvent('contextmenu')));
+    mapDecrease() {
+        this.manageParentSubmenu(() => this.decrease());
     }
     itemIsProgressiveInBaseGame() {
         return !randoIsActive() && this.item.constructor === ProgressiveItem; // False if Subclass of ProgressiveItem
@@ -215,7 +224,7 @@ class TrackerItem extends Storable {
             this.manageParentSubmenu(() => this.showHighestObtained());
         }
         else 
-            this.increase();
+            this.mapIncrease();
     }
     unobtainItem(unobtainedItem) {
         if (this.item instanceof OrItem) {
@@ -229,7 +238,7 @@ class TrackerItem extends Storable {
             this.manageParentSubmenu(() => this.showHighestObtained());
         }
         else 
-            this.decrease();
+            this.mapDecrease();
     }
 }
 
