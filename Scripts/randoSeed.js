@@ -83,43 +83,60 @@ const RandoItemMap = new Map([
     ["Forest_Temple_Dungeon_Map", forestMap],
     ["Forest_Temple_Compass", forestCompass],
     ["Forest_Temple_Big_Key", forestBK],
+    ["Diababa_Defeated", diababa],
+
     ["Goron_Mines_Small_Key", minesSK],
     ["Goron_Mines_Dungeon_Map", minesMap],
     ["Goron_Mines_Compass", minesCompass],
     ["Goron_Mines_Key_Shard", minesBK],
+    ["Fyrus_Defeated", fyrus],
+
     ["Lakebed_Temple_Small_Key", lakebedSK],
     ["Lakebed_Temple_Dungeon_Map", lakebedMap],
     ["Lakebed_Temple_Compass", lakebedCompass],
     ["Lakebed_Temple_Big_Key", lakebedBK],
+    ["Morpheel_Defeated", morpheel],
+
     ["Arbiters_Grounds_Small_Key", arbiterSK],
     ["Arbiters_Grounds_Dungeon_Map", arbiterMap],
     ["Arbiters_Grounds_Compass", arbiterCompass],
     ["Arbiters_Grounds_Big_Key", arbiterBK],
+    ["Stallord_Defeated", stallord],
+
     ["Snowpeak_Ruins_Small_Key", snowpeakSK],
     ["Snowpeak_Ruins_Dungeon_Map", snowpeakMap],
     ["Snowpeak_Ruins_Ordon_Pumpkin", pumpkin],
     ["Snowpeak_Ruins_Ordon_Goat_Cheese", cheese],
     ["Snowpeak_Ruins_Compass", snowpeakCompass],
     ["Snowpeak_Ruins_Bedroom_Key", snowpeakBK],
+    ["Blizzeta_Defeated", blizzeta],
+
     ["Temple_of_Time_Small_Key", templeSK],
     ["Temple_of_Time_Dungeon_Map", templeMap],
     ["Temple_of_Time_Compass", templeCompass],
     ["Temple_of_Time_Big_Key", templeBK],
+    ["Armogohma_Defeated", armogohma],
+
     ["City_in_The_Sky_Small_Key", citySK],
     ["City_in_The_Sky_Dungeon_Map", cityMap],
     ["City_in_The_Sky_Compass", cityCompass],
     ["City_in_The_Sky_Big_Key", cityBK],
+    ["Argorok_Defeated", argorok],
+
     ["Palace_of_Twilight_Small_Key", palaceSK],
     ["Palace_of_Twilight_Dungeon_Map", palaceMap],
     ["Palace_of_Twilight_Compass", palaceCompass],
     ["Palace_of_Twilight_Big_Key", palaceBK],
+    ["Zant_Defeated", zant],
+
     ["Hyrule_Castle_Small_Key", castleSK],
     ["Hyrule_Castle_Dungeon_Map", castleMap],
     ["Hyrule_Castle_Compass", castleCompass],
     ["Hyrule_Castle_Big_Key", castleBK],
+    ["Ganondorf_Defeated", ganondorf],
 
     ["North_Faron_Woods_Gate_Key", faronKey],
-    ["Coro_Gate_Key", coroKey],
+    ["Faron_Woods_Coro_Key", coroKey],
     ["Gerudo_Desert_Bulblin_Camp_Key", bulblinKey],
     ["Gate_Keys", gateKey],
 
@@ -221,8 +238,8 @@ function manageFile(file) {
     reader.onload = (e) => {
         try {
             let textResult = e.target.result;
-            let data = JSON.parse(textResult)
-            if (textResult === localStorage.getItem(spoilerLogStorageName)) {
+            let data = JSON.parse(textResult);
+            if (textResult === localStorage.getItem(spoilerLogStorageName)) { // TODO: Compare seed IDs instead
                 dropZoneText.innerHTML = "<b>This seed is already loaded!</b>";
                 setTimeout(() => {
                     dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
@@ -232,8 +249,7 @@ function manageFile(file) {
             resetRandoItems();
             loadSpoilerLog(data);
             localStorage.setItem(spoilerLogStorageName, textResult);
-            Settings.RevealSetJunkFlags.reset();
-            Settings.RevealSpoilerLog.reset();
+            resetSpoilingSettings();
             pushGAEvent('seed_import', {seed_id: data['meta']['seedId']});
         } 
         catch (error) {
@@ -243,6 +259,11 @@ function manageFile(file) {
     }
 
     reader.readAsText(file);
+}
+
+function resetSpoilingSettings() {
+    Settings.RevealSetJunkFlags.reset();
+    Settings.RevealSpoilerLog.reset();
 }
 
 function checkRandoSeed() {
@@ -265,8 +286,7 @@ function unloadSeed() {
     localStorage.removeItem(spoilerLogStorageName);
     seedIsLoaded = false;
     fileInput.value = '';
-    Settings.RevealSetJunkFlags.reset();
-    Settings.RevealSpoilerLog.reset();
+    resetSpoilingSettings();
     reloadMap();
 
     
@@ -316,10 +336,18 @@ function loadSpoilerLog(data, start=false) {
     // Set Flag Items
     for (let [flagName, itemName] of Object.entries(data["itemPlacements"])) {
         let item = getRandoItem(itemName);
+        let skipEntry = false;
         if (item === undefined) {
             console.log(itemName + " is not in RandoItemMap");
-            continue;
+            skipEntry = true;
         }
+        if (!flags.has(flagName)) {
+            console.log(flagName + " is not in Flags");
+            skipEntry = true;
+        }
+        if (skipEntry)
+            continue;
+
         flags.get(flagName).setRandoItem(item);
     }
 
@@ -332,6 +360,8 @@ function loadSpoilerLog(data, start=false) {
     }
 
     dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
+    if (parseFloat(data["meta"]["imageVersion"]) > 1.2) 
+        dropZoneText.innerHTML += "<br><br><b>Warning: The Development Version of the Randomizer is not fully supported and some things may not work as intended.</b>";
     seedIsLoaded = true;
     
     // Update Gamemode
