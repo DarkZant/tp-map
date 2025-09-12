@@ -349,7 +349,7 @@ class Flag extends Storable{
     }
     markerIsShownAsUnobtainable() {
         let markerElement = this.marker.getElement();
-        if (markerElement === undefined)
+        if (markerElement === undefined || markerElement === null)
             return true;
         return markerElement.classList.contains('unobtainable');
     }
