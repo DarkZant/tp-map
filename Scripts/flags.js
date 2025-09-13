@@ -2750,7 +2750,7 @@ const flags = new Map([
         baseDesc: 'After defeating the Aeralfos, clawshot the target above the chest to reach it.'
     })],
     ["City in The Sky East Wing Lower Level Chest", new Flag(chest.with(cityCompass), [-4641, 4857], {
-        baseReqs: [doubleClawshotReq, spinner, city1SKReq],
+        baseReqs: [doubleClawshotReq, spinnerReq, city1SKReq],
         baseDesc: 'From the east entrance, follow the falling clawshot target path to reach the chest.'
     })],
     ["City in The Sky West Wing Baba Balcony Chest", new Flag(smallChest.with(arrows, 20), [-4404, 2998], {
