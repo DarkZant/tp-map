@@ -2263,7 +2263,7 @@ const flags = new Map([
     })],
     ["Lakebed Temple Ooccoo", new Flag(ooccooPot, [-4490, 4552], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]],
-        baseReqs: 'Pick up or break the pot where Ooccoo is hiding.'
+        baseDesc: 'Pick up or break the pot where Ooccoo is hiding.'
     })],
     ["Lakebed Temple Main Room Lock", new Flag(lock, [-4372, 4666], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq], lakebed1SKReq],
