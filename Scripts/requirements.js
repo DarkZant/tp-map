@@ -266,6 +266,7 @@ function flagReqExists(flagName) {
     return FlagRequirements.has(flagName);
 }
 
+let tileWormReq = [boomerangReq, ironBootsReq];
 let groundsFirstRoomReq = [clawshotReq, shadowCrystalReq];
 let goronMinesFirstRoomReq = [ironBootsReq, [shadowCrystalReq, woodenSwordReq, ballAndChainReq, bombBagReq]] // TODO Test spinner on wooden barriers
 let skullKidReq = [openMapReq, bowReq, new AndRequirements([ballAndChainReq, boomerangReq, bombBagReq])];

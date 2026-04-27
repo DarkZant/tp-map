@@ -4,6 +4,7 @@ generateImageMap.js
 renameImages.js
 
 # No longer useful
-# Dungeons/*/Name.png
-# Dungeons/*F.png
-# Dungeons/B*.png
+Dungeons/*/Name.png
+Dungeons/*F.png
+Dungeons/B*.png
+oldMap.js

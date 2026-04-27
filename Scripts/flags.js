@@ -2746,7 +2746,7 @@ const flags = new Map([
     })],
     // City in the Sky
     ["City in The Sky Aeralfos Chest", new Flag(chest.with(clawshots.getItemByIndex(1)), [-4586, 5765], {
-        baseReqs: [clawshotReq, spinnerReq, ironBootsReq, city1SKReq],
+        baseReqs: [clawshotReq, spinnerReq, ironBootsReq, city1SKReq, tileWormReq],
         baseDesc: 'After defeating the Aeralfos, clawshot the target above the chest to reach it.'
     })],
     ["City in The Sky East Wing Lower Level Chest", new Flag(chest.with(cityCompass), [-4641, 4857], {
@@ -2801,11 +2801,11 @@ const flags = new Map([
         baseDesc: 'Defeat the Aeralfos to obtain an Orange Rupee.'
     })],
     ["City in The Sky East Wing After Dinalfos Alcove Chest", new Flag(smallChest.with(Rupees.Red), [-4916, 5456], {
-        baseReqs: [city1SKReq, clawshotReq, spinnerReq, boomerangReq],
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq, tileWormReq],
         baseDesc: 'Open the gate by clawshotting the switch near the entrance of the room, then use an Oocca and a draft to reach the chest.'
     })],
     ["City in The Sky East Wing After Dinalfos Ledge Chest", new Flag(chest.with(Rupees.Purple), [-4902, 5081], {
-        baseReqs: [city1SKReq, clawshotReq, spinnerReq, boomerangReq],
+        baseReqs: [city1SKReq, clawshotReq, spinnerReq, tileWormReq],
         baseDesc: 'From the entrance of the room, fly through drafts with an Oocca to reach the chest.'
     })],
     ["City in The Sky West Garden Lone Island Chest", new Flag(chest.with(Rupees.Purple), [-4916, 2736], {
@@ -2924,11 +2924,15 @@ const flags = new Map([
     })],
     ["Palace of Twilight East Wing First Room West Alcove", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
         baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
-        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.'
+        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.',
+        randoReqs: [lightMasterSwordReq],
+        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Room East Alcove", new Flag(chest.with(heartPiece), [-5420, 4902], {
         baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
-        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.'
+        baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.',
+        randoReqs: [lightMasterSwordReq],
+        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the east alcove until it brings you to the chest.'
     })],
     ["Palace of Twilight East Wing First Lock", new Flag(lock, [-5209, 4773], {
         baseReqs: [clawshotReq, palace1SKReq],
