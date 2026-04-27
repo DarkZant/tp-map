@@ -236,26 +236,26 @@ function manageFile(file) {
     let reader = new FileReader();
 
     reader.onload = (e) => {
+        let textResult = e.target.result;
+        let data = JSON.parse(textResult);
+        if (textResult === localStorage.getItem(spoilerLogStorageName)) { // TODO: Compare seed IDs instead
+            dropZoneText.innerHTML = "<b>This seed is already loaded!</b>";
+            setTimeout(() => {
+                dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
+            }, 2500)
+            return;
+        }
+        resetRandoItems();
         try {
-            let textResult = e.target.result;
-            let data = JSON.parse(textResult);
-            if (textResult === localStorage.getItem(spoilerLogStorageName)) { // TODO: Compare seed IDs instead
-                dropZoneText.innerHTML = "<b>This seed is already loaded!</b>";
-                setTimeout(() => {
-                    dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
-                }, 2500)
-                return;
-            }
-            resetRandoItems();
             loadSpoilerLog(data);
             localStorage.setItem(spoilerLogStorageName, textResult);
             resetSpoilingSettings();
-            pushGAEvent('seed_import', {seed_id: data['meta']['seedId']});
         } 
         catch (error) {
             displayInvalidFile(file.name)
             console.log(error);
         }
+        pushGAEvent('seed_import', {seed_id: data['meta']['seedId']});
     }
 
     reader.readAsText(file);
@@ -320,8 +320,12 @@ function loadSpoilerLog(data, start=false) {
     for (let [settingName, setting] of RandoSettingsMap.entries()) {
         setting.set(settings[settingName]);
     }
-    addRandoRequirements(Dungeons.Castle, HyruleCastleRandoReqs.get(settings["castleRequirements"]));
-    addRandoRequirements(Dungeons.Palace, PalaceOfTwilightRandoReqs.get(settings["palaceRequirements"]));
+    let castleReqs = HyruleCastleRandoReqs.get(settings["castleRequirements"]);
+    if (castleReqs !== undefined)
+        addRandoRequirements(Dungeons.Castle, castleReqs);
+    let palaceReqs = PalaceOfTwilightRandoReqs.get(settings["palaceRequirements"]);
+    if (palaceReqs !== undefined)
+        addRandoRequirements(Dungeons.Palace, palaceReqs);
 
     // Display Required Dungeons
     for (let requiredElem of document.querySelectorAll(".tdungeon > span"))
@@ -353,15 +357,24 @@ function loadSpoilerLog(data, start=false) {
 
     // Set Hints
     for (let [hintName, hintDescriptions] of Object.entries(data["hints"])) {
+        if (!flags.has(underscoreToSpace(hintName))) {
+            console.log(hintName + " (hint) is not in Flags");
+            continue;
+        }
         let randoText = "";
         for (let description of hintDescriptions)
             randoText += description["text"].replace(/[{}]/g, '') + "<br><br>";
-        flags.get(underscoreToSpace(hintName)).setRandoDescription(randoText);
+        hintFlag = flags.get(underscoreToSpace(hintName));
+        hintFlag.setRandoDescription(randoText);
     }
 
     dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
-    if (parseFloat(data["meta"]["imageVersion"]) > 1.2) 
+    let seedVersion = parseFloat(data["meta"]["imageVersion"]);
+    if (seedVersion > 1.3) 
         dropZoneText.innerHTML += "<br><br><b>Warning: The Development Version of the Randomizer is not fully supported and some things may not work as intended.</b>";
+    else if (seedVersion == 1.3)
+        dropZoneText.innerHTML += "<br><br><b>Warning: The tracker is currently being updated to support the new features added in version 1.3 of the Randomizer, so some things may not work as intended.</b>";
+
     seedIsLoaded = true;
     
     // Update Gamemode
