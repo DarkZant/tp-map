@@ -1080,8 +1080,13 @@ class Province {
         this.glitchedReqs = glitchedReqs;
         let flagContents = [];
         for (let c of contents) {
-            if(typeof c === 'string')
-                flagContents.push(flags.get(c));
+            if(typeof c === 'string') {
+                let flag = flags.get(c);
+                if (flag)
+                    flagContents.push(flags.get(c));
+                else
+                    console.error('Flag ' + c + ' not found in flags for province ' + name);
+            }
             else 
                 flagContents.push(c);
         }
@@ -1362,7 +1367,7 @@ const Dungeons = Object.freeze({
         randoReqs: [[lanternReq, shadowCrystalReq, new AndRequirements([prologueNotSkippedReq, boulderReq])]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
     }),
     
-    Mines: new Dungeon([-3660, 8193], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
+    Mines: new Dungeon([-3643, 8137], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
         [   // 1F
             // Entrance Room
             "Goron Mines Entrance Chest",
@@ -1615,7 +1620,7 @@ const Dungeons = Object.freeze({
             "Temple of Time Poe Above Scales",
             "Temple of Time Big Key Chest",
             "Temple of Time Floor Switch Puzzle Room Upper Chest",
-            "Temple of Time Gilloutine Chest",
+            "Temple of Time Guillotine Chest",
         ], [ // 8F
             "Temple of Time Chest Before Darknut",
             "Temple of Time Darknut Lock",
@@ -1692,8 +1697,8 @@ const Dungeons = Object.freeze({
             "Palace of Twilight West Wing Second Lock",
             "Palace of Twilight East Wing First Room Zant Head Chest",
             "Palace of Twilight East Wing First Room North Small Chest",
-            "Palace of Twilight East Wing First Room West Alcove",
-            "Palace of Twilight East Wing First Room East Alcove",
+            "Palace of Twilight East Wing First Room West Alcove Chest",
+            "Palace of Twilight East Wing First Room East Alcove Chest",
             "Palace of Twilight East Wing First Lock",
             "Palace of Twilight East Wing Second Room Southwest Chest",
             "Palace of Twilight East Wing Second Room Northwest Chest",
@@ -1807,8 +1812,23 @@ const Provinces = Object.freeze({
             'Uli Cradle Delivery',
             "Ordon Spring Golden Wolf",
             "Herding Goats Reward",
-            "Rusl's House Orange Rupee",
-            "Jaggle House's Purple Rupee",
+            "Ordon Hidden Rusl House Rupee",
+            "Ordon Shield House Ledge Grass Rupee",
+            "Ordon Rupee In Grass By Bo",
+            "Ordon Rupee In River 1",
+            "Ordon Rupee In River 2",
+            "Ordon Rupee Under Bridge",
+            "Ordon Rupee Under Tall Tree 1",
+            "Ordon Rupee Under Tall Tree 2",
+            "Ordon Tree Long Branch Rupee",
+            "Ordon Tree Short Branch Rupee",
+            "Ordon Bo Window Rupee 1",
+            "Ordon Bo Window Rupee 2",
+            "Ordon Bo Roof Rupee",
+            "Ordon Bo Cliff Rupee",
+            "Ordon Rusl House Roof Rupee 1",
+            "Ordon Rusl House Roof Rupee 2",
+            "Ordon Spring Portal",
             "Ordon Sign",
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
@@ -1824,7 +1844,7 @@ const Provinces = Object.freeze({
             new SimpleSubmap([-9037, 5015], doorIconImage, "Jaggle's House", [
                 "Ordon Shield"
             ]),
-            new SimpleFlooredSubmap([-9171, 4953], doorIconImage, "Bo's House", [
+            new SimpleFlooredSubmap([-9178, 4970], doorIconImage, "Bo's House", [
                 ["Wrestling With Bo"],
                 []
             ]),
@@ -1850,6 +1870,7 @@ const Provinces = Object.freeze({
             "Faron Mist Cave Lantern Chest",
             "North Faron Woods Deku Baba Chest",
             "Coro Bottle",
+            'Faron Twilight Cleared',
             "Faron Woods Golden Wolf",
             "Faron Mist Stump Chest",
             "Faron Mist North Chest",
@@ -1870,11 +1891,18 @@ const Provinces = Object.freeze({
             "Sacred Grove Master Sword Poe",
             "Faron Woods Owl Statue Sky Character",
             "Faron Woods Owl Statue Chest",
-            "Faron Owl Statue Rupee Boulder",
+            "Faron Owl Statue Boulder Rupee",
+            "Faron Woods Coro Boulder Rupee 1",
+            "Faron Woods Coro Boulder Rupee 2",
+            "Faron Woods Coro Boulder Rupee 3",
+            "Faron Woods Coro Boulder Rupee 4",
             "North Faron Woods Howling Stone",
             "Coro Lock",
             "Faron Mist Lock",
             "Faron Field Gate Lock",
+            "North Faron Portal",
+            "South Faron Portal",
+            "Sacred Grove Portal",
             "Faron Field Sign",
             "Faron Woods Sign",
             "Sacred Grove Sign",
@@ -1913,13 +1941,15 @@ const Provinces = Object.freeze({
 
     Eldin: new Province("Eldin", [-4096, 7904], {
             baseReqs: [diababaReq],
-            randoReqs: [leaveFaronWoodsReq]
+            randoReqs: [],
+            // randoReqs: [leaveFaronWoodsReq]
         }, [
             [-5952, 6280], [-5936, 7020], [-5904, 7676], [-6044, 8248], [-5952, 8836], [-5612, 9452], [-5212, 9544], [-4584, 9492], 
             [-3932, 9572], [-3340, 9472], [-2956, 9196], [-2460, 9040], [-1972, 8608], [-1404, 8006], [-1228, 7352], [-2164, 7080], 
             [-2772, 7060], [-2989, 7110], [-3281, 6985], [-3432, 6760], [-3580, 6472], [-3748, 6372], [-3932, 6324], [-4276, 6340], 
             [-4419, 6316], [-4680, 6260], [-5060, 5972], [-5332, 6004],
         ], [
+            'Eldin Twilight Cleared',
             "Kakariko Gorge Youths Scent",
             "Kakariko Graveyard Lantern Chest",
             "Kakariko Graveyard Male Ant",
@@ -1954,16 +1984,28 @@ const Provinces = Object.freeze({
             "Bridge of Eldin Owl Statue Chest",
             "Kakariko Gorge Owl Statue Sky Character",
             "Kakariko Gorge Owl Statue Chest",
-            "Kakariko Gorge Corner Rupee Boulder",
-            "Kakariko Gorge Owl Statue Rupee Boulder",
-            "Eldin Spring Underwater Rupee Boulder",
+            "Kakariko Gorge Spire Boulder Rupee",
+            "Kakariko Gorge Owl Statue Boulder Rupee",
+            "Eldin Spring Underwater Boulder Rupee",
             "Death Mountain Trail Red Rupees",
             "Kakariko Village Bell Rupee",
-            "Kakariko Graveyard Underwater Rupee Boulder",
-            "Bridge of Eldin Rupee Boulder",
+            "Kakariko Graveyard Underwater Boulder Rupee",
+            "Bridge of Eldin Boulder Rupee",
             "Death Mountain Howling Stone",
             "Hidden Village Howling Stone",
             "Kakariko Gorge Gate Lock",
+            "Kakariko Village Spring Shortcut Box Rupee 1",
+            "Kakariko Village Spring Shortcut Box Rupee 2",
+            "Kakariko Village Ant House Ledge Box Rupee",
+            "Kakariko Village Hot Spring Ledge Box Rupee",
+            "Death Mountain Volcano Pipe Ledge Rock Rupee",
+            "Death Mountain Volcano Ledge Rupee 1",
+            "Death Mountain Volcano Ledge Rupee 2",
+            "Death Mountain Volcano Ledge Rupee 3",
+            "Death Mountain Portal",
+            "Kakariko Gorge Portal",
+            "Kakariko Village Portal",
+            "Bridge of Eldin Portal",
             "Death Mountain Sign",
             "Eldin Field Sign",
             "Hidden Village Sign",
@@ -2049,7 +2091,8 @@ const Provinces = Object.freeze({
     ]),
     Desert: new Province("Desert", [-5440, 2224], {
             baseReqs: [aurusMemoReq], 
-            randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq]
+            randoReqs: [],
+            // randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq]
         }, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
             [-3804, 2924], [-3840, 3154], [-4984, 3264], [-5116, 3148], [-5280, 3184], [-5472, 3256], [-5640, 3424], [-5953, 3742],
@@ -2083,6 +2126,8 @@ const Provinces = Object.freeze({
             "Outside Bulblin Camp Poe",
             "Gerudo Desert Owl Statue Sky Character",
             "Gerudo Desert Owl Statue Chest",
+            "Gerudo Desert Portal",
+            "Mirror Chamber Portal",
             "Bulblin Camp Sign",
             "Gerudo Desert Sign",
             newGrotto(4, [-6060, 2588], "Gerudo Desert Skulltula Grotto", [
@@ -2168,7 +2213,8 @@ const Provinces = Object.freeze({
 
     Peak: new Province('Peak', [-1744, 3488], {
         baseReqs: [stallordReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
+        randoReqs: [],
+        // randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
     }, [
         [-712, 5344], [-1132, 5392], [-1296, 5360], [-1548, 5152], [-1690, 4891], [-1892, 4804], [-2076, 4624], [-2564, 4404], 
             [-2704, 4220], [-3036, 4080], [-3624, 3880], [-3812, 3184], [-3636, 2272], [-3436, 1720], [-2668, 1568], [-2092, 1804], 
@@ -2184,6 +2230,26 @@ const Provinces = Object.freeze({
         "Snowpeak Cave Ice Lantern Chest",
         "Snowpeak Howling Stone",
         "Snowpeak Mountain Sign",
+        "Snowboarding Top Right Rupee",
+        "Snowboarding Top Left Rupee",
+        "Snowboarding Bridge Ledge Upper Rupee",
+        "Snowboarding Bridge Ledge Middle Rupee",
+        "Snowboarding Bridge Ledge Bottom Rupee",
+        "Snowboarding Snowy Tree Top Rupee 1",
+        "Snowboarding Snowy Tree Top Rupee 2",
+        "Snowboarding Snowy Tree Top Rupee 3",
+        "Snowboarding Shortcut Rupee 1",
+        "Snowboarding Shortcut Rupee 2",
+        "Snowboarding Shortcut Rupee 3",
+        "Snowboarding Shortcut Rupee 4",
+        "Snowboarding Shortcut Rupee 5",
+        "Snowboarding Shortcut Rupee 6",
+        "Snowboarding Shortcut Rupee 7",
+        "Snowboarding Shortcut Rupee 8",
+        "Snowboarding Shortcut Rupee 9",
+        "Snowboarding Shortcut Rupee 10",
+        "Snowboarding Shortcut Rupee 11",
+        "Snowpeak Portal",
         newGrotto(4, [-405, 3690], "Snowpeak Freezard Grotto", [
             "Snowpeak Freezard Grotto Chest"
         ]),
@@ -2193,7 +2259,8 @@ const Provinces = Object.freeze({
     ]),
     Lanayru: new Province('Lanayru', [-2192, 5984], {
         baseReqs: [fyrusReq, bombBagReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
+        randoReqs: [],
+        // randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
     }, [[
         [-5400, 5584], [-5360, 6000], [-5056, 5968], [-4640, 6248], [-4312, 6336], [-3696, 6344], [-3528, 6472], [-3424, 6728], 
         [-3280, 6968], [-2992, 7104], [-2760, 7048], [-2096, 7072], [-1248, 7328], [-800, 7216], [-584, 6768], [-480, 6368], 
@@ -2230,6 +2297,7 @@ const Provinces = Object.freeze({
         "Outside South Castle Town Tightrope Chest",
         "Outside South Castle Town Fountain Chest",
         "Outside South Castle Town Poe",
+        'Castle Town Goron Shop Arrow Refill',
         "Lake Hylia Bridge Vines Chest",
         "Isle of Riches Poe",
         "Flight By Fowl Fifth Platform Chest",
@@ -2267,27 +2335,44 @@ const Provinces = Object.freeze({
         "Outside South Castle Town Double Clawshot Chasm Chest",
         "Upper Zoras River Howling Stone",
         "Lake Hylia Howling Stone",
-        "Lake Hylia Bridge South Rupee Boulder",
-        "Lake Hylia Bridge North Rupee Boulder",
-        "West Hyrule Field East Rupee Boulder",
-        "West Hyrule Field North Rupee Boulder",
-        "Lanayru Field West Corner Rupee Boulder",
-        "Zoras Domain Tunnel East Rupee Boulder",
-        "Zoras Domain Tunnel West Rupee Boulder", 
-        "Zoras Domain Underwater North Rupee Boulder",
-        "Zoras Domain Underwater South Rupee Boulder",
-        "Zoras Domain Throne Room Rupee Boulder",
-        "Upper Zoras River Trench Rupee Boulder",
-        "Upper Zoras River Gate Rupee Boulder",
-        "Upper Zoras River Tunnel Rupee Boulder",
-        "Lanayru Field North Underwater Rupee Boulder",
-        "Lanayru Field South Underwater Rupee Boulder",
-        "Lanayru Field Spinner Track Rupee Boulder",
-        "Lake Hylia Bridge Spinner Track Rupee Boulder",
-        "Outside South Castle Town Rupee Boulder",
-        "Upper Zoras River Above Water Rupee Boulder",
-        "Lake Hylia West Underwater Rupee Boulder",
-        "Lake Hylia East Underwater Rupee Boulder",
+        "Lake Hylia Bridge Faron Boulder Rupee",
+        "Lake Hylia Bridge Owl Statue Boulder Rupee",
+        "West Hyrule Field Southern Boulder Rupee",
+        "West Hyrule Field Northern Boulder Rupee",
+        "Lanayru Field Tree Boulder Rupee",
+        "Zoras Domain Shortcut Upper Boulder Rupee",
+        "Zoras Domain Shortcut Lower Boulder Rupee",
+        "Zoras Domain North Underwater Boulder Rupee",
+        "Zoras Domain Central Underwater Boulder Rupee",
+        "Zoras Domain Waterfall Ledge Rupee",
+        "Zoras Domain Behind Waterfall Rupee",
+        "Zoras Domain Vine Ledge Rupee",
+        "Zoras Domain Shortcut Ledge Rupee",
+        "Zoras Domain Top Ledge Rupee",
+        "Zoras Domain Throne Room Boulder Rupee",
+        "Zoras Domain Throne West Gate Underwater Rupee",
+        "Zoras Domain Throne East Gate Underwater Rupee",
+        "Zoras Domain Throne West Underwater Rupee",
+        "Zoras Domain Throne East Underwater Rupee",
+        "Zoras Domain Throne Northwest Underwater Rupee",
+        "Zoras Domain Throne South Underwater Rupee",
+        "Upper Zoras River East Underwater Boulder Rupee",
+        "Upper Zoras River Central Underwater Boulder Rupee",
+        "Upper Zoras River West Underwater Boulder Rupee",
+        "Lanayru Field North Underwater Boulder Rupee",
+        "Lanayru Field South Underwater Boulder Rupee",
+        "Lanayru Field North Spinner Track Boulder Rupee",
+        "Lanayru Field South Spinner Track Boulder Rupee",
+        "Outside South Castle Town Boulder Rupee",
+        "Upper Zoras River Ledge Boulder Rupee",
+        "Lake Hylia Left Underwater Boulder Rupee",
+        "Lake Hylia Right Underwater Boulder Rupee",
+        "Lake Hylia Left Underwater Pillar Rupee",
+        "Lake Hylia Right Underwater Pillar Rupee",
+        "Lake Hylia Portal",
+        "Castle Town Portal",
+        "Upper Zoras River Portal",
+        "Zoras Domain Portal",
         "Agithas Castle Sign",
         "Beside Castle Town Sign",
         "Castle Town Sign",
@@ -2355,8 +2440,13 @@ const Provinces = Object.freeze({
             "Doctors Office Medicine Scent"
         ]),
         new SimpleFlooredSubmap([-4090, 4656], doorIconImage, 'Castle Goron Merchants', [
-            [],
-            []
+            [
+                "Castle Town Goron Shop Red Potion",
+                'Castle Town Goron Shop Hylian Shield',
+            ],
+            [
+                'Castle Town Goron Shop Lantern Oil'
+            ]
         ]),
         new SimpleSubmap([-4147, 4643], doorIconImage, "Fanadi's Palace", [
 
@@ -2392,6 +2482,7 @@ const Provinces = Object.freeze({
             Bottle.BeeLarva.new([-4238, 4905])
         ]),
         new SimpleSubmap([-5259, 3502], entranceIconImage, 'Lanayru Spring', [
+            'Lanayru Twilight Cleared',
             "Lanayru Spring Underwater Left Chest",
             "Lanayru Spring Underwater Right Chest",
             "Lanayru Spring Back Room Left Chest",
@@ -2399,8 +2490,8 @@ const Provinces = Object.freeze({
             "Lanayru Spring Back Room Lantern Chest",
             "Lanayru Spring West Double Clawshot Chest",
             "Lanayru Spring East Double Clawshot Chest",
-            "Lanayru Spring Underwater North Rupee Boulder",
-            "Lanayru Spring Underwater South Rupee Boulder",
+            "Lanayru Spring Lower Underwater Boulder Rupee",
+            "Lanayru Spring Upper Underwater Boulder Rupee",
             "Lanayru Spring Sign"
         ]),
         new SimpleSubmap([-5546, 3134], entranceIconImage, 'Lake Lantern Cave', [

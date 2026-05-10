@@ -297,7 +297,11 @@ const Settings = Object.freeze({
     Minigames_Visibility: new CategoryVisibilitySetting('Minigames_Visibility', Categories.Minigames),
     // New Settings
     Base_Quest_Visibility: new CategoryVisibilitySetting('Base_Quest_Visibility', Categories.Quest, 1),
-    Rando_Quest_Visibility: new CategoryVisibilitySetting('Rando_Quest_Visibility', Categories.Quest, 1)
+    Rando_Quest_Visibility: new CategoryVisibilitySetting('Rando_Quest_Visibility', Categories.Quest, 1),
+    Rando_Freestanding_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Freestanding_Rupees_Visibility', Categories.FreestandingRupees, 1),
+    Rando_Hidden_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Hidden_Rupees_Visibility', Categories.HiddenRupees, 1),
+    Base_Portal_Visibility: new CategoryVisibilitySetting('Base_Portal_Visibility', Categories.Portals, 1),
+    Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
 }); // Always add settings at the end to preserve storage IDs
 
 const settingsSU = new StorageUnit('settings', Object.values(Settings));
@@ -321,6 +325,7 @@ let baseVisibilityParent = new ParentSetting('Base_Visibility_Parent', [
     Settings.Base_Bosses_Visibility,
     Settings.Base_Ooccoo_Visibility,
     Settings.Base_Locks_Visibility,
+    Settings.Base_Portal_Visibility,
 ]);
 
 let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Parent', [ 
@@ -330,7 +335,9 @@ let randoCheckVisibilityParent = new ParentSetting('Rando_Check_Visibility_Paren
     Settings.Rando_Bugs_Visibility,
     Settings.Rando_Skills_Visibility,
     Settings.Rando_Gifts_Visibility,
-    Settings.Rando_Shop_Visibility
+    Settings.Rando_Shop_Visibility,
+    Settings.Rando_Hidden_Rupees_Visibility,
+    Settings.Rando_Freestanding_Rupees_Visibility,
 ]);
 
 let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibility_Parent', [ 
@@ -340,6 +347,7 @@ let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibilit
     Settings.Rando_Rupees_Visibility,
     Settings.Rando_Locks_Visibility,
     Settings.Rando_Ooccoo_Visibility,
+    Settings.Rando_Portal_Visibility,
     // Settings.Rando_Non_Check_Visibility
 ]);
 

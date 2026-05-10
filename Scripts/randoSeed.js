@@ -140,6 +140,22 @@ const RandoItemMap = new Map([
     ["Gerudo_Desert_Bulblin_Camp_Key", bulblinKey],
     ["Gate_Keys", gateKey],
 
+    ["Bridge_of_Eldin_Portal", Portals.BridgeOfEldin],
+    ["Castle_Town_Portal", Portals.CastleTown],
+    ["Death_Mountain_Portal", Portals.DeathMountain],
+    ["Gerudo_Desert_Portal", Portals.GerudoDesert],
+    ["Kakariko_Gorge_Portal", Portals.KakarikoGorge],
+    ["Kakariko_Village_Portal", Portals.KakarikoVillage],
+    ["Lake_Hylia_Portal", Portals.LakeHylia],
+    ["Mirror_Chamber_Portal", Portals.MirrorChamber],
+    ["North_Faron_Portal", Portals.NorthFaron],
+    ["Ordon_Spring_Portal", Portals.OrdonSpring],
+    ["Sacred_Grove_Portal", Portals.SacredGrove],
+    ["Snowpeak_Portal", Portals.Snowpeak],
+    ["South_Faron_Portal", Portals.SouthFaron],
+    ["Upper_Zoras_River_Portal", Portals.UpperZorasRiver],
+    ["Zoras_Domain_Portal", Portals.ZorasDomain],
+
     ["Foolish_Item", randoFoolishItem],
 
 ]);
@@ -357,6 +373,8 @@ function loadSpoilerLog(data, start=false) {
 
     // Set Hints
     for (let [hintName, hintDescriptions] of Object.entries(data["hints"])) {
+        if (hintName === "Midna")
+            continue; 
         if (!flags.has(underscoreToSpace(hintName))) {
             console.log(hintName + " (hint) is not in Flags");
             continue;
@@ -364,7 +382,7 @@ function loadSpoilerLog(data, start=false) {
         let randoText = "";
         for (let description of hintDescriptions)
             randoText += description["text"].replace(/[{}]/g, '') + "<br><br>";
-        hintFlag = flags.get(underscoreToSpace(hintName));
+        let hintFlag = flags.get(underscoreToSpace(hintName));
         hintFlag.setRandoDescription(randoText);
     }
 

@@ -33,7 +33,7 @@ class Flag extends Storable{
         this.initializeMarker();
     }
     getImage() {
-        return this.item.image;
+        return this.item.getImage();
     }
     getCurrentItem() {
         if (this.hasRandoItem() && randoIsActive() && this.randoItemIsRevealed()) {
@@ -80,7 +80,7 @@ class Flag extends Storable{
         return this.randoItem !== undefined;
     }
     randoItemIsRevealed() {
-        return randoIsActive() && Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk())
+        return randoIsActive() && (Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk()))
     }
     set() {
         if (this.isSet())
@@ -641,6 +641,10 @@ function getAgithaRewardFlag(index) {
     return agithaRewards.flags[pairIndex].flags[genderIndex];
 }
 
+let faronTwilightCleared = getFlagReq("Faron Twilight Cleared");
+let eldinTwilightCleared = getFlagReq("Eldin Twilight Cleared");
+let lanayruTwilightCleared = getFlagReq("Lanayru Twilight Cleared");
+
 const flags = new Map([
     // Ordon
     ['Uli Cradle Delivery', new Flag(fishingRods.getItemByIndex(0), [-9094, 4809], {
@@ -659,13 +663,15 @@ const flags = new Map([
         randoReqs: [],
         randoDesc: 'On Epona, talk to Fado and complete the Goat Hoarding minigame in under 2 minutes to receive the reward.'
     })],
-    ["Rusl's House Orange Rupee", new Flag(Rupees.Orange, [-9058, 4788], {
+    ["Ordon Hidden Rusl House Rupee", new Flag(Rupees.Orange, [-9058, 4788], {
         baseReqs: [[clawshotReq, boomerangReq]],
-        baseDesc: "This orange rupee is hiding behind Rusl's house, use the boomerang or clawshot through the vines to obtain it."
+        baseDesc: "This orange rupee is hiding behind Rusl's house, use the boomerang or clawshot through the vines to obtain it.",
+        randoCategory: Categories.FreestandingRupees,
     })],  
-    ["Jaggle House's Purple Rupee", new Flag(Rupees.Purple, [-9006, 4999], { 
-        baseReqs: [[clawshotReq, boomerangReq]],
-        baseDesc: 'This purple rupee is hidden in the tall grass on the little platform to the left of the windmill.'
+    ["Ordon Shield House Ledge Grass Rupee", new Flag(Rupees.Purple, [-9006, 4999], { 
+        baseDesc: 'Hidden in the tall grass on the little platform to the left of the windmill. You can reach it by calling the hawk to get a Cucco and then flying to the platform.',
+        randoCategory: Categories.FreestandingRupees,
+        randoReqs: [nightReq],
     })],
     ["Links Basement Chest", new Flag(chest.with(Rupees.Purple), [-8615, 5082], {
         baseReqs: [lanternReq],
@@ -714,7 +720,8 @@ const flags = new Map([
     // Faron
     ["Coro Gate Key", new Flag(coroKey, [-7385, 4898], {
         baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave.",
-        randoCategory: Categories.NonChecks,
+        randoCategory: Categories.Gifts,
+        randoDesc: "Talk to Coro for a second time to obtain the item."
     })],
     ["Coro Lock", new Flag(faronBulblinLock, [-7496, 4787], {
         baseReqs: [coroKeyReq],
@@ -726,8 +733,8 @@ const flags = new Map([
     })],
     ["Coro Lantern", new Flag(lantern, [-7405, 4910], {
         baseDesc: 'While chasing Talo and the monkey, talk to Coro to obtain the lantern.',
-        randoCategory: Categories.NonChecks,
-        randoDesc: 'Talk to Coro to obtain the lantern. Currently not a Randomizer check.'
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Talk to Coro for the first time to obtain the item.'
     })],
     ["Faron Mist Cave Open Chest", new Flag(smallChest.with(faronKey), [-7023, 4805], {
         baseDesc: 'Walk into the cave and open the small chest to obtain the key to the Faron Woods gate.',
@@ -746,6 +753,7 @@ const flags = new Map([
         baseReqs: [Requirement.fromCountItem(rupees, 100)],
         baseDesc: 'After clearing the Faron twilight, talk to Coro and he will offer you the oil bottle for 100 rupees.',
         randoCategory: Categories.Gifts,
+        randoDesc: 'Talk to Coro for a third time to buy the item for 100 rupees.'
     })],
     ["Faron Woods Golden Wolf", new Flag(goldenWolf, [-7104, 4184], {
         baseDesc: 'Meet the Golden Wolf after clearing the Faron Twilight to learn the Ending Blow.',
@@ -787,7 +795,7 @@ const flags = new Map([
         randoDesc: 'The item is on an elevated tree trunk, use the boomerang or the clawshot to grab it.'
     })],
     ["Faron Mist Poe", new Flag(poeSoul, [-7184, 4515], {
-        baseReqs: [shadowCrystalReq],
+        baseReqs: [faronTwilightCleared, shadowCrystalReq],
         baseDesc: 'Use Midna jumps to reach the tree base where the poe is.'
     })], 
     ["Sacred Grove Pedestal Master Sword", new Flag(swords.getItemByIndex(2), [-6801, 3677], {
@@ -814,7 +822,7 @@ const flags = new Map([
         randoReqs: [leaveFaronWoodsReq, clawshotReq]
     })],
     ["Faron Field Poe", new Flag(nightPoe, [-5953, 4955], {
-        baseReqs: [diababaReq, nightReq, shadowCrystalReq],
+        baseReqs: [diababaReq, nightReq, shadowCrystalReq], // Might Lanayru twilights cleared / MDH
         baseDesc: 'Above the flower patch on the elevated ledge.',
         randoReqs: [leaveFaronWoodsReq, nightReq, shadowCrystalReq]
     })],
@@ -851,9 +859,10 @@ const flags = new Map([
         baseReqs: [domRodReq, boulderReq, shadowCrystalReq],
         baseDesc: 'Put the Owl Statue in the hole next to the rock, then use Midna Jumps to reach the chest on the other side of the loading zone.'
     })],
-    ["Faron Owl Statue Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 17), [-7307, 4866], {
+    ["Faron Owl Statue Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 17), [-7307, 4866], {
         baseReqs: [boulderReq],
-        baseDesc: 'Blocking the way to the Owl Statue. Gives 17 rupees.'
+        baseDesc: 'Blocking the way to the Owl Statue. Gives 17 rupees.',
+        randoCategory: Categories.NonChecks,
     })],
     ["South Faron Cave Chest", new Flag(smallChest.with(Rupees.Yellow), [-7340, 4450], {
         baseDesc: 'Use the lantern to be able to locate the chest more easily.',
@@ -1011,7 +1020,7 @@ const flags = new Map([
         randoReqs: [Requirement.fromCountItem(rupees, 1000)]
     })],
     ["Kakariko Gorge Poe", new Flag(nightPoe, [-5347, 5978], {
-        baseReqs: [shadowCrystalReq, nightReq],
+        baseReqs: [shadowCrystalReq, nightReq], // Might Lanayru twilights cleared / MDH
         baseDesc: "Behind the tree with the crows."
     })],
     ["Gift From Ralis", new Flag(coralEarring, [-5473, 8235], {
@@ -1035,13 +1044,13 @@ const flags = new Map([
         randoDesc: 'Defeat all the Bulblins, then talk to Impaz in front of her house to receive the charm. This check is never randomized.'
     })],
     ["Cats Hide and Seek Minigame", new Flag(heartPiece, [-2165, 6565], {
-        baseReqs: [horseCallReq, shadowCrystalReq, clawshotReq],
+        baseReqs: [armogohmaReq, horseCallReq, shadowCrystalReq, clawshotReq],
         baseDesc: 'Start the Cat Seeking Minigame by talking to the Cucco Leader near the howling stone. ' +
                 "Once you have spoken to all 20 cats, report back to the Cucco Leader to receive the heart piece in front of Impaz' House",
         randoCategory: Categories.Main
     })],
     ["Hidden Village Poe", new Flag(nightPoe, [-2018, 6535], {
-        baseReqs: [horseCallReq, shadowCrystalReq, nightReq],
+        baseReqs: [armogohmaReq, horseCallReq, shadowCrystalReq, nightReq],
         baseDesc: 'On the balcony above the white piece of cloth.'
     })],
     ["Bridge of Eldin Owl Statue Sky Character", new Flag(skybookChar, [-2509, 7359], {
@@ -1060,17 +1069,20 @@ const flags = new Map([
         baseReqs: [domRodReq],
         baseDesc: 'Use the Owl Statue as a platform for the first jump, then take control of it right after to set it up for the second jump. Once done, the chest is around the corner.'
     })],
-    ["Kakariko Gorge Corner Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 21), [-5380, 5510], {
+    ["Kakariko Gorge Spire Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 21), [-5380, 5510], {
         baseReqs: [boulderReq],
-        baseDesc: 'Blow up the rock with a bomb or hit it with the ball and chain to reveal 21 rupees.'
+        baseDesc: 'Blow up the rock with a bomb or hit it with the ball and chain to reveal 21 rupees.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Kakariko Gorge Owl Statue Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 30), [-5074, 5909], {
+    ["Kakariko Gorge Owl Statue Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 30), [-5074, 5909], {
         baseReqs: [boulderReq],
-        baseDesc: 'The rock is in the middle of the field.'
+        baseDesc: 'The rock is in the middle of the field.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Eldin Spring Underwater Rupee Boulder", new Flag(rupeeBoulder.with(Rupees.Purple), [-5840, 7667], {
+    ["Eldin Spring Underwater Boulder Rupee", new Flag(rupeeBoulder.with(Rupees.Purple), [-5840, 7667], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: 'The rock is underwater in front of the chest.'
+        baseDesc: 'The rock is underwater in front of the chest.',
+        randoCategory: Categories.HiddenRupees,
     })],
     ["Death Mountain Trail Red Rupees", new Flag(Rupees.Red, [-4269, 8150], {
         baseReqs: [[clawshotReq, fyrusReq]],
@@ -1078,22 +1090,25 @@ const flags = new Map([
     })],
     ["Kakariko Village Bell Rupee", new Flag(Rupees.Silver, [-5513, 7720], {
         baseReqs: [bombBagReq, bowReq],
-        baseDesc: 'Climb up the sanctuary with Midna jumps or a Cucco, then shoot a bomb arrow at the bell to make the silver rupee drop.'
+        baseDesc: 'Climb up the sanctuary with Midna jumps or a Cucco, then shoot a bomb arrow at the bell to make the silver rupee drop.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Kakariko Graveyard Underwater Rupee Boulder", new Flag(rupeeBoulder.with(Rupees.Red), [-5518, 8237], {
+    ["Kakariko Graveyard Underwater Boulder Rupee", new Flag(rupeeBoulder.with(Rupees.Red), [-5518, 8237], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: 'Underwater, right of the Zora shrine.'
+        baseDesc: 'Underwater, right of the Zora shrine.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Bridge of Eldin Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 40), [-2391, 7503], {
+    ["Bridge of Eldin Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 40), [-2391, 7503], {
         baseReqs: [boulderReq],
-        baseDesc: 'In the open, below the Eldin Lava Cave entrance.'
+        baseDesc: 'In the open, below the Eldin Lava Cave entrance.',
+        randoCategory: Categories.HiddenRupees,
     })],
     ["Kakariko Village Female Ant", new Flag(antF, [-5239, 7705], {
         baseDesc: 'This ♀ Ant is walking around the floor of the house.',
         randoDesc: 'The item is on the floor.'
     })],
     ["Kakariko Inn Chest", new Flag(smallChest.with(Rupees.Red), [-5452, 8068], {
-        baseDesc: 'The chest is hidden under the staircase.'
+        baseDesc: 'The chest is hidden under the staircase.' // Available during the Twilight
     })],
     ["Barnes Bomb Bag", new Flag(bombBag, [-5300, 7755], {
         baseReqs: [fyrusReq, Requirement.fromCountItem(rupees, 120)],
@@ -1131,8 +1146,8 @@ const flags = new Map([
     ["Shad Dominion Rod", new Flag(dominionRods.getItemByIndex(1), [-5390, 7453], {
         baseReqs: [skybookReq],
         baseDesc: 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod.',
-        randoCategory: Categories.NonChecks,
-        randoDesc: 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod. This is not a Randomizer Check.',
+        randoCategory: Categories.Gifts,
+        randoDesc: 'Show the Ancient Sky Book to Shad for him to give you the item',
     })],
     ["Renados Letter", new Flag(renadosLetter, [-5640, 7377], {
         baseReqs: [armogohmaReq],
@@ -1144,7 +1159,6 @@ const flags = new Map([
         baseReqs: [Requirement.fromBoolItem(iliasCharm)],
         baseDesc: 'Show the charm to Ilia for it to be revealed as the horse call and receive it back.',
         randoCategory: Categories.Gifts,
-        randoDesc: 'Show the charm to Ilia for it to be revealed as the horse call and receive it back. This item is never Randomized.'
     })],
     ["Eldin Lantern Cave First Chest", new Flag(smallChest.with(Rupees.Red), [-5530, 5822], {
         baseReqs: [[lanternReq, bombBagReq, ballAndChainReq]],
@@ -1247,7 +1261,7 @@ const flags = new Map([
         baseReqs: [clawshotReq],
         baseDesc: 'Clawshot the peahat to cross the chasm and get to the chest.'
     })],
-    ["Gerudo Desert Poe Above Cave of Ordeals", new Flag(nightPoe, [-6077, 560], {
+    ["Gerudo Desert Poe Above Cave of Ordeals", new Flag(nightPoe, [-6093, 539], {
         baseReqs: [clawshotReq, shadowCrystalReq, nightReq],
         baseDesc: 'Above the Cave of Ordeals entrance.'
     })],
@@ -1416,11 +1430,13 @@ const flags = new Map([
     })],
     // Lanayru
     ["Zoras Domain Chest By Mother and Child Isles", new Flag(smallChest.with(Rupees.Yellow), [-610, 4930], {
-        baseDesc: 'From the water, climb the path to reach the chest.'
+        baseDesc: 'From the water, climb the path to reach the chest.',
+        randoDesc: 'This chest is available during Twilight.'
     })],
     ["Zoras Domain Chest Behind Waterfall", new Flag(smallChest.with(Rupees.Red), [-601, 4967], {
         baseReqs: [shadowCrystalReq],
-        baseDesc: 'Use Midna jumps to follow the path from the west shore of the domain to reach the chest.'
+        baseDesc: 'Use Midna jumps to follow the path from the west shore of the domain to reach the chest.',
+        randoDesc: 'This chest is available during Twilight.'
     })],
     ["Lake Hylia Underwater Chest", new Flag(chest.with(Rupees.Orange), [-5461, 3284], {
         baseReqs: [[ironBootsReq, magicArmorReq]],
@@ -1692,89 +1708,115 @@ const flags = new Map([
         baseReqs: [shadowCrystalReq],
         baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
     })],
-    ["Lake Hylia Bridge South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
+    ["Lake Hylia Bridge Faron Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
         baseReqs: [boulderReq],
-        baseDesc: 'Hidden between two larger stone structures.'
+        baseDesc: 'Hidden between two larger stone structures.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lake Hylia Bridge North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-4333, 3548], {
+    ["Lake Hylia Bridge Owl Statue Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 20), [-4333, 3548], {
         baseReqs: [boulderReq],
-        baseDesc: 'Out in the open, east of the Owl Statue.'
+        baseDesc: 'Out in the open, east of the Owl Statue.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["West Hyrule Field East Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 35), [-3637, 4089], {
+    ["West Hyrule Field Southern Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 35), [-3637, 4089], {
         baseReqs: [boulderReq],
-        baseDesc: 'Out in the open, defeat the Bulblins to make it easier to destroy.'
+        baseDesc: 'Out in the open, defeat the Bulblins to make it easier to destroy.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["West Hyrule Field North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 38), [-3412, 4111], {
+    ["West Hyrule Field Northern Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 38), [-3412, 4111], {
         baseReqs: [boulderReq],
-        baseDesc: 'Hidden in the corner.'
+        baseDesc: 'Hidden in the corner.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lanayru Field West Corner Rupee Boulder", new Flag(rupeeBoulder.with(Rupees.Purple), [-2564, 4084], {
+    ["Lanayru Field Tree Boulder Rupee", new Flag(rupeeBoulder.with(Rupees.Purple), [-2564, 4084], {
         baseReqs: [boulderReq],
-        baseDesc: 'Out in the open in the corner.'
+        baseDesc: 'Out in the open in the corner.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Tunnel East Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 21), [-477, 4725], {
+    ["Zoras Domain Shortcut Upper Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 21), [-477, 4750], {
         baseReqs: [boulderReq],
-        baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.'
+        baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Tunnel West Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 17), [-475, 4702], {
+    ["Zoras Domain Shortcut Lower Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 17), [-475, 4702], {
         baseReqs: [boulderReq],
-        baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.'
+        baseDesc: 'This boulder is in the tunnel from the top of the domain to the balcony.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Underwater North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 60), [-515, 4850], {
+    ["Zoras Domain North Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 60), [-515, 4850], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, under the waterfall."
+        baseDesc: "Underwater, under the waterfall.",
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Underwater South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 37), [-680, 4850], {
+    ["Zoras Domain Central Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 37), [-680, 4850], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-         baseDesc: "Underwater, at the center of the domain."
+         baseDesc: "Underwater, at the center of the domain.",
+         randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Throne Room Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 10), [-123, 4793], {
+    ["Zoras Domain Throne Room Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 10), [-123, 4793], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, east of the throne. The rocks under the boulder are worth lifting as there is a total of 40 rupees under them."
+        baseDesc: "Underwater, east of the throne. The rocks under the boulder are worth lifting as there is a total of 40 rupees under them.",
+        randoCategory: Categories.Rupees,
     })],
-    ["Upper Zoras River Trench Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 31), [-876, 5882], {
+    ["Upper Zoras River Central Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 31), [-876, 5882], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, in the trench."
+        baseDesc: "Underwater, in the trench.",
+        randoCategory: Categories.HiddenRupees,
+        randoReqs: [[new AndRequirements([[ballAndChainReq, bombBagReq]]), new AndRequirements([getFlagReq('Lanayru Twilight Cleared'), bombBagReq, [ironBootsReq, magicArmorReq]])]],
     })],
-    ["Upper Zoras River Gate Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 32), [-1037, 5965], {
+    ["Upper Zoras River East Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 32), [-1037, 5965], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, before the wooden gate."
+        baseDesc: "Underwater, before the wooden gate.",
+        randoCategory: Categories.HiddenRupees,
+        randoReqs: [[new AndRequirements([[ballAndChainReq, bombBagReq]]), new AndRequirements([getFlagReq('Lanayru Twilight Cleared'), bombBagReq, [ironBootsReq, magicArmorReq]])]],
     })],
-    ["Upper Zoras River Tunnel Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 43), [-963, 5806], {
+    ["Upper Zoras River West Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 43), [-963, 5806], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, under the tunnel that leads to Lanayru Field."
+        baseDesc: "Underwater, under the tunnel that leads to Lanayru Field.",
+        randoCategory: Categories.HiddenRupees,
+        randoReqs: [[new AndRequirements([[ballAndChainReq, bombBagReq]]), new AndRequirements([getFlagReq('Lanayru Twilight Cleared'), bombBagReq, [ironBootsReq, magicArmorReq]])]],
     })],
-    ["Lanayru Field North Underwater Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 50), [-2355, 4889], {
+    ["Lanayru Field North Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 50), [-2355, 4889], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, north of the bridge."
+        baseDesc: "Underwater, north of the bridge.",
+        randoCategory: Categories.HiddenRupees,
+        randoReqs: [[new AndRequirements([[ballAndChainReq, bombBagReq]]), new AndRequirements([getFlagReq('Lanayru Twilight Cleared'), bombBagReq, [ironBootsReq, magicArmorReq]])]],
     })],
-    ["Lanayru Field South Underwater Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 31), [-2698, 4923], {
+    ["Lanayru Field South Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 31), [-2698, 4923], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, south of the bridge."
+        baseDesc: "Underwater, south of the bridge.",
+        randoCategory: Categories.HiddenRupees,
+        randoReqs: [[new AndRequirements([[ballAndChainReq, bombBagReq]]), new AndRequirements([getFlagReq('Lanayru Twilight Cleared'), bombBagReq, [ironBootsReq, magicArmorReq]])]],
     })],
-    ["Lanayru Field Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 30), [-2601, 3974], {
+    ["Lanayru Field North Spinner Track Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 30), [-2601, 3974], {
         baseReqs: [boulderReq],
-        baseDesc: 'These boulders are blocking the north entrance to the spinner area.'
+        baseDesc: 'These boulders are blocking the north entrance to the spinner area.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lake Hylia Bridge Spinner Track Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 20), [-3816, 3385], {
+    ["Lanayru Field South Spinner Track Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 20), [-3816, 3385], {
         baseReqs: [boulderReq],
-        baseDesc: 'These boulders are blocking the south entrance to the spinner area.'
+        baseDesc: 'These boulders are blocking the south entrance to the spinner area.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Outside South Castle Town Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 38), [-4422, 4873], {
+    ["Outside South Castle Town Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 38), [-4422, 4873], {
         baseReqs: [boulderReq],
-        baseDesc: 'Out in the open.'
+        baseDesc: 'Out in the open.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Upper Zoras River Above Water Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 31), [-808, 5851], {
+    ["Upper Zoras River Ledge Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 31), [-808, 5851], {
         baseReqs: [boulderReq],
-        baseDesc: 'In the open near the howling stone.'
+        baseDesc: 'In the open near the howling stone.',
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lake Hylia West Underwater Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 36), [-4847, 3363], {
+    ["Lake Hylia Left Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 36), [-4847, 3363], {
         baseReqs: [bombBagReq, zoraArmorReq, ironBootsReq],
-        baseDesc: "Deep underwater, west of the entrance to Lakebed Temple."
+        baseDesc: "Deep underwater, west of the entrance to Lakebed Temple.",
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lake Hylia East Underwater Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 40), [-4950, 3446], {
+    ["Lake Hylia Right Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 40), [-4915, 3442], {
         baseReqs: [bombBagReq, zoraArmorReq, ironBootsReq],
-        baseDesc: "Deep underwater, east of the entrance to Lakebed Temple."
+        baseDesc: "Deep underwater, east of the entrance to Lakebed Temple.",
+        randoCategory: Categories.HiddenRupees,
     })],
     ["Agitha Male Ant Reward",           getAgithaRewardFlag(0)],
     ["Agitha Female Ant Reward",         getAgithaRewardFlag(1)],
@@ -1904,13 +1946,15 @@ const flags = new Map([
         baseReqs: [doubleClawshotReq],
         baseDesc: 'Follow the clawshot target path, then take a right to reach the chest.'
     })],
-    ["Lanayru Spring Underwater North Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 37), [-5171, 3447], {
+    ["Lanayru Spring Lower Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 37), [-5171, 3447], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, near the entrance."
+        baseDesc: "Underwater, near the entrance.",
+        randoCategory: Categories.HiddenRupees,
     })],
-    ["Lanayru Spring Underwater South Rupee Boulder", new Flag(rupeeBoulder.with(rupees, 41), [-5322, 3394], {
+    ["Lanayru Spring Upper Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 41), [-5322, 3394], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
-        baseDesc: "Underwater, in the back."
+        baseDesc: "Underwater, in the back.",
+        randoCategory: Categories.HiddenRupees,
     })],
     ["Lake Lantern Cave First Chest", new Flag(smallChest.with(bombs, 5), [-5696, 3100], {
         baseReqs: [boulderReq],
@@ -2728,7 +2772,7 @@ const flags = new Map([
         baseReqs: [temple2SKReq, spinnerReq, bowReq, clawshotReq],
         baseDesc: 'Clawshot the target on the ceiling to reach the chest.'
     })],
-    ["Temple of Time Gilloutine Chest", new Flag(chest.with(templeSK), [-6178, 4981], {
+    ["Temple of Time Guillotine Chest", new Flag(chest.with(templeSK), [-6178, 4981], {
         baseReqs: [temple2SKReq, spinnerReq, bowReq],
         baseDesc: 'Avoid the traps and go behind the sharp pendulum to reach the chest.'
     })],
@@ -2922,13 +2966,13 @@ const flags = new Map([
         baseReqs: [clawshotReq],
         baseDesc: 'Make your way across the moving platforms to reach the chest.'
     })],
-    ["Palace of Twilight East Wing First Room West Alcove", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
+    ["Palace of Twilight East Wing First Room West Alcove Chest", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
         baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
         baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.',
         randoReqs: [lightMasterSwordReq],
         randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.'
     })],
-    ["Palace of Twilight East Wing First Room East Alcove", new Flag(chest.with(heartPiece), [-5420, 4902], {
+    ["Palace of Twilight East Wing First Room East Alcove Chest", new Flag(chest.with(heartPiece), [-5420, 4902], {
         baseReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
         baseDesc: 'After obtaining the reward for collecting both sols, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.',
         randoReqs: [lightMasterSwordReq],
@@ -3149,7 +3193,9 @@ const flags = new Map([
     ["Arbiters Grounds Sign", new Flag(randoHint, [-4491, 4314], {
         baseReqs: [groundsFirstRoomReq, arbiter1SKReq, lanternReq],
     })],
-    ["Beside Castle Town Sign", new Flag(randoHint, [-3883, 4188])],
+    ["Beside Castle Town Sign", new Flag(randoHint, [-3695, 3839], {
+        baseReqs: [clawshotReq]
+    })],
     ["Bulblin Camp Sign", new Flag(randoHint, [-4151, 531])],
     ["Castle Town Sign", new Flag(randoHint, [-3994, 4707])],
     ["Cave of Ordeals Sign", new Flag(randoHint, [-6268, 581])],
@@ -3177,11 +3223,11 @@ const flags = new Map([
     })],
     ["Hyrule Castle Sign", new Flag(randoHint, [-5856, 4318])],
     ["Jovani House Sign", new Flag(randoHint, [-4110, 4837])],
-    ["Kakariko Gorge Sign", new Flag(randoHint, [-4979, 5876])],
+    ["Kakariko Gorge Sign", new Flag(randoHint, [-4999, 5982])],
     ["Kakariko Graveyard Sign", new Flag(randoHint, [-5475, 8300], {
         randoReqs: [gateKeyReq]
     })],
-    ["Kakariko Village Sign", new Flag(randoHint, [-5253, 7455], {
+    ["Kakariko Village Sign", new Flag(randoHint, [-5220, 7548], {
         randoReqs: [[...boulderReq, fyrusReq]]
     })],
     ["Lake Hylia Sign", new Flag(randoHint, [-4659, 2920])],
@@ -3191,11 +3237,11 @@ const flags = new Map([
     ["Lakebed Temple Sign", new Flag(randoHint, [-4392, 3903], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq]]
     })],
-    ["Lanayru Field Sign", new Flag(randoHint, [-1891, 4860])],
+    ["Lanayru Field Sign", new Flag(randoHint, [-2668, 4272])],
     ["Lanayru Spring Sign", new Flag(randoHint, [-5238, 3468], {
         baseReqs: [[ironBootsReq, magicArmorReq]],
     })],
-    ["North Eldin Sign", new Flag(randoHint, [-1911, 7257], {
+    ["North Eldin Sign", new Flag(randoHint, [-1657, 6880], {
         randoReqs: [lanayruRandoReq]
     })],
     ["Ordon Sign", new Flag(randoHint, [-8842, 4938])],
@@ -3217,20 +3263,25 @@ const flags = new Map([
     ["Arbiters Grounds Poe Scent", new Flag(scents.getItemByIndex(2), [-4656, 4329], {
         baseReqs: [shadowCrystalReq, arbiter1SKReq, lanternReq],
         baseDesc: "After defeating the poe, activate your senses to learn the Poe Scent.",
+        randoCategory: Categories.Quest,
     })],
     ["Zoras Domain Reekfish Scent", new Flag(scents.getItemByIndex(3), [-705, 4947], {
         baseReqs: [coralEarringReq, shadowCrystalReq],
         baseDesc: "After catching a Reekfish, transform into Wolf and use your senses to learn the Reekfish Scent.",
+        randoCategory: Categories.Quest,
     })],
     ["Doctors Office Medicine Scent", new Flag(scents.getItemByIndex(4), [-3750, 4917], {
         baseReqs: [invoiceReq, shadowCrystalReq],
         baseDesc: "After giving the invoice to the doctor, transform into Wolf and push the box to reveal the Medicine Scent.",
+        randoCategory: Categories.Quest,
     })],
     ["Kakariko Gorge Youths Scent", new Flag(scents.getItemByIndex(0), [-5772, 5762], {
-        baseDesc: "After entering the Eldin Twilight, use your senses near the wooden sword on the ground to learn the Youths' Scent. The wooden sword disappears after clearing the Twilight."
+        baseDesc: "After entering the Eldin Twilight, use your senses near the wooden sword on the ground to learn the Youths' Scent. The wooden sword disappears after clearing the Twilight.",
+        randoCategory: Categories.Quest,
     })],
     ["Lanayru Field Scent of Ilia", new Flag(scents.getItemByIndex(1), [-2093, 6116], {
-        baseDesc: "After entering the Lanayru Twilight, use your senses near the purse on the ground to learn the Scent of Ilia. The purse disappears after clearing the Twilight."
+        baseDesc: "After entering the Lanayru Twilight, use your senses near the purse on the ground to learn the Scent of Ilia. The purse disappears after clearing the Twilight.",
+        randoCategory: Categories.Quest,
     })],
     ["Kakariko Village Malo Mart Bridge Repaired", new Flag(gorEbizoDonation, [-5187, 7340], {
         baseReqs: [Requirement.fromCountItem(rupees, 1000)],
@@ -3244,11 +3295,364 @@ const flags = new Map([
                     new AndRequirements([getFlagReq("Goron Springwater Rush"), Requirement.fromCountItem(rupees, 200)])]],
         baseDesc: "Donate 2000 Rupees (or 200 rupees if the Goron Springwater Rush quest is completed) to Gor Ebizo to unlock the Castle Town shop."
     })],
+    ["Castle Town Goron Shop Red Potion", new Flag(Bottle.RedPotion, [-4159, 4718], {
+        itemCategory: Categories.ShopItems,
+        baseDesc: "Buy the Red Potion from the young goron for 40 Rupees.",
+        randoDesc: "Buy the item from the young goron."
+    })],
+    ['Castle Town Goron Shop Hylian Shield', new Flag(hylianShield, [-4050, 4753], {
+        itemCategory: Categories.ShopItems,
+        baseDesc: "Buy the Hylian Shield from the adult goron for 210 Rupees.",
+        randoDesc: "Buy the item from the adult goron."
+    })],
+    ['Castle Town Goron Shop Lantern Oil', new Flag(Bottle.Oil, [-4328, 4597], {
+        itemCategory: Categories.ShopItems,
+        baseDesc: "Buy the Lantern Oil from the young goron for 30 Rupees.",
+        randoDesc: "Buy the item from the young goron."
+    })],
+    ['Castle Town Goron Shop Arrow Refill', new Flag(new MultiItem(arrows, 30), [-4087, 4707], {
+        itemCategory: Categories.ShopItems,
+        baseDesc: "Buy the 30 Arrow Refill from the adult goron for 40 Rupees.",
+        randoDesc: "Buy the item from the adult goron."
+    })],
+    ['Faron Twilight Cleared', new Flag(vesselOfLight, [-7623, 4734], {
+        baseDesc: "Collect all the tears of light to clear the Faron Twilight."
+    })],
+    ['Eldin Twilight Cleared', new Flag(vesselOfLight, [-5729, 7689], {
+        baseDesc: "Collect all the tears of light to clear the Eldin Twilight."
+    })],
+    ['Lanayru Twilight Cleared', new Flag(vesselOfLight, [-5144, 3503], {
+        baseDesc: "Collect all the tears of light to clear the Lanayru Twilight."
+    })],
+    ["Ordon Rupee In Grass By Bo", new Flag(Rupees.Green, [-9212, 4845], {
+        baseDesc: "Hidden in the grass near the ranch entrance.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rupee In River 1", new Flag(Rupees.Green, [-9150, 4770], {
+        baseDesc: "In the river near Rusl's House.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rupee In River 2", new Flag(Rupees.Green, [-9150, 4800], {
+        baseDesc: "In the river near Rusl's House.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rupee Under Bridge", new Flag(Rupees.Green, [-9083, 4957], {
+        baseDesc: "Under the bridge.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rupee Under Tall Tree 1", new Flag(Rupees.Green, [-9069, 4858], {
+        baseDesc: "Under the tall tree, above Hanch's house.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rupee Under Tall Tree 2", new Flag(Rupees.Green, [-9053, 4856], {
+        baseDesc: "Under the tall tree, above Hanch's house.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Tree Long Branch Rupee", new Flag(Rupees.Yellow, [-9006, 4864], {
+        baseDesc: "Climb the vines to reach the top of the tree, then go to the end of the long branch.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Tree Short Branch Rupee", new Flag(Rupees.Blue, [-9024, 4877], {
+        baseDesc: "Climb the vines to reach the top of the tree, then go to the end of the short branch.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Bo Window Rupee 1", new Flag(Rupees.Green, [-9177, 4918], {
+        baseDesc: "In front of the window on Mayor Bo's House. Climb the ladder behind Bo's house to reach it.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Bo Window Rupee 2", new Flag(Rupees.Green, [-9156, 4920], {
+        baseDesc: "In front of the window on Mayor Bo's House. Climb the ladder behind Bo's house to reach it.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Bo Roof Rupee", new Flag(Rupees.Yellow, [-9172, 4944], {
+        baseDesc: "On the roof near the hawk grass on Bo's House. Climb the ladder behind Bo's house to reach it.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Bo Cliff Rupee", new Flag(Rupees.Yellow, [-9241, 4899], {
+        baseDesc: "On the cliff above Bo's House. Use the hawk grass on top of Bo's House to catch a Cucco, then use the it to fly to the cliff.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Ordon Rusl House Roof Rupee 1", new Flag(Rupees.Yellow, [-9099, 4759], {
+        baseDesc: "On the roof of Rusl's House. Jump from Rusl's porch onto the house sign and then onto the roof.",
+        randoCategory: Categories.FreestandingRupees,        
+    })],
+    ["Ordon Rusl House Roof Rupee 2", new Flag(Rupees.Yellow, [-9080, 4754], {
+        baseDesc: "On the roof of Rusl's House. Jump from Rusl's porch onto the house sign and then onto the roof.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Faron Woods Coro Boulder Rupee 4", new Flag(Rupees.Yellow, [-7321, 4890], {
+        baseReqs: [boulderReq],
+        baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Faron Woods Coro Boulder Rupee 1", new Flag(Rupees.Green, [-7321, 4855], {
+        baseReqs: [boulderReq],
+        baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Faron Woods Coro Boulder Rupee 2", new Flag(Rupees.Green, [-7291, 4855], {
+        baseReqs: [boulderReq],
+        baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Faron Woods Coro Boulder Rupee 3", new Flag(Rupees.Blue, [-7291, 4890], {
+        baseReqs: [boulderReq],
+        baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Kakariko Village Spring Shortcut Box Rupee 1", new Flag(Rupees.Blue, [-5696, 7514], {
+        baseReqs: [boulderReq],
+        baseDesc: "In the right box behind the boulder leading to the back of the Eldin Spring.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Kakariko Village Spring Shortcut Box Rupee 2", new Flag(Rupees.Yellow, [-5696, 7545], {
+        baseReqs: [boulderReq],
+        baseDesc: "In the left box behind the boulder leading to the back of the Eldin Spring.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Kakariko Village Ant House Ledge Box Rupee", new Flag(Rupees.Yellow, [-5304, 7675], {
+        baseReqs: [[new AndRequirements([boulderReq, [woodenSwordReq, shadowCrystalReq]]), boomerangReq, clawshotReq]],
+        baseDesc: "In a box on the right end of the lower wooden scaffolding above the ant house.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Kakariko Village Hot Spring Ledge Box Rupee", new Flag(Rupees.Yellow, [-5209, 7583], {
+        baseReqs: [[new AndRequirements([boulderReq, [woodenSwordReq, shadowCrystalReq]]), boomerangReq, clawshotReq]],
+        baseDesc: "In a box on the wooden scaffolding to the left of the hot spring.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Death Mountain Volcano Pipe Ledge Rock Rupee", new Flag(Rupees.Yellow, [-3614, 8232], {
+        baseDesc: "Hidden under the rock on the ledge below the pipe. Reach it by using the Goron.",
+        randoCategory: Categories.HiddenRupees,
+    })],
+    ["Death Mountain Volcano Ledge Rupee 3", new Flag(Rupees.Yellow, [-3691, 8188], {
+        baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+     ["Death Mountain Volcano Ledge Rupee 2", new Flag(Rupees.Yellow, [-3702, 8177], {
+        baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Death Mountain Volcano Ledge Rupee 1", new Flag(Rupees.Yellow, [-3708, 8160], {
+        baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Zoras Domain Throne West Gate Underwater Rupee", new Flag(Rupees.Blue, [-253, 4831], {
+        baseReqs: [sinkReq],
+        baseDesc: "Underwater, behind the west gate of the throne room.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Zoras Domain Throne East Gate Underwater Rupee", new Flag(Rupees.Blue, [-253, 4865], {
+        baseReqs: [sinkReq],
+        baseDesc: "Underwater, behind the east gate of the throne room.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Zoras Domain Throne West Underwater Rupee", new Flag(Rupees.Yellow, [-124, 4795], {
+        baseReqs: [[zoraArmorReq, ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater in the throne room, above the boulder.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Throne Northwest Underwater Rupee", new Flag(Rupees.Yellow, [-99, 4827], {
+        baseReqs: [[zoraArmorReq, ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater in the throne room, northeast and far above the boulder.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Throne East Underwater Rupee", new Flag(Rupees.Yellow, [-147, 4910], {
+        baseReqs: [[zoraArmorReq, ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater in the throne room, east of the room.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Throne South Underwater Rupee", new Flag(Rupees.Yellow, [-240, 4831], {
+        baseReqs: [[zoraArmorReq, ironBootsReq, magicArmorReq]],
+        baseDesc: "Underwater in the throne room, south of the room.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Waterfall Ledge Rupee", new Flag(Rupees.Blue, [-520, 4811], {
+        baseReqs: [[shadowCrystalReq, clawshotReq]],
+        baseDesc: "On the ledge near the waterfall, left of the poe.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Zoras Domain Behind Waterfall Rupee", new Flag(Rupees.Blue, [-500, 4892], {
+        baseReqs: [[shadowCrystalReq, clawshotReq]],
+        baseDesc: "Behind the waterfall above the vines, right of the poe.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Zoras Domain Vine Ledge Rupee", new Flag(Rupees.Blue, [-581, 4790], {
+        baseReqs: [[shadowCrystalReq, clawshotReq]],
+        baseDesc: "Below the vines leading to the place with the Shadow Bug.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Shortcut Ledge Rupee", new Flag(Rupees.Yellow, [-595, 4770], {
+        baseReqs: [[shadowCrystalReq, clawshotReq]],
+        baseDesc: "Above the vines leading to the place with the Shadow Bug.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Zoras Domain Top Ledge Rupee", new Flag(Rupees.Yellow, [-508, 4782], {
+        baseReqs: [[shadowCrystalReq, clawshotReq]],
+        baseDesc: "On the very last ledge before reaching the top of the waterfall.",
+        randoCategory: Categories.FreestandingRupees, 
+    })],
+    ["Lake Hylia Left Underwater Pillar Rupee", new Flag(Rupees.Yellow, [-4902, 3374], {
+        baseReqs: [zoraArmorReq],
+        baseDesc: "Underwater, on top of one of the broken pillars left of the entrance.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Lake Hylia Right Underwater Pillar Rupee", new Flag(Rupees.Yellow, [-4839, 3444], {
+        baseReqs: [zoraArmorReq],
+        baseDesc: "Underwater, on top of one of the broken pillars right of the entrance.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Top Right Rupee", new Flag(Rupees.Green, [-521, 2349], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the right ledge near the start of the path.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Top Left Rupee", new Flag(Rupees.Green, [-833, 2420], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the left ledge near the start of the path.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Bridge Ledge Upper Rupee", new Flag(Rupees.Green, [-680, 2128], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the right ledge above the bridge.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Bridge Ledge Middle Rupee", new Flag(Rupees.Green, [-701, 2037], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the right ledge above the bridge.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Bridge Ledge Bottom Rupee", new Flag(Rupees.Green, [-877, 1974], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the right ledge above the bridge.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Snowy Tree Top Rupee 1", new Flag(Rupees.Blue, [-1650, 1954], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the tree tops that have snow ledges on them.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Snowy Tree Top Rupee 2", new Flag(Rupees.Red, [-1748, 1946], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the tree tops that have snow ledges on them.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Snowy Tree Top Rupee 3", new Flag(Rupees.Purple, [-1842, 1938], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, leap onto the tree tops that have snow ledges on them.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 1", new Flag(Rupees.Green, [-2179, 1985], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 2", new Flag(Rupees.Green, [-2229, 2000], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 3", new Flag(Rupees.Green, [-2469, 2096], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 4", new Flag(Rupees.Red, [-2513, 2089], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 5", new Flag(Rupees.Green, [-2542, 2088], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 6", new Flag(Rupees.Green, [-2581, 2086], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 7", new Flag(Rupees.Green, [-2613, 2089], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 8", new Flag(Rupees.Green, [-2669, 2107], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 9", new Flag(Rupees.Green, [-2747, 2115], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 10", new Flag(Rupees.Green, [-2831, 2109], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Snowboarding Shortcut Rupee 11", new Flag(Rupees.Green, [-2910, 2088], {
+        baseReqs: [coralEarringReq, shadowCrystalReq],
+        baseDesc: "While Snowboarding down the mountain, take the shortcut to the left to reach the rupee.",
+        randoCategory: Categories.FreestandingRupees,
+    })],
+    ["Bridge of Eldin Portal", new Flag(Portals.BridgeOfEldin, [-2809, 7396], {
+        baseReqs: [woodenSwordReq],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Castle Town Portal", new Flag(Portals.CastleTown, [-3963, 4147], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Death Mountain Portal", new Flag(Portals.DeathMountain, [-3697, 8279], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Gerudo Desert Portal", new Flag(Portals.GerudoDesert, [-6059, 593], {
+        baseReqs: [[woodenSwordReq, shadowCrystalReq]],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Kakariko Gorge Portal", new Flag(Portals.KakarikoGorge, [-5457, 6027], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Kakariko Village Portal", new Flag(Portals.KakarikoVillage, [-5552, 7586], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Lake Hylia Portal", new Flag(Portals.LakeHylia, [-5271, 3175], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Mirror Chamber Portal", new Flag(Portals.MirrorChamber, [-3732, 604], {
+        baseReqs: [[woodenSwordReq, shadowCrystalReq]],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["North Faron Portal", new Flag(Portals.NorthFaron, [-7341, 4230], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Sacred Grove Portal", new Flag(Portals.SacredGrove, [-7064, 3676], {
+        baseReqs: [[woodenSwordReq, shadowCrystalReq]],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],   
+    ["Snowpeak Portal", new Flag(Portals.Snowpeak, [-663, 3166], {
+        baseReqs: [[woodenSwordReq, shadowCrystalReq]],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["South Faron Portal", new Flag(Portals.SouthFaron, [-7835, 4839], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Upper Zoras River Portal", new Flag(Portals.UpperZorasRiver, [-786, 5985], {
+        baseReqs: [woodenSwordReq],
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Zoras Domain Portal", new Flag(Portals.ZorasDomain, [-131, 4848], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+    ["Ordon Spring Portal", new Flag(Portals.OrdonSpring, [-8497, 4768], {
+        baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+    })],
+
 
 
 ]); // Always add flags at the end to preserve storage IDs
 
-// Flag initiliazation
+// Flag initialization
 const flagsSU = new StorageUnit('flags', flags.values());
 for (let [name, flag] of flags.entries()) {
     flag.setName(name);

@@ -44,6 +44,7 @@ const Categories = Object.freeze({
     Bosses: "Bosses",
     Minibosses: "Minibosses",
     Quest: "Quests",
+    Portals: "Warp Portals",
     // Non Flags
     Bottle: "Bottled Items",
     Shops: "Shops",
@@ -55,6 +56,8 @@ const Categories = Object.freeze({
     // Randomizer Categories
     Gifts: "Gifts from NPCs",
     ShopItems: "Shop Items",
+    FreestandingRupees: "Freestanding Rupees",
+    HiddenRupees: "Hidden Rupees",
     Hints: "Randomizer Hints",  
     NonChecks: "Non-Check Items",
     Fool: "Foolish Items"
@@ -67,7 +70,9 @@ const RandomizerCheckCategories = [
     Categories.HiddenSkills,
     Categories.SkyCharacters,
     Categories.Gifts,
-    Categories.ShopItems
+    Categories.ShopItems,
+    Categories.FreestandingRupees,
+    Categories.HiddenRupees,
 ];
 
 class Obtainable {
@@ -681,6 +686,24 @@ var castleCompass = new BoolItem("Compass", {name: "Hyrule Castle Compass"});
 var castleBK = new BoolItem("Boss KeyHC", {name: "Hyrule Castle Big Key"});
 var ganondorf = new BoolItem('Ganondorf', {category: Categories.Bosses});
 
+const Portals = Object.freeze({
+    BridgeOfEldin: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Bridge of Eldin Portal"}),
+    CastleTown: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Castle Town Portal"}),
+    DeathMountain: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Death Mountain Portal"}),
+    GerudoDesert: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Gerudo Desert Portal"}),
+    KakarikoGorge: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Kakariko Gorge Portal"}),
+    KakarikoVillage: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Kakariko Village Portal"}),
+    LakeHylia: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Lake Hylia Portal"}),
+    MirrorChamber: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Mirror Chamber Portal"}),
+    NorthFaron: new BoolItem("Warp Portal", {category: Categories.Portals, name: "North Faron Portal"}),
+    OrdonSpring: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Ordon Spring Portal"}),
+    SacredGrove: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Sacred Grove Portal"}),
+    Snowpeak: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Snowpeak Portal"}),
+    SouthFaron: new BoolItem("Warp Portal", {category: Categories.Portals, name: "South Faron Portal"}),
+    UpperZorasRiver: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Upper Zora's River Portal"}),
+    ZorasDomain: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Zora's Domain Portal"})
+});
+
 // Rupees Enum
 const Rupees = Object.freeze({
     Green  : new Obtainable("Green Rupee", rupees),
@@ -725,6 +748,7 @@ let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let gorEbizoDonation = new Obtainable('Gor Ebizo', null, {name: "Gor Ebizo Donations", category: Categories.Quest});
+let vesselOfLight = new Obtainable("Vessel of Light", null, {category: Categories.Quest});
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
 let randoFoolishItem = new Obtainable('FoolIce', null, {name: "Foolish Item", category: Categories.Fool});

@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-NDPK4X9D');</script>
-        <!-- End Google Tag Manager -->
+       
 
         <meta charset="UTF-8">
         <title>Twilight Princess Interactive Map</title>
@@ -38,6 +32,18 @@
         <meta property="og:image" content="Submaps/Preview.png" />
         <meta property="og:title" content="Twilight Princess Interactive Map" />
         <meta property="og:description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer." />
+
+         <!-- Google Tag Manager -->
+        <script>
+            (function(w,d,s,l,i){
+                w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+                var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+                j.async=true;
+                j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-NDPK4X9D');
+        </script>
+        <!-- End Google Tag Manager -->
     </head>
     <body oncontextmenu="return false;">
         <!-- Google Tag Manager (noscript) -->
@@ -265,6 +271,7 @@
                     <label><input type="checkbox" id="Base_Characters_Visibility">Show Sky Characters</label>
                     <label><input type="checkbox" id="Base_Rupees_Visibility">Show Rupees</label>
                     <label><input type="checkbox" id="Base_Ammunition_Visibility">Show Arrows, Bombs & Seeds</label>
+                    <label><input type="checkbox" id="Base_Portal_Visibility">Show Warp Portals</label>
                     <label><input type="checkbox" id="Base_Quest_Visibility">Show Quest Flags</label>
                     <label><input type="checkbox" id="Base_Bosses_Visibility">Show Bosses</label>
                     <label><input type="checkbox" id="Base_Ooccoo_Visibility">Show Ooccoo</label>
@@ -280,13 +287,16 @@
                         <label><input type="checkbox" id="Rando_Characters_Visibility">Show Sky Characters</label>
                         <label><input type="checkbox" id="Rando_Gifts_Visibility">Show Gifts from NPCs</label>
                         <label><input type="checkbox" id="Rando_Shop_Visibility">Show Shop Items</label>
+                        <label><input type="checkbox" id="Rando_Freestanding_Rupees_Visibility">Show Freestanding Rupees</label>
+                        <label><input type="checkbox" id="Rando_Hidden_Rupees_Visibility">Show Hidden Rupees</label>
                     </div>
                     <div id="randoNonChecksVisibility">
                         <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Non_Check_Visibility_Parent" class="bigSettingCheckbox">Show Non-Checks</label>
                         <label><input type="checkbox" id="Rando_Hints_Visibility">Show Hints</label>
                         <label><input type="checkbox" id="Rando_Bosses_Visibility">Show Bosses</label>
                         <label><input type="checkbox" id="Rando_Quest_Visibility">Show Quest Flags</label>
-                        <label><input type="checkbox" id="Rando_Rupees_Visibility">Show Rupees</label>
+                        <label><input type="checkbox" id="Rando_Portal_Visibility">Show Warp Portals</label>
+                        <label><input type="checkbox" id="Rando_Rupees_Visibility">Show Other Rupees</label>
                         <label><input type="checkbox" id="Rando_Locks_Visibility">Show Locks</label>
                         <label><input type="checkbox" id="Rando_Ooccoo_Visibility">Show Ooccoo</label>
                         <label><input type="checkbox" id="Rando_Non-Check_Visibility">Show Non-Check Items</label>

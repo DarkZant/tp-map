@@ -40,6 +40,13 @@ class Requirement {
             () => flag.isSet()
         );
     }
+    static fromUnsetFlag(flag, name=flag.name) {
+        return new Requirement(
+            flag.getImage(),
+            name,
+            () => !flag.isSet()
+        );
+    }
     static fromCheckboxRandoSetting(randoSetting, enabled=true) {
         let condition = () => enabled ? randoSetting.isEnabled() : !randoSetting.isEnabled();
         return new Requirement(
@@ -162,7 +169,8 @@ let skybookReq = Requirement.fromBoolItem(skybook.getItemByReq(1));
 let completedSkybookReq = Requirement.fromBoolItem(skybook.getItemByReq(7));
 
 let boulderReq = [bombBagReq, ballAndChainReq];
-let webReq = [lanternReq, bombBagReq, ballAndChainReq]
+let sinkReq = [ironBootsReq, magicArmorReq];
+let webReq = [lanternReq, bombBagReq, ballAndChainReq];
 let stalfosReq = boulderReq;
 
 let diababaReq = Requirement.fromBoss(diababa);
@@ -256,6 +264,7 @@ function initializeFlagRequirements() {
 }
 
 function getFlagReq(flagName) {
+    // Use this when creating requirements for flags in flags.js
     let flagReq = FlagRequirements.get(flagName);
     if (flagReq === undefined)
         flagReq = createNewFlagReq(flagName);
