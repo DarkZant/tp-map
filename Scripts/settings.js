@@ -298,8 +298,8 @@ const Settings = Object.freeze({
     // New Settings
     Base_Quest_Visibility: new CategoryVisibilitySetting('Base_Quest_Visibility', Categories.Quest, 1),
     Rando_Quest_Visibility: new CategoryVisibilitySetting('Rando_Quest_Visibility', Categories.Quest, 1),
-    Rando_Freestanding_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Freestanding_Rupees_Visibility', Categories.FreestandingRupees, 1),
-    Rando_Hidden_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Hidden_Rupees_Visibility', Categories.HiddenRupees, 1),
+    Rando_Freestanding_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Freestanding_Rupees_Visibility', Categories.FreestandingRupees),
+    Rando_Hidden_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Hidden_Rupees_Visibility', Categories.HiddenRupees),
     Base_Portal_Visibility: new CategoryVisibilitySetting('Base_Portal_Visibility', Categories.Portals, 1),
     Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
 }); // Always add settings at the end to preserve storage IDs

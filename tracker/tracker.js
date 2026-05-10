@@ -1,10 +1,3 @@
-trackedItems.push(...[
-    ganondorf, forestMap, forestCompass, minesMap, minesCompass, lakebedMap,
-    lakebedCompass, arbiterMap, arbiterCompass, snowpeakMap, snowpeakCompass,
-    templeMap, templeCompass, cityMap, cityCompass, palaceMap, palaceCompass,
-    castleMap, castleCompass
-]); // Always add items at the end to preserve storage IDs
-
 let trackerModified = true;
 document.addEventListener('trackerUpdated', function () {
     if (!trackerModified)

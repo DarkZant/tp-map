@@ -12,7 +12,10 @@ let trackedItems = [
     minesBK, fyrus, lakebedSK, lakebedBK, morpheel, arbiterSK, arbiterBK, 
     stallord, snowpeakSK, snowpeakBK, pumpkin, cheese, blizzeta, templeSK, 
     templeBK, armogohma, citySK, cityBK, argorok, palaceSK, palaceBK, zant,
-    castleSK, castleBK, faronKey
+    castleSK, castleBK, faronKey,  ganondorf, forestMap, forestCompass, minesMap, 
+    minesCompass, lakebedMap, lakebedCompass, arbiterMap, arbiterCompass, 
+    snowpeakMap, snowpeakCompass, templeMap, templeCompass, cityMap, cityCompass,
+    palaceMap, palaceCompass, castleMap, castleCompass
 ]; // Always add items at the end to preserve storage IDs
 
 
@@ -250,18 +253,25 @@ function initializeMapTracker() {
         let imageSrc = item.getBaseImageSrc();
         // Harcoded exceptions for items with duplicate images
         // Should use item names for all but too lazy to put data-item on all .titem Divs
-        if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png'))
+        if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png') || 
+            imageSrc.includes('Dungeon_Map') || imageSrc.includes('Compass'))
             trackerItems.set(item.name, new TrackerItem(item));   
         else
             trackerItems.set(imageSrc, new TrackerItem(item));       
     }
     // Assign .titem Divs to TrackerItems
     for (let titemDiv of document.querySelectorAll('.titem')) {
+        let baseIconPath = "Icons/";
         // Check if titemDiv has assigned item
-        if ("item" in titemDiv.dataset) 
-            trackerItems.get(titemDiv.dataset.item).setElem(titemDiv);
+        if ("item" in titemDiv.dataset) {
+            let trackerItem = trackerItems.get(titemDiv.dataset.item);
+            trackerItem.setElem(titemDiv);
+        }
         else {
-            trackerItems.get("Icons/" + titemDiv.getElementsByClassName('timage')[0].src.split("Icons/")[1]).setElem(titemDiv);
+            let imgSrc = titemDiv.getElementsByClassName('timage')[0].src;
+            let itemImgName = imgSrc.split(baseIconPath)[1];
+            let trackerItem = trackerItems.get(baseIconPath + itemImgName);
+            trackerItem.setElem(titemDiv);
         }
     }
     trackerSU = new StorageUnit(trackerSUName, trackerItems.values());
@@ -324,4 +334,13 @@ function resetTracker() {
         if (requiredElem.style.display === 'inline')
             requiredElem.style.display = 'none';
     }
+}
+
+function hideUnshowableTrackerItems() {
+    // Hide titem divs for which there is no space in the tracker
+    let mapAndCompassDivs = document.querySelectorAll('.titem:has(img[src*="Dungeon_Map"], img[src*="Compass"])');
+    mapAndCompassDivs.forEach(div => {
+        div.style.display = "none";
+    });
+    document.getElementById('gabon').style.display = "none";
 }

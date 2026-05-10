@@ -729,6 +729,7 @@ function updateMenuXPosition(menuX) {
 function resetMenuXPosition(menuX) {
     menuX.style.right = menuX.oldPosition;
 }
+hideUnshowableTrackerItems();
 function showTracker() {
     if (Settings.TrackerOverlay.isEnabled()) {
         separateTrackerFromMap();
