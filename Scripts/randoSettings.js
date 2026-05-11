@@ -46,6 +46,9 @@ class SelectRandoSetting extends RandoSetting {
 
 const RandoSettings = Object.freeze({
     SkipPrologue: new CheckboxRandoSetting('Skip Prologue'),
+    FaronTwilightCleared: new CheckboxRandoSetting('Faron Twilight Cleared'),
+    EldinTwilightCleared: new CheckboxRandoSetting('Eldin Twilight Cleared'),
+    LanayruTwilightCleared: new CheckboxRandoSetting('Lanayru Twilight Cleared'),
     FaronWoodsLogic: new SelectRandoSetting('Faron Woods Logic'),
     UnlockMapRegions : new CheckboxRandoSetting('Unlock Map Regions'),
     OpenDoT : new CheckboxRandoSetting('Open Door of Time'),

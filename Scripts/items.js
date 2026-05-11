@@ -157,6 +157,11 @@ class Item {
     getState() {
         return this.state;
     }
+    setState(state) {
+        if (state < this.defaultState || state > this.maxState)
+            return;
+        this.state = state;
+    }
     getMinState() {
         return this.defaultState;
     }
@@ -701,7 +706,11 @@ const Portals = Object.freeze({
     Snowpeak: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Snowpeak Portal"}),
     SouthFaron: new BoolItem("Warp Portal", {category: Categories.Portals, name: "South Faron Portal"}),
     UpperZorasRiver: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Upper Zora's River Portal"}),
-    ZorasDomain: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Zora's Domain Portal"})
+    ZorasDomain: new BoolItem("Warp Portal", {category: Categories.Portals, name: "Zora's Domain Portal"}),
+
+    getPortalFlagName(portal) {
+        return portal.getName().replace("'", "");
+    }
 });
 
 // Rupees Enum

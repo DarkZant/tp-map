@@ -158,10 +158,16 @@ const RandoItemMap = new Map([
 
     ["Foolish_Item", randoFoolishItem],
 
+    ["Red_Potion_Shop", Bottle.RedPotion],
+    ["Lantern_Oil_Shop", Bottle.Oil],
+
 ]);
 
 const RandoSettingsMap = new Map([
     ["skipPrologue", RandoSettings.SkipPrologue],
+    ["faronTwilightCleared", RandoSettings.FaronTwilightCleared],
+    ["eldinTwilightCleared", RandoSettings.EldinTwilightCleared],
+    ["lanayruTwilightCleared", RandoSettings.LanayruTwilightCleared],
     ["faronWoodsLogic", RandoSettings.FaronWoodsLogic],
     ["openMap", RandoSettings.UnlockMapRegions],
     ["openDot", RandoSettings.OpenDoT],
@@ -319,7 +325,6 @@ function unloadSeed() {
     }, 2000);
 }
 
-
 let seedIsLoaded = false;
 
 function loadSpoilerLog(data, start=false) {
@@ -353,7 +358,7 @@ function loadSpoilerLog(data, start=false) {
             requiredElem.style.display = 'inline';
     }
 
-    // Set Flag Items
+    // Set Flags' Rando Items
     for (let [flagName, itemName] of Object.entries(data["itemPlacements"])) {
         let item = getRandoItem(itemName);
         let skipEntry = false;
@@ -371,7 +376,7 @@ function loadSpoilerLog(data, start=false) {
         flags.get(flagName).setRandoItem(item);
     }
 
-    // Set Hints
+    // Set Hints' descriptions
     for (let [hintName, hintDescriptions] of Object.entries(data["hints"])) {
         if (hintName === "Midna")
             continue; 
@@ -385,6 +390,66 @@ function loadSpoilerLog(data, start=false) {
         let hintFlag = flags.get(underscoreToSpace(hintName));
         hintFlag.setRandoDescription(randoText);
     }
+
+
+    // Increase Starting Items
+    found_progressive_items = new Map();
+    for (let itemName of settings["startingItems"]) {
+        let item = getRandoItem(itemName);
+        if (item instanceof BoolItem && !item.isObtained()) {
+            if (item.getName().includes("Portal")) { // Special case for portals since they're not tracked
+                let flag = flags.get(Portals.getPortalFlagName(item));
+                if (flag)
+                    flag.set();
+                continue;
+            }
+            let itemTracker = item.getTracker();
+            if (itemTracker)
+                itemTracker.increase();
+            else
+                item.obtain();
+        }
+        else if (item instanceof ProgressiveItem || item instanceof CountRequiredItem || item instanceof CountItem) {
+            let currentCount = found_progressive_items.get(item) || 0;
+            found_progressive_items.set(item, currentCount + 1);
+        }
+    }
+    for (let [item, amount] of found_progressive_items) {
+        if (item.getState() >= amount)
+            continue;
+        let itemTracker = item.getTracker();
+        if (itemTracker) {
+            while (item.getState() < amount)
+                itemTracker.increase();
+        }
+        else 
+            item.setState(amount);
+    }
+
+    // Setting Flags 
+    if (RandoSettings.SkipPrologue.isEnabled()) {
+        flags.get("Ordon Spring Portal").set();
+    }
+    if (RandoSettings.FaronTwilightCleared.isEnabled()) {
+        flags.get("Faron Twilight Cleared").set();
+        flags.get("South Faron Portal").set();
+        flags.get("North Faron Portal").set();
+    }
+    if (RandoSettings.EldinTwilightCleared.isEnabled()) {
+        flags.get("Eldin Twilight Cleared").set();
+        flags.get("Kakariko Gorge Portal").set();
+        flags.get("Kakariko Village Portal").set();
+        flags.get("Death Mountain Portal").set();
+        flags.get("Kakariko Gorge Youths Scent").set();
+    }
+    if (RandoSettings.LanayruTwilightCleared.isEnabled()) {
+        flags.get("Lanayru Twilight Cleared").set();
+        flags.get("Lake Hylia Portal").set();
+        flags.get("Castle Town Portal").set();
+        flags.get("Zoras Domain Portal").set();
+        flags.get("Lanayru Field Scent of Ilia").set();
+    }
+    
 
     dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
     let seedVersion = parseFloat(data["meta"]["imageVersion"]);

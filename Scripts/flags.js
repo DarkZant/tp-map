@@ -144,8 +144,8 @@ class Flag extends Storable{
     isRandomizerCheck() {
         if (this.item === howlingStone)
             return false;
-        else if (this.item instanceof BoolItem && this.item.getParentItem() === scents)
-            return false;
+        // else if (this.item instanceof BoolItem && this.item.getParentItem() === scents)
+        //     return false;
 
         return RandomizerCheckCategories.includes(this.randoCategory);
     }
