@@ -789,8 +789,8 @@ class CaveOfOrdeals extends FlooredSubmap {
             gEL(['Masked Lizalfos 2 ', 'Red Bokoblins 6 ']),
             gEL(['Stalfos 2 ', 'Fire Bubbles 3 ', 'Stalchildren 12']),
             gf('Releases fairies into the Eldin Spring.'),
-            gEL(['Beamos 5 ', 'Keese 8 ']) + tip('The Dominion Rod and the Bow are required to go further.<br>Eliminate the ' + 
-                'Beamos from the ledge to make the room easier.'),
+            gEL(['Beamos 5 ', 'Keese 8 ']) + tip("The restored Dominion Rod is required to go further.<br>Eliminate the " + 
+                "Beamos from the ledge to make the room easier. If you don't have the bow, use the ball and chain to defeat the Beamos."),
             gEL(['Fire Bubbles 6 ', 'Fire Keese 6 ', 'Torch Slugs 6 ', 'Dodongos 2 ']) + tip('Eliminate the Torch Slugs on the ceiling before ' + 
                 'going down to make the room easier.'),
             gEL(['Poe 1 ', 'Gibdos 4 ']) + tip('Defeat the closest Gibdo, then the Poe, then the other Gibdos.'),

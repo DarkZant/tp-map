@@ -1084,9 +1084,9 @@ const flags = new Map([
         baseDesc: 'The rock is underwater in front of the chest.',
         randoCategory: Categories.HiddenRupees,
     })],
-    ["Death Mountain Trail Red Rupees", new Flag(Rupees.Red, [-4269, 8150], {
+    ["Death Mountain Trail Red Rupees", new Flag(new MultiItem(Rupees.Red, 4), [-4269, 8150], {
         baseReqs: [[clawshotReq, fyrusReq]],
-        baseDesc: 'There are 4 red rupees hidden under rocks near the Poe, for a total of 80 rupees.'
+        baseDesc: 'There are 4 red rupees hidden under rocks near the Poe, for a total of 80 rupees. These respawn every time the game is reloaded.',
     })],
     ["Kakariko Village Bell Rupee", new Flag(Rupees.Silver, [-5513, 7720], {
         baseReqs: [bombBagReq, bowReq],
@@ -1361,19 +1361,19 @@ const flags = new Map([
         baseDesc: 'In the middle of the room.'
     })],
     ["Cave of Ordeals Floor 33 Poe", new Flag(poeSoul, [-6294, 735], {
-        baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq, ballAndChainReq, bowReq, domRodReq],
+        baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq, ballAndChainReq, domRodReq],
         baseDesc: 'In the middle of the room.'
     })],
     ["Cave of Ordeals Floor 39 Silver Rupee", new Flag(Rupees.Silver, [-5933, 274], {
-        baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq, ballAndChainReq, bowReq, domRodReq],
+        baseReqs: [spinnerReq, [clawshotReq, bombBagReq], shadowCrystalReq, ballAndChainReq, domRodReq],
         baseDesc:  "Buried in the middle of the room, use Wolf Link's senses to dig it up."
     })],
     ["Cave of Ordeals Floor 44 Poe", new Flag(poeSoul, [-6305, 272], {
-        baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
+        baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, domRodReq, doubleClawshotReq],
         baseDesc: 'In the middle of the room'
     })],
     ["Cave of Ordeals Great Fairy Reward", new Flag(Bottle.Tears, [-5928, 737], {
-        baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, bowReq, domRodReq, doubleClawshotReq],
+        baseReqs: [spinnerReq, shadowCrystalReq, ballAndChainReq, domRodReq, doubleClawshotReq],
         baseDesc: "Talk to the Great Fairy to obtain Great Fairy's Tears.",
         randoCategory: Categories.Gifts
     })],
@@ -1753,7 +1753,7 @@ const flags = new Map([
          baseDesc: "Underwater, at the center of the domain.",
          randoCategory: Categories.HiddenRupees,
     })],
-    ["Zoras Domain Throne Room Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 10), [-123, 4793], {
+    ["Zoras Domain Throne Room Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 47), [-123, 4793], {
         baseReqs: [bombBagReq, [ironBootsReq, magicArmorReq]],
         baseDesc: "Underwater, east of the throne. The rocks under the boulder are worth lifting as there is a total of 40 rupees under them.",
         randoCategory: Categories.Rupees,
@@ -3381,21 +3381,25 @@ const flags = new Map([
         randoCategory: Categories.FreestandingRupees,
     })],
     ["Faron Woods Coro Boulder Rupee 4", new Flag(Rupees.Yellow, [-7321, 4890], {
+        itemCategory: Categories.HiddenRupees,
         baseReqs: [boulderReq],
         baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
         randoCategory: Categories.HiddenRupees,
     })],
     ["Faron Woods Coro Boulder Rupee 1", new Flag(Rupees.Green, [-7321, 4855], {
+        itemCategory: Categories.HiddenRupees,
         baseReqs: [boulderReq],
         baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
         randoCategory: Categories.HiddenRupees,
     })],
     ["Faron Woods Coro Boulder Rupee 2", new Flag(Rupees.Green, [-7291, 4855], {
+        itemCategory: Categories.HiddenRupees,
         baseReqs: [boulderReq],
         baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
         randoCategory: Categories.HiddenRupees,
     })],
     ["Faron Woods Coro Boulder Rupee 3", new Flag(Rupees.Blue, [-7291, 4890], {
+        itemCategory: Categories.HiddenRupees,
         baseReqs: [boulderReq],
         baseDesc: "Hidden in the boulder blocking the way to the Owl Statue.",
         randoCategory: Categories.HiddenRupees,
@@ -3410,7 +3414,7 @@ const flags = new Map([
         baseDesc: "In the left box behind the boulder leading to the back of the Eldin Spring.",
         randoCategory: Categories.HiddenRupees,
     })],
-    ["Kakariko Village Ant House Ledge Box Rupee", new Flag(Rupees.Yellow, [-5304, 7675], {
+    ["Kakariko Village Ant House Ledge Box Rupee", new Flag(Rupees.Red, [-5304, 7675], {
         baseReqs: [[new AndRequirements([boulderReq, [woodenSwordReq, shadowCrystalReq]]), boomerangReq, clawshotReq]],
         baseDesc: "In a box on the right end of the lower wooden scaffolding above the ant house.",
         randoCategory: Categories.HiddenRupees,
@@ -3420,7 +3424,7 @@ const flags = new Map([
         baseDesc: "In a box on the wooden scaffolding to the left of the hot spring.",
         randoCategory: Categories.HiddenRupees,
     })],
-    ["Death Mountain Volcano Pipe Ledge Rock Rupee", new Flag(Rupees.Yellow, [-3614, 8232], {
+    ["Death Mountain Volcano Pipe Ledge Rock Rupee", new Flag(Rupees.Red, [-3614, 8232], {
         baseDesc: "Hidden under the rock on the ledge below the pipe. Reach it by using the Goron.",
         randoCategory: Categories.HiddenRupees,
     })],
@@ -3488,7 +3492,7 @@ const flags = new Map([
     })],
     ["Zoras Domain Top Ledge Rupee", new Flag(Rupees.Yellow, [-508, 4782], {
         baseReqs: [[shadowCrystalReq, clawshotReq]],
-        baseDesc: "On the very last ledge before reaching the top of the waterfall.",
+        baseDesc: "On the very last ledge before reaching the top of the waterfall, next to the vines.",
         randoCategory: Categories.FreestandingRupees, 
     })],
     ["Lake Hylia Left Underwater Pillar Rupee", new Flag(Rupees.Yellow, [-4902, 3374], {
