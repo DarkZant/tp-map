@@ -810,7 +810,7 @@ class CaveOfOrdeals extends FlooredSubmap {
             gEL(['Bulblin Archers 6 ', 'Masked Lizalfos 3 ']) + tip('Use the Bow from the ledge for the Bulblins that are further away. ' +
                 'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down.'),
             gEL(['Poe 1 ', 'Dynalfos 4 ']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
-            gEL(['Bulblin Archers 2 ', 'Gibdos 2 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
+            gEL(['Bulblin Archers 2 ', 'Gibdos 5 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
                 `they are on towers and can shoot you from the other room.<br>${hearts3} are buried under the ledge.`),
             gEL(['Freezards 2 ', 'Chilfos 3 ', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
                 'avoid the Freezard under the ledge.'),
