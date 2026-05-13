@@ -29,6 +29,8 @@ class TrackerItem extends Storable {
         this.item = item;
         this.item.tracker = this;
         this.initialized = false;
+        this.showCounterState = 1;
+        this.counterStateOffset = 0;
     }
     setElem(elem) {
         this.elem = elem;
@@ -110,23 +112,27 @@ class TrackerItem extends Storable {
             this.elem.style.filter = "none";
         }
     }
+    setShowCounterState(state) {
+        this.showCounterState = state;
+        this.counterStateOffset = state - 1;
+    }
     updateElementCounter() {
         let counterElem = this.elem.children[2];
         let currentItemState = this.item.getState();
         let maxItemState = this.item.getMaxState();
 
-        if (currentItemState == 0) {
-            counterElem.style.display = 'none'; //Hide counter
+        if (currentItemState < this.showCounterState) {
+            counterElem.style.display = 'none'; // Hide counter
             return;
         }
 
-        counterElem.innerHTML = currentItemState; // Update Counter
+        counterElem.innerHTML = currentItemState - this.counterStateOffset; // Update Counter
         if (currentItemState == maxItemState) {
-            counterElem.style.display = 'inline'; //Show counter
+            counterElem.style.display = 'inline'; // Show counter
             counterElem.style.color = "#50C878"; // Change color to green
         }
-        else if (currentItemState == 1) {
-            counterElem.style.display = 'inline'; //Show Counter
+        else if (currentItemState == this.showCounterState) {
+            counterElem.style.display = 'inline'; // Show counter
             this.elem.children[2].style.color = "#c0c0c0"; // Set color to white
         } 
         else if (currentItemState == maxItemState - 1) {
@@ -247,33 +253,37 @@ class TrackerItem extends Storable {
 
 let trackerItems = new Map();
 let trackerSUName = "tracker";
+
+// Assign Items to TrackerItems
+for (let item of trackedItems) {
+    let imageSrc = item.getBaseImageSrc();
+    // Harcoded exceptions for items with duplicate images
+    // Should use item names for all but too lazy to put data-item on all .titem Divs
+    if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png') || 
+        imageSrc.includes('Dungeon_Map') || imageSrc.includes('Compass'))
+        trackerItems.set(item.name, new TrackerItem(item));   
+    else
+        trackerItems.set(imageSrc, new TrackerItem(item));       
+}
+// Assign .titem Divs to TrackerItems
+for (let titemDiv of document.querySelectorAll('.titem')) {
+    let baseIconPath = "Icons/";
+    // Check if titemDiv has assigned item
+    if ("item" in titemDiv.dataset) {
+        let trackerItem = trackerItems.get(titemDiv.dataset.item);
+        trackerItem.setElem(titemDiv);
+    }
+    else {
+        let imgSrc = titemDiv.getElementsByClassName('timage')[0].src;
+        let itemImgName = imgSrc.split(baseIconPath)[1];
+        let trackerItem = trackerItems.get(baseIconPath + itemImgName);
+        trackerItem.setElem(titemDiv);
+    }
+}
+
+let skybookTracker = skybook.getTracker().setShowCounterState(2);
+
 function initializeMapTracker() {
-    // Assign Items to TrackerItems
-    for (let item of trackedItems) {
-        let imageSrc = item.getBaseImageSrc();
-        // Harcoded exceptions for items with duplicate images
-        // Should use item names for all but too lazy to put data-item on all .titem Divs
-        if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png') || 
-            imageSrc.includes('Dungeon_Map') || imageSrc.includes('Compass'))
-            trackerItems.set(item.name, new TrackerItem(item));   
-        else
-            trackerItems.set(imageSrc, new TrackerItem(item));       
-    }
-    // Assign .titem Divs to TrackerItems
-    for (let titemDiv of document.querySelectorAll('.titem')) {
-        let baseIconPath = "Icons/";
-        // Check if titemDiv has assigned item
-        if ("item" in titemDiv.dataset) {
-            let trackerItem = trackerItems.get(titemDiv.dataset.item);
-            trackerItem.setElem(titemDiv);
-        }
-        else {
-            let imgSrc = titemDiv.getElementsByClassName('timage')[0].src;
-            let itemImgName = imgSrc.split(baseIconPath)[1];
-            let trackerItem = trackerItems.get(baseIconPath + itemImgName);
-            trackerItem.setElem(titemDiv);
-        }
-    }
     trackerSU = new StorageUnit(trackerSUName, trackerItems.values());
     // Create StorageUnit for TrackerItems
     // Initialize TrackerItems

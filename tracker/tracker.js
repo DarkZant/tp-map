@@ -4,32 +4,6 @@ document.addEventListener('trackerUpdated', function () {
         trackerModified = true;
 })
 
-// Assign Items to TrackerItems
-for (let item of trackedItems) {
-    let imageSrc = item.getBaseImageSrc();
-    // Harcoded exceptions for items with duplicate images
-    // Should use item names for all but too lazy to put data-item on all .titem Divs
-    if (imageSrc.includes('Small_Key.png') || imageSrc.includes('Boss_Key.png') || 
-        imageSrc.includes('Dungeon_Map') || imageSrc.includes('Compass'))
-        trackerItems.set(item.name, new TrackerItem(item));   
-    else
-        trackerItems.set(imageSrc, new TrackerItem(item));       
-}
-// Assign .titem Divs to TrackerItems
-for (let titemDiv of document.querySelectorAll('.titem')) {
-    let baseIconPath = "Icons/";
-    // Check if titemDiv has assigned item
-    if ("item" in titemDiv.dataset) {
-        let trackerItem = trackerItems.get(titemDiv.dataset.item);
-        trackerItem.setElem(titemDiv);
-    }
-    else {
-        let imgSrc = titemDiv.getElementsByClassName('timage')[0].src;
-        let itemImgName = imgSrc.split(baseIconPath)[1];
-        let trackerItem = trackerItems.get(baseIconPath + itemImgName);
-        trackerItem.setElem(titemDiv);
-    }
-}
 // Create StorageUnit for TrackerItems
 let aloneTrackerSU = new StorageUnit("tracker/tracker", trackerItems.values());
 // Initialize TrackerItems
@@ -116,6 +90,7 @@ function resetButtonText(button, text="Resetting...") {
         button.originalText = button.innerHTML;
     button.innerHTML = text;
 }
+
 function resetButtonsFeedback(button, text="Reset done!") {
     button.innerHTML = text;
     button.disabled = true;
