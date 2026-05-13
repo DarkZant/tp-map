@@ -125,6 +125,10 @@ class Setting extends Storable {
     changeElementDisplay(display) {
         this.element.parentElement.style.display = display;
     }
+    clickIfInactive() {
+        if (!this.isEnabled())
+            this.element.click();
+    }
 }
 
 class FunctionSetting extends Setting {
@@ -138,6 +142,7 @@ class FunctionSetting extends Setting {
     handleClick() {
         this.updateActive();
         this.func();
+        dispatchSettingsUpdate();
     }
     setFunction(func) {
         this.func = func;
@@ -243,6 +248,7 @@ function gameVersionStartFunction() {
 function revealSpoilerLog() {
     let revealed = this.element.checked;
     if (revealed) {
+        Settings.RevealSetJunkFlags.clickIfInactive();
         revealRandomEntrances();
     }
     else {
