@@ -234,17 +234,26 @@
                     </p>
                     <input id="spoilerLog" type="file">
                 </div>
-                <a id="seedLink" target="_blank">
-                    View Seed on the Rando Website
-                    <img src="Icons/External_Link.png">
-                </a>
                 <button id="Unload_Seed" onclick="unloadSeed()">Unload Seed</button>
-                <div id="seedSettings">
-                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints</label>
-                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Item_Tracker" class="bigSettingCheckbox">Autocomplete Tracker with Rando Items</label>
-                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Set/Junked Flags</label>
-                    <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Spoiler_Log" class="bigSettingCheckbox">Reveal Spoiler Log</label>
-                </div>
+                <div id="loadedSeed">
+                    <a id="seedLink" target="_blank">
+                        View Seed on the Rando Website
+                        <img src="Icons/External_Link.png">
+                    </a>
+                    <div id="seedSettings">
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints</label>
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Rando_Item_Tracker" class="bigSettingCheckbox">Autocomplete Tracker with Rando Items</label>
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Set/Junked Flags</label>
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Entrance_Randomized" class="bigSettingCheckbox">Load into Randomized Entrances</label>
+                        <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Reveal_Spoiler_Log" class="bigSettingCheckbox">Reveal Spoiler Log</label>
+                    </div>
+                    <div id="spoilerSpheresContainer">
+                        <details id="spheresDetails">
+                            <summary>Spheres</summary>
+                            <div class="scrollable" id="spheresList"></div>
+                        </details>
+                    </div>
+                </div>    
             </div>
             <div id="settingsCheckboxes">
                 
@@ -916,7 +925,7 @@
         <div id="notes" class="menu rightMenu">
             <div class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>Notes</h2>
-            <textarea id="notesInput" placeholder="Write your notes here..." spellcheck="false"></textarea>
+            <textarea class="scrollable" id="notesInput" placeholder="Write your notes here..." spellcheck="false"></textarea>
         </div>
         <!-- Scripts -->
         <script src="Scripts/images.js"></script>
@@ -931,8 +940,8 @@
         <script src="Scripts/requirements.js"></script>
         <script src="Scripts/nonflags.js"></script>
         <script src="Scripts/flags.js"></script>
-        <script src="Scripts/randoSeed.js"></script>
         <script src="Scripts/submaps.js"></script>
+        <script src="Scripts/randoSeed.js"></script>
         <!-- <script src="Scripts/oldMap.js"></script>  -->
         <script src="Scripts/storageCleanup.js"></script>
         <script>loadMap();</script>

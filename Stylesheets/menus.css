@@ -87,7 +87,7 @@
     color: #585858;
 }
 @supports not selector(::-webkit-scrollbar) {
-    .menu, textarea {
+    .menu, .scrollable {
         scrollbar-width: thin;
         scrollbar-color: #757575 rgb(56, 53, 46, 0.85); 
     }
@@ -97,7 +97,7 @@
         width: 0.6vw;
         min-width: 5px;
     }
-    textarea::-webkit-scrollbar {
+    .scrollable::-webkit-scrollbar {
         width: 0.4vw;
     }
     .menu::-webkit-scrollbar-track {
@@ -108,7 +108,7 @@
     textarea::-webkit-scrollbar-track {
         margin-block: 0.5dvh;
     }
-    .menu::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
+    .menu::-webkit-scrollbar-thumb, .scrollable::-webkit-scrollbar-thumb {
         border-radius: 10px;
         background-color: #757575;
         border: 2px solid transparent;
@@ -295,13 +295,21 @@ select:hover {
     font-size: calc(5px + 0.3vw);
     width: 6.9dvw;
 }
+#loadedSeed {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 1dvh;
+}
 
 #seedLink {
+    display: flex;
+    text-align: center;
     font-size: 1.025vmax;
-    display: none;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 1dvh 1dvw;
+    padding: 1dvh 0.75dvw;
     border: solid #c0c0c0 0.1dvw;
     border-radius: 0.5dvw;
     text-decoration: none;
@@ -309,7 +317,7 @@ select:hover {
 }
 #seedLink img {
     padding-left: 0.5dvw;
-    max-width: 1.5dvw;
+    max-width: 1.25dvw;
 }
 #seedLink:hover {
     text-decoration: underline;
@@ -317,12 +325,68 @@ select:hover {
 }
 
 #settings #Unload_Seed {
-    display: none;
     margin: 0;
 }
 #seedSettings {
     text-align: left;
-    display: none;
+}
+
+#spoilerSpheresContainer {
+    width: 100%;
+    text-align: left;
+    margin-top: 0.5dvh;
+    border-block: solid #c0c0c0 0.1dvw; /* Top and bottom */
+    padding-top: 1dvh;
+    padding-bottom: 0.5dvh;
+}
+
+#spheresDetails summary {
+    cursor: pointer;
+    font-size: 1.05vmax;
+    font-weight: bold;
+    color: #c0c0c0;
+    margin-bottom: 0.5dvh;
+}
+
+#spheresDetails summary:hover {
+    text-decoration: underline;
+}
+
+#spheresList {
+    margin-left: 0.5dvw;
+    max-height: 30dvh;
+    overflow-y: auto;
+}
+
+.sphereDetails {
+    max-width: 100%;
+    margin-bottom: 0.5dvh;
+}
+
+.sphereDetails summary {
+    font-size: 0.95vmax;
+    color: #a0a0a0;
+}
+
+.sphereContent {
+    max-width: 18dvw;
+    margin-left: 0.75dvw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5dvh;
+}
+
+.sphereItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5dvw;
+    font-size: 0.8vmax;
+    color: #e0e0e0;
+}
+
+.sphereItem img {
+    max-width: 2vmax;
+    max-height: 2vmax;
 }
 
 #settingsCheckboxes {

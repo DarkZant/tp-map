@@ -75,7 +75,8 @@ const LeafletMap = L.map('map', {
         keyboard: false,
         doubleClickZoom: false,
         bounds: [[500, -500], [-10836, 10676]],
-        dragging: false
+        dragging: false,
+        // renderer: L.canvas(),
 }); 
 
 const TileLayerBounds = L.latLngBounds([0, 0], [-9826, 8515]);
@@ -926,3 +927,13 @@ function resetButtonsFeedback(button, text="Reset done!") {
 }
 
 
+function revealRandomEntrances() {
+    for (let dungeon of Object.values(Dungeons))
+        dungeon.setTooltipToRandoEntrance();
+}
+function resetRandomEntrances() {
+    for (let dungeon of Object.values(Dungeons))
+        dungeon.resetTooltip();
+}
+
+mapIsLoaded = true;

@@ -1,3 +1,4 @@
+let mapIsLoaded = false;
 let selectedGamemode;
 const Gamemodes = Object.freeze({
     Base: 0,
@@ -218,6 +219,8 @@ function gamemodeFunction() {
         document.getElementById('randoFlagCounters').style.display = "block";
         document.getElementById('randoSeed').style.display = "flex";
     }
+    if (mapIsLoaded)
+        reloadMap();
 } 
 
 function gameVersionFunction() {
@@ -235,6 +238,16 @@ function gameVersionFunction() {
 
 function gameVersionStartFunction() {
     selectedGameVersion = parseInt(this.element.value);
+}
+
+function revealSpoilerLog() {
+    let revealed = this.element.checked;
+    if (revealed) {
+        revealRandomEntrances();
+    }
+    else {
+        resetRandomEntrances();
+    }
 }
 
 const Settings = Object.freeze({
@@ -259,7 +272,7 @@ const Settings = Object.freeze({
     RandoTracker: new Setting("Rando_Item_Tracker"),
     RevealHints: new Setting("Reveal_Hints"),
     RevealSetJunkFlags: new Setting('Reveal_Set_Junk_Flags'),
-    RevealSpoilerLog: new Setting("Reveal_Spoiler_Log"),
+    RevealSpoilerLog: new FunctionSetting("Reveal_Spoiler_Log"),
     // Base Game Flags Visibility
     Base_Main_Visibility: new CategoryVisibilitySetting('Base_Main_Visibility', Categories.Main, 1),
     Base_Hearts_Visibility: new CategoryVisibilitySetting('Base_Hearts_Visibility', Categories.Hearts, 1),
@@ -302,7 +315,10 @@ const Settings = Object.freeze({
     Rando_Hidden_Rupees_Visibility: new CategoryVisibilitySetting('Rando_Hidden_Rupees_Visibility', Categories.HiddenRupees),
     Base_Portal_Visibility: new CategoryVisibilitySetting('Base_Portal_Visibility', Categories.Portals, 1),
     Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
+    Entrances_Randomized: new Setting('Entrance_Randomized'),
 }); // Always add settings at the end to preserve storage IDs
+
+Settings.RevealSpoilerLog.setFunction(revealSpoilerLog);
 
 const settingsSU = new StorageUnit('settings', Object.values(Settings));
 

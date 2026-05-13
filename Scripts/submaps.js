@@ -1,18 +1,19 @@
+/** 
+* Transforms Strings into Flags in an array with Flags/NonFlags
+*/
+function resolveContents(contents) {
+    return contents.map(c => typeof c === 'string' ? flags.get(c) : c);
+}
+
 class SubmapFloor {
     constructor(floorImage, label, contents) {
         if (floorImage instanceof ImageWrapper)
-            this.image = this.image;
+            this.image = floorImage;
         else
             this.image = images.get(floorImage + '.png');
         this.label = label;
         let flagContents = [];
-        for (let c of contents) {
-            if(typeof c === 'string')
-                flagContents.push(flags.get(c));
-            else 
-                flagContents.push(c);
-        }
-        this.contents = flagContents;
+        this.contents = resolveContents(contents);
     }
     set() {
         for (let c of this.contents) {
@@ -267,6 +268,9 @@ class Submap {
     setName(name) {
         this.name = name;
     }
+    getName() {
+        return this.name;
+    }
     set() {
         for (let floor of this.floors)
             floor.set();
@@ -458,6 +462,7 @@ class Submap {
                 return;
             }
         }
+        this.updateTooltipContent();
         addMarkerToMap(this.marker, position);
         if (!requirementsAreMet) {
             this.marker.setIcon(getIcon(this.iconImage));
@@ -588,6 +593,26 @@ class Submap {
             this.activeFloor.manageJunkContent();
             return;
         }
+    }
+    setRandoEntrance(otherSubmap) {
+        this.randoEntrance = otherSubmap;
+    }
+    resetRandoEntrance() {
+        this.randoEntrance = null;
+    }
+    setTooltipToRandoEntrance() {
+        if (!this.randoEntrance)
+            return;
+        this.marker.setTooltipContent(this.randoEntrance.getName());
+    }
+    resetTooltip() {
+        this.marker.setTooltipContent(this.name);
+    }
+    updateTooltipContent() {
+        let tooltipContent = this.name;
+        if (randoIsActive() && this.randoEntrance && Settings.RevealSpoilerLog.isEnabled())
+            tooltipContent = this.randoEntrance.getName();
+        this.marker.setTooltipContent(tooltipContent);
     }
 }
 
@@ -1012,6 +1037,7 @@ class Dungeon extends FlooredSubmap {
     loadImageMapMarker() {
         if (layerCannotReload(this.marker))
             return;
+        this.updateTooltipContent();
         addMarkerToMap(this.marker, this.imagedPosition);
         this.loadMarkerVisuals();
     }
@@ -1026,6 +1052,12 @@ class Dungeon extends FlooredSubmap {
     
     }
     load() {
+        if (this.randoEntrance && randoIsActive() && Settings.Entrances_Randomized.isEnabled() && !this.isFromOtherSubmap) {
+            this.randoEntrance.isFromOtherSubmap = true;
+            this.randoEntrance.load();
+            return;
+        }
+        this.isFromOtherSubmap = false;
         removeAllLayers();
         if (currentMapState === MapStates.ImageMap) {
             setMapCenterToTileLayer();
@@ -1078,19 +1110,7 @@ class Province {
         this.baseReqs = baseReqs;
         this.randoReqs = randoReqs;
         this.glitchedReqs = glitchedReqs;
-        let flagContents = [];
-        for (let c of contents) {
-            if(typeof c === 'string') {
-                let flag = flags.get(c);
-                if (flag)
-                    flagContents.push(flags.get(c));
-                else
-                    console.error('Flag ' + c + ' not found in flags for province ' + name);
-            }
-            else 
-                flagContents.push(c);
-        }
-        this.contents = flagContents;
+        this.contents = resolveContents(contents);
         this.initializePolygon(polygonPoints);
     }
     set() {

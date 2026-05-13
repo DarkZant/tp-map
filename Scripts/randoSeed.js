@@ -163,6 +163,51 @@ const RandoItemMap = new Map([
 
 ]);
 
+const RandoOutsideDungeonString = Object.freeze({
+    Forest: "North Faron Woods",
+    Mines: "Death Mountain Sumo Hall Goron Mines Tunnel",
+    Lakebed: "Lake Hylia Lakebed Temple Entrance",
+    Grounds: "Outside Arbiters Grounds",
+    SnowpeakLeft: "Snowpeak Summit Lower Left Door",
+    SnowpeakRight: "Snowpeak Summit Lower Right Door",
+    Time: "Sacred Grove Past Behind Window",
+    City: "Lake Hylia",
+    Palace: "Mirror Chamber Portal",
+    Castle: "Castle Town North Inside Barrier",
+});
+
+const RandoDungeonEntrancesMap = new Map([
+    // Forest Temple
+    [RandoOutsideDungeonString.Forest, Dungeons.Forest],
+    ["Forest Temple Entrance", Dungeons.Forest],
+    // Goron Mines
+    [RandoOutsideDungeonString.Mines, Dungeons.Mines],
+    ["Goron Mines Entrance", Dungeons.Mines],
+    // Lakebed Temple
+    [RandoOutsideDungeonString.Lakebed, Dungeons.Lakebed],
+    ["Lakebed Temple Entrance", Dungeons.Lakebed],
+    // Arbiter's Grounds
+    [RandoOutsideDungeonString.Grounds, Dungeons.Grounds],
+    ["Arbiters Grounds Entrance", Dungeons.Grounds],
+    // Snowpeak Ruins
+    [RandoOutsideDungeonString.SnowpeakLeft, Dungeons.Snowpeak],
+    [RandoOutsideDungeonString.SnowpeakRight, Dungeons.Snowpeak],
+    ["Snowpeak Ruins Left Door", Dungeons.Snowpeak],
+    ["Snowpeak Ruins Right Door", Dungeons.Snowpeak],
+    // Temple of Time
+    [RandoOutsideDungeonString.Time, Dungeons.Time],
+    ["Temple of Time Entrance", Dungeons.Time],
+    // City in the Sky
+    [RandoOutsideDungeonString.City, Dungeons.City],
+    ["City in The Sky Entrance", Dungeons.City],
+    // Palace of Twilight
+    [RandoOutsideDungeonString.Palace, Dungeons.Palace],
+    ["Palace of Twilight Entrance", Dungeons.Palace],
+    // Hyrule Castle
+    [RandoOutsideDungeonString.Castle, Dungeons.Castle],
+    ["Hyrule Castle Entrance", Dungeons.Castle],
+]);
+
 const RandoSettingsMap = new Map([
     ["skipPrologue", RandoSettings.SkipPrologue],
     ["faronTwilightCleared", RandoSettings.FaronTwilightCleared],
@@ -212,6 +257,9 @@ function getRandoItem(itemName) {
 let dropZone = document.getElementById('randoSeedFile');
 let dropZoneText = document.getElementById("randoSeedFileText");
 let fileInput = document.getElementById('spoilerLog');
+let spheresDetail = document.getElementById('spheresDetails');
+let spheresList = document.getElementById("spheresList");
+
 
 dropZone.addEventListener('click', () => {
     fileInput.click();
@@ -268,6 +316,7 @@ function manageFile(file) {
             return;
         }
         resetRandoItems();
+        resetRandoEntrances();
         try {
             loadSpoilerLog(data);
             localStorage.setItem(spoilerLogStorageName, textResult);
@@ -285,9 +334,13 @@ function manageFile(file) {
 
 function resetSpoilingSettings() {
     Settings.RevealSetJunkFlags.reset();
+    Settings.Entrances_Randomized.reset();
     Settings.RevealSpoilerLog.reset();
+    spheresDetail.open = false; 
 }
-
+/**
+ * Checks the seed on initial load
+ */
 function checkRandoSeed() {
     let savedLog = localStorage.getItem(spoilerLogStorageName);
     if (!savedLog)
@@ -303,18 +356,24 @@ function resetRandoItems() {
         flag.resetRandoItem();
 }
 
+function resetRandoEntrances() {
+    for (let dungeon of Object.values(Dungeons)) {
+        dungeon.resetRandoEntrance();
+    }
+    resetRandomEntrances();
+}
+
 function unloadSeed() {
     resetRandoItems();
+    resetRandoEntrances();
     localStorage.removeItem(spoilerLogStorageName);
     seedIsLoaded = false;
     fileInput.value = '';
     resetSpoilingSettings();
     reloadMap();
-
     
     dropZoneText.innerHTML = "Seed Unloaded!";
-    document.getElementById("seedSettings").style.display = "none";
-    document.getElementById("seedLink").style.display = "none";
+    document.getElementById("loadedSeed").style.display = "none";
     let unloadButton = document.getElementById("Unload_Seed");
     resetButtonText(unloadButton, "Unloading...");
     resetButtonsFeedback(unloadButton, "Seed Unloaded!");
@@ -327,12 +386,44 @@ function unloadSeed() {
 
 let seedIsLoaded = false;
 
+function populateSpheres(data) {
+    spheresList.innerHTML = "";
+
+    for (let [sphereIndex, sphere] of Object.entries(data['spheres'])) {
+        let sphereDetails = document.createElement("details");
+        sphereDetails.className = "sphereDetails";
+        let sphereSummary = document.createElement("summary");
+        sphereSummary.textContent = sphereIndex;
+        sphereDetails.appendChild(sphereSummary);
+
+        let sphereContent = document.createElement("div");
+        sphereContent.className = "sphereContent";
+
+        for (let [flagName, itemName] of Object.entries(sphere)) {
+            let sphereItem = document.createElement("div");
+            sphereItem.className = "sphereItem";
+            
+            let item = getRandoItem(itemName);
+            let iconPath = "Icons/ItemBox.png";
+            let displayName = underscoreToSpace(itemName);
+            if (item) {
+                iconPath = item.getImage().src;
+                displayName = item.getName();
+            }
+
+            sphereItem.innerHTML = `<img src="${iconPath}"><span>${flagName}: ${displayName}</span>`;
+            sphereContent.appendChild(sphereItem);
+        }
+        sphereDetails.appendChild(sphereContent);
+        spheresList.appendChild(sphereDetails);
+    }
+}
+
 function loadSpoilerLog(data, start=false) {
+    document.getElementById("loadedSeed").style.display = "flex";
     document.getElementById("Unload_Seed").style.display = "inline";
-    document.getElementById("seedSettings").style.display = "inline";
 
     let seedLink = document.getElementById("seedLink");
-    seedLink.style.display = "flex";
     seedLink.href = "https://generator.tprandomizer.com/s/" + data['meta']['seedId'];
 
     let settings = data["settings"];
@@ -396,6 +487,10 @@ function loadSpoilerLog(data, start=false) {
     found_progressive_items = new Map();
     for (let itemName of settings["startingItems"]) {
         let item = getRandoItem(itemName);
+        if (!item) {
+            console.log("Unknown item in startingItems:", itemName);
+            continue;
+        }
         if (item instanceof BoolItem && !item.isObtained()) {
             if (item.getName().includes("Portal")) { // Special case for portals since they're not tracked
                 let flag = flags.get(Portals.getPortalFlagName(item));
@@ -449,15 +544,33 @@ function loadSpoilerLog(data, start=false) {
         flags.get("Zoras Domain Portal").set();
         flags.get("Lanayru Field Scent of Ilia").set();
     }
-    
+
+    // Setting randomized dungeon entrances
+    let shuffledEntrancesMap = new Map();
+    for (let shuffledEntrance of data["shuffledEntrances"]) {
+        let split = shuffledEntrance.split(' -> ');
+        shuffledEntrancesMap.set(split[0], split[1]);
+    }
+    for (let outsideEntrance of Object.values(RandoOutsideDungeonString)) {
+        let dungeonEntrance = RandoDungeonEntrancesMap.get(outsideEntrance);
+        let enteredDungeon = RandoDungeonEntrancesMap.get(shuffledEntrancesMap.get(outsideEntrance));
+        if (dungeonEntrance && enteredDungeon)
+            dungeonEntrance.setRandoEntrance(enteredDungeon);
+    }
+    if (settings['unpairEntrances'] && shuffledEntrancesMap.get(RandoOutsideDungeonString.SnowpeakLeft) !== shuffledEntrancesMap.get(RandoOutsideDungeonString.Right)) {
+        //TODO Unpaired entrances
+    }
 
     dropZoneText.innerHTML = "Loaded Seed:<br><b>" + data["playthroughName"] +"</b><br>Click or Drag to load another seed.";
     let seedVersion = parseFloat(data["meta"]["imageVersion"]);
-    if (seedVersion > 1.3) 
+    let currentRandoVersion = 1.3;
+    let mapIsOutdated = false;
+    if (seedVersion > currentRandoVersion) 
         dropZoneText.innerHTML += "<br><br><b>Warning: The Development Version of the Randomizer is not fully supported and some things may not work as intended.</b>";
-    else if (seedVersion == 1.3)
-        dropZoneText.innerHTML += "<br><br><b>Warning: The tracker is currently being updated to support the new features added in version 1.3 of the Randomizer, so some things may not work as intended.</b>";
+    else if (seedVersion == currentRandoVersion && mapIsOutdated)
+        dropZoneText.innerHTML += `<br><br><b>Warning: The tracker is currently being updated to support the new features added in version ${currentRandoVersion} of the Randomizer, so some things may not work as intended.</b>`;
 
+    populateSpheres(data);
     seedIsLoaded = true;
     
     // Update Gamemode
@@ -470,6 +583,4 @@ function loadSpoilerLog(data, start=false) {
         Settings.Gamemode.setValue(Gamemodes.Glitched);
     if (!unblockMapReloading() && !start)
         reloadMap();
-
-    
 }
