@@ -1000,7 +1000,7 @@ class Dungeon extends FlooredSubmap {
         super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
         this.floorOffset = floorOffset;
         this.imagedPosition = imagedPosition;
-        this.marker.setZIndexOffset(2000);
+        this.marker.setZIndexOffset(100000);
         this.boundsOffset = [1500, 300];
     }
     initializeImages() {

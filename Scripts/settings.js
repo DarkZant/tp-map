@@ -259,7 +259,7 @@ function revealSpoilerLog() {
 const Settings = Object.freeze({
     Gamemode: new SelectSetting('Gamemodes',  gamemodeFunction), // Keep in 1st for rando link to work
     GameVersion: new SelectSetting('gameVersion', gameVersionFunction, gameVersionStartFunction),
-    TrackerLogic: new FunctionSetting('Tracker_Logic', 1),
+    TrackerLogic: new FunctionSetting('Tracker_Logic'),
     HideNoReqs: new FunctionSetting('Hide_Flag_Without_Requirement'),
     AutocompleteTracker: new Setting('Tracker_Autocompletion', 1),
     DisableTrackerAnims: new Setting('Disable_Tracker_Animations'),
