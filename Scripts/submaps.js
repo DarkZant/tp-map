@@ -406,10 +406,10 @@ class Submap {
         return false;
     }
     isShown() {
+        if (!verifySubmapRequirements(this) && Settings.HideNoReqs.isEnabled()) 
+            return false;
         if (Settings.EmptySubmaps.isEnabled())
             return true;
-        if (!verifySubmapRequirements(this) && Settings.HideNoReqs.isEnabled())
-            return false;
         for (let floor of this.floors) {
             if (floor.hasShownContent())
                 return true;
@@ -455,6 +455,7 @@ class Submap {
         if (!this.isShown() || layerCannotReload(this.marker))
             return;
         let requirementsAreMet = verifySubmapRequirements(this);
+
         if (Settings.SubmapAsMarker.isEnabled() && requirementsAreMet) {
             let uniqueMarker = this.getUniqueShownMarker();
             if (uniqueMarker !== null) {
@@ -763,12 +764,18 @@ class CaveOfOrdeals extends FlooredSubmap {
         let floorsText = this.getFloorsText();
         for (let i = 0; i < this.floors.length; ++i)
             this.floors[i].text = floorsText[i];
+        
+        this.baseReqs = [clawshotReq];
     }
     getFloorsText() {
         let gEL = (enemies) => { // Get Enemy List Formatting
             let text = "<b>Enemies</b><ul>";
-            for(let i = 0; i < enemies.length; ++i)
-                text += "<li>" + enemies[i].slice(0, -2) + '&nbsp× &nbsp' + enemies[i].slice(-2) + '</li>'
+            for (let i = 0; i < enemies.length; ++i) {
+                let enemy = enemies[i].split(" ");
+                let enemyName = enemy.slice(0, -1).join(" ");
+                let enemyNumber = enemy.at(-1);
+                text += "<li>" + enemyName + ' &nbsp × &nbsp ' + enemyNumber + '</li>'
+            }
             return text + "</ul>"
         }
         let tip = (text) => "<u>Tip</u><br>" + text;
@@ -776,72 +783,73 @@ class CaveOfOrdeals extends FlooredSubmap {
         let heart = "<img src=Icons/Heart.png>";
         let hearts3 = "3&nbsp×&nbsp" + heart;
         let floorsText = [
-            gEL(['Blue / Red Bokoblin 1 ']),
-            gEL(['Keese 3 ', 'Rats 3 ']),
-            gEL(['Baba Serpents 4 ']) + tip('You can make the ceiling ones fall with either the ' +
+            gEL(['Blue / Red Bokoblin 1']) + tip("After clearing the Cave of Ordeals once, the bokoblin will be red."),
+            gEL(['Keese 3', 'Rats 3']),
+            gEL(['Baba Serpents 4']) + tip('You can make the ceiling ones fall with either the ' +
             `Slingshot, Clawshot, Boomerang or Bow.<br>There is also a ${heart} buried under the grounded Baba Serpent.`),
-            gEL(['Skulltulas 3 ']),
-            gEL(['Bulblin Archers 3 ']) + tip('Collect the arrows they miss to fill up your quiver.'),
-            gEL(['Torchs Slugs 9 ']) + tip('Defeating the ceiling ones with a long ranged weapon' +
+            gEL(['Skulltulas 3']),
+            gEL(['Bulblin Archers 3']) + tip('Collect the arrows they miss to fill up your quiver.'),
+            gEL(['Torchs Slugs 9']) + tip('Defeating the ceiling ones with a long ranged weapon' +
             ' makes the room a lot easier.'),
-            gEL(["Dodongos 2 ", 'Fire Keese 5 ']) + hearts3 + ' are buried next to the west wall.',
-            gEL(['Blue Tektites 2 ', 'Red Tektikes 5 ']),
-            gEL(['Bulblin Archers 2 ', 'Lizalfos 2 ']) + tip('The Bulblin Archers are hidden under ' +
+            gEL(["Dodongos 2", 'Fire Keese 5']) + hearts3 + ' are buried next to the west wall.',
+            gEL(['Blue Tektites 2', 'Red Tektikes 5']),
+            gEL(['Bulblin Archers 2', 'Lizalfos 2']) + tip('The Bulblin Archers are hidden under ' +
             'the ledge, take them out first.'),
             gf('Releases fairies into the Ordon Spring.'),
-            gEL(['Helmasaurs 3 ', 'Rats 13']) + tip('The Spinner is required to go further.<br>You can defeat the rats easily with a Jump Attack ' +
+            gEL(['Helmasaurs 3', 'Rats 13']) + tip('The Spinner is required to go further.<br>You can defeat the rats easily with a Jump Attack ' +
             'into Spin Attack from the ledge.'),
-            gEL(['Large Purple Chu 1 ']) + tip('Use a Bomb to instantly separate the Large Chu into Small Chus.'),
-            gEL(['Chu Worms 4 ']) + tip('Destroy their bubbles with Bombs or use the Clawshot to get them out of it.'),
+            gEL(['Large Purple Chu 1']) + tip('Use a Bomb to instantly separate the Large Chu into Small Chus.'),
+            gEL(['Chu Worms 4']) + tip('Destroy their bubbles with Bombs or use the Clawshot to get them out of it.'),
             gEL(['Bubbles 15']) + tip('Quickspin works well against Bubbles.'),
             gEL(['Bulblins 10']),
-            gEL(['Rats 6 ', 'Keese 6 ']),
-            gEL(['Poe 1 ', 'Stalhounds 10']) + tip('Defeat the Stalhounds in human form and then defeat the Poe.'),
-            gEL(['Leevers 8 ']) + tip(`Wait for them to get close then use a Spin Attack.<br> There is a ${heart} buried under the ledge.`),
-            gEL(['Purple Chus 36', 'Blue Chu 2 ', 'Red Chu 1 ', 'Rare / Yellow Chu 1 ']) + tip('The Purple Chus merge with Non-Purple ' +
+            gEL(['Rats 6', 'Keese 6']),
+            gEL(['Poe 1', 'Stalhounds 10']) + tip('Defeat the Stalhounds in human form and then defeat the Poe.'),
+            gEL(['Leevers 8']) + tip(`Wait for them to get close then use a Spin Attack.<br> There is a ${heart} buried under the ledge.`),
+            gEL(['Purple Chus 36', 'Blue Chu 2', 'Red Chu 1', 'Rare / Yellow Chu 1']) + tip('The Purple Chus merge with Non-Purple ' +
                 'Chus first, so you have to be quick is you wanna collect Chu Jelly.'),
             gf('Releases fairies into the Faron Spring.'),
-            gEL(['Bokoblins 5 ', 'Ice Keese 5 ']) + tip("The Ball and Chain is required to go further."),
-            gEL(['Ghoul Rats 10', 'Keese 5 ', 'Rats 5 ']) + tip(`Use Wolf Link and his senses to defeat the Ghoul Rats.<br>${hearts3}` +
+            gEL(['Bokoblins 5', 'Ice Keese 5']) + tip("The Ball and Chain is required to go further."),
+            gEL(['Ghoul Rats 10', 'Keese 5', 'Rats 5']) + tip(`Use Wolf Link and his senses to defeat the Ghoul Rats.<br>${hearts3}` +
                 ' are buried in the center of the room.'),
             gEL(['Stalchildren 25']),
-            gEL(['Gibdos 5 ']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily.'),
-            gEL(['Bulblin Archers 3 ', 'Bulblins 8 ']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
+            gEL(['Gibdos 5']) + tip('Throw the Ball and Chain from a safe distance to defeat the Gibdos easily.'),
+            gEL(['Bulblin Archers 3', 'Bulblins 8']) + tip('Be careful of the Bulbin Archer on top of the tower' + 
                 ' as he can shoot you from the other floor.'),
-            gEL(['Stalfos 3 ']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
-            gEL(['Skulltulas 3 ', 'Bubbles 6 ']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a ' + heart + 
+            gEL(['Stalfos 3']) + tip('Use the Ball and Chain to easily defeat the Stalfos.'),
+            gEL(['Skulltulas 3', 'Bubbles 6']) + tip('The hanging Skulltulas cannot harm Link.<br> There is a ' + heart + 
                 ' buried near the west wall.'),
-            gEL(['Masked Lizalfos 2 ', 'Red Bokoblins 6 ']),
-            gEL(['Stalfos 2 ', 'Fire Bubbles 3 ', 'Stalchildren 12']),
+            gEL(['Masked Lizalfos 2', 'Red Bokoblins 6']),
+            gEL(['Stalfos 2', 'Fire Bubbles 3', 'Stalchildren 12']),
             gf('Releases fairies into the Eldin Spring.'),
-            gEL(['Beamos 5 ', 'Keese 8 ']) + tip("The restored Dominion Rod is required to go further.<br>Eliminate the " + 
+            gEL(['Beamos 5', 'Keese 8']) + tip("The restored Dominion Rod is required to go further.<br>Eliminate the " + 
                 "Beamos from the ledge to make the room easier. If you don't have the bow, use the ball and chain to defeat the Beamos."),
-            gEL(['Fire Bubbles 6 ', 'Fire Keese 6 ', 'Torch Slugs 6 ', 'Dodongos 2 ']) + tip('Eliminate the Torch Slugs on the ceiling before ' + 
+            gEL(['Fire Bubbles 6', 'Fire Keese 6', 'Torch Slugs 6', 'Dodongos 2']) + tip('Eliminate the Torch Slugs on the ceiling before ' + 
                 'going down to make the room easier.'),
-            gEL(['Poe 1 ', 'Gibdos 4 ']) + tip('Defeat the closest Gibdo, then the Poe, then the other Gibdos.'),
-            gEL(['Ghoul Rats 10', 'Purple Chus 7 ', 'Red Chu 1 ', 'Yellow Chu 1 ']) + tip('Defeat the Ghoul Rats as Wolf Link, then ' +
+            gEL(['Poe 1', 'Gibdos 4']) + tip('Defeat the closest Gibdo, then the Poe, then the other Gibdos.'),
+            gEL(['Ghoul Rats 10', 'Purple Chus 7', 'Red Chu 1', 'Yellow Chu 1']) + tip('Defeat the Ghoul Rats as Wolf Link, then ' +
                 `transform back into human to defeat the Chus.<br>There is a ${heart} buried next to the south-west wall.`),
-            gEL(['Ice Keese 6 ', 'Freezard 1 ']),
-            gEL(['Chilfos 4 ']),
-            gEL(['Leevers 8 ', 'Bubbles 4 ', 'Ice Bubbles 4 ']),
-            gEL(['Freezards 2 ', 'Chilfos 4 ', 'Ice Keese 3 ',  'Ice Bubbles 4 ']) + tip('Take out the Chilfos with Bomb Arrows and the ' + 
+            gEL(['Ice Keese 6', 'Freezard 1']),
+            gEL(['Chilfos 4']),
+            gEL(['Leevers 8', 'Bubbles 4', 'Ice Bubbles 4']),
+            gEL(['Freezards 2', 'Chilfos 4', 'Ice Keese 3', 'Ice Bubbles 4']) + tip('Take out the Chilfos with Bomb Arrows and the ' + 
                 'Ice Keese and Ice Bubbles with Arrows. Magic Armor is particulary good for this room.'),
-            gEL(['Darknuts 2 ']) + tip('Try to fight them off one by one before they regroup. Hidden Skills like Helm Splitter and Back Slice ' +
-                'are effective against Darknuts. You can also use the running slice and get behind them for easy attacks.'),
+            gEL(['Darknuts 2&nbsp&nbsp/&nbsp&nbsp3']) + tip('If you comeback to this floor after having cleared the Cave of Ordeals once, there will ' + 
+                'be 3 Darknuts. Try to fight them off one by one before they regroup. Attack like Helm Splitter, Back Slice ' +
+                'and the running slice are effective against Darknuts.'),
             gf('Releases fairies into the Lanayru Spring.'),    
-            gEL(['Armos 9 ']) + tip('The Double Clawshots are required to go further.<br>Use Bomb Arrows to defeat the Armos from afar, ' +
+            gEL(['Armos 9']) + tip('The Double Clawshots are required to go further.<br>Use Bomb Arrows to defeat the Armos from afar, ' +
                 'or jump down and use Bomblings or Hidden Skills to defeat them easily.'),
-            gEL(['Baba Serpents 6 ', 'Red Bokoblins 6 ']) + tip('Try to lure the Bokoblins away from the Babas to make the room easier.'),
-            gEL(['Bulblin Archers 6 ', 'Masked Lizalfos 3 ']) + tip('Use the Bow from the ledge for the Bulblins that are further away. ' +
+            gEL(['Baba Serpents 6', 'Red Bokoblins 6']) + tip('Try to lure the Bokoblins away from the Babas to make the room easier.'),
+            gEL(['Bulblin Archers 6', 'Masked Lizalfos 3']) + tip('Use the Bow from the ledge for the Bulblins that are further away. ' +
                 'One Bulblin is exactly under the ledge and two others are not far, so be careful when dropping down.'),
-            gEL(['Poe 1 ', 'Dynalfos 4 ']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
-            gEL(['Bulblin Archers 2 ', 'Gibdos 5 ', 'Purple Chus 8 ', 'Red Chus 2 ', 'Blue Chu 1 ']) + tip('Be careful of the Bulblin Archers as ' +
+            gEL(['Poe 1', 'Dynalfos 4']) + tip('Eliminate the Dynalfos with Bomb Arrows, then jump down to defeat the Poe.'),
+            gEL(['Bulblin Archers 2', 'Gibdos 5', 'Purple Chus 8', 'Red Chus 2', 'Blue Chu 1']) + tip('Be careful of the Bulblin Archers as ' +
                 `they are on towers and can shoot you from the other room.<br>${hearts3} are buried under the ledge.`),
-            gEL(['Freezards 2 ', 'Chilfos 3 ', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
+            gEL(['Freezards 2', 'Chilfos 3', 'Ghoul Rats 10']) + tip('Defeat the Chilfos from the ledge with Bomb Arrows, then jump carefully to ' + 
                 'avoid the Freezard under the ledge.'),
-            gEL(['Rats 17', 'Stalchildren 9 ', 'Blue Bokoblin 1 ']) + tip('Be careful of the Rats that are under the ledge.'),
-            gEL(['Darknut 1 ', 'Aeralfos 2 ']) + tip('Take out the Aeralfos first, using the Boomerang then Clawshot technique.'),
-            gEL(['Darknut 3 ']) + tip('If you comeback to this floor after having cleared the Cave of Ordeals once, there will ' + 
+            gEL(['Rats 17', 'Stalchildren 9', 'Blue Bokoblin 1']) + tip('Be careful of the Rats that are under the ledge.'),
+            gEL(['Darknut 1', 'Aeralfos 2']) + tip('Take out the Aeralfos first, using the Boomerang then Clawshot technique.'),
+            gEL(['Darknut 3&nbsp&nbsp/&nbsp&nbsp4']) + tip('If you comeback to this floor after having cleared the Cave of Ordeals once, there will ' + 
                 'be 4 Darknuts. Try to pick them off one by one and use attacks that stun them all at the same time.'),
             gf('Gives you Great Fairy Tears everytime you visit her. Also enables the ability to get Great Fairy Tears at ' +
                 'Spirit Springs if you do not have any.')  
@@ -1356,6 +1364,7 @@ const Dungeons = Object.freeze({
         "Forest Temple Totem Pole Monkey Lock",
         // Totem Pole Monkey Room
         "Forest Temple Second Monkey Under Bridge Chest",
+        "Forest Temple Pole Monkey",
         // West Room
         "Forest Temple West Deku Like Chest",
         // Big Baba Room
@@ -1368,22 +1377,28 @@ const Dungeons = Object.freeze({
         "Forest Temple Tile Worm Monkey Lock",
         // Ook Room
         "Forest Temple Gale Boomerang",
+        // Big Outside Bridges Room
+        "Forest Temple Hanging Cage Monkey",
         // Windless Bridge Room
         "Forest Temple Windless Bridge Chest",
         "Forest Temple Windless Bridge Lock",
+        // West Skulltula Web Room
+        "Forest Temple Monkey Under Web",
         // East Tile Worm Room
         "Forest Temple East Tile Worm Chest",
+        "Forest Temple Monkey Behind Windmill Gate",
         // Before Boss Room
         Bottle.Fairy.new([-3920, 4820]),
         "Forest Temple Boss Lock",
         // North Water Room
         "Forest Temple North Deku Like Chest",
+        "Forest Temple Monkey Behind Rocks",
         // Diababa Room
         "Forest Temple Diababa",
         "Forest Temple Diababa Heart Container",
         "Forest Temple Dungeon Reward",
     ]], {
-        baseReqs: [lanternReq], 
+        baseReqs: [faronTwilightCleared, lanternReq],
         randoReqs: [[lanternReq, shadowCrystalReq, new AndRequirements([prologueNotSkippedReq, boulderReq])]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
     }),
     
@@ -1465,6 +1480,8 @@ const Dungeons = Object.freeze({
             // Before Deku Toad Room
             "Lakebed Temple Before Deku Toad Alcove Chest",
             "Lakebed Temple Before Deku Toad Lock",
+            Bottle.YellowChu.new([-4145, 5642]),
+            Bottle.PurpleChu.new([-4185, 5628]),
             // Deku Toad Room
             "Lakebed Temple Deku Toad Chest",
             // West Lower Room
@@ -1475,6 +1492,9 @@ const Dungeons = Object.freeze({
             // Entrance Room
             "Lakebed Temple Lobby Rear Chest",
             "Lakebed Temple Lobby Left Chest",
+            Bottle.PurpleChu.new([-5396, 4360]),
+            Bottle.RedChu.new([-5515, 4437]),
+            Bottle.BlueChu.new([-5308, 4362]),
             // Stalactite 
             "Lakebed Temple Stalactite Room Chest",
             // Main Room
@@ -1485,6 +1505,8 @@ const Dungeons = Object.freeze({
             "Lakebed Temple East Second Floor Southwest Chest",
             "Lakebed Temple East Second Floor Southeast Chest",
             Bottle.Fairy.new([-4533, 5253]),
+            Bottle.RedChu.new([-4398, 5725]),
+            Bottle.PurpleChu.new([-4451, 5725]),
             // East Supply 
             "Lakebed Temple East Water Supply Lock",
             // West Upper Room
@@ -1492,15 +1514,21 @@ const Dungeons = Object.freeze({
             "Lakebed Temple West Second Floor Northeast Chest",
             "Lakebed Temple West Second Floor Southwest Underwater Chest",
             "Lakebed Temple West Second Floor Southeast Chest",
+            Bottle.RedChu.new([-4148, 3435]),
+            Bottle.PurpleChu.new([-4179, 3396]),
+            Bottle.RedChu.new([-4534, 3320]),
+            Bottle.PurpleChu.new([-4592, 3318]),
         ], [ // 3F
 
         ], [ // 4F
             // East Supply Top
             "Lakebed Temple East Water Supply Small Chest",
             "Lakebed Temple East Water Supply Clawshot Chest",
+            "Lakebed Temple East Water Supply",
             // West Supply Top
             "Lakebed Temple West Water Supply Small Chest",
             "Lakebed Temple West Water Supply Chest",
+            "Lakebed Temple West Water Supply",
         ]
     ], {floorOffset: 1, 
         baseReqs: [zoraArmorReq, bombBagReq, ironBootsReq], 
@@ -1586,7 +1614,9 @@ const Dungeons = Object.freeze({
             "Snowpeak Ruins Chest After Darkhammer",
             "Snowpeak Ruins Armor Bubble Rupee After Darkhammer",
             "Snowpeak Ruins Sign",
-            Bottle.Soup.new([-5141, 4911])
+            Bottle.Soup.new([-5141, 4911]),
+            Bottle.PurpleChu.new([-5517, 4471]),
+            Bottle.YellowChu.new([-5602, 3929]),
         ], [ // 2F
             "Snowpeak Ruins Chapel Chest",
             "Snowpeak Ruins Ice Room Poe",
@@ -1602,8 +1632,8 @@ const Dungeons = Object.freeze({
             "Snowpeak Ruins Dungeon Reward",
         ]
     ], {
-        baseReqs: [coralEarringReq, reekfishScentReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, [new AndRequirements([coralEarringReq, reekfishScentReq, shadowCrystalReq], snowpeakScentReq)]]
+        baseReqs: snowpeakReq, 
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, ...snowpeakReq]
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1658,7 +1688,9 @@ const Dungeons = Object.freeze({
 
         ], [ // B1
             "City in The Sky East Wing Lower Level Chest",
-            "City in The Sky West Wing Baba Balcony Chest"
+            "City in The Sky West Wing Baba Balcony Chest",
+            Bottle.RedChu.new([-4434, 2711]),
+            Bottle.PurpleChu.new([-4434, 2775]),
         ], [ // 1F
             "City in The Sky Underwater West Chest",
             "City in The Sky Underwater East Chest",
@@ -1672,7 +1704,8 @@ const Dungeons = Object.freeze({
             "City in The Sky Chest Behind North Fan",
             "City in The Sky North Aeralfos Rupee",
             "City in the Sky Sign",
-            Bottle.Fairy.new([-4495, 3767])
+            Bottle.Fairy.new([-4495, 3767]),
+            Bottle.PurpleChu.new([-4428, 2977]),
         ], [ // 2F
             "City in The Sky East Wing After Dinalfos Alcove Chest",
             "City in The Sky East Wing After Dinalfos Ledge Chest",
@@ -1691,14 +1724,16 @@ const Dungeons = Object.freeze({
             "City in The Sky Central Outside Poe Island Chest",
             "City in The Sky Big Key Chest",
             "City in The Sky Poe Above Central Fan",
-            Bottle.BlueChu.new([-3776, 3738])
+            Bottle.BlueChu.new([-3776, 3738]),
+            Bottle.PurpleChu.new([-3827, 3756]),
         ], [ // 5F
             "City in The Sky Boss Lock",
             "City in The Sky Argorok",
             "City in The Sky Argorok Heart Container",
             "City in The Sky Dungeon Reward",
             Bottle.Fairy.new([-3728, 4136]),
-            Bottle.BlueChu.new([-3674, 4127])
+            Bottle.BlueChu.new([-3654, 4095]),
+            Bottle.PurpleChu.new([-3674, 4144]),
         ]
     ], {floorOffset: 0, 
         baseReqs: [clawshotReq, completedSkybookReq],
@@ -1726,7 +1761,8 @@ const Dungeons = Object.freeze({
             "Palace of Twilight East Wing Second Room Southeast Chest",
             "Palace of Twilight East Wing Second Lock",
             "Palace of Twilight Sign",
-            Bottle.Fairy.new([-5106, 3727])
+            Bottle.Fairy.new([-5106, 3727]),
+            Bottle.Fairy.new([-5067, 4607]),
         ], [ // 2F
             "Palace of Twilight Central First Room Chest"
         ], [ // 3F
@@ -1764,6 +1800,7 @@ const Dungeons = Object.freeze({
             "Hyrule Castle East Wing Balcony Chest",
             "Hyrule Castle Main Hall Northeast Chest",
             "Hyrule Castle Main Hall Northwest Chest",
+            "Hyrule Castle West Hall Darknut Rupee",
             "Hyrule Castle Main Hall Southwest Chest",
             "Hyrule Castle Lantern Staircase Chest",
             "Hyrule Castle Southeast Balcony Tower Chest",
@@ -1807,10 +1844,10 @@ let grottoIconImage = getIconImage('Grotto');
 let doorIconImage = getIconImage('Door');
 let entranceIconImage = getIconImage('Entrance');
 
-function newGrotto(id, position, name, contents) {
+function newGrotto(id, position, name, contents, {baseReqs=[], randoReqs=baseReqs}={}) {
     let grotto = new SimpleSubmap(position, grottoIconImage, 'Grotto_' + id, contents, {
-        baseReqs: [],
-        randoReqs: [shadowCrystalReq]
+        baseReqs: baseReqs,
+        randoReqs: randoReqs
     });
     grotto.setName(name);
     return grotto;
@@ -1849,6 +1886,8 @@ const Provinces = Object.freeze({
             "Ordon Rusl House Roof Rupee 1",
             "Ordon Rusl House Roof Rupee 2",
             "Ordon Spring Portal",
+            "Ordon First Goats Herding",
+            "Met Zelda",
             "Ordon Sign",
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
@@ -1870,7 +1909,11 @@ const Provinces = Object.freeze({
             ]),
             newGrotto(1, [-9523, 4765], "Ordon Ranch Grotto", [
                 "Ordon Ranch Grotto Lantern Chest"
-            ]),
+            ], {
+                baseReqs: [[new AndRequirements(getFlagReq("Met Zelda"), faronTwilight), new AndRequirements(warpOutEldinTwilightReq, eldinTwilight), 
+                    new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
+                randoReqs: [shadowCrystalReq],
+            }),
             horseGrass.new([-9517, 5015]),
             horseGrass.new([-8500, 4800]),
             hawkGrass.new([-8991, 4960]),
@@ -1923,6 +1966,7 @@ const Provinces = Object.freeze({
             "North Faron Portal",
             "South Faron Portal",
             "Sacred Grove Portal",
+            "Faron Woods Talo Saved",
             "Faron Field Sign",
             "Faron Woods Sign",
             "Sacred Grove Sign",
@@ -1933,28 +1977,39 @@ const Provinces = Object.freeze({
             Bottle.BeeLarva.new([-7318, 3518]),
             new SimpleSubmap([-7447, 4718], entranceIconImage, "South Faron Cave", [
                 "South Faron Cave Chest"
-            ]),
+            ], {
+                baseReqs: [firstGoatsReq],
+            }),
             new SimpleSubmap([-7410, 4936], doorIconImage, "Coro's House", [
 
-            ]),
+            ], {
+                baseReqs: [firstGoatsReq],
+            }),
             newGrotto(2, [-6662, 5180], "Faron Field Corner Grotto", [
                 "Faron Field Corner Grotto Left Chest",
                 "Faron Field Corner Grotto Right Chest",
                 "Faron Field Corner Grotto Rear Chest",
                 Bottle.RareChu.new([-6571, 5153])
-            ]),
+            ], {
+                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]]
+            }),
             newGrotto(5, [-5652, 4644], "Faron Field Fishing Grotto", [
                 Bottle.Worm.new([-5378, 4597])
-            ]),
+            ], {
+                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]]
+            }),
+            
             newGrotto(2, [-7123, 3500], "Sacred Grove Baba Serpent Grotto", [
                 "Sacred Grove Baba Serpent Grotto Chest"
-            ]),
+            ], {
+                baseReqs: [boulderReq, shadowCrystalReq],
+            }),
             new SimpleSubmap([-7204, 3678], doorIconImage, "Past Sacred Grove", [
                 "Sacred Grove Female Snail",
                 "Sacred Grove Temple of Time Owl Statue Poe",
                 "Sacred Grove Past Owl Statue Chest",
             ], {
-                baseReqs: [masterSwordReq],
+                baseReqs: [blizzetaReq, masterSwordReq],
                 randoReqs: [shadowCrystalReq, skullKidReq, [masterSwordReq, openSacredGroveReq, openToTReq]]
             })
     ]),
@@ -2022,10 +2077,13 @@ const Provinces = Object.freeze({
             "Death Mountain Volcano Ledge Rupee 1",
             "Death Mountain Volcano Ledge Rupee 2",
             "Death Mountain Volcano Ledge Rupee 3",
+            "Kakariko Gorge Eldin Field Boulder",
             "Death Mountain Portal",
             "Kakariko Gorge Portal",
             "Kakariko Village Portal",
             "Bridge of Eldin Portal",
+            "Retamed Epona",
+            "Kakariko Graveyard Lake Hylia Boulder",
             "Death Mountain Sign",
             "Eldin Field Sign",
             "Hidden Village Sign",
@@ -2039,6 +2097,9 @@ const Provinces = Object.freeze({
             hawkGrass.new([-4108, 8225]),
             Bottle.BeeLarva.new([-5507, 8125]),
             Bottle.RareChu.new([-4102, 8260]),
+            Bottle.RedChu.new([-5048, 6022]),
+            Bottle.PurpleChu.new([-4928, 6102]),
+            Bottle.YellowChu.new([-5000, 6106]),
             new SimpleSubmap([-5259, 7660], doorIconImage, 'Kakariko Empty House', [
                 "Kakariko Village Female Ant"
             ]),
@@ -2052,6 +2113,9 @@ const Provinces = Object.freeze({
             new SimpleSubmap([-5162, 7670], doorIconImage, "Barnes' Shop", [
                 "Barnes Bomb Bag"
             ]),
+            // new SimpleSubmap([-5228, 7769], doorIconImage, "Barnes' Bomb House", [
+
+            // ], {baseReqs: [eldinTwilight]}),
             new SimpleFlooredSubmap([-5097, 7593], doorIconImage, 'Kakariko Watchtower', [
                 [],
                 ["Kakariko Watchtower Chest"]
@@ -2080,17 +2144,26 @@ const Provinces = Object.freeze({
             ], {baseReqs: [boulderReq]}),
             newGrotto(2, [-5607, 6282], "Kakariko Gorge Keese Grotto", [
 
-            ]),
+            ], {
+                baseReqs: [eldinTwilightCleared, [new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
+                randoReqs: [eldinTwilightCleared, shadowCrystalReq],
+            }),
             newGrotto(1, [-3772, 6334], "Eldin Field Bomskit Grotto", [
                 "Eldin Field Bomskit Grotto Left Chest",
                 "Eldin Field Bomskit Grotto Lantern Chest",
                 Bottle.RareChu.new([-3676, 6313]),
                 Bottle.Worm.new([-3796, 6315])
-            ]),
+            ], {
+                baseReqs: [eldinTwilightCleared, [new AndRequirements(gorgeEldinBoulderReq, warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
+                randoReqs: [eldinTwilightCleared, shadowCrystalReq],
+            }),
             newGrotto(5, [-3249, 7223], "Eldin Field Fishing Grotto", [
                 "Eldin Field Water Bomb Fish Grotto Chest",
                 Bottle.BeeLarva.new([-2941, 7190])
-            ]),
+            ], {
+                baseReqs: [eldinTwilightCleared, [new AndRequirements(gorgeEldinBoulderReq, warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
+                randoReqs: [eldinTwilightCleared, shadowCrystalReq],
+            }),
             new SimpleFlooredSubmap([-2400, 7597], entranceIconImage, "Eldin Stockcave", [
                 [
                     "Eldin Stockcave Lantern Chest",
@@ -2099,15 +2172,17 @@ const Provinces = Object.freeze({
                 ["Eldin Stockcave Upper Chest"],
                 [],
                 []
-            ]),
+            ], {baseReqs: [clawshotReq]}),
             newGrotto(2, [-1543, 7011], "Eldin Field Stalfos Grotto", [
                 "Eldin Field Stalfos Grotto Left Small Chest",
                 "Eldin Field Stalfos Grotto Right Small Chest",
                 "Eldin Field Stalfos Grotto Stalfos Chest",
-            ]),
+            ], {
+                baseReqs: [spinnerReq, shadowCrystalReq],
+            }),
             new SimpleSubmap([-2211, 6585], doorIconImage, "Impaz's House", [
                 "Skybook From Impaz"
-            ]),
+            ], {baseReqs: [woodenStatueReq]}),
     ]),
     Desert: new Province("Desert", [-5440, 2224], {
             baseReqs: [aurusMemoReq], 
@@ -2148,6 +2223,7 @@ const Provinces = Object.freeze({
             "Gerudo Desert Owl Statue Chest",
             "Gerudo Desert Portal",
             "Mirror Chamber Portal",
+            "Mirror Chamber Mirror Shard",
             "Bulblin Camp Sign",
             "Gerudo Desert Sign",
             newGrotto(4, [-6060, 2588], "Gerudo Desert Skulltula Grotto", [
@@ -2272,10 +2348,14 @@ const Provinces = Object.freeze({
         "Snowpeak Portal",
         newGrotto(4, [-405, 3690], "Snowpeak Freezard Grotto", [
             "Snowpeak Freezard Grotto Chest"
-        ]),
+        ], {
+            baseReqs: snowpeakReq,
+        }),
         newGrotto(3, [-390, 3350], "Snowpeak Chu Grotto", [
             Bottle.RareChu.new([-416, 3048])
-        ]),
+        ],{
+            baseReqs: snowpeakReq,
+        }),
     ]),
     Lanayru: new Province('Lanayru', [-2192, 5984], {
         baseReqs: [fyrusReq, bombBagReq], 
@@ -2292,6 +2372,7 @@ const Provinces = Object.freeze({
         "Zoras Domain Chest By Mother and Child Isles",
         "Zoras Domain Chest Behind Waterfall",
         "Zoras Domain Reekfish Scent",
+        "Melted Zora's Domain Ice",
         postman.new([-93, 4849]),
         postman.new([-4608, 5364]),
         "Lake Hylia Underwater Chest",
@@ -2389,10 +2470,14 @@ const Provinces = Object.freeze({
         "Lake Hylia Right Underwater Boulder Rupee",
         "Lake Hylia Left Underwater Pillar Rupee",
         "Lake Hylia Right Underwater Pillar Rupee",
+        "Lanayru Field Zora's Domain Boulder",
+        "Faron Field South Castle Town Boulder",
+        "Fishing Hole Sinking Lure",
         "Lake Hylia Portal",
         "Castle Town Portal",
         "Upper Zoras River Portal",
         "Zoras Domain Portal",
+        "Midna's Lament Completed",
         "Agithas Castle Sign",
         "Beside Castle Town Sign",
         "Castle Town Sign",
@@ -2407,8 +2492,11 @@ const Provinces = Object.freeze({
         hawkGrass.new([-5218, 2926]),
         hawkGrass.new([-4901, 3895]),
         Bottle.BeeLarva.new([-614, 5775]),
+        Bottle.Worm.new([-647, 5862]),
         Bottle.Fairy.new([-5488, 3116]),
         Bottle.RareChu.new([-5353, 3456]),
+        Bottle.RedChu.new([-5329, 3430]),
+        Bottle.PurpleChu.new([-5382, 3488]),
         new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle",[[
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
@@ -2436,29 +2524,43 @@ const Provinces = Object.freeze({
             "Agitha Female Dragonfly Reward",
         ], [
 
-        ]]),
+        ]], {
+            baseReqs: [lanayruTwilightCleared],
+            randoReqs: []
+        }),
         new SimpleSubmap([-4057, 4837], doorIconImage, "Jovani's House", [
             "Jovani House Poe",
             "Jovani 20 Poe Soul Reward",
             "Jovani 60 Poe Soul Reward",
-        ]),
+            "Gengle Silver Rupee"
+        ], {
+            baseReqs: [morpheelReq],
+            randoReqs: [lanayruTwilightCleared],
+        }),
         new SimpleSubmap([-4035, 4573], doorIconImage, 'STAR Tent', [
             "STAR Prize 1",
             "STAR Prize 2"
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared],
+        }),
         new SimpleSubmap([-4060, 4759], doorIconImage, 'Malo Mart Castle Branch', [
             "Castle Town Malo Mart Magic Armor",
-        ]),
+        ], {
+            baseReqs: [getFlagReq("Kakariko Village Malo Mart Castle Town Shop")],
+        }),
         new SimpleFlooredSubmap([-4141, 4795], doorIconImage, "Telma's Bar", [
             [
                 "Telma Invoice",
                 postman.new([-4282, 4523])
             ],
             []
-        ]),
+        ]), // Bar is open during Lanayru Twilight to see Ilia
         new SimpleSubmap([-3940, 4930], doorIconImage, "Doctor's Office", [
             "Doctors Office Medicine Scent"
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared],
+            randoReqs: []
+        }),
         new SimpleFlooredSubmap([-4090, 4656], doorIconImage, 'Castle Goron Merchants', [
             [
                 "Castle Town Goron Shop Red Potion",
@@ -2467,40 +2569,68 @@ const Provinces = Object.freeze({
             [
                 'Castle Town Goron Shop Lantern Oil'
             ]
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared],
+            randoReqs: []
+        }),
         new SimpleSubmap([-4147, 4643], doorIconImage, "Fanadi's Palace", [
 
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared],
+            randoReqs: []
+        }),
         new SimpleSubmap([-612, 5828], doorIconImage, "Hena's Shop", [
-
-        ]),
+            "Fishing Hole Frog Lure",
+        ], {
+            baseReqs: [lanayruTwilightCleared],
+            randoReqs: []
+        }),
         newGrotto(1, [-3733, 3820], "West Hyrule Field Helmasaur Grotto", [
             "West Hyrule Field Helmasaur Grotto Chest"
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared, clawshotReq, shadowCrystalReq],
+        }),
         newGrotto(4, [-2121, 4843], "Lanayru Field Skulltula Grotto", [
             "Lanayru Field Skulltula Grotto Chest"
-        ]),
+        ], {
+            baseReqs: [morpheelReq],
+            randoReqs: [lanayruTwilightCleared, midnasLamentReq]
+        }),
         newGrotto(1, [-2605, 4189], "Lanayru Field Poe Grotto", [
             "Lanayru Field Poe Grotto Left Poe",
             "Lanayru Field Poe Grotto Right Poe"
-        ]),
+        ], {
+            baseReqs: [midnasLamentReq],
+            randoReqs: [lanayruTwilightCleared, midnasLamentReq],
+        }),
         newGrotto(3, [-2812, 5187], "Lanayru Field Chu Grotto", [
 
-        ]),
+        ], {
+            baseReqs: [midnasLamentReq],
+            randoReqs: [lanayruTwilightCleared, midnasLamentReq],
+        }),
         newGrotto(4, [-5696, 3751], "Lake Hylia Bridge Bubble Grotto", [
             "Lake Hylia Bridge Bubble Grotto Chest"
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared, clawshotReq, bombBagReq, [boomerangReq, bowReq], shadowCrystalReq],
+        }),
         newGrotto(5, [-5499, 3045], "Lake Hylia Water Toadpoli Grotto", [
             "Lake Hylia Water Toadpoli Grotto Chest",
             Bottle.BeeLarva.new([-5191, 2990])
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared, shadowCrystalReq],
+        }),
         newGrotto(5, [-4614, 2875], "Lake Hylia Shell Blade Grotto", [
             "Lake Hylia Shell Blade Grotto Chest"
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared, shadowCrystalReq],
+        }),
         newGrotto(5, [-4551, 4937], "Outside South Castle Town Tektite Grotto", [
             "Outside South Castle Town Tektite Grotto Chest",
             Bottle.BeeLarva.new([-4238, 4905])
-        ]),
+        ], {
+            baseReqs: [lanayruTwilightCleared, shadowCrystalReq],
+        }),
         new SimpleSubmap([-5259, 3502], entranceIconImage, 'Lanayru Spring', [
             'Lanayru Twilight Cleared',
             "Lanayru Spring Underwater Left Chest",
@@ -2513,7 +2643,9 @@ const Provinces = Object.freeze({
             "Lanayru Spring Lower Underwater Boulder Rupee",
             "Lanayru Spring Upper Underwater Boulder Rupee",
             "Lanayru Spring Sign"
-        ]),
+        ], {
+            baseReqs: [meltedIceReq],
+        }),
         new SimpleSubmap([-5546, 3134], entranceIconImage, 'Lake Lantern Cave', [
             "Lake Lantern Cave First Chest",
             "Lake Lantern Cave Second Chest",
@@ -2535,12 +2667,14 @@ const Provinces = Object.freeze({
             "Lake Lantern Cave End Lantern Chest",
             "Lake Lantern Cave Sign"
         ], {
-            baseReqs: [boulderReq]
+            baseReqs: [lanayruTwilightCleared, boulderReq],
+            randoReqs: [boulderReq],
         }),
         new SimpleSubmap([-2025, 4818], entranceIconImage, 'Lanayru Ice Cave', [
             "Lanayru Ice Block Puzzle Cave Chest"
         ], {
-            baseReqs: [boulderReq]
+            baseReqs: [lanayruTwilightCleared, boulderReq],
+            randoReqs: [boulderReq],
         }),
     ]),
     Castle: new DungeonProvince(Dungeons.Castle, [-3584, 5440], hyruleCastlePolygonPoints)

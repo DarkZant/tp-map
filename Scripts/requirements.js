@@ -65,6 +65,13 @@ class Requirement {
     isMet() {
         return this.condition();
     }
+    copyConditionAndImageAndName(item) {
+        return new Requirement(
+            item.getImage(),
+            item.getName(),
+            this.condition
+        )
+    }
 }
 
 class FlagRequirement {
@@ -78,11 +85,41 @@ class FlagRequirement {
     isMet() {
         return this.condition();
     }
+    copyConditionWithImageAndName(image, name) {
+        return new Requirement(
+            image,
+            name,
+            () => this.isMet()
+        );
+    }
+    copyWithItemImageAndName(item) {
+        return new Requirement(
+            item.getImage(),
+            item.getName(),
+            () => this.isMet()
+        );
+    }
+}
+
+class UnsetFlagRequirement extends FlagRequirement {
+    constructor() {super(); }
+    initialize(flagName) {
+        let flag = flags.get(flagName.slice(0, -1)); // Remove the added "/"
+        this.image = flag.getImage();
+        this.text = flag.getFlagName() + " Not Set";
+        this.condition = () => !flag.isSet();
+    }
 }
 
 class AndRequirements {
-    constructor(requirements) {
-        this.requirements = requirements;
+    constructor(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) {
+            // If single argument (array) is passed
+            this.requirements = args[0];
+        } else {
+            // If multiple arguments are passed
+            this.requirements = args;
+        }
     }
     isMet() {
         return verifyRequirements(this.requirements);
@@ -107,10 +144,11 @@ function verifyRequirements(requirements) {
 }
 
 function verifySubmapRequirements(submap) {
+    // debugger;
     if (!Settings.TrackerLogic.isEnabled())
-            return true;
+        return true;
     if (selectedGamemode === Gamemodes.Base) 
-            return verifyRequirements(submap.baseReqs);
+        return verifyRequirements(submap.baseReqs);
     return verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? submap.randoReqs : submap.glitchedReqs)
 }
 
@@ -155,6 +193,7 @@ let lightMasterSwordReq = Requirement.fromBoolItem(swords.getItemByIndex(3));
 let bowReq = Requirement.fromBoolItem(bow.getItemByIndex(0));
 let invoiceReq = Requirement.fromBoolItem(invoice);
 let woodenStatueReq = Requirement.fromBoolItem(woodenStatue);
+let iliasCharmReq = Requirement.fromBoolItem(iliasCharm);
 let horseCallReq = Requirement.fromBoolItem(horseCall);
 let endingBlowReq = Requirement.fromBoolItem(hiddenSkills.getItemByReq(1));
 let faronKeyReq = Requirement.fromBoolItem(faronKey);
@@ -167,6 +206,7 @@ let allFusedShadowsReq = Requirement.fromCountItem(fusedShadow, 3);
 let completedMirrorReq = Requirement.fromCountItem(mirrorShard, 4);
 let skybookReq = Requirement.fromBoolItem(skybook.getItemByReq(1));
 let completedSkybookReq = Requirement.fromBoolItem(skybook.getItemByReq(7));
+let woodenShieldReq = Requirement.fromBoolItem(woodenShields.getItemByIndex(0));
 
 let boulderReq = [bombBagReq, ballAndChainReq];
 let sinkReq = [ironBootsReq, magicArmorReq];
@@ -232,8 +272,8 @@ let allDungeonsReq = [
     diababaReq, fyrusReq, morpheelReq, stallordReq, blizzetaReq, armogohmaReq, argorokReq, zantReq
 ];
 
-let reekfishScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Reekfish Scent"));
-let medicineScentReq = Requirement.fromAlwaysMetBoolItem(scents.getItemByName("Medicine Scent"));
+let reekfishScentReq = Requirement.fromBoolItem(scents.getItemByName("Reekfish Scent"));
+let medicineScentReq = Requirement.fromBoolItem(scents.getItemByName("Medicine Scent"));
 let nightReq = new Requirement('Moon', 'Night Time');
 
 let prologueNotSkippedReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SkipPrologue, false);
@@ -252,27 +292,28 @@ let transformAnywhereReq = Requirement.fromCheckboxRandoSetting(RandoSettings.Tr
 
 const FlagRequirements = new Map();
 
-function createNewFlagReq(flagName) {
-    let flagReq = new FlagRequirement();
-    FlagRequirements.set(flagName, flagReq);
+function createNewFlagReq(key, metWhenSet) {
+    let flagReq = metWhenSet ? new FlagRequirement() : new UnsetFlagRequirement();
+    FlagRequirements.set(key, flagReq);
     return flagReq;
+}
+
+function getFlagReq(flagName, metWhenSet=true) {
+    // Use this when creating requirements for flags in flags.js
+    let key = metWhenSet ? flagName : flagName + "/";
+    let flagReq = FlagRequirements.get(key);
+    if (flagReq === undefined)
+        flagReq = createNewFlagReq(key, metWhenSet);
+    return flagReq;
+}
+
+function flagReqExists(flagName) {
+    return FlagRequirements.has(flagName) || FlagRequirements.has(flagName + "/");
 }
 
 function initializeFlagRequirements() {
     for (let [flagName, flagReq] of FlagRequirements.entries())
         flagReq.initialize(flagName);
-}
-
-function getFlagReq(flagName) {
-    // Use this when creating requirements for flags in flags.js
-    let flagReq = FlagRequirements.get(flagName);
-    if (flagReq === undefined)
-        flagReq = createNewFlagReq(flagName);
-    return flagReq;
-}
-
-function flagReqExists(flagName) {
-    return FlagRequirements.has(flagName);
 }
 
 let tileWormReq = [boomerangReq, ironBootsReq];

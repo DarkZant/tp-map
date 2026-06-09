@@ -150,6 +150,10 @@ class TrackerItem extends Storable {
         this.resetItem();
         this.update();
     }
+    modifyItemState(modif) {
+        this.item.setState(this.item.getState() + modif);
+        this.update();
+    }
     updateElementImage() {
         let imgElem = this.elem.children[1];
         let imgSrc = imgElem.src;
@@ -202,7 +206,7 @@ class TrackerItem extends Storable {
         setTimeout(() => showTrackerSubmenu(submenuID), 2000);
     }
     manageParentSubmenu(func) {
-        if (blockMapReset || Settings.DisableTrackerAnims.isEnabled()) {
+        if (blockMapReset || Settings.DisableTrackerAnims.isEnabled() || this.elem.style.display === 'none') {
             func();
             return;
         }

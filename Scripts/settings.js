@@ -322,6 +322,7 @@ const Settings = Object.freeze({
     Base_Portal_Visibility: new CategoryVisibilitySetting('Base_Portal_Visibility', Categories.Portals, 1),
     Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
     Entrances_Randomized: new Setting('Entrance_Randomized'),
+    LocksConsumeKeys: new Setting("Locks_Consume_Keys"),
 }); // Always add settings at the end to preserve storage IDs
 
 Settings.RevealSpoilerLog.setFunction(revealSpoilerLog);

@@ -1,3 +1,4 @@
+.vscode
 *.xcf
 *.txt
 generateImageMap.js

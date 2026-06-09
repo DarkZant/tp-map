@@ -76,11 +76,12 @@ const RandomizerCheckCategories = [
 ];
 
 class Obtainable {
-    constructor(imageInfo, item, {name=imageInfo, category=item.getCategory()}={}) {
+    constructor(imageInfo, item, {name=imageInfo, category=item.getCategory(), consumesItem=false}={}) {
         this.image = getIconImage(imageInfo);
         this.item = item;
         this.name = name;
         this.category = category;
+        this.consumesItem = consumesItem;
     }
     hasItem() {
         return this.item !== null;
@@ -108,6 +109,33 @@ class Obtainable {
         if (this.hasItem())
             return this.item.getTracker();
         return null;
+    }
+    getState() {
+        if (!this.hasItem())
+            return;
+        return this.item.getState();
+    }
+   
+}
+
+class ConsumingObtainable extends Obtainable {
+    constructor(imageInfo, item, {name=imageInfo, category=item.getCategory(), consumesItem=false}={}) {
+        super(imageInfo, item, {name: name, category: category});
+        this.consumesItem = consumesItem;
+    }
+    manageItemFromFlag(flagWasSet, itemTracker, item) {
+        if (Number.isInteger(this.consumesItem)) {
+            if (flagWasSet) {      
+                while (item.getState() > 0) 
+                    itemTracker.unobtainItem(item);
+            }
+            else {
+                while (item.getState() < this.consumesItem) 
+                    itemTracker.obtainItem(item);           
+            }
+        }
+        else
+            flagWasSet ? itemTracker.unobtainItem(item) : itemTracker.obtainItem(item);
     }
 }
 
@@ -273,6 +301,8 @@ class ProgressiveItem extends Item {
             let boolItem = new BoolItem(name + i, {name: itemNames[i], category: category});
             boolItem.parentItem = this;
             this.items[i] = boolItem;
+            if (min > i)
+                boolItem.obtain();
         }
     }
     getItems() {
@@ -728,6 +758,8 @@ let goldenWolf = new Obtainable("Golden Wolf", hiddenSkills);
 let howlingStone = new Obtainable("Howling Stone", null, {category: Categories.HiddenSkills});
 let skybookChar = new Obtainable("Sky Book Character", skybook);
 let coralEarring = new Obtainable("Coral Earring", fishingRods.getItemByIndex(1));
+let sinkingLure = new Obtainable("Sinking Lure", null, {category: Categories.Main});
+let frogLure = new Obtainable("Frog Lure", null, {category: Categories.Main});
 let coroBottle = new Obtainable('BottleYellow', bottle, {name: "Coro's Oil Bottle"});
 let seraBottle = new Obtainable("BottleMilkH", bottle, {name: "Sera's 1/2 Milk Bottle"});
 let jovaniBottle = new Obtainable("BottleTears", bottle, {name: "Jovani's Great Fairy's Tears Bottle"});
@@ -736,7 +768,7 @@ let giantQuiver = new Obtainable("Quiver2", bow.getItemByIndex(2), {name: "Giant
 let minesBKAmoto = new Obtainable("GBK0", minesBK, {name: "Gor Amato Key Shard"});
 let minesBKEbizo = new Obtainable("GBK1", minesBK, {name: "Gor Ebizo Key Shard"});
 let minesBKLiggs = new Obtainable("GBK2", minesBK, {name: "Gor Liggs Key Shard"});
-let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Night Poe Soul"});
+let nightPoe = new Obtainable("NightPoe", poeSoul, {name: "Poe Soul"});
 
 let ooccoo = new Obtainable("Ooccoo", null, {category: Categories.Ooccoo});
 let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo, name: "Ooccoo"});
@@ -744,11 +776,26 @@ let ooccooPot = new Obtainable('OoccooPot', null, {category: Categories.Ooccoo, 
 let faronBulblinLock = new Obtainable("LockFaronBulblin", null, {category: Categories.Locks, name: "Overworld Lock"});
 let gateLock = new Obtainable("LockGates", null, {category: Categories.Locks, name: "Gate Lock"});
 let lock = new Obtainable("Lock", null, {category: Categories.Locks, name: "Dungeon Lock"});
-let snowpeakLock = new Obtainable("LockS", null, {category: Categories.Locks, name: "Snowpeak Ruins Lock"});
 let bossLock = new Obtainable("Boss Lock", null, {category: Categories.Locks, name: "Dungeon Boss Lock"});
-let minesBossLock = new Obtainable("Boss LockG", null, {category: Categories.Locks, name: "Goron Mines Boss Lock"});
-let lakebedBossLock = new Obtainable("Boss LockL", null, {category: Categories.Locks, name: "Lakebed Temple Boss Lock"});
-let snowpeakBossLock = new Obtainable("Boss LockS", null, {category: Categories.Locks, name: "Snowpeak Ruins Boss Lock"});
+
+let forestLock = new ConsumingObtainable("Lock", forestSK, {category: Categories.Locks, name: "Forest Temple Lock", consumesItem: true});
+let forestBossLock = new ConsumingObtainable("Boss Lock", forestBK, {category: Categories.Locks, name: "Forest Temple Boss Lock", consumesItem: true});
+let minesLock = new ConsumingObtainable("Lock", minesSK, {category: Categories.Locks, name: "Goron Mines Lock", consumesItem: true});
+let minesBossLock = new ConsumingObtainable("Boss LockG", minesBK, {category: Categories.Locks, name: "Goron Mines Boss Lock", consumesItem: 3});
+let lakebedLock = new ConsumingObtainable("Lock", lakebedSK, {category: Categories.Locks, name: "Lakebed Temple Lock", consumesItem: true});
+let lakebedBossLock = new ConsumingObtainable("Boss LockL", lakebedBK, {category: Categories.Locks, name: "Lakebed Temple Boss Lock", consumesItem: true});
+let arbitersLock = new ConsumingObtainable("Lock", arbiterSK, {category: Categories.Locks, name: "Arbiter's Grounds Lock", consumesItem: true});
+let arbitersBossLock = new ConsumingObtainable("Boss Lock", arbiterBK, {category: Categories.Locks, name: "Arbiter's Grounds Boss Lock", consumesItem: true});
+let snowpeakLock = new ConsumingObtainable("LockS", snowpeakSK, {category: Categories.Locks, name: "Snowpeak Ruins Lock", consumesItem: true});
+let snowpeakBossLock = new ConsumingObtainable("Boss LockS", snowpeakBK, {category: Categories.Locks, name: "Snowpeak Ruins Boss Lock", consumesItem: true});
+let templeLock = new ConsumingObtainable("Lock", templeSK, {category: Categories.Locks, name: "Temple of Time Lock", consumesItem: true});
+let templeBossLock = new ConsumingObtainable("Boss Lock", templeBK, {category: Categories.Locks, name: "Temple of Time Boss Lock", consumesItem: true});
+let cityLock = new ConsumingObtainable("Lock", citySK, {category: Categories.Locks, name: "City in the Sky Lock", consumesItem: true});
+let cityBossLock = new ConsumingObtainable("Boss Lock", cityBK, {category: Categories.Locks, name: "City in the Sky Boss Lock", consumesItem: true});
+let palaceLock = new ConsumingObtainable("Lock", palaceSK, {category: Categories.Locks, name: "Palace of Twilight Lock", consumesItem: true});
+let palaceBossLock = new ConsumingObtainable("Boss Lock", palaceBK, {category: Categories.Locks, name: "Palace of Twilight Boss Lock", consumesItem: true});
+let castleLock = new ConsumingObtainable("Lock", castleSK, {category: Categories.Locks, name: "Hyrule Castle Lock", consumesItem: true});
+let castleBossLock = new ConsumingObtainable("Boss Lock", castleBK, {category: Categories.Locks, name: "Hyrule Castle Boss Lock", consumesItem: true});
 
 let bombs = new Obtainable("Bombs", null, {category: Categories.Ammo});
 let waterBombs = new Obtainable("Water Bombs", null, {category: Categories.Ammo});
@@ -758,6 +805,15 @@ let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
 let gorEbizoDonation = new Obtainable('Gor Ebizo', null, {name: "Gor Ebizo Donations", category: Categories.Quest});
 let vesselOfLight = new Obtainable("Vessel of Light", null, {category: Categories.Quest});
+let goatHerding = new Obtainable('Goat', null, {name: "Goat Herding", category: Categories.Quest});
+let saveTalo = new Obtainable('Talo', null, {name: "Talo Saved", category: Categories.Quest});
+let metZelda = new Obtainable('Cloaked Zelda', null, {name: "Talked to Zelda", category: Categories.Quest});
+let saveMonkey = new Obtainable("Monkey", null, {name: "Saved Monkey", category: Categories.Quest});
+let epona = new Obtainable("Epona", null, {name: "Retamed Epona", category: Categories.Quest});
+let moltenShard = new Obtainable("Molten Shard", null, {name: "Molten Shard", category: Categories.Quest});
+let emptyBoulder = new Obtainable("Boulder", null, {category: Categories.Quest});
+let waterSupply = new Obtainable("Water Supply", null, {category: Categories.Quest});
+let midnasLament = new Obtainable("Midna", null, {name: "Midna's Lament", category: Categories.Quest})
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
 let randoFoolishItem = new Obtainable('FoolIce', null, {name: "Foolish Item", category: Categories.Fool});

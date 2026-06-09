@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-       
-
         <meta charset="UTF-8">
         <title>Twilight Princess Interactive Map</title>
         <link rel="icon" href="Icons/Midna.png">
@@ -108,7 +106,7 @@
         <div id="flagDetails" class="menu">
             <span id="flagDetailsX" class="xButton menuX" onclick="hideDetails()">×</span>
             <div id="flagName">
-                <h3>Flag Name</h3>
+                <h3 id="flagNameTitle">Flag Name</h3>
                 <div id="flagNameDiv" class="bordered"></div>
             </div>
             <div id="flagItem">
@@ -262,6 +260,7 @@
                 <label style="display: none;"><input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Tracker Autocompletion</label>
                 <label><input type="checkbox" id="Disable_Tracker_Animations">Disable Tracker Animations</label>
+                <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Locks_Consume_Keys" class="bigSettingCheckbox">Setting Lock Flags consumes Keys</label>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Tracker_Position" class="bigSettingCheckbox">Separate Tracker from Map</label>
                 <br>
                 <label class="bigSettingCheckboxLabel"><input type="checkbox" id="Empty_Submaps_Visibility" class="bigSettingCheckbox">Show Empty Submaps</label>
@@ -884,28 +883,28 @@
                 <div id="keysX" class="xButton tsubmenuX" onclick="hideTrackerSubmenu(this.parentElement)">×</div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Small_KeyC.png" class="timage">
-                </div>
-                <div class="titem">
-                    <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small_KeyF.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
-                    <img src="Icons/Small_KeyB.png" class="timage">
+                    <img src="Icons/Small_KeyC.png" class="timage">
                 </div>
                 <div class="titem">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Small_KeyG.png" class="timage">
                 </div>
+                <div class="titem">
+                    <img src="Icons/ItemBox.png" class="tbox">
+                    <img src="Icons/Small_KeyB.png" class="timage">
+                </div>
             </div>
             <div id="truins" class="tsubmenu tcontainer">
                 <div id="ruinsX" class="xButton tsubmenuX" onclick="hideTrackerSubmenu(this.parentElement)">×</div>
-                <div class="titem" data-item="Snowpeak Ruins Dungeon Map">
+                <div class="titem" data-item="Snowpeak Ruins Dungeon Map" style="display: flex;">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Dungeon_Map.png" class="timage">
                 </div>
-                  <div class="titem" data-item="Snowpeak Ruins Compass">
+                  <div class="titem" data-item="Snowpeak Ruins Compass" style="display: flex;">
                     <img src="Icons/ItemBox.png" class="tbox">
                     <img src="Icons/Compass.png" class="timage">
                 </div>
@@ -941,9 +940,9 @@
         <script src="Scripts/requirements.js"></script>
         <script src="Scripts/nonflags.js"></script>
         <script src="Scripts/flags.js"></script>
+        <script src="Scripts/flagsData.js"></script>
         <script src="Scripts/submaps.js"></script>
         <script src="Scripts/randoSeed.js"></script>
-        <!-- <script src="Scripts/oldMap.js"></script>  -->
         <script src="Scripts/storageCleanup.js"></script>
         <script>loadMap();</script>
 
