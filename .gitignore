@@ -3,6 +3,7 @@
 *.txt
 generateImageMap.js
 renameImages.js
+generate_image_sizes.py
 
 # No longer useful
 Dungeons/*/Name.png

@@ -160,6 +160,8 @@ const RandoItemMap = new Map([
 
     ["Red_Potion_Shop", Bottle.RedPotion],
     ["Lantern_Oil_Shop", Bottle.Oil],
+    ["Fairy_Tears", Bottle.Tears],
+    ["Vanilla", "Vanilla"],
 
 ]);
 
@@ -217,6 +219,7 @@ const RandoSettingsMap = new Map([
     ["openMap", RandoSettings.UnlockMapRegions],
     ["openDot", RandoSettings.OpenDoT],
     ["increaseWallet", RandoSettings.WalletCapacity],
+    ["goronMinesEntrance", RandoSettings.MinesEntrance],
     ["skipLakebedEntrance", RandoSettings.LakebedBombs],
     ["skipArbitersEntrance", RandoSettings.ArbitersCamp],
     ["skipSnowpeakEntrance", RandoSettings.SnowpeakReekfish],
@@ -454,7 +457,7 @@ function loadSpoilerLog(data, start=false) {
         let item = getRandoItem(itemName);
         let skipEntry = false;
         if (item === undefined) {
-            console.log(itemName + " is not in RandoItemMap");
+            console.log(flagName + ": " + itemName + " is not in RandoItemMap");
             skipEntry = true;
         }
         if (!flags.has(flagName)) {
@@ -522,8 +525,12 @@ function loadSpoilerLog(data, start=false) {
     }
 
     // Setting Flags 
+    flags.get("Ordon Spring Portal").set();
+    flags.get("Retamed Epona").set();
     if (RandoSettings.SkipPrologue.isEnabled()) {
-        flags.get("Ordon Spring Portal").set();
+        flags.get("Ordon First Goats Herding").set();
+        flags.get("Faron Woods Talo Saved").set();
+        flags.get("Met Zelda").set();
     }
     if (RandoSettings.FaronTwilightCleared.isEnabled()) {
         flags.get("Faron Twilight Cleared").set();
@@ -544,6 +551,7 @@ function loadSpoilerLog(data, start=false) {
         flags.get("Zoras Domain Portal").set();
         flags.get("Lanayru Field Scent of Ilia").set();
     }
+    agithaRewards.updateAllFlags();
 
     // Setting randomized dungeon entrances
     let shuffledEntrancesMap = new Map();

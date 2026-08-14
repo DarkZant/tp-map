@@ -7,6 +7,8 @@ let lanayruTwilight = getFlagReq("Lanayru Twilight Cleared", false);
 
 let firstGoatsReq = getFlagReq("Ordon First Goats Herding");
 let ordonPortalReq = getFlagReq("Ordon Spring Portal");
+let taloSavedReq = getFlagReq("Faron Woods Talo Saved");
+let zeldaMetReq = getFlagReq("Met Zelda");
 let zeldaNotMetReq = getFlagReq("Met Zelda", false);
 
 let poleMonkeyReq = getFlagReq("Forest Temple Pole Monkey");
@@ -58,6 +60,7 @@ let warpOutLanayruTwilightReq = getFlagReq("Zoras Domain Portal");
 let gorgeEldinBoulderReq = getFlagReq("Kakariko Gorge Eldin Field Boulder");
 let waterBombReq = zoraArmorReq.copyConditionAndImageAndName(waterBombs);
 let midnasLamentReq = getFlagReq("Midna's Lament Completed");
+let midnasLamentNotCompletedReq = getFlagReq("Midna's Lament Completed", false);
 
 let snowpeakPortalReq = getFlagReq("Snowpeak Portal");
 let snowpeakReq = [shadowCrystalReq, [reekfishScentReq, snowpeakPortalReq]];
@@ -67,7 +70,8 @@ const flags = new Map([
     ['Uli Cradle Delivery', new Flag(fishingRods.getItemByIndex(0), [-9094, 4809], {
         baseReqs: [firstGoatsReq],
         baseDesc: 'Retrieve the cradle from the monkey using the hawk and deliver it to Uli to receive the fishing rod.',
-        randoCategory: Categories.Gifts
+        randoCategory: Categories.Gifts,
+        randoReqs: [],
     })],
     ["Ordon Spring Golden Wolf", new Flag(goldenWolf, [-8542, 4795], {
         baseReqs: [getFlagReq("Death Mountain Howling Stone"), eldinTwilightCleared],
@@ -79,7 +83,7 @@ const flags = new Map([
         baseReqs: [eponaReq],
         baseDesc: 'After getting Epona back from the monsters, talk to Fado and complete the Goat Hoarding minigame in under 2 minutes to receive the heart piece.',
         randoCategory: Categories.Gifts,
-        randoReqs: [],
+        randoReqs: [zeldaMetReq],
         randoDesc: 'On Epona, talk to Fado and complete the Goat Hoarding minigame in under 2 minutes to receive the reward.'
     })],
     ["Ordon Hidden Rusl House Rupee", new Flag(Rupees.Orange, [-9058, 4788], {
@@ -90,7 +94,7 @@ const flags = new Map([
     ["Ordon Shield House Ledge Grass Rupee", new Flag(Rupees.Purple, [-9006, 4999], { 
         baseDesc: 'Hidden in the tall grass on the little platform to the left of the windmill. You can reach it by calling the hawk to get a Cucco and then flying to the platform.',
         randoCategory: Categories.FreestandingRupees,
-        randoReqs: [nightReq],
+        //randoReqs: [nightReq],
     })],
     ["Links Basement Chest", new Flag(chest.with(Rupees.Purple), [-8615, 5082], {
         baseReqs: [lanternReq],
@@ -117,11 +121,11 @@ const flags = new Map([
     ["Ordon Sword", new Flag(swords.getItemByIndex(1), [-9004, 4850], {
         baseReqs: [woodenShieldReq],
         baseDesc: 'Pick up the sword on the couch after entering by the side of the house by digging as Wolf Link.',
-        randoReqs: [getFlagReq("Met Zelda")],
+        randoReqs: [],
         randoDesc: 'Pick up the sword on the couch after entering the house.'
     })],
     ["Ordon Shield", new Flag(woodenShields.getItemByIndex(0), [-9044, 4410], {
-        baseReqs: [getFlagReq("Met Zelda")],
+        baseReqs: [zeldaMetReq],
         baseDesc: 'Use Midna to jump to the ledge where the shield is, then bonk on the wall twice to make it fall and obtain it.',
         randoReqs: [shadowCrystalReq]
     })],
@@ -141,15 +145,19 @@ const flags = new Map([
         baseReqs: [faronTwilightCleared],
         baseDesc: "Talk to Coro to obtain the key that opens the gate to the South Faron Cave.",
         randoCategory: Categories.Gifts,
+        randoReqs: [],
         randoDesc: "Talk to Coro for a second time to obtain the item."
     })],
     ["Coro Lock", new Flag(faronBulblinLock, [-7496, 4787], {
         baseReqs: [faronTwilightCleared, coroKeyReq],
-        baseDesc: "Unlock this gate with the key obtained from Coro to reach the mist area of the forest."
+        baseDesc: "Unlock this gate with the key obtained from Coro to reach the mist area of the forest.",
+        randoReqs: [coroKeyReq],
+        randoDesc: "This gate is unlocked automatically upon obtaining Coro's key.",
     })],
     ["Faron Mist Lock", new Flag(faronBulblinLock, [-7343, 4351], {
         baseReqs: [faronKeyReq],
         baseDesc: "Unlock this gate to reach the north part of the Faron Woods.",
+        randoDesc: "This gate is unlocked automatically upon obtaining the Faron Woods key.",
     })],
     ["Coro Lantern", new Flag(lantern, [-7405, 4910], {
         baseReqs: [firstGoatsReq],
@@ -175,28 +183,32 @@ const flags = new Map([
         baseReqs: [faronTwilightCleared, Requirement.fromCountItem(rupees, 100)],
         baseDesc: 'After clearing the Faron twilight, talk to Coro and he will offer you the oil bottle for 100 rupees.',
         randoCategory: Categories.Gifts,
+        randoReqs: [Requirement.fromCountItem(rupees, 100)],
         randoDesc: 'Talk to Coro for a third time to buy the item for 100 rupees.'
     })],
     ["Faron Woods Golden Wolf", new Flag(goldenWolf, [-7104, 4184], {
         baseReqs: [faronTwilightCleared],
         baseDesc: 'Meet the Golden Wolf after clearing the Faron Twilight to learn the Ending Blow.',
         randoDesc: "The item is lying on the ground where the Golden Wolf usually is.",
-        randoReqs: [[lanternReq, shadowCrystalReq]],
+        randoReqs: [zeldaMetReq, [lanternReq, shadowCrystalReq]],
     })],    
     ["Faron Mist Stump Chest", new Flag(smallChest.with(Rupees.Red), [-7235, 4518], {
         baseReqs: [faronTwilightCleared, lanternReq],
         baseDesc: 'Clear out the purple fog with the lantern and climb the tree stump to reach the chest.',
-        randoCategory: Categories.Main
+        randoCategory: Categories.Main,
+        randoReqs: [zeldaMetReq, lanternReq],
     })],
     ["Faron Mist North Chest", new Flag(smallChest.with(Rupees.Yellow), [-7010, 4567], {
         baseReqs: [faronTwilightCleared, lanternReq],
         baseDesc: 'Clear out the purple fog with the lantern and go to the left of the cave entrance to find the chest.',
-        randoCategory: Categories.Main
+        randoCategory: Categories.Main,
+        randoReqs: [zeldaMetReq, lanternReq],
     })],
     ["Faron Mist South Chest", new Flag(chest.with(Rupees.Purple), [-7351, 4513], {
         baseReqs: [faronTwilightCleared, lanternReq], 
         baseDesc: 'Clear out the purple fog with the lantern and from the exit of the mist, go right to find the chest.',
-        randoCategory: Categories.Main
+        randoCategory: Categories.Main,
+        randoReqs: [zeldaMetReq, lanternReq],
     })],
     ["Faron Field Tree Heart Piece", new Flag(heartPiece, [-6278, 4930], {
         baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
@@ -219,7 +231,8 @@ const flags = new Map([
     })],
     ["Faron Mist Poe", new Flag(poeSoul, [-7184, 4515], {
         baseReqs: [faronTwilightCleared, [new AndRequirements(gorgePortalReq, eldinTwilight), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
-        baseDesc: 'Use Midna jumps to reach the tree base where the poe is.'
+        baseDesc: 'Use Midna jumps to reach the tree base where the poe is.',
+        randoReqs: [faronTwilightCleared, shadowCrystalReq],
     })], 
     ["Sacred Grove Pedestal Master Sword", new Flag(swords.getItemByIndex(2), [-6801, 3677], {
         baseReqs: [midnasLamentReq],
@@ -252,13 +265,13 @@ const flags = new Map([
     ["Lost Woods Waterfall Poe", new Flag(nightPoe, [-7172, 3043], {
         baseReqs: [blizzetaReq, shadowCrystalReq, nightReq],
         baseDesc: 'Behind the waterfall, accessible while fighting Skull Kid for the second time.',
-        randoReqs: [shadowCrystalReq, nightReq],
+        randoReqs: [faronTwilightCleared, shadowCrystalReq, nightReq],
         randoDesc: 'Go behind the waterfall to access the poe',
     })],
     ["Lost Woods Lantern Chest", new Flag(chest.with(bombs, 30), [-6975, 3273], {
         baseReqs: [blizzetaReq, lanternReq],
         baseDesc: 'Light the 2 torches in the back of the area to make the chest appear.',
-        randoReqs: [shadowCrystalReq, lanternReq]
+        randoReqs: [faronTwilightCleared, shadowCrystalReq, lanternReq]
     })],
     ["Lost Woods Boulder Poe", new Flag(poeSoul, [-7137, 3529], {
         baseReqs: [shadowCrystalReq, [ballAndChainReq, bombBagReq], skullKidReq],
@@ -291,7 +304,8 @@ const flags = new Map([
     ["South Faron Cave Chest", new Flag(smallChest.with(Rupees.Yellow), [-7340, 4450], {
         baseReqs: [lanternReq],
         baseDesc: 'Use the lantern to be able to locate the chest more easily.',
-        randoDesc: 'The chest is located at the end of the tunnel'
+        randoReqs: [],
+        randoDesc: 'The chest is located at the end of the tunnel',
     })],
     ["Faron Field Corner Grotto Rear Chest", new Flag(smallChest.with(Rupees.Yellow), [-6928, 5138], {
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
@@ -308,7 +322,7 @@ const flags = new Map([
     ["Sacred Grove Baba Serpent Grotto Chest", new Flag(chest.with(heartPiece), [-6868, 3472], {
         baseReqs: [boulderReq, shadowCrystalReq],
         baseDesc: 'Defeat all the 8 Deku Serpents to make the chest appear.',
-        randoReqs: [shadowCrystalReq, boulderReq, skullKidReq]
+        randoReqs: [shadowCrystalReq, [boomerangReq, bowReq, clawshotReq]],
     })],
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
         baseReqs: [[boomerangReq, clawshotReq]],
@@ -329,7 +343,7 @@ const flags = new Map([
     ["North Faron Woods Howling Stone", new Flag(howlingStone, [-7340, 4043], {
         baseReqs: [midnasLamentReq],
         baseDesc: 'Summons the South Castle Town Golden Wolf, accessible while on the way to the Master Sword.',
-        randoReqs: [shadowCrystalReq]
+        randoReqs: [faronTwilightCleared, shadowCrystalReq]
     })],
     ["Faron Field Gate Lock", new Flag(gateLock, [-5825, 4324], {
         baseReqs: [gateKeyReq],
@@ -350,23 +364,26 @@ const flags = new Map([
     ["Eldin Field Male Grasshopper", new Flag(grasshopperM, [-4064, 6973], {
         baseReqs: [eponaReq],
         baseDesc: 'This ♂ Grasshopper is particulary hard to get. Use the boomerang or clawshot if necessary.',
-        randoDesc: 'The item is on the ground where the bug usually is.'
+        randoReqs: [eldinTwilightCleared],
+        randoDesc: 'The item is on the ground where the bug usually is.',
     })],
     ["Eldin Field Female Grasshopper", new Flag(grasshopperF, [-3372, 5952], {
         baseReqs: [eponaReq],
         baseDesc: 'This ♀ Grasshopper is just lying on the ground.',
+        randoReqs: [eldinTwilightCleared],
         randoDesc: 'The item is on the ground where the bug usually is.'
     })],
     ["Bridge of Eldin Male Phasmid", new Flag(phasmidM, [-3158, 7408], {
         baseReqs: [eponaReq, [boomerangReq, clawshotReq]],
         baseDesc: "This ♂ Phasmid is too high to reach, so you'll need to use the clawshot or the boomerang to make it come down.",
+        randoReqs: [eldinTwilightCleared, [boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: "The item is where the bug usually is and is too high to reach.",
-        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]]
     })],
     ["Bridge of Eldin Female Phasmid", new Flag(phasmidF, [-2390, 7561], {
         baseReqs: [eponaReq, [boomerangReq, clawshotReq]],
         baseDesc: "This ♀ Phasmid is too high to reach, you can use the boomerang from down below to reach her, or climb the ledge using the clawshot target.",
-        randoDesc: "The item is where the bug usually is and is too high to reach."
+        randoReqs: [eldinTwilightCleared, [boomerangReq, clawshotReq]],
+        randoDesc: "The item is where the bug usually is and is too high to reach.",
     })],
     ["Kakariko Gorge Female Pill Bug", new Flag(pillbugF, [-5584, 6316], {
         baseReqs: [eldinTwilightCleared],
@@ -420,12 +437,14 @@ const flags = new Map([
         randoCategory: Categories.Gifts
     })],
     ["Kakariko Village Bomb Shop Poe", new Flag(nightPoe, [-5228, 7767], {
-        baseReqs: [shadowCrystalReq, nightReq], // Available during Lanayru Twilight
-        baseDesc: "In the ruins of Barnes' old warehouse."
+        baseReqs: [shadowCrystalReq, nightReq],
+        baseDesc: "In the ruins of Barnes' old warehouse.",
+        randoReqs: [eldinTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Kakariko Village Watchtower Poe", new Flag(nightPoe, [-5107, 7621], {
-        baseReqs: [shadowCrystalReq, nightReq],// Available during Lanayru Twilight
-        baseDesc: "At the base of the watchtower."
+        baseReqs: [shadowCrystalReq, nightReq],
+        baseDesc: "At the base of the watchtower.",
+        randoReqs: [eldinTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Kakariko Village Bomb Rock Spire Heart Piece", new Flag(heartPiece, [-5610, 7578], {
         baseReqs: [bombBagReq, boomerangReq],
@@ -435,7 +454,8 @@ const flags = new Map([
     })],
     ["Kakariko Graveyard Open Poe", new Flag(nightPoe, [-5455, 8048], {
         baseReqs: [[new AndRequirements(lanayruTwilight, warpOutLanayruTwilightReq), midnasLamentReq], nightReq],
-        baseDesc: "Near the graves."
+        baseDesc: "Near the graves.",
+        randoReqs: [eldinTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Death Mountain Trail Poe", new Flag(nightPoe, [-4331, 8118], {
         baseReqs: [fyrusReq, shadowCrystalReq, nightReq],
@@ -450,8 +470,7 @@ const flags = new Map([
         baseReqs: [getFlagReq("Kakariko Village Malo Mart Bridge Repaired")],
         baseDesc: 'After repairing the bridge for 1000 rupees, talk to the Goron near the bridge then talk to Gor Liggs in front of the Malo Mart in Kakariko and bring the springwater to the dehydrated Goron.',
         randoCategory: Categories.Gifts,
-        randoReqs: [Requirement.fromCountItem(rupees, 1000)],
-        randoDesc: 'After repairing the bridge for 1000 rupees, talk to the Gor Liggs in front of the Malo Mart in Kakariko and bring the springwater to the dehydrated Goron.',
+        randoDesc: 'After repairing the bridge for 1000 rupees, talk to Gor Liggs in front of the Malo Mart in Kakariko and bring the springwater to the dehydrated Goron.',
     })],
     ["Kakariko Gorge Poe", new Flag(nightPoe, [-5347, 5978], {
         baseReqs: [midnasLamentReq, nightReq],
@@ -471,7 +490,8 @@ const flags = new Map([
     })],
     ["Kakariko Graveyard Grave Poe", new Flag(nightPoe, [-5493, 7987], {
         baseReqs: [[new AndRequirements(lanayruTwilight, warpOutLanayruTwilightReq), midnasLamentReq], nightReq],
-        baseDesc: 'Push the south-west grave to reveal the poe.'
+        baseDesc: 'Push the south-west grave to reveal the poe.',
+        randoReqs: [eldinTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Ilia Charm", new Flag(iliasCharm, [-2155, 6620], {
         baseReqs: [woodenStatueReq, bowReq],
@@ -480,15 +500,16 @@ const flags = new Map([
         randoDesc: 'Defeat all the Bulblins, then talk to Impaz in front of her house to receive the charm. This check is never randomized.'
     })],
     ["Cats Hide and Seek Minigame", new Flag(heartPiece, [-2165, 6565], {
-        baseReqs: [armogohmaReq, horseCallReq, shadowCrystalReq, clawshotReq],
+        baseReqs: [horseCallReq, shadowCrystalReq, clawshotReq],
         baseDesc: 'Start the Cat Seeking Minigame by talking to the Cucco Leader near the howling stone. ' +
                 "Once you have spoken to all 20 cats, report back to the Cucco Leader to receive the heart piece in front of Impaz' House",
-        randoCategory: Categories.Main
+        randoCategory: Categories.Main,
+        randoReqs: [getFlagReq("Ilia Memory Reward"), shadowCrystalReq, clawshotReq],
     })],
     ["Hidden Village Poe", new Flag(nightPoe, [-2018, 6535], {
-        baseReqs: [horseCallReq, shadowCrystalReq, nightReq],
+        baseReqs: [skybookReq, shadowCrystalReq, nightReq],
         baseDesc: 'On the balcony above the white piece of cloth.',
-        randoReqs: [armogohmaReq, horseCallReq, shadowCrystalReq, nightReq],
+        randoReqs: [getFlagReq("Skybook From Impaz"), shadowCrystalReq, nightReq],
     })],
     ["Bridge of Eldin Owl Statue Sky Character", new Flag(skybookChar, [-2509, 7359], {
         baseReqs: [domRodReq],
@@ -530,6 +551,7 @@ const flags = new Map([
         baseReqs: [bombBagReq, bowReq],
         baseDesc: 'Climb up the sanctuary with Midna jumps or a Cucco, then shoot a bomb arrow at the bell to make the silver rupee drop.',
         randoCategory: Categories.HiddenRupees,
+        randoReqs: [eldinTwilightCleared, bombBagReq, [bowReq, boomerangReq]],
     })],
     ["Kakariko Graveyard Underwater Boulder Rupee", new Flag(rupeeBoulder.with(Rupees.Red), [-5518, 8237], {
         baseReqs: [waterBombReq, ironBootsReq],
@@ -554,7 +576,7 @@ const flags = new Map([
         baseReqs: [fyrusReq, Requirement.fromCountItem(rupees, 120)],
         baseDesc: 'After clearing the Goron Mines, you can buy this Bomb Bag from Barnes for 120 rupees.',
         randoCategory: Categories.ShopItems,
-        randoReqs: [Requirement.fromCountItem(rupees, 120)],
+        randoReqs: [eldinTwilightCleared, Requirement.fromCountItem(rupees, 120)],
         randoDesc: "Select a type of bomb to buy the item from Barnes for 120 rupees"
     })],
     ["Kakariko Watchtower Chest", new Flag(chest.with(Rupees.Purple), [-5181, 7310], {
@@ -566,6 +588,7 @@ const flags = new Map([
         baseReqs: [ironBootsReq, Requirement.fromCountItem(rupees, 200)],
         baseDesc: 'You can buy it after saving Collin for 200 rupees.',
         randoCategory: Categories.ShopItems,
+        randoReqs: [eldinTwilightCleared, Requirement.fromCountItem(rupees, 200)],
         randoDesc: "You can buy the item for 200 rupees."
     })],
     ["Kakariko Village Malo Mart Wooden Shield", new Flag(woodenShields.getItemByIndex(1), [-5445, 7400], {
@@ -823,7 +846,7 @@ const flags = new Map([
     ["Ashei Sketch", new Flag(asheisSketch, [-606, 4446], {
         baseReqs: [stallordReq],
         baseDesc: 'Speak to Ashei to obtain her sketch.',
-        randoReqs: [lanayruTwilightCleared],
+        randoReqs: [[lanayruTwilightCleared, snowpeakPortalReq]],
         randoCategory: Categories.Gifts
     })],
     ["Snowpeak Blizzard Poe", new Flag(poeSoul, [-307, 3521], {
@@ -870,9 +893,10 @@ const flags = new Map([
         randoDesc: 'This chest is available during Twilight.'
     })],
     ["Zoras Domain Chest Behind Waterfall", new Flag(smallChest.with(Rupees.Red), [-601, 4967], {
-        baseReqs: [meltedIceReq, [lanayruTwilight, clawshotReq, shadowCrystalReq]],
+        baseReqs: [meltedIceReq, [lanayruTwilight, shadowCrystalReq]],
         baseDesc: 'Use Midna jumps to follow the path from the west shore of the domain to reach the chest.',
-        randoDesc: 'This chest is available during Twilight.'
+        randoReqs: [meltedIceReq, shadowCrystalReq],
+        randoDesc: 'This chest is available during Twilight.',
     })],
     ["Lake Hylia Underwater Chest", new Flag(chest.with(Rupees.Orange), [-5461, 3284], {
         baseReqs: [lanayruTwilightCleared, ironBootsReq],
@@ -924,6 +948,7 @@ const flags = new Map([
     ["Zoras Domain Light All Torches Chest", new Flag(chest.with(Rupees.Purple), [-206, 4870], {
         baseReqs: [lanayruTwilightCleared, lanternReq, ironBootsReq],
         baseDesc: 'Light up all the 3 torches with the lantern to make the chest appear.',
+        randoReqs: [meltedIceReq, lanternReq, ironBootsReq],
     })],
     ["Zoras Domain Male Dragonfly", new Flag(dragonflyM, [-741, 4977], {
         baseReqs: [lanayruTwilightCleared],
@@ -938,13 +963,13 @@ const flags = new Map([
     ["Fishing Hole Bottle", new Flag(bottle, [-370, 6066], {
         baseReqs: [lanayruTwilightCleared, fishingRodReq],
         baseDesc: 'Cast the fishing in the small pond isolated by the bridge to catch the bottle.',
-        randoReqs: [fishingRodReq],
+        randoReqs: [meltedIceReq, fishingRodReq],
     })],
     ["Fishing Hole Heart Piece", new Flag(heartPiece, [-372, 5801], {
         baseReqs: [lanayruTwilightCleared, [Requirement.fromCountItem(rupees, 20), clawshotReq]],
         baseDesc: 'Go fishing with the canoe (20 rupees) and use the provided fishing rod to reel in the heart piece or use the clawshot.',
         randoCategory: Categories.Main,
-        randoReqs: [[Requirement.fromCountItem(rupees, 20), clawshotReq]],
+        randoReqs: [meltedIceReq, [Requirement.fromCountItem(rupees, 20), clawshotReq]],
         randoDesc: "'Go fishing with the canoe (20 rupees) and use the provided fishing rod to reel in the item or use the clawshot.'"
     })],
     ["Iza Helping Hand", new Flag(bombBag, [-853, 6061], {
@@ -983,16 +1008,18 @@ const flags = new Map([
     ["Outside South Castle Town Tightrope Chest", new Flag(chest.with(Rupees.Orange), [-4364, 4644], {
         baseReqs: [clawshotReq, shadowCrystalReq],
         baseDesc: '1. Clawshot the top of the target at the top of the right tower and climb up.<br>2. Transform into Wolf Link and cross the rope, then transform ' + 
-                'back.<br>3. Slowly walk towards the ledge to hang from it, then hold left to crawl to the left platform.<br>4. Transform back into Wolf and cross the last rope to reach the chest.'
+                'back.<br>3. Slowly walk towards the ledge to hang from it, then hold left to crawl to the left platform.<br>4. Transform back into Wolf and cross the last rope to reach the chest.',
+        randoReqs: [lanayruTwilightCleared, clawshotReq, shadowCrystalReq],
     })],
     ["Outside South Castle Town Fountain Chest", new Flag(chest.with(Rupees.Orange), [-4428, 4710], {
         baseReqs: [clawshotReq, spinnerReq],
-        baseDesc: '1. Clawshot the top of the target at the top of the right tower and drop down.<br>2. Use the spinner on the railing, then jump below to the chest.'
+        baseDesc: '1. Clawshot the top of the target at the top of the right tower and drop down.<br>2. Use the spinner on the railing, then jump below to the chest.',
+        randoReqs: [lanayruTwilightCleared, clawshotReq, spinnerReq],
     })],
     ["Outside South Castle Town Poe", new Flag(nightPoe, [-4446, 4641], {
         baseReqs: [midnasLamentReq, nightReq],
         baseDesc: 'Near the middle of the stairs.',
-        randoReqs: [shadowCrystalReq, [lanayruTwilight, nightReq]],
+        randoReqs: [lanayruTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Lake Hylia Bridge Vines Chest", new Flag(chest.with(Rupees.Orange), [-4574, 3388], {
         baseReqs: [clawshotReq],
@@ -1001,7 +1028,8 @@ const flags = new Map([
     })],
     ["Isle of Riches Poe", new Flag(nightPoe, [-4920, 3065], {
         baseReqs: [Requirement.fromCountItem(rupees, 20), shadowCrystalReq, nightReq],
-        baseDesc: "Can be obtained from the lowest platform with the small chest."
+        baseDesc: "Can be obtained from the lowest platform with the small chest.",
+        randoReqs: [lanayruTwilightCleared, Requirement.fromCountItem(rupees, 20), shadowCrystalReq, nightReq],
     })],
     ["Flight By Fowl Fifth Platform Chest", new Flag(smallChest.with(Rupees.Yellow), [-4900, 3050], {
         baseReqs: [lanayruTwilightCleared, Requirement.fromCountItem(rupees, 20)],
@@ -1036,7 +1064,8 @@ const flags = new Map([
     })],
     ["Outside South Castle Town Golden Wolf", new Flag(goldenWolf, [-4430, 4591], {
         baseReqs: [getFlagReq("North Faron Woods Howling Stone")],
-        baseDesc: 'Summoned by the Faron Woods Howling Stone.'
+        baseDesc: 'Summoned by the Faron Woods Howling Stone.',
+        randoReqs: [lanayruTwilightCleared, getFlagReq("North Faron Woods Howling Stone")],
     })],
     ["Plumm Fruit Balloon Minigame", new Flag(heartPiece, [-4905, 3923], {
         baseReqs: [midnasLamentReq],
@@ -1049,7 +1078,7 @@ const flags = new Map([
         baseReqs: [waterBombReq, ironBootsReq],
         baseDesc: 'Blow up the rock in the middle of the room with water bombs and talk to the Goron that comes out of it.',
         randoCategory: Categories.Gifts,
-        randoReqs: [meltedIceReq, bombBagReq, ironBootsReq],
+        randoReqs: [lanayruTwilightCleared, bombBagReq, ironBootsReq],
     })],
     ["Zoras Domain Waterfall Poe", new Flag(nightPoe, [-475, 4844], {
         baseReqs: [midnasLamentReq, nightReq],
@@ -1073,11 +1102,13 @@ const flags = new Map([
     })],
     ["Lake Hylia Bridge Cliff Chest", new Flag(chest.with(Rupees.Purple), [-5656, 3789], {
         baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq],
-        baseDesc: 'Blow up the rocks that are elevated to reveal clawshot targets. Follow the target path until you reach the chest.'
+        baseDesc: 'Blow up the rocks that are elevated to reveal clawshot targets. Follow the target path until you reach the chest.',
+        randoReqs: [meltedIceReq, bombBagReq, [bowReq, boomerangReq], clawshotReq],
     })],
     ["Lake Hylia Bridge Cliff Poe", new Flag(nightPoe, [-5691, 3795], {
-        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, shadowCrystalReq],
-        baseDesc: 'On the left of the chest.'
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], clawshotReq, shadowCrystalReq, nightReq],
+        baseDesc: 'On the left of the chest.',
+        randoReqs: [lanayruTwilightCleared, midnasLamentReq, bombBagReq, [bowReq, boomerangReq], clawshotReq, shadowCrystalReq, nightReq],
     })],
     ["Lake Hylia Bridge King Bulblin Gate Keys", new Flag(gateKey, [-5048, 3400], {
         baseReqs: [lanayruTwilightCleared],
@@ -1097,11 +1128,13 @@ const flags = new Map([
     })],
     ["Lake Hylia Tower Poe", new Flag(nightPoe, [-5509, 2724], {
         baseReqs: [shadowCrystalReq, nightReq],
-        baseDesc: 'On the left of the watchtower.'
+        baseDesc: 'On the left of the watchtower.',
+        randoReqs: [lanayruTwilightCleared, shadowCrystalReq, nightReq],
     })],
     ["Flight By Fowl Ledge Poe", new Flag(nightPoe, [-4656, 2886], {
         baseReqs: [Requirement.fromCountItem(rupees, 20), shadowCrystalReq, nightReq],
-        baseDesc: "Play the Flight By Fowl minigame (20 rupees) and use the Cucco to reach the platform under Fowl's house."
+        baseDesc: "Play the Flight By Fowl minigame (20 rupees) and use the Cucco to reach the platform under Fowl's house.",
+        randoReqs: [lanayruTwilightCleared, Requirement.fromCountItem(rupees, 20), shadowCrystalReq, nightReq],
     })],
     ["Charlo Donation Blessing", new Flag(heartPiece, [-3952, 4594], {
         baseReqs: [lanayruTwilightCleared, Requirement.fromCountItem(rupees, 1000)],
@@ -1122,9 +1155,9 @@ const flags = new Map([
         baseDesc: 'Destroy the boulders blocking the way, then use the spinner tracks to reach the chest.'
     })],
     ["Hyrule Field Amphitheater Poe", new Flag(nightPoe, [-4314, 3790], {
-        baseReqs: [midnasLamentReq, nightReq],
+        baseReqs: [morpheelReq, nightReq],
         baseDesc: 'At the center of the ruins.',
-        randoReqs: [midnasLamentReq, shadowCrystalReq, nightReq]
+        randoReqs: [lanayruTwilightCleared, shadowCrystalReq, nightReq]
     })],
     ["Doctors Office Balcony Chest", new Flag(smallChest.with(Rupees.Red), [-3940, 4890], {
         baseReqs: [invoiceReq, shadowCrystalReq],
@@ -1136,7 +1169,8 @@ const flags = new Map([
     })],
     ["North Castle Town Golden Wolf", new Flag(goldenWolf, [-3701, 4709], {
         baseReqs: [getFlagReq("Hidden Village Howling Stone")],
-        baseDesc: 'Summoned by the Hidden Village Howling Stone.'
+        baseDesc: 'Summoned by the Hidden Village Howling Stone.',
+        randoReqs: [getFlagReq("Hidden Village Howling Stone"), midnasLamentReq],
     })],
     ["Lake Hylia Bridge Owl Statue Sky Character", new Flag(skybookChar, [-4220, 3378], {
         baseReqs: [clawshotReq, domRodReq],
@@ -1156,7 +1190,8 @@ const flags = new Map([
     })],
     ["Outside South Castle Town Double Clawshot Chasm Chest", new Flag(chest.with(Rupees.Orange), [-4550, 4505], {
         baseReqs: [doubleClawshotReq],
-        baseDesc: 'Follow the clawshot target path down the chasm to reach the chest.'
+        baseDesc: 'Follow the clawshot target path down the chasm to reach the chest.',
+        randoReqs: [lanayruTwilightCleared, doubleClawshotReq],
     })],
     ["Upper Zoras River Howling Stone", new Flag(howlingStone, [-852, 5918], {
         baseReqs: [meltedIceReq, [lanayruTwilight, shadowCrystalReq]],
@@ -1164,12 +1199,14 @@ const flags = new Map([
     })],
     ["Lake Hylia Howling Stone", new Flag(howlingStone, [-5405, 3014], {
         baseReqs: [shadowCrystalReq],
-        baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.'
+        baseDesc: 'Summons the Gerudo Desert Golden Wolf, climb the ladder as human to reach it.',
+        randoReqs: [meltedIceReq, shadowCrystalReq],
     })],
     ["Lake Hylia Bridge Faron Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 20), [-5458, 3876], {
         baseReqs: [lanayruTwilightCleared, boulderReq],
         baseDesc: 'Hidden between two larger stone structures.',
         randoCategory: Categories.HiddenRupees,
+        randoReqs: [meltedIceReq, boulderReq],
     })],
     ["Lake Hylia Bridge Owl Statue Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 20), [-4333, 3548], {
         baseReqs: [lanayruTwilightCleared, boulderReq],
@@ -1223,6 +1260,7 @@ const flags = new Map([
         baseReqs: [waterBombReq, ironBootsReq],
         baseDesc: "Underwater, east of the throne. The rocks under the boulder are worth lifting as there is a total of 40 rupees under them.",
         randoCategory: Categories.Rupees,
+        randoReqs: [lanayruTwilightCleared, bombBagReq, ironBootsReq],
     })],
     ["Upper Zoras River Central Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 31), [-876, 5882], {
         baseReqs: [waterBombReq, ironBootsReq],
@@ -1270,7 +1308,6 @@ const flags = new Map([
         baseReqs: [lanayruTwilightCleared, boulderReq],
         baseDesc: 'Out in the open.',
         randoCategory: Categories.HiddenRupees,
-        randoReqs: [boulderReq]
     })],
     ["Upper Zoras River Ledge Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 31), [-808, 5851], {
         baseReqs: [lanayruTwilightCleared, boulderReq],
@@ -1282,13 +1319,13 @@ const flags = new Map([
         baseReqs: [waterBombReq, zoraArmorReq, ironBootsReq],
         baseDesc: "Deep underwater, west of the entrance to Lakebed Temple.",
         randoCategory: Categories.HiddenRupees,
-        randoReqs: [bombBagReq, zoraArmorReq, ironBootsReq],
+        randoReqs: [lanayruTwilightCleared, zoraArmorReq, ironBootsReq, bombBagReq],
     })],
     ["Lake Hylia Right Underwater Boulder Rupee", new Flag(rupeeBoulder.with(rupees, 40), [-4915, 3442], {
         baseReqs: [waterBombReq, zoraArmorReq, ironBootsReq],
         baseDesc: "Deep underwater, east of the entrance to Lakebed Temple.",
         randoCategory: Categories.HiddenRupees,
-        randoReqs: [bombBagReq, zoraArmorReq, ironBootsReq],
+        randoReqs: [lanayruTwilightCleared, zoraArmorReq, ironBootsReq, bombBagReq],
     })],
     ["Agitha Male Ant Reward",           getAgithaRewardFlag(0)],
     ["Agitha Female Ant Reward",         getAgithaRewardFlag(1)],
@@ -1559,7 +1596,13 @@ const flags = new Map([
     ["Forest Temple Gale Boomerang", new Flag(boomerang, [-4508, 4262], {
         baseReqs: [getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock")],
         baseDesc: 'Defeat Ook to obtain the Gale Boomerang.',
-        randoReqs: [[forest3SKReq, new AndRequirements([boomerangReq, ...forestTempleLeftSideReq])], [woodenSwordReq, shadowCrystalReq, ballAndChainReq, bombBagReq, bowReq]]
+        randoReqs: [
+            [
+                new AndRequirements(getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock")), 
+                new AndRequirements([...forestTempleLeftSideReq, boomerangReq])
+            ], 
+            [woodenSwordReq, shadowCrystalReq, ballAndChainReq, bombBagReq, bowReq]
+        ]
     })],
     ["Forest Temple West Tile Worm Chest Behind Stairs", new Flag(chest.with(heartPiece), [-5304, 3050], {
         baseReqs: [poleMonkeyReq, boomerangReq],
@@ -1588,19 +1631,19 @@ const flags = new Map([
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Heart Container.',
         randoCategory: Categories.Main,
-        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
+        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the item.'
     })],
     ["Forest Temple Dungeon Reward", new Flag(fusedShadow, [-3796, 4777], {
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Fused Shadow.',
-        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
+        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
     })],
     ["Forest Temple Diababa", new Flag(diababa, [-3651, 4860], {
         baseReqs: [boomerangReq, [forestBKReq, getFlagReq("Forest Temple Boss Lock")], ordonSwordReq],
         baseDesc: 'Defeat Diababa to clear out the Forest Temple.',
-        randoReqs: [forestBKReq, boomerangReq, [forest4SKReq, clawshotReq], [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]]
+        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]]
     })],
     ["Forest Temple Ooccoo", new Flag(ooccooPot, [-5250, 4565], {
         baseReqs: [], // Needs a way to put the Bombling into bomb form (shield/damage) or boulderReq
@@ -1609,12 +1652,12 @@ const flags = new Map([
     ["Forest Temple Tile Worm Monkey Lock", new Flag(forestLock, [-5309, 2943], {
         baseReqs: [poleMonkeyReq, forest1SKReq, lanternReq],
         baseDesc: 'Unlock this door to free the west wing monkey.',
-        randoReqs: [webReq, [forest2SKReq, new AndRequirements([clawshotReq, forest1SKReq])]]
+        randoReqs: [...forestTempleLeftSideReq, forest1SKReq],
     })],
     ["Forest Temple Big Baba Monkey Lock", new Flag(forestLock, [-5869, 3752], {
         baseReqs: [poleMonkeyReq, forest1SKReq, lanternReq],
         baseDesc: 'Unlock this door to free the Big Baba Monkey',
-        randoReqs: [webReq, [forest2SKReq, new AndRequirements([clawshotReq, forest1SKReq])]]
+        randoReqs: [...forestTempleLeftSideReq, forest1SKReq]
     })],
     ["Forest Temple Totem Pole Monkey Lock", new Flag(forestLock, [-5224, 5130], {
         baseReqs: [forest1SKReq],
@@ -1630,7 +1673,13 @@ const flags = new Map([
             getFlagReq("Forest Temple Monkey Behind Rocks"), getFlagReq("Forest Temple Monkey Behind Windmill Gate"),
         ],
         baseDesc: "Unlock this door to reach Diababa.",
-        randoReqs: [boomerangReq, forestBKReq, [forest4SKReq, clawshotReq]],
+        randoReqs: [boomerangReq, forestBKReq, [
+            new AndRequirements(getFlagReq("Forest Temple Hanging Cage Monkey"), getFlagReq("Forest Temple Monkey Under Web"),
+            getFlagReq("Forest Temple Monkey Behind Rocks"), getFlagReq("Forest Temple Monkey Behind Windmill Gate"),
+            getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock"),
+            getFlagReq("Forest Temple Pole Monkey")), 
+            clawshotReq
+        ]],
     })],
     // Goron Mines
     ["Goron Mines Entrance Chest", new Flag(smallChest.with(Rupees.Red), [-5791, 4465], {
@@ -1744,7 +1793,7 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Fyrus.",
     })],
     ["Goron Mines Fyrus", new Flag(fyrus, [-4332, 3840], {
-        baseReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], minesBKReq, bowReq],
+        baseReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], [minesBKReq, getFlagReq("Goron Mines Boss Lock")], bowReq],
         baseDesc: 'Defeat Fyrus to clear out the Goron Mines.'
     })],
     ["Goron Mines Fyrus Heart Container", new Flag(heartContainer, [-4252, 3815], {
@@ -2189,12 +2238,12 @@ const flags = new Map([
     ["Temple of Time Boss Lock", new Flag(templeBossLock, [-4197, 4350], {
         baseReqs: [spinnerReq, bowReq, [temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], pastDomRodReq, templeBKReq],
         baseDesc: "Unlock this door to reach Armogohma.",
-        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([temple3SKReq, spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
         baseReqs: [spinnerReq, bowReq, [temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], pastDomRodReq, [templeBKReq, getFlagReq("Temple of Time Boss Lock")]],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
-        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
+        randoReqs: [pastDomRodReq, bowReq, [templeBKReq, getFlagReq("Temple of Time Boss Lock")], [doorOfTimeReq, new AndRequirements([[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],
@@ -2436,7 +2485,7 @@ const flags = new Map([
     ["Palace of Twilight Collect Both Sols", new Flag(swords.getItemByIndex(3), [-5877, 4329], {
         baseReqs: [clawshotReq, westSolReq, eastSolReq],
         baseDesc: 'Bring both Sols to their pedestal to obtain the Light Filled Master Sword.',
-        randoReqs: [clawshotReq, palace4SKReq, [shadowCrystalReq, woodenSwordReq]],
+        randoReqs: [clawshotReq, [palace4SKReq, new AndRequirements([westSolReq, eastSolReq])], [shadowCrystalReq, woodenSwordReq]],
     })],
     ["Palace of Twilight West Wing Chest Behind Wall of Darkness", new Flag(chest.with(heartPiece), [-5400, 3585], {
         baseReqs: [clawshotReq, [westSolReq, lightMasterSwordReq]],
@@ -2482,12 +2531,14 @@ const flags = new Map([
     ["Palace of Twilight East Wing First Room West Alcove Chest", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
         baseReqs: [lightMasterSwordReq],
         baseDesc: 'After obtaining Light Filled Master Sword, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.',
-        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.'
+        randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
+        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.',    randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
     })],
     ["Palace of Twilight East Wing First Room East Alcove Chest", new Flag(chest.with(heartPiece), [-5420, 4902], {
         baseReqs: [lightMasterSwordReq],
         baseDesc: 'After obtaining the Light Filled Master Sword, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.',
-        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the east alcove until it brings you to the chest.'
+        randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
+        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the east alcove until it brings you to the chest.',
     })],
     ["Palace of Twilight East Wing First Lock", new Flag(palaceLock, [-5209, 4773], {
         baseReqs: [westSolReq, clawshotReq, palace1SKReq],
@@ -2497,23 +2548,24 @@ const flags = new Map([
     ["Palace of Twilight East Wing Second Room Southwest Chest", new Flag(chest.with(palaceMap), [-4944, 4606], {
         baseReqs: [westSolReq, [palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq],
         baseDesc: 'Use the Double Clawshot to reach the chest.',
-        randoReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        randoReqs: [[new AndRequirements([[palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq]), new AndRequirements([[palace2SKReq, palaceEastSecondLockReq], clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
         randoDesc: 'Use the Double Clawshot or the Sol to reach the chest.',
     })],
     ["Palace of Twilight East Wing Second Room Northwest Chest", new Flag(smallChest.with(Rupees.Purple), [-4822, 4606], {
         baseReqs: [westSolReq, clawshotReq, [palace1SKReq, palaceEastFirstLockReq]],
-        baseDesc: 'Clawshot the wall target from the platform with the northern door to reach the chest.'
+        baseDesc: 'Clawshot the wall target from the platform with the northern door to reach the chest.',
+        randoReqs: [clawshotReq, [palace1SKReq, palaceEastFirstLockReq]],
     })],
     ["Palace of Twilight East Wing Second Room Northeast Chest", new Flag(smallChest.with(Rupees.Purple), [-4873, 4940], {
         baseReqs: [westSolReq, [palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq],
         baseDesc: 'Use the Double Clawshot to reach the chest.',
-        randoReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        randoReqs: [[new AndRequirements([[palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq]), new AndRequirements([[palace2SKReq, palaceEastSecondLockReq], clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
         randoDesc: 'Use the Double Clawshot or the Sol to reach the chest.',
     })],
     ["Palace of Twilight East Wing Second Room Southeast Chest", new Flag(chest.with(palaceSK), [-4944, 4940], {
         baseReqs: [westSolReq, [palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq],
         baseDesc: 'Use the Double Clawshot to reach the chest.',
-        randoReqs: [[new AndRequirements([palace1SKReq, doubleClawshotReq]), new AndRequirements([palace2SKReq, clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
+        randoReqs: [[new AndRequirements([[palace1SKReq, palaceEastFirstLockReq], doubleClawshotReq]), new AndRequirements([[palace2SKReq, palaceEastSecondLockReq], clawshotReq, [woodenSwordReq, shadowCrystalReq]])]],
         randoDesc: 'Use the Double Clawshot or the Sol to reach the chest.',
     })],
     ["Palace of Twilight East Wing Second Lock", new Flag(palaceLock, [-4676, 4773], {
@@ -2755,11 +2807,11 @@ const flags = new Map([
     })],
     ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
     ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055], {
-        randoReqs: [[forest1SKReq, clawshotReq]]
+        randoReqs: [[getFlagReq("Forest Temple Pole Monkey"), clawshotReq]]
     })],
     ["Gerudo Desert Sign", new Flag(randoHint, [-5481, 1185])],
     ["Goron Mines Sign", new Flag(randoHint, [-3723, 5334], {
-        baseReqs: [ironBootsReq, mines3SKReq]
+        baseReqs: [ironBootsReq, [mines3SKReq, minesThirdLockReq]]
     })],
     ["Great Bridge of Hylia Sign", new Flag(randoHint, [-4250, 3381], {
         randoReqs: [clawshotReq]
@@ -2774,7 +2826,7 @@ const flags = new Map([
         randoReqs: [gateKeyReq]
     })],
     ["Kakariko Village Sign", new Flag(randoHint, [-5220, 7548], {
-        randoReqs: [[...boulderReq, fyrusReq]]
+        randoReqs: []
     })],
     ["Lake Hylia Sign", new Flag(randoHint, [-4659, 2920])],
     ["Lake Lantern Cave Sign", new Flag(randoHint, [-5335, 3018], {
@@ -2795,14 +2847,20 @@ const flags = new Map([
     ["Sacred Grove Sign", new Flag(randoHint, [-7214, 3630], {
         randoReqs: [shadowCrystalReq, skullKidReq]
     })],
-    ["Snowpeak Mountain Sign", new Flag(randoHint, [-483, 3939])],
+    ["Snowpeak Mountain Sign", new Flag(randoHint, [-483, 3939], {
+        randoReqs: [[lanayruTwilightCleared, snowpeakPortalReq]],
+    })],
     ["Snowpeak Ruins Sign", new Flag(randoHint, [-5035, 4186])],
-    ["South of Castle Town Sign", new Flag(randoHint, [-4475, 4710])],
+    ["South of Castle Town Sign", new Flag(randoHint, [-4475, 4710], {
+        randoReqs: [lanayruTwilightCleared],
+    })],
     ["Temple of Time Beyond Point Sign", new Flag(randoHint, [-4928, 3970], {
-        baseReqs: [temple2SKReq, spinnerReq, bowReq]
+        baseReqs: [[temple2SKReq, templeSecondLockReq], spinnerReq, bowReq]
     })],
     ["Temple of Time Sign", new Flag(randoHint, [-5721, 4278])],
-    ["Upper Zoras River Sign", new Flag(randoHint, [-590, 5780])],
+    ["Upper Zoras River Sign", new Flag(randoHint, [-590, 5780], {
+        randoReqs: [meltedIceReq],
+    })],
     ["Zoras Domain Sign", new Flag(randoHint, [-748, 4751], {
         randoReqs: [[shadowCrystalReq, ...boulderReq]]
     })],
@@ -2863,21 +2921,24 @@ const flags = new Map([
     })],
     ['Castle Town Goron Shop Arrow Refill', new Flag(new MultiItem(arrows, 30), [-4087, 4707], {
         itemCategory: Categories.ShopItems,
-        baseReqs: [Requirement.fromCountItem(rupees, 40)],
+        baseReqs: [lanayruTwilightCleared, Requirement.fromCountItem(rupees, 40)],
         baseDesc: "Buy the 30 Arrow Refill from the adult goron for 40 Rupees.",
         randoDesc: "Buy the item from the adult goron for 40 rupees."
     })],
     ['Faron Twilight Cleared', new Flag(vesselOfLight, [-7623, 4734], {
         baseReqs: [getFlagReq("South Faron Portal"), getFlagReq("North Faron Portal")],
         baseDesc: "Collect all the tears of light in the Faron region to clear the Faron Twilight.",
+        randoReqs: [zeldaMetReq, shadowCrystalReq, getFlagReq("South Faron Portal"), getFlagReq("North Faron Portal")],
     })],
     ['Eldin Twilight Cleared', new Flag(vesselOfLight, [-5729, 7689], {
         baseReqs: [getFlagReq("Death Mountain Portal")],
-        baseDesc: "Collect all the tears of light in the Eldin region to clear the Eldin Twilight."
+        baseDesc: "Collect all the tears of light in the Eldin region to clear the Eldin Twilight.",
+        randoReqs: [getFlagReq("Death Mountain Portal"), shadowCrystalReq],
     })],
     ['Lanayru Twilight Cleared', new Flag(vesselOfLight, [-5144, 3503], {
         baseReqs: [getFlagReq("Castle Town Portal")],
-        baseDesc: "Collect all the tears of light in the Lanayru region to clear the Lanayru Twilight."
+        baseDesc: "Collect all the tears of light in the Lanayru region to clear the Lanayru Twilight.",
+        randoReqs: [getFlagReq("Castle Town Portal"), shadowCrystalReq],
     })],
     ["Ordon Rupee In Grass By Bo", new Flag(Rupees.Green, [-9212, 4845], {
         baseReqs: [firstGoatsReq, zeldaNotMetReq],
@@ -3000,21 +3061,25 @@ const flags = new Map([
     ["Death Mountain Volcano Pipe Ledge Rock Rupee", new Flag(Rupees.Red, [-3614, 8232], {
         baseReqs: [ironBootsReq],
         baseDesc: "Hidden under the rock on the ledge below the pipe. Reach it by using the Goron.",
+         randoReqs: [eldinTwilightCleared],
         randoCategory: Categories.HiddenRupees,
     })],
     ["Death Mountain Volcano Ledge Rupee 3", new Flag(Rupees.Yellow, [-3691, 8188], {
         baseReqs: [ironBootsReq],
         baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+         randoReqs: [eldinTwilightCleared],
         randoCategory: Categories.FreestandingRupees,
     })],
      ["Death Mountain Volcano Ledge Rupee 2", new Flag(Rupees.Yellow, [-3702, 8177], {
         baseReqs: [ironBootsReq],
         baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+        randoReqs: [eldinTwilightCleared],
         randoCategory: Categories.FreestandingRupees,
     })],
     ["Death Mountain Volcano Ledge Rupee 1", new Flag(Rupees.Yellow, [-3708, 8160], {
         baseReqs: [ironBootsReq],
         baseDesc: "Launch yourself onto the ledge with the help of the highest Goron to reach the rupee.",
+        randoReqs: [eldinTwilightCleared],
         randoCategory: Categories.FreestandingRupees,
     })],
     ["Zoras Domain Throne West Gate Underwater Rupee", new Flag(Rupees.Blue, [-253, 4831], {
@@ -3076,11 +3141,13 @@ const flags = new Map([
         baseReqs: [zoraArmorReq],
         baseDesc: "Underwater, on top of one of the broken pillars left of the entrance.",
         randoCategory: Categories.FreestandingRupees,
+        randoReqs: [lanayruTwilightCleared, zoraArmorReq],
     })],
     ["Lake Hylia Right Underwater Pillar Rupee", new Flag(Rupees.Yellow, [-4839, 3444], {
         baseReqs: [zoraArmorReq],
         baseDesc: "Underwater, on top of one of the broken pillars right of the entrance.",
         randoCategory: Categories.FreestandingRupees,
+        randoReqs: [lanayruTwilightCleared, zoraArmorReq],
     })],
     ["Snowboarding Top Right Rupee", new RandoFlag(Rupees.Green, [-521, 2349], {
         baseReqs: [snowpeakPortalReq],
@@ -3214,8 +3281,10 @@ const flags = new Map([
         baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
     })],
     ["Sacred Grove Portal", new Flag(Portals.SacredGrove, [-7064, 3676], {
-        baseReqs: [blizzetaReq, [woodenSwordReq, shadowCrystalReq]],
+        baseReqs: [blizzetaReq, [masterSwordReq, shadowCrystalReq]],
         baseDesc: "After striking the Master Sword in its pedestal, defeat the Shadow Beasts that appear to open the portal.",
+        randoReqs: [skullKidReq, [woodenSwordReq, shadowCrystalReq]],
+        randoDesc: "After defeating Skull Kid, defeat the Shadow Beasts that appear to open the portal.",
     })],   
     ["Snowpeak Portal", new Flag(Portals.Snowpeak, [-663, 3166], {
         baseReqs: [reekfishScentReq, [masterSwordReq, shadowCrystalReq]],
@@ -3225,6 +3294,7 @@ const flags = new Map([
     ["South Faron Portal", new Flag(Portals.SouthFaron, [-7835, 4839], {
         baseReqs: [ordonPortalReq],
         baseDesc: "Defeat the Shadow Beasts that appear with a Midna charge attack to open the portal.",
+        randoReqs: [zeldaMetReq, [woodenSwordReq, shadowCrystalReq]],
     })],
     ["Upper Zoras River Portal", new Flag(Portals.UpperZorasRiver, [-786, 5985], {
         baseReqs: [lanayruTwilightCleared],
@@ -3233,10 +3303,13 @@ const flags = new Map([
     })],
     ["Zoras Domain Portal", new Flag(Portals.ZorasDomain, [-131, 4848], {
         baseDesc: "Defeat the Shadow Beasts that appear to open the portal.",
+        randoReqs: [[shadowCrystalReq, woodenSwordReq]],
     })],
     ["Ordon Spring Portal", new Flag(Portals.OrdonSpring, [-8497, 4768], {
         baseReqs: [ordonSwordReq, woodenShieldReq],
         baseDesc: "After talking to the Light Spirit, defeat the Shadow Beast that appears to open the portal.",
+        randoReqs: [],
+        randoDesc: "This portal is unlocked from the start in Rando."
     })],
     ["Ordon First Goats Herding", new Flag(goatHerding, [-9478, 4861], {
         baseDesc: "Heard the goats with Epona for the first time.<br>" +
@@ -3247,16 +3320,17 @@ const flags = new Map([
         baseDesc: "Follow Talo while he is chasing the monkey and free him from the cage to save him.<br>" +
                   "This concludes Day 2 of the Prologue."
     })],
-    ["Met Zelda", new Flag(metZelda, [-8496, 4708], {
-        baseReqs: [getFlagReq("Faron Woods Talo Saved")],
+    ["Met Zelda", new Flag(metZelda, [-8345, 4927], {
+        baseReqs: [taloSavedReq],
         baseDesc: "Meet Zelda in her tower after having been imprisoned.",
+        randoDesc: "Meet Zelda in her tower after having been imprisoned. Also unlocks the Hero's Clothes in Rando." 
     })],
     ["Forest Temple Pole Monkey", new Flag(saveMonkey, [-5225, 5296], {
         baseReqs: [[forest1SKReq, getFlagReq("Forest Temple Totem Pole Monkey Lock")]],
         baseDesc: "Save the monkey by rolling into the totem pole to make the cage fall.",
     })],
     ["Forest Temple Hanging Cage Monkey", new Flag(saveMonkey, [-4752, 3792], {
-        baseReqs: [boomerangReq],
+        baseReqs: [...forestTempleLeftSideReq, boomerangReq],
         baseDesc: "Free the monkey by using the boomerang on the web holding the cage.",
     })],
     ["Forest Temple Monkey Under Web", new Flag(saveMonkey, [-4551, 4580], {
@@ -3292,14 +3366,14 @@ const flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], lakebedEastWaterReq],
         baseDesc: 'Go to the top of the room and pull the lever to activate the west water supply.'
     })],
-    ["Midna's Lament Completed", new Flag(midnasLament, [-3888, 4044], {
+    ["Midna's Lament Completed", new Flag(midnasLament, [-3470, 4776], {
         baseReqs: [morpheelReq],
         baseDesc: "Save Midna by bringing her to Zelda after she was injured during the encounter with Zant."
     })],
     ["Kakariko Graveyard Lake Hylia Boulder", new Flag(emptyBoulder, [-5423, 8230], {
         baseReqs: [waterBombReq, ironBootsReq],
         baseDesc: "Destroy this boulder to gain access to the shortcut from Kakariko Graveyard to Lake Hylia.",
-        randoReqs: [bombBagReq, ironBootsReq],
+        randoReqs: [gateKeyReq, bombBagReq, ironBootsReq],
     })],
     ["Lanayru Field Zora's Domain Boulder", new Flag(emptyBoulder, [-1796, 4861], {
         baseReqs: [lanayruTwilightCleared, boulderReq],

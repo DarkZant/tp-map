@@ -77,14 +77,14 @@ class SubmapFloor {
     }
     isSet() {
         for (let c of this.contents) {
-            if (c instanceof Flag && !c.isSet())
+            if (c instanceof Flag && c.isSettable() && !c.isSet())
                 return false;
         }
         return true;
     }
     shownFlagsAreSet() {
         for (let c of this.contents) {
-            if (c instanceof Flag && c.isShown() && !c.isSet())
+            if (c instanceof Flag && c.isShown() && c.isSettable() && !c.isSet())
                 return false;
         }
         return true;
@@ -170,6 +170,8 @@ class SubmapFloor {
     getUniqueShownMarker() {
         let shownMarkerFound = null;
         for (let c of this.contents) {
+            if (c instanceof Submap) 
+                continue;
             if (c.isShown()) {
                 if (shownMarkerFound === null)
                     shownMarkerFound = c;
@@ -196,8 +198,10 @@ class SubmapFloor {
     }
     getAllTooltipMarkers() {
         let tooltipMarkers = [];
-        for (let c of this.contents)
+        for (let c of this.contents) {
+
             tooltipMarkers.push(c.marker);
+        }
         return tooltipMarkers;
     }
     getFlags() {
@@ -243,7 +247,7 @@ class Submap {
         this.boundJunkMarker = this.junkMarker.bind(this);
         this.boundUnjunkMarker = this.unjunkMarker.bind(this);
     }
-    initializeImages() {
+    initializeImages(position=this.position) {
         let width = this.floors[0].image.width;
         let height = this.floors[0].image.height;
         if (height > 330) {
@@ -251,12 +255,12 @@ class Submap {
             height = 330;
         }
         let topLeftCornerPosition = [
-            this.position[0] + height, 
-            this.position[1] - width
+            position[0] + height, 
+            position[1] - width
         ];
         let bottomRightCornerPosition = [
-            this.position[0] - height, 
-            this.position[1] + width
+            position[0] - height, 
+            position[1] + width
         ];
         this.assignImagesToFloors(L.latLngBounds(topLeftCornerPosition, bottomRightCornerPosition));
         
@@ -436,6 +440,9 @@ class Submap {
             count += floor.totalCount();
         return count;
     }
+    isCounted() { return false; }
+    countedInTotal() { return false; }
+    countsForTotal() { return false; }
     getUniqueShownMarker() {
         let shownMarkerFound = null;
         for (let floor of this.floors) {
@@ -450,6 +457,10 @@ class Submap {
                 return null;
         } 
         return shownMarkerFound;
+    }
+    setMarkerAsUnobtainable() {
+        this.marker.setIcon(getIcon(this.iconImage));
+        showMarkerAsUnobtainable(this.marker);
     }
     loadMarker(position=this.position) {
         if (!this.isShown() || layerCannotReload(this.marker))
@@ -466,8 +477,7 @@ class Submap {
         this.updateTooltipContent();
         addMarkerToMap(this.marker, position);
         if (!requirementsAreMet) {
-            this.marker.setIcon(getIcon(this.iconImage));
-            showMarkerAsUnobtainable(this.marker);
+            this.setMarkerAsUnobtainable();
             return;
         }
         this.loadMarkerVisuals();
@@ -507,6 +517,10 @@ class Submap {
         }, delay);
     }
     load() {
+        if (currentMapState === MapStates.FlooredSubmap) {
+            loadedSubmap.hideFloorUI();
+            loadedSubmap.disableKeyboardControls();
+        }
         currentMapState = MapStates.Submap;
         this.prepareMap();
         this.exitEvent = () => {
@@ -569,11 +583,11 @@ class Submap {
     }
     showTooltip() {
         addTooltipToMarker(this.marker, this.name);
+        for (let floor of this.floors)
+            floor.showTooltips();
     }
     showTooltips() {
         this.showTooltip();
-        for (let floor of this.floors)
-            floor.showTooltips();
     }
     enableKeyboardControls() {
         this.controlsEvent = (e) => this.controls(e);
@@ -615,6 +629,15 @@ class Submap {
             tooltipContent = this.randoEntrance.getName();
         this.marker.setTooltipContent(tooltipContent);
     }
+    duplicateAtNewPosition(newPosition) {
+        let newSubmap = new this.constructor(...this.getDuplicateArgs(newPosition));
+        newSubmap.initializeImages(this.position);
+        return newSubmap;
+    }
+    // Abstract
+    getDuplicateArgs(newPosition) {
+        throw new Error("Implement in subclass");
+    }
 }
 
 class SimpleSubmap extends Submap {
@@ -624,6 +647,19 @@ class SimpleSubmap extends Submap {
         let floor = new SubmapFloor('Submaps/' + spaceToUnderscore(name), "1F", contents);
         super(position, iconImage, name, [floor], {baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
         this.boundsOffset = [100, 100];
+    }
+    getDuplicateArgs(newPosition) {
+        return [
+            newPosition,
+            this.iconImage,
+            this.name,
+            this.floors[0].contents,
+            {
+                baseReqs: [...this.baseReqs],
+                randoReqs: [...this.randoReqs],
+                glitchedReqs: [...this.glitchedReqs],
+            }
+        ];
     }
 }
 
@@ -638,6 +674,13 @@ class FlooredSubmap extends Submap {
         this.floorOffset = floorOffset;
     }
     load() {
+        if (currentMapState !== MapStates.TileMap) {
+            LeafletMap.off('zoomend');
+            LeafletMap.on('zoomend', loadImageMapFromTileMap); 
+            document.getElementById('submapName').style.display = "none";
+            TileLayer.setOpacity(1);
+            loadedSubmap.disableKeyboardControls();
+        }
         currentMapState = MapStates.FlooredSubmap;
         this.prepareMap();
         loadedSubmap = this;
@@ -746,6 +789,20 @@ class SimpleFlooredSubmap extends FlooredSubmap {
         super(position, iconImage, name, floors, {floorOffset: floorOffset, baseReqs: baseReqs, randoReqs: randoReqs, glitchedReqs: glitchedReqs});
         this.boundsOffset = [200, 100];
     }
+    getDuplicateArgs(newPosition) {
+        return [
+            newPosition,
+            this.iconImage,
+            this.name,
+            this.floors.map(floor => floor.contents),
+            {
+                floorOffset: this.floorOffset,
+                baseReqs: [...this.baseReqs],
+                randoReqs: [...this.randoReqs],
+                glitchedReqs: [...this.glitchedReqs],
+            }
+        ];
+    }
 }
 
 class CaveOfOrdeals extends FlooredSubmap {
@@ -766,6 +823,7 @@ class CaveOfOrdeals extends FlooredSubmap {
             this.floors[i].text = floorsText[i];
         
         this.baseReqs = [clawshotReq];
+        this.randoReqs = [clawshotReq, [woodenSwordReq, shadowCrystalReq]];
     }
     getFloorsText() {
         let gEL = (enemies) => { // Get Enemy List Formatting
@@ -1075,6 +1133,12 @@ class Dungeon extends FlooredSubmap {
             LeafletMap.dragging.enable();       
             LeafletMap.on('zoomend', loadImageMapFromTileMap);  
         }
+        else if (currentMapState !== MapStates.TileMap) {
+            LeafletMap.off('zoomend');
+            LeafletMap.on('zoomend', loadImageMapFromTileMap); 
+            document.getElementById('submapName').style.display = "none";
+            TileLayer.setOpacity(1);
+        }
         LeafletMap.setView(mapCenter, -2); // Center, min dungeon zoom
         currentMapState = MapStates.Dungeon;
         loadedSubmap = this;
@@ -1103,6 +1167,21 @@ class Dungeon extends FlooredSubmap {
     }
     getControlsOffset() {
         return 1500;
+    }
+    getDuplicateArgs(newPosition) {
+        return [
+            newPosition,
+            this.imagedPosition,
+            this.iconImage,
+            this.name,
+            this.floors.map(floor => floor.contents),
+            {
+                floorOffset: this.floorOffset,
+                baseReqs: [...this.baseReqs],
+                randoReqs: [...this.randoReqs],
+                glitchedReqs: [...this.glitchedReqs],
+            }
+        ];
     }
 
 }
@@ -1175,7 +1254,7 @@ class Province {
         for (let c of this.contents) {
             if (c instanceof Submap && !c.shownFlagsAreSet())
                 return false;
-            else if (c instanceof Flag && c.isShown() && !c.isSet())
+            else if (c instanceof Flag && c.isSettable() &&c.isShown() && !c.isSet())
                 return false;
         }
         return true;
@@ -1225,6 +1304,10 @@ class Province {
             for (let c of this.contents) {
                 if (c instanceof Flag)
                     c.loadMarkerAsUnobtainable();
+                else if (c instanceof Submap) {
+                    c.loadMarker();
+                    c.setMarkerAsUnobtainable();
+                }
                 else 
                     c.loadMarker();
             }
@@ -1451,7 +1534,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [ironBootsReq], 
-        randoReqs: [leaveFaronWoodsReq, ironBootsReq]
+        randoReqs: [leaveFaronWoodsReq, ironBootsReq, [eldinTwilightCleared, openMinesReq]]
     }),
 
     Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
@@ -1632,8 +1715,8 @@ const Dungeons = Object.freeze({
             "Snowpeak Ruins Dungeon Reward",
         ]
     ], {
-        baseReqs: snowpeakReq, 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, ...snowpeakReq]
+        baseReqs: [snowpeakPortalReq], 
+        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, snowpeakPortalReq]
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1860,6 +1943,28 @@ let hyruleCastlePolygonPoints = [
     [-3558, 5242], [-3552, 5158], [-3218, 5266], [-3360, 5325], [-3359, 5348], [-3184, 5345], [-3180, 5304], [-2936, 5440]
 ];
 
+midnasLamentCastle = new SimpleFlooredSubmap(
+    [-3626, 4712], doorIconImage, "Castle - Midna's Lament", [ 
+        [],
+        [],
+        [new NonFlag("Purple Rupee", Categories.Rupees, undefined, [-3772, 4839])],
+        ["Midna's Lament Completed"],
+    ], {baseReqs: [morpheelReq, midnasLamentNotCompletedReq]}
+);
+
+jovanisHouse = new SimpleSubmap(
+    [-4057, 4837], doorIconImage, "Jovani's House", [
+        "Jovani House Poe",
+        "Jovani 20 Poe Soul Reward",
+        "Jovani 60 Poe Soul Reward",
+        "Gengle Silver Rupee",
+        midnasLamentCastle.duplicateAtNewPosition([-4017, 5078])
+    ], {
+        baseReqs: [morpheelReq],
+        randoReqs: [lanayruTwilightCleared],
+    }
+);
+
 
 const Provinces = Object.freeze({
     Ordona: new Province('Ordona', [-8816, 5664], {}, [
@@ -1887,7 +1992,7 @@ const Provinces = Object.freeze({
             "Ordon Rusl House Roof Rupee 2",
             "Ordon Spring Portal",
             "Ordon First Goats Herding",
-            "Met Zelda",
+            // "Met Zelda",
             "Ordon Sign",
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
@@ -1914,6 +2019,12 @@ const Provinces = Object.freeze({
                     new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
                 randoReqs: [shadowCrystalReq],
             }),
+            new SimpleFlooredSubmap([-8494, 4856], doorIconImage, "Castle - Prologue", [
+                [],
+                [],
+                [],
+                ["Met Zelda"],
+            ], {baseReqs: [taloSavedReq, zeldaNotMetReq]}),
             horseGrass.new([-9517, 5015]),
             horseGrass.new([-8500, 4800]),
             hawkGrass.new([-8991, 4960]),
@@ -1991,23 +2102,26 @@ const Provinces = Object.freeze({
                 "Faron Field Corner Grotto Rear Chest",
                 Bottle.RareChu.new([-6571, 5153])
             ], {
-                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]]
+                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]],
+                randoReqs: [shadowCrystalReq],
             }),
             newGrotto(5, [-5652, 4644], "Faron Field Fishing Grotto", [
                 Bottle.Worm.new([-5378, 4597])
             ], {
-                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]]
+                baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]],
+                randoReqs: [shadowCrystalReq],
             }),
             
             newGrotto(2, [-7123, 3500], "Sacred Grove Baba Serpent Grotto", [
                 "Sacred Grove Baba Serpent Grotto Chest"
             ], {
-                baseReqs: [boulderReq, shadowCrystalReq],
+                baseReqs: [skullKidReq, boulderReq, shadowCrystalReq],
             }),
             new SimpleSubmap([-7204, 3678], doorIconImage, "Past Sacred Grove", [
                 "Sacred Grove Female Snail",
                 "Sacred Grove Temple of Time Owl Statue Poe",
                 "Sacred Grove Past Owl Statue Chest",
+                Dungeons.Time.duplicateAtNewPosition([-6876, 3678])
             ], {
                 baseReqs: [blizzetaReq, masterSwordReq],
                 randoReqs: [shadowCrystalReq, skullKidReq, [masterSwordReq, openSacredGroveReq, openToTReq]]
@@ -2113,9 +2227,9 @@ const Provinces = Object.freeze({
             new SimpleSubmap([-5162, 7670], doorIconImage, "Barnes' Shop", [
                 "Barnes Bomb Bag"
             ]),
-            // new SimpleSubmap([-5228, 7769], doorIconImage, "Barnes' Bomb House", [
+            new SimpleSubmap([-5228, 7769], doorIconImage, "Barnes' Bomb House", [
 
-            // ], {baseReqs: [eldinTwilight]}),
+            ], {baseReqs: [eldinTwilight]}),
             new SimpleFlooredSubmap([-5097, 7593], doorIconImage, 'Kakariko Watchtower', [
                 [],
                 ["Kakariko Watchtower Chest"]
@@ -2135,6 +2249,9 @@ const Provinces = Object.freeze({
                    "Ilia Memory Reward"
                 ]
             ], {floorOffset: 2}),
+            new SimpleSubmap([-3651, 8194], entranceIconImage, "Goron Sumo", [
+
+            ], {baseReqs: [ironBootsReq]}),
             new SimpleSubmap([-5711, 6043], entranceIconImage, 'Eldin Lantern Cave', [
                 "Eldin Lantern Cave First Chest",
                 "Eldin Lantern Cave Second Chest",
@@ -2186,7 +2303,7 @@ const Provinces = Object.freeze({
     ]),
     Desert: new Province("Desert", [-5440, 2224], {
             baseReqs: [aurusMemoReq], 
-            randoReqs: [],
+            // randoReqs: [],
             // randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq]
         }, [
             [-6646, 3472], [-6704, 2448], [-6584, 1152], [-6208, 880], [-5240, 1000], [-3668, 1256], [-3480, 1804], [-3646, 2242], 
@@ -2228,15 +2345,21 @@ const Provinces = Object.freeze({
             "Gerudo Desert Sign",
             newGrotto(4, [-6060, 2588], "Gerudo Desert Skulltula Grotto", [
                 "Gerudo Desert Skulltula Grotto Chest"
-            ]),
+            ], {
+                baseReqs: [shadowCrystalReq],
+            }),
             newGrotto(3, [-5689, 638], "Gerudo Desert Chu Grotto", [
                 Bottle.RareChu.new([-5579, 809])
-            ]),
+            ], {
+                baseReqs: [shadowCrystalReq],
+            }),
             newGrotto(3, [-5075, 1380], "Gerudo Desert Rock Grotto", [
                 "Gerudo Desert Rock Grotto First Poe",
                 "Gerudo Desert Rock Grotto Second Poe",
                 "Gerudo Desert Rock Grotto Lantern Chest"
-            ]),
+            ], {
+                baseReqs: [clawshotReq, shadowCrystalReq],
+            }),
             new CaveOfOrdeals([-6116, 503], entranceIconImage, [
                 ["Cave of Ordeals Sign"], // B1
                 [], // B2
@@ -2477,7 +2600,7 @@ const Provinces = Object.freeze({
         "Castle Town Portal",
         "Upper Zoras River Portal",
         "Zoras Domain Portal",
-        "Midna's Lament Completed",
+        // "Midna's Lament Completed",
         "Agithas Castle Sign",
         "Beside Castle Town Sign",
         "Castle Town Sign",
@@ -2528,15 +2651,7 @@ const Provinces = Object.freeze({
             baseReqs: [lanayruTwilightCleared],
             randoReqs: []
         }),
-        new SimpleSubmap([-4057, 4837], doorIconImage, "Jovani's House", [
-            "Jovani House Poe",
-            "Jovani 20 Poe Soul Reward",
-            "Jovani 60 Poe Soul Reward",
-            "Gengle Silver Rupee"
-        ], {
-            baseReqs: [morpheelReq],
-            randoReqs: [lanayruTwilightCleared],
-        }),
+       
         new SimpleSubmap([-4035, 4573], doorIconImage, 'STAR Tent', [
             "STAR Prize 1",
             "STAR Prize 2"
@@ -2548,12 +2663,14 @@ const Provinces = Object.freeze({
         ], {
             baseReqs: [getFlagReq("Kakariko Village Malo Mart Castle Town Shop")],
         }),
+        jovanisHouse,
+        midnasLamentCastle,
         new SimpleFlooredSubmap([-4141, 4795], doorIconImage, "Telma's Bar", [
             [
                 "Telma Invoice",
                 postman.new([-4282, 4523])
             ],
-            []
+            [jovanisHouse.duplicateAtNewPosition([-3868, 4650])] //   To Jovani's House
         ]), // Bar is open during Lanayru Twilight to see Ilia
         new SimpleSubmap([-3940, 4930], doorIconImage, "Doctor's Office", [
             "Doctors Office Medicine Scent"
@@ -2574,7 +2691,7 @@ const Provinces = Object.freeze({
             randoReqs: []
         }),
         new SimpleSubmap([-4147, 4643], doorIconImage, "Fanadi's Palace", [
-
+                
         ], {
             baseReqs: [lanayruTwilightCleared],
             randoReqs: []
@@ -2583,7 +2700,7 @@ const Provinces = Object.freeze({
             "Fishing Hole Frog Lure",
         ], {
             baseReqs: [lanayruTwilightCleared],
-            randoReqs: []
+            randoReqs: [meltedIceReq],
         }),
         newGrotto(1, [-3733, 3820], "West Hyrule Field Helmasaur Grotto", [
             "West Hyrule Field Helmasaur Grotto Chest"
@@ -2594,20 +2711,20 @@ const Provinces = Object.freeze({
             "Lanayru Field Skulltula Grotto Chest"
         ], {
             baseReqs: [morpheelReq],
-            randoReqs: [lanayruTwilightCleared, midnasLamentReq]
+            randoReqs: [lanayruTwilightCleared, shadowCrystalReq]
         }),
         newGrotto(1, [-2605, 4189], "Lanayru Field Poe Grotto", [
             "Lanayru Field Poe Grotto Left Poe",
             "Lanayru Field Poe Grotto Right Poe"
         ], {
             baseReqs: [midnasLamentReq],
-            randoReqs: [lanayruTwilightCleared, midnasLamentReq],
+            randoReqs: [lanayruTwilightCleared, shadowCrystalReq],
         }),
         newGrotto(3, [-2812, 5187], "Lanayru Field Chu Grotto", [
 
         ], {
             baseReqs: [midnasLamentReq],
-            randoReqs: [lanayruTwilightCleared, midnasLamentReq],
+            randoReqs: [lanayruTwilightCleared, shadowCrystalReq],
         }),
         newGrotto(4, [-5696, 3751], "Lake Hylia Bridge Bubble Grotto", [
             "Lake Hylia Bridge Bubble Grotto Chest"
@@ -2668,7 +2785,7 @@ const Provinces = Object.freeze({
             "Lake Lantern Cave Sign"
         ], {
             baseReqs: [lanayruTwilightCleared, boulderReq],
-            randoReqs: [boulderReq],
+            randoReqs: [meltedIceReq, boulderReq],
         }),
         new SimpleSubmap([-2025, 4818], entranceIconImage, 'Lanayru Ice Cave', [
             "Lanayru Ice Block Puzzle Cave Chest"

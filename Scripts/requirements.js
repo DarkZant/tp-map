@@ -219,7 +219,6 @@ let forest2SKReq = Requirement.fromCountItem(forestSK, 2);
 let forest3SKReq = Requirement.fromCountItem(forestSK, 3);
 let forest4SKReq = Requirement.fromCountItem(forestSK, 4);
 let forestBKReq = Requirement.fromBoolItem(forestBK);
-let forestTempleLeftSideReq = [webReq, [forest1SKReq, clawshotReq]];
 
 let fyrusReq = Requirement.fromBoss(fyrus);
 let mines1SKReq = Requirement.fromCountItem(minesSK);
@@ -283,6 +282,7 @@ let walletCapacityReq = Requirement.fromCheckboxRandoSetting(RandoSettings.Walle
 let lakebedBombsReq = Requirement.fromCheckboxRandoSetting(RandoSettings.LakebedBombs);
 let snowpeakScentReq = Requirement.fromCheckboxRandoSetting(RandoSettings.SnowpeakReekfish);
 let doorOfTimeReq = Requirement.fromCheckboxRandoSetting(RandoSettings.OpenDoT);
+let openMinesReq = Requirement.fromSelectRandoSetting(RandoSettings.MinesEntrance, 'Open');
 let arbitersCampReq = Requirement.fromCheckboxRandoSetting(RandoSettings.ArbitersCamp);
 let openSacredGroveReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open Grove');
 let openToTReq = Requirement.fromSelectRandoSetting(RandoSettings.TempleTime, 'Open');
@@ -319,7 +319,8 @@ function initializeFlagRequirements() {
 let tileWormReq = [boomerangReq, ironBootsReq];
 let groundsFirstRoomReq = [clawshotReq, shadowCrystalReq];
 let goronMinesFirstRoomReq = [ironBootsReq, [shadowCrystalReq, woodenSwordReq, ballAndChainReq, bombBagReq]] // TODO Test spinner on wooden barriers
-let skullKidReq = [openMapReq, bowReq, new AndRequirements([ballAndChainReq, boomerangReq, bombBagReq])];
+let skullKidReq = [openMapReq, bowReq, new AndRequirements([boomerangReq, bombBagReq])];
 let leaveFaronWoodsReq = [diababaReq, openWoodsReq];
 let lanayruRandoReq = [...boulderReq, gateKeyReq, new AndRequirements([shadowCrystalReq, openMapReq]), getFlagReq("Kakariko Village Malo Mart Bridge Repaired")];
+let forestTempleLeftSideReq = [webReq, [getFlagReq("Forest Temple Pole Monkey"), clawshotReq]];
 

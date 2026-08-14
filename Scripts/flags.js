@@ -54,16 +54,22 @@ class Flag extends Storable {
         this.name = name;
     }
     setItem(item) {
+        if (this.item === this.randoItem) // For Flag Groups
+            this.randoItem = item;
         this.item = item;
         this.itemCategory = item.getCategory();
         let icon = getIcon(this.getImage());
         this.marker.setIcon(icon);
+        if (!layerIsLoaded(this.marker))
+            return;
         if (this.isSet())
             this.setVisually();
-        else if (this.isJunk())
+        else if (this.isJunk() && randoIsActive())
             this.junkVisually();
     }
     setRandoItem(item) {
+        if (item === "Vanilla")
+            item = this.item;
         if (this.isContainer())
             this.randoItem = this.item.with(item);
         else
@@ -357,8 +363,10 @@ class Flag extends Storable {
         }
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
-        this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
-        this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
+        if (layerIsLoaded(this.marker)) {
+            this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
+            this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
+        }
     }
     markerIsShownAsUnobtainable() {
         let markerElement = this.marker.getElement();
@@ -494,17 +502,31 @@ class Flag extends Storable {
         else
            flagDescDiv.innerHTML = description;
     }
+    isSettable() {
+        return true;
+    }
 }
 
 class UnsettableFlag extends Flag {
     set() {
 
     }
+    unset() {
+        
+    }
+    isSet() {
+        return false;
+    }
+    isSettable() {
+        return false;
+    }
     setMarker() {
         blockMarkerReload(this.marker);
         this.setVisually();    
-        unblockMarkerReload(this.marker);
-        setTimeout(() => this.unsetVisually(), 1500);
+        setTimeout(() => {
+            this.unsetVisually();
+            unblockMarkerReload(this.marker);
+        }, 1500);
     }
     getFlagNameType() {
         return "Non Flag";
@@ -628,7 +650,7 @@ class FlagGroup {
         return this.obtainedAmount >= amount;
     }
     updateFlags() {
-        if (randoIsActive())
+        if (randoIsActive() && this.flags[0].randoItem !== this.flags[0].item)
             return;
 
         for (let [req, item] of Object.entries(this.items)) {
@@ -664,17 +686,19 @@ class FlagGroup {
                 flag.updateFlags();
         }
     }
-    increaseAmount() {
-        ++this.count;
+    updateAllFlags() {
         this.updateChildGroups();
         this.updateFlags();
+    }
+    increaseAmount() {
+        ++this.count;
+        this.updateAllFlags();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();   
     }
     decreaseAmount() {
         --this.count;
-        this.updateChildGroups();
-        this.updateFlags();
+        this.updateAllFlags();
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
     }

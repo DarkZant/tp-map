@@ -53,6 +53,7 @@ const RandoSettings = Object.freeze({
     UnlockMapRegions : new CheckboxRandoSetting('Unlock Map Regions'),
     OpenDoT : new CheckboxRandoSetting('Open Door of Time'),
     WalletCapacity : new CheckboxRandoSetting('Increase Wallet Capacity'),
+    MinesEntrance: new SelectRandoSetting('Goron Mines Entrance'),
     LakebedBombs : new CheckboxRandoSetting('Lakebed Does Not Require Water Bombs'),
     ArbitersCamp : new CheckboxRandoSetting('Arbiters Does Not Require Bulblin Camp'),
     SnowpeakReekfish : new CheckboxRandoSetting('Snowpeak Does Not Require Reekfish Scent'),
