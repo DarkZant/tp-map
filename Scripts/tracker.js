@@ -62,6 +62,12 @@ class TrackerItem extends Storable {
                 }
             }); 
         }
+        elem.addEventListener('mouseover', () => {
+            const itemName = elem.dataset.name || elem.dataset.item;
+            if (itemName) {
+                elem.title = itemName;
+            }
+        });
     }
     increase() {
         this.item.increase(); 
