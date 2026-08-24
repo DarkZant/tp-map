@@ -111,6 +111,9 @@ class Setting extends Storable {
     isEnabled() {
         return this.active;
     }
+    isDisabled() {
+        return !this.isEnabled();
+    }
     getDefaultStoreValue() {
         return this.defaultValue;
     }
@@ -285,7 +288,7 @@ const Settings = Object.freeze({
     Base_Souls_Visibility: new CategoryVisibilitySetting('Base_Souls_Visibility', Categories.PoeSouls, 1),
     Base_Bugs_Visibility: new CategoryVisibilitySetting('Base_Bugs_Visibility', Categories.Bugs, 1),
     Base_Skills_Visibility: new CategoryVisibilitySetting('Base_Skills_Visibility', Categories.HiddenSkills, 1),
-    Base_Characters_Visibility: new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters,1 ),
+    Base_Characters_Visibility: new CategoryVisibilitySetting('Base_Characters_Visibility', Categories.SkyCharacters, 1),
     Base_Rupees_Visibility: new CategoryVisibilitySetting('Base_Rupees_Visibility', Categories.Rupees),
     Base_Ammunition_Visibility: new CategoryVisibilitySetting('Base_Ammunition_Visibility', Categories.Ammo),
     Base_Bosses_Visibility: new CategoryVisibilitySetting('Base_Bosses_Visibility', Categories.Bosses, 1),
@@ -323,6 +326,8 @@ const Settings = Object.freeze({
     Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
     Entrances_Randomized: new Setting('Entrance_Randomized'),
     LocksConsumeKeys: new Setting("Locks_Consume_Keys"),
+    FlagLogic: new Setting("Flag_Logic"),
+    KeyLogic: new Setting("Key_Logic"),
 }); // Always add settings at the end to preserve storage IDs
 
 Settings.RevealSpoilerLog.setFunction(revealSpoilerLog);
@@ -380,7 +385,7 @@ let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [
     // Settings.Monster_Rupee,
     Settings.Grass_Visibility,
     Settings.Postman_Visibility,
-    // Settings.Fishing_Visibility,
+    Settings.Fishing_Visibility,
     // Settings.Minigames_Visibility
 ]); 
 
@@ -419,4 +424,4 @@ Settings.Rando_Non_Check_Visibility.changeElementDisplay("none");
 Settings.Shop_Visibility.changeElementDisplay('none');
 Settings.Monster_Rupee.changeElementDisplay('none');
 Settings.Minigames_Visibility.changeElementDisplay('none');
-Settings.Fishing_Visibility.changeElementDisplay('none');
+// Settings.Fishing_Visibility.changeElementDisplay('none');

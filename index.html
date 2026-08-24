@@ -109,6 +109,14 @@
                 <h3 id="flagNameTitle">Flag Name</h3>
                 <div id="flagNameDiv" class="bordered"></div>
             </div>
+            <div id="flagButtons">
+                <h3 id="flagButtonsTitle">Flag Actions</h3>
+                <button id="setFlagButton">Mark as Set</button>
+                <div id="randoFlagButtons">
+                    <button id="junkFlagButton">Mark as Junk</button>
+                    <button id="importantFlagButton">Mark as Important</button>
+                </div>
+            </div>
             <div id="flagItem">
                 <h3 id="flagItemTitle">Content</h3>
                 <div id="flagItemDiv" class="item bordered"></div>
@@ -120,6 +128,12 @@
             <div id="flagDescription">
                 <h3>Description</h3>
                 <div id="flagDescriptionDiv"></div>
+            </div>
+            <div id="fishes">
+                <h2>Bobber Fishing Spot</h2>
+                <h3>Available Fishes</h3>
+                <div id="fishesList"></div>
+                <a>Bobber Fishing Guide Page</a>
             </div>
             <br>
         </div>
@@ -210,7 +224,7 @@
                     <select name="Gamemodes" id="Gamemodes">
                         <option value="0">Base Game</option>
                         <option value="1">Glitchless Randomizer</option>
-                        <option value="2" title="Warning: Requirements still under development">Glitched Randomizer</option>
+                        <option value="2" title="Warning: Glitched Requirements still under development">Glitched Randomizer</option>
                     </select>
             </div>
              <div id="gameVersionSelection" class="selectContainer">
@@ -242,11 +256,11 @@
                         <label class="bigSettingCheckboxLabel" title="Reveal the contents of Randomizer hint signs in the description section of the Flag details menu.">
                             <input type="checkbox" id="Reveal_Hints" class="bigSettingCheckbox">Reveal Hints
                         </label>
-                        <label class="bigSettingCheckboxLabel" title="Autocomplete the tracker with items obtained from the Randomizer's checks.">
+                        <label class="bigSettingCheckboxLabel" title="Autocomplete the tracker with items obtained from the Randomizer's checks. Tracker Autocompletion will be disabled in a Randomizer gamemode if this setting is not enabled.">
                             <input type="checkbox" id="Rando_Item_Tracker" class="bigSettingCheckbox">Autocomplete Tracker with Rando Items
                         </label>
-                        <label class="bigSettingCheckboxLabel" title="Reveal the randomizer items of Checks when they are Set, Junked or Revealed as important.">
-                            <input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Set/Junked Flags
+                        <label class="bigSettingCheckboxLabel" title="Reveal the randomizer items of Checks when they are marked as Set, Junked or Important.">
+                            <input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Marked Flags  
                         </label>
                         <label class="bigSettingCheckboxLabel" title="Clicking a dungeon with a randomized entrance will load into the associated randomized entrance.">
                             <input type="checkbox" id="Entrance_Randomized" class="bigSettingCheckbox">Load into Randomized Entrances
@@ -267,22 +281,28 @@
                 
                 <h3>General Settings</h3>
                 <label class="bigSettingCheckboxLabel" title="Flags which require items on the Tracker will be greyed out if the required items are not obtained.">
-                    <input type="checkbox" id="Tracker_Logic" class="bigSettingCheckbox">Enable Tracker Logic
+                    <input type="checkbox" id="Tracker_Logic" class="bigSettingCheckbox">Enable Item Tracker Logic
+                </label>
+                <label title="Dungeon Keys, Locks and Quest Flags are not considered in logic. This can be useful in a Randomizer if you know want to know how many checks are available in a dungeon.">
+                    <input type="checkbox" id="Key_Logic">Ignore Dungeon Progression Content in Logic
+                </label>
+                <label class="bigSettingCheckboxLabel" title="Flags which require other Flags will be greyed out if the required flags are not set.">
+                    <input type="checkbox" id="Flag_Logic" class="bigSettingCheckbox">Enable Flag Logic
                 </label>
                 <label style="display: none;" title="Hide Flags which requirements are not met.">
                     <input type="checkbox" id="Hide_Flag_Without_Requirement">Hide Flags Without Requirements
                 </label>
                 <label class="bigSettingCheckboxLabel" title="Automatically complete the tracker when Flags with tracker items are set.">
-                    <input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Tracker Autocompletion
+                    <input type="checkbox" id="Tracker_Autocompletion" class="bigSettingCheckbox">Enable Item Tracker Autocompletion
+                </label>
+                <label title="Setting Flags that are Dungeon Locks consumes their corresponding Small Keys in the Tracker. This is mostly useful in Randomizers, as certain dungeons can be done in custom orders.">
+                    <input type="checkbox" id="Locks_Consume_Keys">Setting Lock Flags consumes Small Keys
                 </label>
                 <label title="Disable the Tracker Submenus opening and closing upon setting a Flag with an item in a Submenu.">
-                    <input type="checkbox" id="Disable_Tracker_Animations">Disable Tracker Animations
-                </label>
-                <label class="bigSettingCheckboxLabel" title="Setting Flags that are locks consumes their corresponding Small Keys in the Tracker. This is mostly useful in Randomizers, as certain dungeons can be done in custom orders.">
-                    <input type="checkbox" id="Locks_Consume_Keys" class="bigSettingCheckbox">Setting Lock Flags consumes Small Keys
+                    <input type="checkbox" id="Disable_Tracker_Animations">Disable Item Tracker Animations
                 </label>
                 <label class="bigSettingCheckboxLabel" title="Separate the Tracker window so that it does not overlap with the Map.">
-                    <input type="checkbox" id="Tracker_Position" class="bigSettingCheckbox">Separate Tracker from Map
+                    <input type="checkbox" id="Tracker_Position" class="bigSettingCheckbox">Separate Item Tracker from Map
                 </label>
                 <br>
                 <label class="bigSettingCheckboxLabel" title="Show Submaps that have no visible Markers inside.">
@@ -397,7 +417,7 @@
             </ul>
             <h2>Flag Controls</h2>
             <ul>
-                <li><b>Click</b> on a flag to <i>Show Details</i> about it</li>
+                <li><b>Click</b> on a flag to <i>Show its Details</i> and <i>Interact</i> with it</li>
                 <li><b>Click</b> anywhere on the map to <i>Hide</i> the details tab</li>
                 <li><b>Right Click</b> on a flag to <i>Set / Unset </i> it</li>
                 <li><b>Middle Click</b> on a flag to <i>Junk / Unjunk</i> it (Only for Rando Checks)</li>

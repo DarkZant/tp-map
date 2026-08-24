@@ -20,7 +20,10 @@ class CheckboxRandoSetting extends RandoSetting {
     }
     isEnabled() {
         return this.active;
-    }  
+    } 
+    isDisabled() {
+        return !this.isEnabled();
+    }
     set(value) {
         this.active = value;
     }
@@ -59,5 +62,6 @@ const RandoSettings = Object.freeze({
     SnowpeakReekfish : new CheckboxRandoSetting('Snowpeak Does Not Require Reekfish Scent'),
     TempleTime : new SelectRandoSetting('Temple of Time Entrance'),
     CitySkybook : new CheckboxRandoSetting('City Does Not Require Filled Skybook'),
-    TransformAnywhere : new CheckboxRandoSetting('Transform Anywhere')
+    TransformAnywhere : new CheckboxRandoSetting('Transform Anywhere'),
+    ShuffleShopItems: new CheckboxRandoSetting('Shuffle Shop Items')
 });

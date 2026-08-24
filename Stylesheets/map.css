@@ -283,13 +283,33 @@ body img {
     background-color: rgb(56, 53, 46, 0.9);
 }
 /* Checkmarks */
-.checkmark, .junk {
-    width: 1.25dvw;
-    height: 1.25dvw;
+.checkmark, .junk, .important {
+    width: 1.25dvw; /* Useless */
+    height: 1.25vmax;
+    min-height: 20px;
     position: absolute;
     top: 55%;
     left: 55%;
     z-index: 2000;
     filter: brightness(200%);
+}
+.important {
+    filter: brightness(150%);
+    height: 1.75vmax;
+    left: 80%;
+    top: 85%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: important-spin 4s linear infinite;
+}
+
+@keyframes important-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .important {
+        animation: none;
+    }
 }
 

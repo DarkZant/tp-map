@@ -33,20 +33,20 @@ class Requirement {
             () => item.amountIsObtained(amount)
         );
     }
-    static fromFlag(flag) {
-        return new Requirement(
-            flag.getImage(),
-            flag.name,
-            () => flag.isSet()
-        );
-    }
-    static fromUnsetFlag(flag, name=flag.name) {
-        return new Requirement(
-            flag.getImage(),
-            name,
-            () => !flag.isSet()
-        );
-    }
+    // static fromFlag(flag) {
+    //     return new Requirement(
+    //         flag.getImage(),
+    //         flag.name,
+    //         () => flag.isSet()
+    //     );
+    // }
+    // static fromUnsetFlag(flag, name=flag.name) {
+    //     return new Requirement(
+    //         flag.getImage(),
+    //         name,
+    //         () => !flag.isSet()
+    //     );
+    // }
     static fromCheckboxRandoSetting(randoSetting, enabled=true) {
         let condition = () => enabled ? randoSetting.isEnabled() : !randoSetting.isEnabled();
         return new Requirement(
@@ -63,6 +63,8 @@ class Requirement {
         );
     }
     isMet() {
+        if (Settings.TrackerLogic.isDisabled())
+            return true;
         return this.condition();
     }
     copyConditionAndImageAndName(item) {
@@ -83,6 +85,8 @@ class FlagRequirement {
         this.condition = () => flag.isSet();
     }
     isMet() {
+        if (Settings.FlagLogic.isDisabled())
+            return true;
         return this.condition();
     }
     copyConditionWithImageAndName(image, name) {
@@ -102,12 +106,42 @@ class FlagRequirement {
 }
 
 class UnsetFlagRequirement extends FlagRequirement {
-    constructor() {super(); }
+    constructor() { super(); }
     initialize(flagName) {
         let flag = flags.get(flagName.slice(0, -1)); // Remove the added "/"
         this.image = flag.getImage();
         this.text = flag.getFlagName() + " Not Set";
         this.condition = () => !flag.isSet();
+    }
+}
+
+class DungeonProgressionItemRequirement {
+    constructor(item, amount=1) {
+        this.image = item.image;
+        let itemIsBool = item instanceof BoolItem;
+        if (itemIsBool) {
+            this.text = item.name;
+            this.condition = () => item.isObtained();
+        }
+        else {
+            this.text = amount > 1 ? MultiItem.getNameFormat(item, amount) : item.name;
+            this.condition = () => item.amountIsObtained(amount)
+        }
+    }
+    isMet() {
+        if (Settings.TrackerLogic.isDisabled() || Settings.KeyLogic.isEnabled())
+            return true;
+        return this.condition();
+    }
+}
+
+class DungeonProgressionFlagRequirement extends FlagRequirement {
+    constructor() { super(); }
+    initialize(flagName) { super.initialize(flagName); }
+    isMet() {
+        if (Settings.FlagLogic.isDisabled() || Settings.KeyLogic.isEnabled())
+            return true;
+        return this.condition();
     }
 }
 
@@ -144,9 +178,6 @@ function verifyRequirements(requirements) {
 }
 
 function verifySubmapRequirements(submap) {
-    // debugger;
-    if (!Settings.TrackerLogic.isEnabled())
-        return true;
     if (selectedGamemode === Gamemodes.Base) 
         return verifyRequirements(submap.baseReqs);
     return verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? submap.randoReqs : submap.glitchedReqs)
@@ -214,59 +245,67 @@ let webReq = [lanternReq, bombBagReq, ballAndChainReq];
 let stalfosReq = boulderReq;
 
 let diababaReq = Requirement.fromBoss(diababa);
-let forest1SKReq = Requirement.fromCountItem(forestSK);
-let forest2SKReq = Requirement.fromCountItem(forestSK, 2);
-let forest3SKReq = Requirement.fromCountItem(forestSK, 3);
-let forest4SKReq = Requirement.fromCountItem(forestSK, 4);
-let forestBKReq = Requirement.fromBoolItem(forestBK);
+let forest1SKReq = new DungeonProgressionItemRequirement(forestSK);
+let forest2SKReq = new DungeonProgressionItemRequirement(forestSK, 2);
+let forest3SKReq = new DungeonProgressionItemRequirement(forestSK, 3);
+let forest4SKReq = new DungeonProgressionItemRequirement(forestSK, 4);
+let forestBKReq = new DungeonProgressionItemRequirement(forestBK);
 
 let fyrusReq = Requirement.fromBoss(fyrus);
-let mines1SKReq = Requirement.fromCountItem(minesSK);
-let mines2SKReq = Requirement.fromCountItem(minesSK, 2);
-let mines3SKReq = Requirement.fromCountItem(minesSK, 3);
+let mines1SKReq = new DungeonProgressionItemRequirement(minesSK);
+let mines2SKReq = new DungeonProgressionItemRequirement(minesSK, 2);
+let mines3SKReq = new DungeonProgressionItemRequirement(minesSK, 3);
 let dangoroReq = [woodenSwordReq, ballAndChainReq, bombBagReq];
-let minesBKReq = Requirement.fromBoolItem(minesBK.getItemByReq(3));
+let minesBKReq = new DungeonProgressionItemRequirement(minesBK.getItemByReq(3));
+
 let morpheelReq = Requirement.fromBoss(morpheel);
-let lakebed1SKReq = Requirement.fromCountItem(lakebedSK);
-let lakebed2SKReq = Requirement.fromCountItem(lakebedSK, 2);
-let lakebed3SKReq = Requirement.fromCountItem(lakebedSK, 3);
-let lakebedBKReq = Requirement.fromBoolItem(lakebedBK);
+let lakebed1SKReq = new DungeonProgressionItemRequirement(lakebedSK);
+let lakebed2SKReq = new DungeonProgressionItemRequirement(lakebedSK, 2);
+let lakebed3SKReq = new DungeonProgressionItemRequirement(lakebedSK, 3);
+let lakebedBKReq = new DungeonProgressionItemRequirement(lakebedBK);
+
 let stallordReq = Requirement.fromBoss(stallord);
-let arbiter1SKReq = Requirement.fromCountItem(arbiterSK);
-let arbiter2SKReq = Requirement.fromCountItem(arbiterSK, 2);
-let arbiter3SKReq = Requirement.fromCountItem(arbiterSK, 3);
-let arbiter4SKReq = Requirement.fromCountItem(arbiterSK, 4);
-let arbiter5SKReq = Requirement.fromCountItem(arbiterSK, 5);
-let arbiterBKReq = Requirement.fromBoolItem(arbiterBK);
+let arbiter1SKReq = new DungeonProgressionItemRequirement(arbiterSK);
+let arbiter2SKReq = new DungeonProgressionItemRequirement(arbiterSK, 2);
+let arbiter3SKReq = new DungeonProgressionItemRequirement(arbiterSK, 3);
+let arbiter4SKReq = new DungeonProgressionItemRequirement(arbiterSK, 4);
+let arbiter5SKReq = new DungeonProgressionItemRequirement(arbiterSK, 5);
+let arbiterBKReq = new DungeonProgressionItemRequirement(arbiterBK);
+
 let blizzetaReq = Requirement.fromBoss(blizzeta);
-let snowpeak1SKReq = Requirement.fromCountItem(snowpeakSK);
-let snowpeak2SKReq = Requirement.fromCountItem(snowpeakSK, 2);
-let snowpeak3SKReq = Requirement.fromCountItem(snowpeakSK, 3);
-let snowpeak4SKReq = Requirement.fromCountItem(snowpeakSK, 4);
-let bedroomKeyReq = Requirement.fromBoolItem(snowpeakBK);
-let pumpkinReq = Requirement.fromBoolItem(pumpkin);
-let cheeseReq = Requirement.fromBoolItem(cheese);
+let snowpeak1SKReq = new DungeonProgressionItemRequirement(snowpeakSK);
+let snowpeak2SKReq = new DungeonProgressionItemRequirement(snowpeakSK, 2);
+let snowpeak3SKReq = new DungeonProgressionItemRequirement(snowpeakSK, 3);
+let snowpeak4SKReq = new DungeonProgressionItemRequirement(snowpeakSK, 4);
+let bedroomKeyReq = new DungeonProgressionItemRequirement(snowpeakBK);
+let pumpkinReq = new DungeonProgressionItemRequirement(pumpkin);
+let cheeseReq = new DungeonProgressionItemRequirement(cheese);
+
 let armogohmaReq = Requirement.fromBoss(armogohma);
-let temple1SKReq = Requirement.fromCountItem(templeSK);
-let temple2SKReq = Requirement.fromCountItem(templeSK, 2);
-let temple3SKReq = Requirement.fromCountItem(templeSK, 3);
-let templeBKReq = Requirement.fromBoolItem(templeBK);
+let temple1SKReq = new DungeonProgressionItemRequirement(templeSK);
+let temple2SKReq = new DungeonProgressionItemRequirement(templeSK, 2);
+let temple3SKReq = new DungeonProgressionItemRequirement(templeSK, 3);
+let templeBKReq = new DungeonProgressionItemRequirement(templeBK);
+
 let argorokReq = Requirement.fromBoss(argorok);
-let city1SKReq = Requirement.fromCountItem(citySK);
-let cityBKReq = Requirement.fromBoolItem(cityBK);
+let city1SKReq = new DungeonProgressionItemRequirement(citySK);
+let cityBKReq = new DungeonProgressionItemRequirement(cityBK);
+
 let zantReq = Requirement.fromBoss(zant);
-let palace1SKReq = Requirement.fromCountItem(palaceSK);
-let palace2SKReq = Requirement.fromCountItem(palaceSK, 2);
-let palace3SKReq = Requirement.fromCountItem(palaceSK, 3);
-let palace4SKReq = Requirement.fromCountItem(palaceSK, 4);
-let palace5SKReq = Requirement.fromCountItem(palaceSK, 5);
-let palace6SKReq = Requirement.fromCountItem(palaceSK, 6);
-let palace7SKReq = Requirement.fromCountItem(palaceSK, 7);
-let palaceBKReq = Requirement.fromBoolItem(palaceBK);
-let castle1SKReq = Requirement.fromCountItem(castleSK);
-let castle2SKReq = Requirement.fromCountItem(castleSK, 2);
-let castle3SKReq = Requirement.fromCountItem(castleSK, 3);
-let castleBKReq = Requirement.fromBoolItem(castleBK);
+let palace1SKReq = new DungeonProgressionItemRequirement(palaceSK);
+let palace2SKReq = new DungeonProgressionItemRequirement(palaceSK, 2);
+let palace3SKReq = new DungeonProgressionItemRequirement(palaceSK, 3);
+let palace4SKReq = new DungeonProgressionItemRequirement(palaceSK, 4);
+let palace5SKReq = new DungeonProgressionItemRequirement(palaceSK, 5);
+let palace6SKReq = new DungeonProgressionItemRequirement(palaceSK, 6);
+let palace7SKReq = new DungeonProgressionItemRequirement(palaceSK, 7);
+let palaceBKReq = new DungeonProgressionItemRequirement(palaceBK);
+
+let castle1SKReq = new DungeonProgressionItemRequirement(castleSK);
+let castle2SKReq = new DungeonProgressionItemRequirement(castleSK, 2);
+let castle3SKReq = new DungeonProgressionItemRequirement(castleSK, 3);
+let castleBKReq = new DungeonProgressionItemRequirement(castleBK);
+
 let allDungeonsReq = [
     diababaReq, fyrusReq, morpheelReq, stallordReq, blizzetaReq, armogohmaReq, argorokReq, zantReq
 ];
@@ -307,6 +346,15 @@ function getFlagReq(flagName, metWhenSet=true) {
     return flagReq;
 }
 
+function getDungeonProgressionFlagReq(flagName) {
+    let flagReq = FlagRequirements.get(flagName);
+    if (flagReq === undefined) {
+        flagReq = new DungeonProgressionFlagRequirement();
+        FlagRequirements.set(flagName, flagReq);
+    }
+    return flagReq;
+}
+
 function flagReqExists(flagName) {
     return FlagRequirements.has(flagName) || FlagRequirements.has(flagName + "/");
 }
@@ -315,6 +363,97 @@ function initializeFlagRequirements() {
     for (let [flagName, flagReq] of FlagRequirements.entries())
         flagReq.initialize(flagName);
 }
+
+let faronTwilightCleared = getFlagReq("Faron Twilight Cleared");
+let eldinTwilightCleared = getFlagReq("Eldin Twilight Cleared");
+let lanayruTwilightCleared = getFlagReq("Lanayru Twilight Cleared");
+let faronTwilight = getFlagReq("Faron Twilight Cleared", false);
+let eldinTwilight = getFlagReq("Eldin Twilight Cleared", false);
+let lanayruTwilight = getFlagReq("Lanayru Twilight Cleared", false);
+
+let firstGoatsReq = getFlagReq("Ordon First Goats Herding");
+let ordonPortalReq = getFlagReq("Ordon Spring Portal");
+let taloSavedReq = getFlagReq("Faron Woods Talo Saved");
+let zeldaMetReq = getFlagReq("Met Zelda");
+let zeldaNotMetReq = getFlagReq("Met Zelda", false);
+
+let poleMonkeyReq = getDungeonProgressionFlagReq("Forest Temple Pole Monkey");
+let hangingCageMonkeyReq = getDungeonProgressionFlagReq("Forest Temple Hanging Cage Monkey");
+let monkeyUnderWebReq = getDungeonProgressionFlagReq("Forest Temple Monkey Under Web");
+let monkeyBehindRocksReq = getDungeonProgressionFlagReq("Forest Temple Monkey Behind Rocks");
+let monkeyWindmillReq = getDungeonProgressionFlagReq("Forest Temple Monkey Behind Windmill Gate");
+let poleMonkeyLockReq = getDungeonProgressionFlagReq("Forest Temple Totem Pole Monkey Lock");
+let forestBabaLockReq = getDungeonProgressionFlagReq("Forest Temple Big Baba Monkey Lock");
+let forestTileWormLockReq = getDungeonProgressionFlagReq("Forest Temple Tile Worm Monkey Lock");
+let forestBridgeLockReq = getDungeonProgressionFlagReq("Forest Temple Windless Bridge Lock");
+let forestBossLockReq = getDungeonProgressionFlagReq("Forest Temple Boss Lock");
+
+let gorgePortalReq = getFlagReq("Kakariko Gorge Portal");
+let warpOutEldinTwilightReq = gorgePortalReq;
+let eponaReq = getFlagReq("Retamed Epona");
+
+let minesFirstLockReq = getDungeonProgressionFlagReq("Goron Mines First Floor Lock");
+let minesSecondLockReq = getDungeonProgressionFlagReq("Goron Mines Double Beamos Lock");
+let minesThirdLockReq = getDungeonProgressionFlagReq("Goron Mines Outside Lock");
+let minesBossLockReq = getDungeonProgressionFlagReq("Goron Mines Boss Lock");
+
+let lakebedFirstLockReq = getDungeonProgressionFlagReq("Lakebed Temple Main Room Lock");
+let lakebedSecondLockReq = getDungeonProgressionFlagReq("Lakebed Temple East Water Supply Lock");
+let lakebedThirdLockReq = getDungeonProgressionFlagReq("Lakebed Temple Before Deku Toad Lock");
+let lakebedEastWaterReq = getDungeonProgressionFlagReq("Lakebed Temple East Water Supply");
+let lakebedWestWaterReq = getDungeonProgressionFlagReq("Lakebed Temple West Water Supply");
+let lakebedBossLockReq = getDungeonProgressionFlagReq("Lakebed Temple Boss Lock");
+
+let arbitersFirstLockReq = getDungeonProgressionFlagReq("Arbiters Grounds Entrance Lock");
+let arbitersSecondLockReq = getDungeonProgressionFlagReq("Arbiters Grounds East Turning Room Lock");
+let arbitersThirdLockReq = getDungeonProgressionFlagReq("Arbiters Grounds East Upper Turnable Lock");
+let arbitersFourthLockReq = getDungeonProgressionFlagReq("Arbiters Grounds Ghoul Rat Room Lock");
+let poeGateReq = [getDungeonProgressionFlagReq("Arbiters Grounds Torch Room Poe"), getDungeonProgressionFlagReq("Arbiters Grounds East Turning Room Poe"), 
+    getDungeonProgressionFlagReq("Arbiters Grounds Hidden Wall Poe"), getDungeonProgressionFlagReq("Arbiters Grounds West Poe")];
+let arbitersFifthLockReq = getDungeonProgressionFlagReq("Arbiters Grounds North Turning Room Lock");
+let arbitersBossLockReq = getDungeonProgressionFlagReq("Arbiters Grounds Boss Lock");
+
+let ruinsCorridorLockReq = getDungeonProgressionFlagReq("Snowpeak Ruins East Corrider Lock");
+let ruinsLobbyLockReq = getDungeonProgressionFlagReq("Snowpeak Ruins Lobby Lock");
+let ruinsCourtyardLockReq = getDungeonProgressionFlagReq("Snowpeak Ruins Courtyard West Lock");
+let ruinsIceRoomLockReq = getDungeonProgressionFlagReq("Snowpeak Ruins Ice Room Lock");
+let ruinsBossLockReq = getDungeonProgressionFlagReq("Snowpeak Ruins Boss Lock");
+
+let templeFirstLockReq = getDungeonProgressionFlagReq("Temple of Time Lobby Lock");
+let templeSecondLockReq = getDungeonProgressionFlagReq("Temple of Time Second Staircase Lock");
+let templeDarknutLockReq = getDungeonProgressionFlagReq("Temple of Time Darknut Lock");
+let templeBossLockReq = getDungeonProgressionFlagReq("Temple of Time Boss Lock");
+
+let cityFirstLockReq = getDungeonProgressionFlagReq("City in The Sky Lock");
+let cityBossLockReq = getDungeonProgressionFlagReq("City in The Sky Boss Lock");
+
+let palaceWestFirstLockReq = getDungeonProgressionFlagReq("Palace of Twilight West Wing First Lock");
+let palaceWestSecondLockReq = getDungeonProgressionFlagReq("Palace of Twilight West Wing Second Lock");
+let westSolReq = palaceWestSecondLockReq.copyConditionWithImageAndName(getIconImage("Sol"), "West Sol");
+let palaceEastFirstLockReq = getDungeonProgressionFlagReq("Palace of Twilight East Wing First Lock");
+let palaceEastSecondLockReq = getDungeonProgressionFlagReq("Palace of Twilight East Wing Second Lock");
+let eastSolReq = palaceEastSecondLockReq.copyConditionWithImageAndName(getIconImage("Sol"), "East Sol");
+let bothSolReq = getDungeonProgressionFlagReq("Palace of Twilight Collect Both Sols");
+let palaceCentralFirstLockReq = getDungeonProgressionFlagReq("Palace of Twilight Central First Room Lock");
+let palaceCentralSecondLockReq = getDungeonProgressionFlagReq("Palace of Twilight Central Outdoor Lock");
+let palaceCentralThirdLockReq = getDungeonProgressionFlagReq("Palace of Twilight Before Zant Lock");
+let palaceBossLockReq = getDungeonProgressionFlagReq("Palace of Twilight Boss Lock");
+
+let castleFirstLockReq = getDungeonProgressionFlagReq("Hyrule Castle Outside Lock");
+let castleSecondLockReq = getDungeonProgressionFlagReq('Hyrule Castle Balcony Lock');
+let castleThirdLockReq = getDungeonProgressionFlagReq("Hyrule Castle Treasure Room Lock");
+let castleBossLockReq = getDungeonProgressionFlagReq("Hyrule Castle Boss Lock");
+
+let zoraIceReq = getFlagReq("Melted Zora's Domain Ice", false);
+let meltedIceReq = getFlagReq("Melted Zora's Domain Ice");
+let warpOutLanayruTwilightReq = getFlagReq("Zoras Domain Portal");
+let gorgeEldinBoulderReq = getFlagReq("Kakariko Gorge Eldin Field Boulder");
+let waterBombReq = zoraArmorReq.copyConditionAndImageAndName(waterBombs);
+let midnasLamentReq = getFlagReq("Midna's Lament Completed");
+let midnasLamentNotCompletedReq = getFlagReq("Midna's Lament Completed", false);
+
+let snowpeakPortalReq = getFlagReq("Snowpeak Portal");
+let snowpeakReq = [shadowCrystalReq, [reekfishScentReq, snowpeakPortalReq]];
 
 let tileWormReq = [boomerangReq, ironBootsReq];
 let groundsFirstRoomReq = [clawshotReq, shadowCrystalReq];

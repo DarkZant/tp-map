@@ -1,3 +1,10 @@
+const FlagStates = Object.freeze({
+    Unset: 0,
+    Set: 1,
+    Junk: 2,
+    Important: 3
+});
+
 class Flag extends Storable {
     constructor(item, position, { 
             itemCategory=item.getCategory(), baseReqs=[], baseDesc="No description given", 
@@ -21,15 +28,12 @@ class Flag extends Storable {
         this.glitchedReqs = glitchedReqs;
         this.glitchedDesc = glitchedDesc;
         
-        this._set = false;
-        this._junk = false;
+        this.state = FlagStates.Unset;
+        this.detailsOpened = false;
     }
     initialize() {
         let storedValue = this.storageUnit.getFlagAsNumber(this);
-        if (storedValue === 2)
-            this._junk = true;
-        else 
-            this._set = storedValue === 1;         
+        this.state = storedValue;
         this.initializeMarker();
     }
     getImage() {
@@ -91,27 +95,20 @@ class Flag extends Storable {
         return this.randoItem !== undefined;
     }
     randoItemIsRevealed() {
-        return randoIsActive() && (Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk()))
+        return randoIsActive() && (Settings.RevealSpoilerLog.isEnabled() || Settings.RevealSetJunkFlags.isEnabled() && (this.isSet() || this.isJunk() || this.isImportant()))
     }
     set() {
         if (this.isSet())
             return;
-        if (this.isJunk())
-            this._junk = false;
-        this._set = true;
+        this.state = FlagStates.Set;
         this.onSetChange();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
     }
     unset() {
-        if (this.isJunk()) {
-            this._junk = false;
-            this.onJunkChange();
-            return;
-        }
         if (!this.isSet())
             return;
-        this._set = false;
+        this.state = FlagStates.Unset;
         this.onSetChange();
         if (this.parentGroup) 
             this.parentGroup.decreaseAmount();
@@ -123,18 +120,18 @@ class Flag extends Storable {
         updateTotalCounter();
     }
     isSet() {
-        return this._set;
+        return this.state === FlagStates.Set;
     }
     setAsJunk() {
         if (this.isJunk() || !this.isJunkable())
             return;
-        this._junk = true;
+        this.state = FlagStates.Junk;
         this.onJunkChange();
     }
     unsetAsJunk() {
         if (!this.isJunk() || this.isSet())
             return;
-        this._junk = false;
+        this.state = FlagStates.Unset;
         this.onJunkChange();
     }
     onJunkChange() {
@@ -142,15 +139,16 @@ class Flag extends Storable {
         updateTotalCounter();
     }
     isJunk() {
-        return this._junk;
+        return this.state === FlagStates.Junk;
+    }
+    isUnset() {
+        return this.state === FlagStates.Unset;
     }
     isJunkable() {
-        return !this.isSet() && randoIsActive() && this.isRandomizerCheck();
+        return randoIsActive() && this.isRandomizerCheck();
     }
     getCurrentStoreValue() {
-        if (this.isSet())
-            return 1;
-        return this.isJunk() ? 2 : 0;
+        return this.state;
     }
     isRandomizerCheck() {
         if (this.item === howlingStone)
@@ -173,7 +171,7 @@ class Flag extends Storable {
             flag.requiringFlags = [this];
     }
     manageFlagRequirements() {
-        if (!Settings.TrackerLogic.isEnabled() || !flagReqExists(this.name))
+        if (Settings.FlagLogic.isDisabled() || !flagReqExists(this.name))
             return;
         reloadMap();
     }
@@ -183,7 +181,7 @@ class Flag extends Storable {
         return item.getTracker();
     }
     manageItemTracker() {
-        if (!Settings.AutocompleteTracker.isEnabled()) 
+        if (Settings.AutocompleteTracker.isDisabled() || randoIsActive() && Settings.RandoTracker.isDisabled()) 
             return;
 
         let item = this.item;
@@ -191,7 +189,6 @@ class Flag extends Storable {
             item = this.randoItem;
         if (item instanceof Container)
             item = item.getContent();
-
 
         let itemTracker = this.getItemTracker(item);
         if (itemTracker !== null) {
@@ -202,23 +199,25 @@ class Flag extends Storable {
             }
             this.isSet() ? itemTracker.obtainItem(item) : itemTracker.unobtainItem(item);
         }
-
     }
     // Map
+    getCurrentRequirements() {
+        if (selectedGamemode === Gamemodes.Base)
+            return this.baseReqs;
+        else
+            return selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs;
+    }
+    verifyCurrentRequirements() {
+        return verifyRequirements(this.getCurrentRequirements());
+    }
     isShown() {
         if (setFlagsHidden && this.isSet() || !this.categoryIsVisible())
             return false;
-        // Tracker Logic hiding, set flags are shown even if the requirements aren't met
-        if (!Settings.TrackerLogic.isEnabled() || !Settings.HideNoReqs.isEnabled() || this.isSet())
+        // Tracker Logic hiding, set flags are shown even if the requirements aren't met. Set Flags are always shown to avoid them being hidden when they are set (mostly locks)
+        if (!Settings.HideNoReqs.isEnabled() || this.isSet())
             return true;
 
-
-        if (selectedGamemode === Gamemodes.Base) {
-            return verifyRequirements(this.baseReqs);
-        }    
-        else {
-            return verifyRequirements(selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs);
-        }
+        return this.verifyCurrentRequirements(); 
     }
     categoryIsVisible() {
         if (randoIsActive())
@@ -230,7 +229,7 @@ class Flag extends Storable {
         return randoIsActive() && this.isJunk();
     }
     isCounted() {
-        if (this.isSet() || this.countsAsJunk() || !this.isShown())
+        if (this.isSet() || this.countsAsJunk() || !this.isShown() || !this.verifyCurrentRequirements())
             return false;
         return this.isCountable();
     }
@@ -264,6 +263,7 @@ class Flag extends Storable {
         this.boundUnsetMarker = this.unsetMarker.bind(this);
         this.boundJunkMarker = this.junkMarker.bind(this);
         this.boundUnjunkMarker = this.unjunkMarker.bind(this);
+        this.boundClickJunkButton = this.clickJunkButton.bind(this);
     }
     addMarker() {
         if (layerIsLoaded(this.marker))
@@ -298,9 +298,15 @@ class Flag extends Storable {
         if (!this.isShown() || layerCannotReload(this.marker))
             return;
         addMarkerToMap(this.marker, position);
-        if (this.isJunk() && randoIsActive()) {
-            this.junkVisually();
-            return;
+        if (randoIsActive()) {
+            if (this.isJunk()) {
+                this.junkVisually();
+                return;
+            }
+            else if (this.isImportant()) {
+                this.importantVisually();
+                return;
+            }
         }
         if (this.isSet())
             this.setVisually();
@@ -332,7 +338,6 @@ class Flag extends Storable {
             setTimeout(() => this.marker.remove(), 1500);
             return;
         }
-
     }
     unsetMarker() {
         blockMarkerReload(this.marker);
@@ -341,7 +346,6 @@ class Flag extends Storable {
         this.unset();
         this.unsetVisually();
         unblockMarkerReload(this.marker);
-
     }
     setVisually() {
         showMarkerAsSet(this.marker, this.getMarkerImage());
@@ -352,18 +356,11 @@ class Flag extends Storable {
     unsetVisually() {
         showMarkerAsNotSet(this.marker, this.getMarkerImage());
         this.updateTooltipContent();
-        if (Settings.TrackerLogic.isEnabled()) {
-            let currentReqs;
-            if (selectedGamemode === Gamemodes.Base)
-                currentReqs = this.baseReqs;
-            else 
-                currentReqs = selectedGamemode === Gamemodes.Glitchless ? this.randoReqs : this.glitchedReqs;
-            if (!verifyRequirements(currentReqs))
-                showMarkerAsUnobtainable(this.marker);    
-        }
+        if (!this.verifyCurrentRequirements())
+            showMarkerAsUnobtainable(this.marker);    
         this.marker.off('contextmenu', this.boundUnsetMarker);
         this.marker.on('contextmenu', this.boundSetMarker);
-        if (layerIsLoaded(this.marker)) {
+        if (layerIsLoaded(this.marker) && !this.detailsOpened) {
             this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
             this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
         }
@@ -391,7 +388,6 @@ class Flag extends Storable {
             e.preventDefault();
             if (e.button !== 1) 
                 return;
-
         }
         if (this.isSet())
             return;
@@ -402,11 +398,51 @@ class Flag extends Storable {
         showMarkerAsJunk(this.marker, this.getMarkerImage());
         this.updateTooltipContent();
         this.marker.on('contextmenu', this.boundSetMarker);
-        this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
-        this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+        if (!this.detailsOpened && layerIsLoaded(this.marker)) {
+            this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
+            this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+        }
     }
     getFlagNameType() {
         return "Flag";
+    }
+    isImportant() {
+        return this.state == FlagStates.Important;
+    }
+    importantMarker() {
+        this.state = FlagStates.Important;
+        this.importantVisually();
+        this.onImportantChange();
+    }
+    unimportantMarker() {
+        this.state = FlagStates.Unset;
+        this.unsetVisually();
+        this.onImportantChange();
+    }
+    onImportantChange() {
+        this.storageUnit.setFlag(this);
+    }
+    importantVisually() {
+        showMarkerAsImportant(this.marker, this.getMarkerImage());
+        this.updateTooltipContent();
+    }
+    resetMarkerEvents() {
+        this.detailsOpened = false;
+        this.marker.off("contextmenu");
+        if (this.isSet())
+            this.marker.on("contextmenu", this.boundUnsetMarker);
+        else 
+            this.marker.on("contextmenu", this.boundSetMarker);
+        if (layerIsLoaded(this.marker)) {
+            this.marker.getElement().removeEventListener('auxclick', this.boundClickJunkButton);
+            if (this.isJunk()) 
+                this.marker.getElement().addEventListener('auxclick', this.boundUnjunkMarker);
+            else if (this.isJunkable())
+                this.marker.getElement().addEventListener('auxclick', this.boundJunkMarker);
+        }
+    }
+    clickJunkButton() {
+        document.getElementById("junkFlagButton").click();
     }
     showDetails() {
         let item = this.getCurrentItem();
@@ -427,12 +463,111 @@ class Flag extends Storable {
         }
         LeafletMap.on('click', hideDetails);
         let detailsMenu = document.getElementById('flagDetails');
-        detailsMenu.style.visibility = "visible";
+        if (detailsMenu.style.visibility === "visible")
+            detailsMenu.targetedFlag.resetMarkerEvents();            
+        else 
+            detailsMenu.style.visibility = "visible";
+        detailsMenu.targetedFlag = this;
+        this.detailsOpened = true;
         detailsMenu.style.width = "24.4vw";
-        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);    
+        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);
+
         document.getElementById("flagName").style.display = "inline";
         document.getElementById("flagNameTitle").innerHTML = this.getFlagNameType() + " Name";
-        document.getElementById("flagNameDiv").innerHTML = this.name;   
+        document.getElementById("flagNameDiv").innerHTML = this.name;
+
+        document.getElementById("flagButtons").style.display = this.isSettable() ? "flex" : "none";
+        let randoButtonDisplay = randoIsActive() && this.isRandomizerCheck() ? "flex" : "none";
+        document.getElementById("randoFlagButtons").style.display = randoButtonDisplay;
+        let setButton = document.getElementById("setFlagButton");
+        setButton.onclick = () => {
+            if (this.isSet()) {
+                this.unsetMarker();
+                setButton.innerHTML = "Mark as Set";
+                reEnableButton(junkButton);
+                reEnableButton(importantButton);
+                if (layerIsLoaded(this.marker))
+                    this.marker.getElement().addEventListener('auxclick', this.boundClickJunkButton);
+            }
+            else {
+                this.setMarker();
+                setButton.innerHTML = "Mark as Unset";
+                junkButton.innerHTML = "Mark as Junk";
+                importantButton.innerHTML = "Mark as Important";
+                disableButton(junkButton);
+                disableButton(importantButton);
+            }
+        };
+        let junkButton = document.getElementById("junkFlagButton");
+        junkButton.onclick = () => {
+            if (this.isJunk()) {
+                this.unjunkMarker();
+                junkButton.innerHTML = "Mark as Junk";
+                reEnableButton(importantButton);
+            }
+            else {
+                this.junkMarker();
+                junkButton.innerHTML = "Unmark as Junk";
+                disableButton(importantButton);
+            }
+            if (layerIsLoaded(this.marker))
+                    this.marker.getElement().addEventListener('auxclick', this.boundClickJunkButton);        
+        }
+        let importantButton = document.getElementById("importantFlagButton");
+        importantButton.onclick = () => {
+            if (this.isImportant()) {
+                this.unimportantMarker();
+                importantButton.innerHTML = "Mark as Important";
+                reEnableButton(junkButton);
+                if (layerIsLoaded(this.marker))
+                    this.marker.getElement().addEventListener('auxclick', this.boundClickJunkButton);            
+            }
+            else {
+                this.importantMarker();
+                importantButton.innerHTML = "Unmark as Important";
+                disableButton(junkButton);
+            }
+        }
+        this.marker.off('contextmenu');
+        if (this.isJunk())
+            this.marker.getElement().removeEventListener('auxclick', this.boundUnjunkMarker);
+        else 
+            this.marker.getElement().removeEventListener('auxclick', this.boundJunkMarker);
+        this.marker.getElement().onclick = null;
+        this.marker.on('contextmenu', () => setButton.click());
+        if (this.isSet()) {
+            setButton.innerHTML = "Mark as Unset";
+            junkButton.innerHTML = "Mark as Junk";
+            importantButton.innerHTML = "Mark as Important";
+            disableButton(junkButton);
+            disableButton(importantButton);
+        }
+        else if (this.isJunk()) {
+            setButton.innerHTML = "Mark as Set";
+            junkButton.innerHTML = "Unmark as Junk";
+            importantButton.innerHTML = "Mark as Important";
+            reEnableButton(junkButton);
+            disableButton(importantButton);
+            this.marker.getElement().addEventListener('auxclick', this.boundClickJunkButton);
+        }
+        else if (this.isImportant()) { 
+            setButton.innerHTML = "Mark as Set";
+            junkButton.innerHTML = "Mark as Junk";
+            importantButton.innerHTML = "Unmark as Important";
+            disableButton(junkButton);
+            reEnableButton(importantButton);
+        }
+        else {
+            setButton.innerHTML = "Mark as Set";
+            junkButton.innerHTML = "Mark as Junk";
+            importantButton.innerHTML = "Mark as Important";
+            reEnableButton(junkButton);
+            reEnableButton(importantButton);
+            this.marker.getElement().addEventListener('auxclick', this.boundClickJunkButton);
+        }
+
+
+
         document.getElementById('flagItem').style.display = "inline"; 
         if (this.isContainer()) {
             document.getElementById('flagItemTitle').innerHTML = "Content";
@@ -487,6 +622,7 @@ class Flag extends Storable {
         else 
             document.getElementById('flagRequirements').style.display = "none";
 
+        document.getElementById('flagDescription').style.display = "inline";
         document.getElementById('flagDescription').style.visibility = "visible";
         let flagDescDiv = document.getElementById('flagDescriptionDiv');
         if (this.itemCategory === Categories.Hints) {
@@ -537,15 +673,19 @@ class UnsettableFlag extends Flag {
     countsForTotal() {
         return false;
     }
+    isCounted() {
+        return this.isShown() && this.verifyCurrentRequirements() && Settings.CountNonFlags.isEnabled();
+    }
+    isCountable() {
+        return this.isCounted();
+    }
 }
 
 class RandoFlag extends Flag {
     set() {
         if (this.isSet() || !randoIsActive())
             return;
-        if (this.isJunk())
-            this._junk = false;
-        this._set = true;
+        this.state = FlagStates.Set
         this.onSetChange();
         if (this.parentGroup) 
             this.parentGroup.increaseAmount();
@@ -576,7 +716,12 @@ class RandoFlag extends Flag {
             return false;
         return this.categoryIsVisible() && this.isCountable();
     }
-    
+    isCounted() {
+        if (this.isSet() || this.countsAsJunk() || !this.isShown() || !this.verifyCurrentRequirements() || !randoIsActive())
+            return false;
+        return this.isCountable();
+    }
+
 }
 
 class SharedFlag extends Flag {
@@ -606,11 +751,11 @@ class SharedFlag extends Flag {
         this.fromShared = false;
     }
     manageSharedFlag() {
-        if (this.isSet() && !this.sharedFlag.isSet() && !randoIsActive()) {
+        if (this.isSet() && !this.sharedFlag.isSet() && RandoSettings.ShuffleShopItems.isDisabled()) {
             this.sharedFlag.fromShared = true;
             this.sharedFlag.set();
         }
-        else if (!this.isSet() && this.sharedFlag.isSet() && !randoIsActive()) {
+        else if (!this.isSet() && this.sharedFlag.isSet() && RandoSettings.ShuffleShopItems.isDisabled()) {
             this.sharedFlag.fromShared = true;
             this.sharedFlag.unset();
         }

@@ -226,6 +226,7 @@ const RandoSettingsMap = new Map([
     ["totEntrance", RandoSettings.TempleTime],
     ["skipCityEntrance", RandoSettings.CitySkybook],
     ["transformAnywhere", RandoSettings.TransformAnywhere],
+    ["shuffleShopItems", RandoSettings.ShuffleShopItems],
 ]);
 
 const RandoRequirementsMap = new Map([
@@ -336,6 +337,7 @@ function manageFile(file) {
 }
 
 function resetSpoilingSettings() {
+    Settings.RandoTracker.reset();
     Settings.RevealSetJunkFlags.reset();
     Settings.Entrances_Randomized.reset();
     Settings.RevealSpoilerLog.reset();
@@ -550,6 +552,13 @@ function loadSpoilerLog(data, start=false) {
         flags.get("Castle Town Portal").set();
         flags.get("Zoras Domain Portal").set();
         flags.get("Lanayru Field Scent of Ilia").set();
+    }
+    if (RandoSettings.ShuffleShopItems.isDisabled()) {
+        flags.get("Castle Town Goron Shop Red Potion").set();
+        // flags.get('Castle Town Goron Shop Hylian Shield').set();
+        flags.get('Castle Town Goron Shop Lantern Oil').set();
+        flags.get('Castle Town Goron Shop Arrow Refill').set();
+        // Maybe Red Potion in Kakariko Malo Mart too?
     }
     agithaRewards.updateAllFlags();
 

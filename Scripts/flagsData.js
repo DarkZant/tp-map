@@ -1,70 +1,3 @@
-let faronTwilightCleared = getFlagReq("Faron Twilight Cleared");
-let eldinTwilightCleared = getFlagReq("Eldin Twilight Cleared");
-let lanayruTwilightCleared = getFlagReq("Lanayru Twilight Cleared");
-let faronTwilight = getFlagReq("Faron Twilight Cleared", false);
-let eldinTwilight = getFlagReq("Eldin Twilight Cleared", false);
-let lanayruTwilight = getFlagReq("Lanayru Twilight Cleared", false);
-
-let firstGoatsReq = getFlagReq("Ordon First Goats Herding");
-let ordonPortalReq = getFlagReq("Ordon Spring Portal");
-let taloSavedReq = getFlagReq("Faron Woods Talo Saved");
-let zeldaMetReq = getFlagReq("Met Zelda");
-let zeldaNotMetReq = getFlagReq("Met Zelda", false);
-
-let poleMonkeyReq = getFlagReq("Forest Temple Pole Monkey");
-
-let gorgePortalReq = getFlagReq("Kakariko Gorge Portal");
-let warpOutEldinTwilightReq = gorgePortalReq;
-let eponaReq = getFlagReq("Retamed Epona");
-
-let minesFirstLockReq = getFlagReq("Goron Mines First Floor Lock");
-let minesSecondLockReq = getFlagReq("Goron Mines Double Beamos Lock");
-let minesThirdLockReq = getFlagReq("Goron Mines Outside Lock");
-
-let lakebedFirstLockReq = getFlagReq("Lakebed Temple Main Room Lock");
-let lakebedSecondLockReq = getFlagReq("Lakebed Temple East Water Supply Lock");
-let lakebedThirdLockReq = getFlagReq("Lakebed Temple Before Deku Toad Lock");
-let lakebedEastWaterReq = getFlagReq("Lakebed Temple East Water Supply");
-let lakebedWestWaterReq = getFlagReq("Lakebed Temple West Water Supply");
-
-let arbitersFirstLockReq = getFlagReq("Arbiters Grounds Entrance Lock");
-let arbitersSecondLockReq = getFlagReq("Arbiters Grounds East Turning Room Lock");
-let arbitersThirdLockReq = getFlagReq("Arbiters Grounds East Upper Turnable Lock");
-let arbitersFourthLockReq = getFlagReq("Arbiters Grounds Ghoul Rat Room Lock");
-let poeGateReq = [getFlagReq("Arbiters Grounds Torch Room Poe"), getFlagReq("Arbiters Grounds East Turning Room Poe"), 
-    getFlagReq("Arbiters Grounds Hidden Wall Poe"), getFlagReq("Arbiters Grounds West Poe")];
-let arbitersFifthLockReq = getFlagReq("Arbiters Grounds North Turning Room Lock");
-
-let templeFirstLockReq = getFlagReq("Temple of Time Lobby Lock");
-let templeSecondLockReq = getFlagReq("Temple of Time Second Staircase Lock");
-
-let cityFirstLockReq = getFlagReq("City in The Sky Lock");
-
-let palaceWestFirstLockReq = getFlagReq("Palace of Twilight West Wing First Lock");
-let palaceWestSecondLockReq = getFlagReq("Palace of Twilight West Wing Second Lock");
-let westSolReq = palaceWestSecondLockReq.copyConditionWithImageAndName(getIconImage("Sol"), "West Sol");
-let palaceEastFirstLockReq = getFlagReq("Palace of Twilight East Wing First Lock");
-let palaceEastSecondLockReq = getFlagReq("Palace of Twilight East Wing Second Lock");
-let eastSolReq = palaceEastSecondLockReq.copyConditionWithImageAndName(getIconImage("Sol"), "East Sol");
-let palaceCentralFirstLockReq = getFlagReq("Palace of Twilight Central First Room Lock");
-let palaceCentralSecondLockReq = getFlagReq("Palace of Twilight Central Outdoor Lock");
-let palaceCentralThirdLockReq = getFlagReq("Palace of Twilight Before Zant Lock");
-
-let castleFirstLockReq = getFlagReq("Hyrule Castle Outside Lock");
-let castleSecondLockReq = getFlagReq('Hyrule Castle Balcony Lock');
-let castleThirdLockReq = getFlagReq("Hyrule Castle Treasure Room Lock");
-
-let zoraIceReq = getFlagReq("Melted Zora's Domain Ice", false);
-let meltedIceReq = getFlagReq("Melted Zora's Domain Ice");
-let warpOutLanayruTwilightReq = getFlagReq("Zoras Domain Portal");
-let gorgeEldinBoulderReq = getFlagReq("Kakariko Gorge Eldin Field Boulder");
-let waterBombReq = zoraArmorReq.copyConditionAndImageAndName(waterBombs);
-let midnasLamentReq = getFlagReq("Midna's Lament Completed");
-let midnasLamentNotCompletedReq = getFlagReq("Midna's Lament Completed", false);
-
-let snowpeakPortalReq = getFlagReq("Snowpeak Portal");
-let snowpeakReq = [shadowCrystalReq, [reekfishScentReq, snowpeakPortalReq]];
-
 const flags = new Map([
     // Ordon
     ['Uli Cradle Delivery', new Flag(fishingRods.getItemByIndex(0), [-9094, 4809], {
@@ -176,6 +109,7 @@ const flags = new Map([
         baseDesc: 'Light the 2 torches besides the small chest and climb the ledge to open the chest.'
     })],
     ["North Faron Woods Deku Baba Chest", new Flag(smallChest.with(Rupees.Yellow), [-7121, 4136], {
+        baseReqs: [lanternReq],
         baseDesc: 'Defeat the Deku Baba and open the chest behind it.',
         randoReqs: [[lanternReq, shadowCrystalReq, prologueNotSkippedReq]],
     })],
@@ -507,7 +441,7 @@ const flags = new Map([
         randoReqs: [getFlagReq("Ilia Memory Reward"), shadowCrystalReq, clawshotReq],
     })],
     ["Hidden Village Poe", new Flag(nightPoe, [-2018, 6535], {
-        baseReqs: [skybookReq, shadowCrystalReq, nightReq],
+        baseReqs: [horseCallReq, shadowCrystalReq, nightReq],
         baseDesc: 'On the balcony above the white piece of cloth.',
         randoReqs: [getFlagReq("Skybook From Impaz"), shadowCrystalReq, nightReq],
     })],
@@ -1569,7 +1503,7 @@ const flags = new Map([
         baseDesc: 'Swim to the opening and walk to the end to reach the chest.'
     })],
     ["Forest Temple Second Monkey Under Bridge Chest", new Flag(smallChest.with(Rupees.Yellow), [-5155, 5218], {
-        baseReqs: [[forest1SKReq, getFlagReq("Forest Temple Totem Pole Monkey Lock")]],
+        baseReqs: [[forest1SKReq, poleMonkeyLockReq]],
         baseDesc: 'The chest is under the wooden structure.'
     })],
     ["Forest Temple Big Baba Key", new Flag(forestSK, [-5624, 3749], {
@@ -1594,11 +1528,11 @@ const flags = new Map([
         randoReqs: [...forestTempleLeftSideReq]
     })],
     ["Forest Temple Gale Boomerang", new Flag(boomerang, [-4508, 4262], {
-        baseReqs: [getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock")],
+        baseReqs: [forestBabaLockReq, forestTileWormLockReq],
         baseDesc: 'Defeat Ook to obtain the Gale Boomerang.',
         randoReqs: [
             [
-                new AndRequirements(getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock")), 
+                new AndRequirements(forestBabaLockReq, forestTileWormLockReq), 
                 new AndRequirements([...forestTempleLeftSideReq, boomerangReq])
             ], 
             [woodenSwordReq, shadowCrystalReq, ballAndChainReq, bombBagReq, bowReq]
@@ -1624,26 +1558,26 @@ const flags = new Map([
         baseDesc: 'Grab a bombling or use one of your own bombs to defeat the Deku Like and jump across the platforms.'
     })],
     ["Forest Temple East Tile Worm Chest", new Flag(chest.with(Rupees.Red), [-4510, 5206], {
-        baseReqs: [boomerangReq, [forest1SKReq, getFlagReq("Forest Temple Windless Bridge Lock")]],
+        baseReqs: [boomerangReq, [forest1SKReq, forestBridgeLockReq]],
         baseDesc: 'Climb up the room by going in the back or simply get launched by the Tile Worm closest to the chest.'
     })],
     ["Forest Temple Diababa Heart Container", new Flag(heartContainer, [-3773, 4842], {
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Heart Container.',
         randoCategory: Categories.Main,
-        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
+        randoReqs: [[forestBKReq, forestBossLockReq], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the item.'
     })],
     ["Forest Temple Dungeon Reward", new Flag(fusedShadow, [-3796, 4777], {
         baseReqs: [diababaReq],
         baseDesc: 'Defeat Diababa to obtain the Fused Shadow.',
-        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
+        randoReqs: [[forestBKReq, forestBossLockReq], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]],
         randoDesc: 'Defeat Diababa to obtain the dungeon reward.'
     })],
     ["Forest Temple Diababa", new Flag(diababa, [-3651, 4860], {
-        baseReqs: [boomerangReq, [forestBKReq, getFlagReq("Forest Temple Boss Lock")], ordonSwordReq],
+        baseReqs: [boomerangReq, [forestBKReq, forestBossLockReq], ordonSwordReq],
         baseDesc: 'Defeat Diababa to clear out the Forest Temple.',
-        randoReqs: [[forestBKReq, getFlagReq("Forest Temple Boss Lock")], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]]
+        randoReqs: [[forestBKReq, forestBossLockReq], boomerangReq, [woodenSwordReq, ballAndChainReq, bombBagReq, bowReq, shadowCrystalReq]]
     })],
     ["Forest Temple Ooccoo", new Flag(ooccooPot, [-5250, 4565], {
         baseReqs: [], // Needs a way to put the Bombling into bomb form (shield/damage) or boulderReq
@@ -1668,16 +1602,10 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the Northeastern Tile Worm Room."
     })],
     ["Forest Temple Boss Lock", new Flag(forestBossLock, [-3854, 4863], {
-        baseReqs: [
-            boomerangReq, forestBKReq, getFlagReq("Forest Temple Hanging Cage Monkey"), getFlagReq("Forest Temple Monkey Under Web"),
-            getFlagReq("Forest Temple Monkey Behind Rocks"), getFlagReq("Forest Temple Monkey Behind Windmill Gate"),
-        ],
+        baseReqs: [boomerangReq, forestBKReq, hangingCageMonkeyReq, monkeyUnderWebReq, monkeyBehindRocksReq, monkeyWindmillReq],
         baseDesc: "Unlock this door to reach Diababa.",
         randoReqs: [boomerangReq, forestBKReq, [
-            new AndRequirements(getFlagReq("Forest Temple Hanging Cage Monkey"), getFlagReq("Forest Temple Monkey Under Web"),
-            getFlagReq("Forest Temple Monkey Behind Rocks"), getFlagReq("Forest Temple Monkey Behind Windmill Gate"),
-            getFlagReq("Forest Temple Big Baba Monkey Lock"), getFlagReq("Forest Temple Tile Worm Monkey Lock"),
-            getFlagReq("Forest Temple Pole Monkey")), 
+            new AndRequirements(hangingCageMonkeyReq, monkeyUnderWebReq, monkeyBehindRocksReq, monkeyWindmillReq, forestBabaLockReq, forestTileWormLockReq, poleMonkeyReq), 
             clawshotReq
         ]],
     })],
@@ -1793,18 +1721,20 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Fyrus.",
     })],
     ["Goron Mines Fyrus", new Flag(fyrus, [-4332, 3840], {
-        baseReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], [minesBKReq, getFlagReq("Goron Mines Boss Lock")], bowReq],
+        baseReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], [minesBKReq, minesBossLockReq], bowReq],
         baseDesc: 'Defeat Fyrus to clear out the Goron Mines.'
     })],
     ["Goron Mines Fyrus Heart Container", new Flag(heartContainer, [-4252, 3815], {
         baseReqs: [fyrusReq],
         baseDesc: 'Defeat Fyrus to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], [minesBKReq, minesBossLockReq], bowReq],
         randoDesc: 'Defeat Fyrus to obtain the item.'
     })],
     ["Goron Mines Dungeon Reward", new Flag(fusedShadow, [-4276, 3884], {
         baseReqs: [fyrusReq],
         baseDesc: 'Defeat Fyrus to obtain the Fused Shadow.',
+        randoReqs: [ironBootsReq, [mines2SKReq, minesSecondLockReq], [minesBKReq, minesBossLockReq], bowReq],
         randoDesc: 'Defeat Fyrus to obtain the dungeon reward.'
     })],
     // Lakebed Temple
@@ -1932,19 +1862,21 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Morpheel."
     })],
     ["Lakebed Temple Morpheel", new Flag(morpheel, [-4416, 4364], {
-        baseReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, [lakebedBKReq, getFlagReq("Lakebed Temple Boss Lock")], lakebedWestWaterReq],
+        baseReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, [lakebedBKReq, lakebedBossLockReq], lakebedWestWaterReq],
         baseDesc: 'Defeat Morpheel to clear out the Lakebed Temple.',
-        randoReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, [lakebedBKReq, getFlagReq("Lakebed Temple Boss Lock")], lakebedWestWaterReq],
+        randoReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, [lakebedBKReq, lakebedBossLockReq], lakebedWestWaterReq],
     })],
     ["Lakebed Temple Morpheel Heart Container", new Flag(heartContainer, [-4402, 5200], {
         baseReqs: [morpheelReq],
         baseDesc: 'Defeat Morpheel to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, [lakebedBKReq, lakebedBossLockReq], lakebedWestWaterReq],
         randoDesc: 'Defeat Morpheel to obtain the item.'
     })],
     ["Lakebed Temple Dungeon Reward", new Flag(fusedShadow, [-4520, 5050], {
         baseReqs: [morpheelReq],
         baseDesc: 'Defeat Morpheel to obtain the third and last Fused Shadow.',
+        randoReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], clawshotReq, zoraArmorReq, ironBootsReq, woodenSwordReq, [lakebedBKReq, lakebedBossLockReq], lakebedWestWaterReq],
         randoDesc: 'Defeat Morpheel to obtain the dungeon reward.'
     })],
     // Arbiter's Grounds
@@ -2069,13 +2001,14 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Stallord."
     })],
     ["Arbiters Grounds Stallord", new Flag(stallord, [-4530, 4332], {
-        baseReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, getFlagReq("Arbiters Grounds Boss Lock")]],
+        baseReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
         baseReqs: [stallordReq],
         baseDesc: 'Defeat Stallord to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
         randoDesc: 'Defeat Stallord to obtain the item.'
     })],
     ["Arbiters Grounds Dungeon Reward", new Flag(mirrorShard, [-4726, 4334], {
@@ -2083,6 +2016,7 @@ const flags = new Map([
         baseReqs: [stallordReq],
         baseDesc: 'Defeat Stallord to obtain the dungeon reward.',
         randoCategory: Categories.Main,
+        randoReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
     })],
     // Snowpeak Ruins
     ["Snowpeak Ruins Lobby West Armor Chest", new Flag(smallChest.with(Rupees.Red), [-6017, 4105], {
@@ -2125,9 +2059,9 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the north-eastern section of the first floor."
     })],
     ["Snowpeak Ruins Ordon Pumpkin Chest", new Flag(chest.with(pumpkin), [-4369, 5305], {
-        baseReqs: [[snowpeak1SKReq, getFlagReq("Snowpeak Ruins East Corrider Lock")]],
+        baseReqs: [[snowpeak1SKReq, ruinsCorridorLockReq]],
         baseDesc: "Defeat the 2 Chilfos to unlock the door and gain access to the chest.",
-        randoReqs: [[snowpeak1SKReq, getFlagReq("Snowpeak Ruins East Corrider Lock"), new AndRequirements(getFlagReq("Snowpeak Ruins Lobby Lock"), ballAndChainReq, clawshotReq)]],
+        randoReqs: [[snowpeak1SKReq, ruinsCorridorLockReq, new AndRequirements(ruinsLobbyLockReq, ballAndChainReq, clawshotReq)]],
     })],
     ["Snowpeak Ruins West Courtyard Buried Chest", new Flag(smallChest.with(snowpeakSK), [-4462, 3961], {
         baseReqs: [shadowCrystalReq, pumpkinReq],
@@ -2135,9 +2069,9 @@ const flags = new Map([
         randoReqs: [shadowCrystalReq, [ballAndChainReq, pumpkinReq]],
     })],
     ["Snowpeak Ruins Courtyard Central Chest", new Flag(smallChest.with(bombs, 5), [-4943, 4269], {
-        baseReqs: [pumpkinReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Courtyard West Lock")], bombBagReq],
+        baseReqs: [pumpkinReq, [snowpeak1SKReq, ruinsCourtyardLockReq], bombBagReq],
         baseDesc: "Use the cannon or the ball and chain to break the ice that is blocking the chest.",
-        randoReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Courtyard West Lock")], bombBagReq])]],
+        randoReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, [snowpeak1SKReq, ruinsCourtyardLockReq], bombBagReq])]],
     })],
     ["Snowpeak Ruins Courtyard West Lock", new Flag(snowpeakLock, [-4611, 3842], {
         baseReqs: [pumpkinReq, snowpeak1SKReq],
@@ -2170,9 +2104,9 @@ const flags = new Map([
         glitchedDesc: "Break the damaged floor and jump down to chest or LJA from the other entrance of the room to the chest.",
     })],
     ["Snowpeak Ruins Ball and Chain", new Flag(ballAndChain, [-4072, 4270], {
-        baseReqs: [pumpkinReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Courtyard West Lock")], bombBagReq],
+        baseReqs: [pumpkinReq, [snowpeak1SKReq, ruinsCourtyardLockReq], bombBagReq],
         baseDesc: "Defeat Darkhammer to obtain the Ball and Chain.",
-        randoReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Courtyard West Lock")], bombBagReq])]],
+        randoReqs: [[ballAndChainReq, new AndRequirements([pumpkinReq, [snowpeak1SKReq, ruinsCourtyardLockReq], bombBagReq])]],
         randoDesc: "Pick up the Ball and Chain to receive the item.",
     })],
     ["Snowpeak Ruins Chest After Darkhammer", new Flag(chest.with(cheese), [-3611, 4265], {
@@ -2184,19 +2118,19 @@ const flags = new Map([
         baseDesc: 'Break the armor to reveal an Ice Bubble. Upon defeat, it will drop an Orange Rupee.'
     })],
     ["Snowpeak Ruins Chapel Chest", new Flag(chest.with(snowpeakBK), [-3854, 3400], {
-        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, getFlagReq("Snowpeak Ruins Ice Room Lock")], cheeseReq],
+        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, ruinsIceRoomLockReq], cheeseReq],
         baseDesc: "Defeat all the Chilfos to unlock the door and access the chest."
     })],
     ["Snowpeak Ruins Ice Room Poe", new Flag(poeSoul, [-5198, 5214], {
-        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Lobby Lock")], shadowCrystalReq],
+        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, ruinsLobbyLockReq], shadowCrystalReq],
         baseDesc: "Break the ice blocks with the Ball and Chain to reveal the poe."
     })],
     ["Snowpeak Ruins Lobby Chandelier Chest", new Flag(chest.with(heartPiece), [-5833, 4268], {
-        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Lobby Lock")]],
+        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, ruinsLobbyLockReq]],
         baseDesc: "Swing from chandelier to chandelier to reach the chest.<br>Tip: Hit the last chandelier when yours is almost at the furthest from the chest."
     })],
     ["Snowpeak Ruins Northeast Chandelier Chest", new Flag(smallChest.with(snowpeakSK), [-4392, 5147], {
-        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, getFlagReq("Snowpeak Ruins Lobby Lock")], clawshotReq],
+        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak1SKReq, ruinsLobbyLockReq], clawshotReq],
         baseDesc:  "Swing from the chandeliers to reach the chest."
     })],
     ["Snowpeak Ruins Wooden Beam Chandelier Chest", new Flag(chest.with(snowpeakSK), [-4563, 3408], {
@@ -2208,27 +2142,29 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach the second floor of the lobby."
     })],
     ["Snowpeak Ruins Ice Room Lock", new Flag(snowpeakLock, [-5148, 4597], {
-        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak2SKReq, new AndRequirements([snowpeak1SKReq, getFlagReq("Snowpeak Ruins Lobby Lock")])]],
+        baseReqs: [cheeseReq, ballAndChainReq, [snowpeak2SKReq, new AndRequirements([snowpeak1SKReq, ruinsLobbyLockReq])]],
         baseDesc: "Unlock this door to reach the central courtyard cannon."
     })],
     ["Snowpeak Ruins Boss Lock", new Flag(snowpeakBossLock, [-4340, 4268], {
-        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, getFlagReq("Snowpeak Ruins Ice Room Lock")], cheeseReq, bedroomKeyReq],
+        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, ruinsIceRoomLockReq], cheeseReq, bedroomKeyReq],
         baseDesc: "Unlock this door to reach Blizzeta."
     })],
     ["Snowpeak Ruins Blizzeta", new Flag(blizzeta, [-4174, 4268], {
-        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, getFlagReq("Snowpeak Ruins Ice Room Lock")], cheeseReq, [bedroomKeyReq, getFlagReq("Snowpeak Ruins Boss Lock")]],
+        baseReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, ruinsIceRoomLockReq], cheeseReq, [bedroomKeyReq, ruinsBossLockReq]],
         baseDesc: 'Defeat Blizzeta to clear out the Snowpeak Ruins.'
     })],
     ["Snowpeak Ruins Blizzeta Heart Container", new Flag(heartContainer, [-3963, 4358], {
         baseReqs: [blizzetaReq],
         baseDesc: "Defeat Blizzeta to obtain the Heart Container.",
         randoCategory: Categories.Main,
+        randoReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, ruinsIceRoomLockReq], cheeseReq, [bedroomKeyReq, ruinsBossLockReq]],
         randoDesc: "Defeat Blizzeta to obtain the item."
     })],
     ["Snowpeak Ruins Dungeon Reward", new Flag(mirrorShard, [-4066, 4170], {
         baseReqs: [blizzetaReq],
         baseDesc: "Defeat Blizzeta to obtain the Mirror Shard.",
-        randoDesc: "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the item."
+        randoReqs: [ballAndChainReq, bombBagReq, [snowpeak2SKReq, ruinsIceRoomLockReq], cheeseReq, [bedroomKeyReq, ruinsBossLockReq]],
+        randoDesc: "Defeat Blizzeta and leave the dungeon via the Midna warp to obtain the item.",
     })],
     // Temple of Time
     ["Temple of Time Lobby Lantern Chest", new Flag(chest.with(templeSK), [-5497, 4635], {
@@ -2236,24 +2172,26 @@ const flags = new Map([
         baseDesc: 'Light the 2 torches to make the chest appear.'
     })],
     ["Temple of Time Boss Lock", new Flag(templeBossLock, [-4197, 4350], {
-        baseReqs: [spinnerReq, bowReq, [temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], pastDomRodReq, templeBKReq],
+        baseReqs: [spinnerReq, bowReq, [temple3SKReq, templeDarknutLockReq], pastDomRodReq, templeBKReq],
         baseDesc: "Unlock this door to reach Armogohma.",
-        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
+        randoReqs: [pastDomRodReq, bowReq, templeBKReq, [doorOfTimeReq, new AndRequirements([[temple3SKReq, templeDarknutLockReq], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]]
     })],
     ["Temple of Time Armogohma", new Flag(armogohma, [-3724, 4352], {
-        baseReqs: [spinnerReq, bowReq, [temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], pastDomRodReq, [templeBKReq, getFlagReq("Temple of Time Boss Lock")]],
+        baseReqs: [spinnerReq, bowReq, [temple3SKReq, templeDarknutLockReq], pastDomRodReq, [templeBKReq, templeBossLockReq]],
         baseDesc: 'Defeat Armogohma to clear out the Temple of Time.',
-        randoReqs: [pastDomRodReq, bowReq, [templeBKReq, getFlagReq("Temple of Time Boss Lock")], [doorOfTimeReq, new AndRequirements([[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
+        randoReqs: [pastDomRodReq, bowReq, [templeBKReq, templeBossLockReq], [doorOfTimeReq, new AndRequirements([[temple3SKReq, templeDarknutLockReq], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
     })],
     ["Temple of Time Armogohma Heart Container", new Flag(heartContainer, [-3880, 4480], {
         baseReqs: [armogohmaReq],
         baseDesc: 'Defeat Armogohma to obtain the Heart Container.',
         randoCategory: Categories.Main,
+        randoReqs: [pastDomRodReq, bowReq, [templeBKReq, templeBossLockReq], [doorOfTimeReq, new AndRequirements([[temple3SKReq, templeDarknutLockReq], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
         randoDesc: 'Defeat Armogohma to obtain the item.'
     })],
     ["Temple of Time Dungeon Reward", new Flag(mirrorShard, [-3880, 4350], {
         baseReqs: [armogohmaReq],
         baseDesc: 'Defeat Armogohma to obtain the Mirror Shard.',
+        randoReqs: [pastDomRodReq, bowReq, [templeBKReq, templeBossLockReq], [doorOfTimeReq, new AndRequirements([[temple3SKReq, templeDarknutLockReq], spinnerReq, [bombBagReq, woodenSwordReq, ballAndChainReq]])]],
         randoDesc: "Defeat Armogohma to obtain the dungeon reward."
     })],
     ["Temple of Time First Staircase Gohma Gate Chest", new Flag(smallChest.with(arrows, 30), [-6173, 4351], {
@@ -2337,9 +2275,9 @@ const flags = new Map([
         baseDesc: 'Unlock this door to reach the Darknut miniboss.'
     })],
     ["Temple of Time Darknut Chest", new Flag(chest.with(dominionRods.getItemByIndex(0)), [-5511, 3804], {
-        baseReqs: [[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, bowReq],
+        baseReqs: [[temple3SKReq, templeDarknutLockReq], spinnerReq, bowReq],
         baseDesc: 'Defeat the Darknut to open the gate that is blocking access to the chest.',
-        randoReqs:  [[temple3SKReq, getFlagReq("Temple of Time Darknut Lock")], spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
+        randoReqs:  [[temple3SKReq, templeDarknutLockReq], spinnerReq, bowReq, [bombBagReq, woodenSwordReq, ballAndChainReq]],
     })],
     // City in the Sky
     ["City in The Sky Aeralfos Chest", new Flag(chest.with(clawshots.getItemByIndex(1)), [-4586, 5765], {
@@ -2464,21 +2402,21 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Argorok."
     })],
     ["City in The Sky Argorok", new Flag(argorok, [-3923, 3841], {
-        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, getFlagReq("City in The Sky Boss Lock")]],
+        baseReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, cityBossLockReq]],
         baseDesc: 'Defeat Argorok to clear out the City in the Sky.',
-        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, getFlagReq("City in The Sky Boss Lock")], woodenSwordReq],
+        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, cityBossLockReq], woodenSwordReq],
     })],
     ["City in The Sky Argorok Heart Container", new Flag(heartContainer, [-3877, 3766], {
         baseReqs: [argorokReq],
         baseDesc: 'Defeat Argorok to obtain the Heart Container.',
         randoCategory: Categories.Main,
-        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, getFlagReq("City in The Sky Boss Lock")], woodenSwordReq],
+        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, cityBossLockReq], woodenSwordReq],
         randoDesc: 'Defeat Argorok to obtain the item.',
     })],
     ["City in The Sky Dungeon Reward", new Flag(mirrorShard, [-3789, 3712], {
         baseReqs: [argorokReq],
         baseDesc: "Defeat Argorok to obtain the Mirror Shard.",
-        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, getFlagReq("City in The Sky Boss Lock")], woodenSwordReq],
+        randoReqs: [doubleClawshotReq, shadowCrystalReq, ironBootsReq, [cityBKReq, cityBossLockReq], woodenSwordReq],
         randoDesc: "Defeat Argorok to obtain the dungeon reward."
     })],
     // Palace of Twilight
@@ -2531,13 +2469,13 @@ const flags = new Map([
     ["Palace of Twilight East Wing First Room West Alcove Chest", new Flag(smallChest.with(Rupees.Purple), [-5420, 4644], {
         baseReqs: [lightMasterSwordReq],
         baseDesc: 'After obtaining Light Filled Master Sword, return to this room and simply ride the plaftorm below the west alcove until it brings you to the chest.',
-        randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
-        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.',    randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
+        randoReqs: [bothSolReq],
+        randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the west alcove until it brings you to the chest.',
     })],
     ["Palace of Twilight East Wing First Room East Alcove Chest", new Flag(chest.with(heartPiece), [-5420, 4902], {
         baseReqs: [lightMasterSwordReq],
         baseDesc: 'After obtaining the Light Filled Master Sword, return to this room and simply ride the plaftorm below the east alcove until it brings you to the chest.',
-        randoReqs: [getFlagReq("Palace of Twilight Collect Both Sols")],
+        randoReqs: [bothSolReq],
         randoDesc: 'With the Light Filled Master Sword, ride the plaftorm below the east alcove until it brings you to the chest.',
     })],
     ["Palace of Twilight East Wing First Lock", new Flag(palaceLock, [-5209, 4773], {
@@ -2605,14 +2543,14 @@ const flags = new Map([
         baseDesc: "Unlock this door to reach Zant."
     })],
     ["Palace of Twilight Zant", new Flag(zant, [-3721, 4325], {
-        baseReqs: [lightMasterSwordReq, [palace3SKReq, palaceCentralThirdLockReq], [palaceBKReq, getFlagReq("Palace of Twilight Boss Lock")], boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
+        baseReqs: [lightMasterSwordReq, [palace3SKReq, palaceCentralThirdLockReq], [palaceBKReq, palaceBossLockReq], boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
         baseDesc: 'Defeat Zant to clear out the Palace of Twilight.'
     })],
     ["Palace of Twilight Zant Heart Container", new Flag(heartContainer, [-3620, 4324], {
         baseReqs: [zantReq],
         baseDesc: 'Defeat Zant to obtain the Heart Container.',
         randoCategory: Categories.Main,
-        randoReqs: [lightMasterSwordReq, [palace3SKReq, palaceCentralThirdLockReq], [palaceBKReq, getFlagReq("Palace of Twilight Boss Lock")], boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
+        randoReqs: [lightMasterSwordReq, [palace3SKReq, palaceCentralThirdLockReq], [palaceBKReq, palaceBossLockReq], boomerangReq, zoraArmorReq, ironBootsReq, ballAndChainReq],
         randoDesc: 'Defeat Zant to obtain the item.'
     })],
     // Hyrule Castle
@@ -2783,7 +2721,7 @@ const flags = new Map([
         randoReqs: [doubleClawshotReq, [bombBagReq, woodenSwordReq, ballAndChainReq], boomerangReq, [bowReq, lanternReq], spinnerReq, [castle3SKReq, castleThirdLockReq]],
     })],
     ["Hyrule Castle Ganondorf", new UnsettableFlag(ganondorf, [-4838, 4328], {
-        baseReqs: [doubleClawshotReq, boomerangReq, [bowReq, lanternReq], [castle2SKReq, castleSecondLockReq], spinnerReq, [castleBKReq, getFlagReq("Hyrule Castle Boss Lock")], shadowCrystalReq, masterSwordReq, endingBlowReq],
+        baseReqs: [doubleClawshotReq, boomerangReq, [bowReq, lanternReq], [castle2SKReq, castleSecondLockReq], spinnerReq, [castleBKReq, castleBossLockReq], shadowCrystalReq, masterSwordReq, endingBlowReq],
         baseDesc: 'Defeat Ganondorf to save Hyrule!'
     })],
     // Rando Hints
@@ -2807,7 +2745,7 @@ const flags = new Map([
     })],
     ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
     ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055], {
-        randoReqs: [[getFlagReq("Forest Temple Pole Monkey"), clawshotReq]]
+        randoReqs: [[poleMonkeyReq, clawshotReq]]
     })],
     ["Gerudo Desert Sign", new Flag(randoHint, [-5481, 1185])],
     ["Goron Mines Sign", new Flag(randoHint, [-3723, 5334], {
@@ -3326,7 +3264,7 @@ const flags = new Map([
         randoDesc: "Meet Zelda in her tower after having been imprisoned. Also unlocks the Hero's Clothes in Rando." 
     })],
     ["Forest Temple Pole Monkey", new Flag(saveMonkey, [-5225, 5296], {
-        baseReqs: [[forest1SKReq, getFlagReq("Forest Temple Totem Pole Monkey Lock")]],
+        baseReqs: [[forest1SKReq, poleMonkeyLockReq]],
         baseDesc: "Save the monkey by rolling into the totem pole to make the cage fall.",
     })],
     ["Forest Temple Hanging Cage Monkey", new Flag(saveMonkey, [-4752, 3792], {
@@ -3342,7 +3280,7 @@ const flags = new Map([
         baseDesc: "Use the boomerang and the bombling to destroy the rocks and free the monkey.",
     })],
     ["Forest Temple Monkey Behind Windmill Gate", new Flag(saveMonkey, [-4556, 5616], {
-        baseReqs: [boomerangReq, [forest1SKReq, getFlagReq("Forest Temple Windless Bridge Lock")]],
+        baseReqs: [boomerangReq, [forest1SKReq, forestBridgeLockReq]],
         baseDesc: "Free the monkey by activating the two windmills with one boomerang throw.",
     })],
     ["Retamed Epona", new Flag(epona, [-5485, 7617], {

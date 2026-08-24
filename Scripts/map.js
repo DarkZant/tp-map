@@ -151,6 +151,15 @@ function getIconWithJunk(icon) {
     });
 }
 
+function getIconWithImportant(icon) {
+    return L.divIcon({ 
+        iconUrl: icon.options.iconUrl,
+        iconSize: icon.options.iconSize,
+        className: "importantIcon",
+        html: '<img src="Icons/Important.png" class="important">' + getIconImgElement(icon) 
+    });
+}
+
 function getCounterIcon(icon, num) {
     return L.divIcon({ 
         iconUrl: icon.options.iconUrl,
@@ -184,6 +193,8 @@ function updateDivIconSize(marker) {
         marker.setIcon(getIconWithCheckmark(icon));
     else if (markerElement.classList.contains("junkIcon")) 
         marker.setIcon(getIconWithJunk(icon));
+    else if (markerElement.classList.contains("importantIcon"))
+        marker.setIcon(getIconWithImportant(icon));
 
     marker.remove();
     reAddMarkerToMap(marker);
@@ -211,6 +222,15 @@ function showMarkerAsJunk(marker, iconImage) {
         return;
     marker.getElement().classList.remove("unmarked");
     marker.getElement().classList.add("junked");
+}
+
+function showMarkerAsImportant(marker, iconImage)  {
+    marker.setZIndexOffset(marker._zIndex + 500);
+    marker.setIcon(getIconWithImportant(getIcon(iconImage)));
+    if (!layerIsLoaded(marker))
+        return;
+    // marker.getElement().classList.remove("unmarked");
+    // marker.getElement().classList.add("junked");
 }
 
 function showMarkerAsNotSet(marker, iconImage) {
@@ -517,6 +537,8 @@ function layerCannotReload(layer) {
 function reloadAllMapLayers() {
     let loadedLayers = [];
     LeafletMap.eachLayer((layer) => {
+        if (layer instanceof L.Marker)
+            layer.isUnobtainable = layer.getElement().classList.contains("unobtainable");
         loadedLayers.push(layer);
         layer.remove();
     });
@@ -532,6 +554,8 @@ function reloadAllMapLayers() {
             reAddMarkerToMap(layer);
             if (layer.options.icon instanceof L.DivIcon)
                 updateDivIconSize(layer);
+            if (layer.isUnobtainable)
+                showMarkerAsUnobtainable(layer);
         }
         else if (layer instanceof L.Polygon) addPolygonToMap(layer);
     }
@@ -859,10 +883,17 @@ function showRequirementVisibilityButton() {
 function hideDetails() {
     document.getElementById('flagDetailsX').style.visibility = "hidden"; 
     let flagDetails = document.getElementById('flagDetails'); 
+    flagDetails.targetedFlag.resetMarkerEvents();
     flagDetails.style.width = "0vw";
     setTimeout(function() {
         flagDetails.style.visibility = "hidden";
     }, 100);
+    document.getElementById("flagName").style.display = "none";
+    document.getElementById('flagRequirements').style.display = "none";
+    document.getElementById('flagDescription').style.display = "none";
+    document.getElementById("flagButtons").style.display = "none";
+    document.getElementById('flagItem').style.display = "none"; 
+    document.getElementById("fishes").style.display = "none";
     
     LeafletMap.off('click', hideDetails);
 }
@@ -910,19 +941,24 @@ function resetButtonText(button, text="Resetting...") {
         button.originalText = button.innerHTML;
     button.innerHTML = text;
 }
-function resetButtonsFeedback(button, text="Reset done!") {
-    button.innerHTML = text;
+function disableButton(button, text="") {
+    if (text !== "") 
+        button.innerHTML = text;
     button.disabled = true;
-    button.classList.remove('setbh');
-    button.style.cursor = 'default';
+    button.classList.add('disabledButton');
     button.style.pointerEvents = "none";
-
-    setTimeout(function() {
+}
+function reEnableButton(button, text="") {
+    if (button.originalText !== undefined)
         button.innerHTML = button.originalText;
-        button.disabled = false;
-        button.classList.add('setbh');
-        button.style.cursor = 'pointer';
-        button.style.pointerEvents = "";
+    button.disabled = false;
+    button.classList.remove('disabledButton');
+    button.style.pointerEvents = "";
+}
+function resetButtonsFeedback(button, text="Reset done!") {
+    disableButton(button, text);
+    setTimeout(function() {
+        reEnableButton(button);
     }, 2000);
 }
 

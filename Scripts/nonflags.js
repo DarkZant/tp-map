@@ -43,6 +43,7 @@ class NonFlag {
             keyboard: false, 
             zIndexOffset: -1100
         });
+        this.marker.on('click', () => this.showDetails());
         assignGAClickEventToMarker(this.marker);
     }
     loadMarker(position=this.position) {
@@ -51,6 +52,23 @@ class NonFlag {
     }
     showTooltip() {
         addTooltipToMarker(this.marker, this.name);
+    }
+    showDetails() {
+        LeafletMap.on('click', hideDetails);
+        let detailsMenu = document.getElementById('flagDetails');
+        if (detailsMenu.style.visibility === "visible")
+            detailsMenu.targetedFlag.resetMarkerEvents();            
+        else 
+            detailsMenu.style.visibility = "visible";
+        detailsMenu.targetedFlag = this;
+        this.detailsOpened = true;
+        detailsMenu.style.width = "24.4vw";
+        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);
+
+        
+    }
+    resetMarkerEvents() {
+
     }
 }
 
@@ -61,8 +79,27 @@ class Shop extends NonFlag {
 }
 
 class FishingSpot extends NonFlag {
-    constructor(image, category, name=image, position=[]) {
-        super(image, category, name, position);
+    constructor(image, position=[], fishes=[]) {
+        super(image, Categories.Fishing, "Fishing Spot", position);
+        this.fishes = fishes;
+    }
+    static new(position, fishes) {
+        let image = fishes[0][0].image;
+        return new FishingSpot(image, position, fishes);
+    } 
+    showDetails() {
+        super.showDetails();
+        
+        document.getElementById("fishes").style.display = "inline";
+        document.getElementById('fishesList').style.display = "block";
+        let rdHtml = "";
+        for (let fish of this.fishes) {
+            let fishType = fish[0];
+            let amount = fish[1];
+            let fakeReq = {image: fishType.image, text: MultiItem.getNameFormat(fishType, amount)};
+            rdHtml += '<div class="item bordered"><span>•</span>' + displayRequirement(fakeReq) + '</div>';
+        }
+        document.getElementById('fishesList').innerHTML = rdHtml;
     }
 }
 
@@ -103,4 +140,19 @@ const Bottle = Object.freeze({
     BlueChu : new NonFlag("BottleBlue", Categories.Bottle, "Blue Chu Jelly"),
     YellowChu : new NonFlag("BottleYellow", Categories.Bottle, "Yellow Chu Jelly"),
     RareChu : new NonFlag("BottleRare", Categories.Bottle, "Rare Chu Jelly"),
+});
+
+function getFishObject(name) {
+    return {name: name, image: getIconImage(name)}
+}
+
+const Fishes = Object.freeze({
+    Greengill : getFishObject("Greengill"),
+    Catfish: getFishObject("Ordon Catfish"),
+    Reekfish: getFishObject("Reekfish"),
+    Bass: getFishObject("Hyrule Bass"),
+    Pike: getFishObject("Hylian Pike"),
+    Loach: getFishObject("Hylian Loach"),
+    Skullfish: getFishObject("Skullfish"),
+    Bombfish: getFishObject("Bomb Fish")
 });

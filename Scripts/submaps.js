@@ -91,7 +91,7 @@ class SubmapFloor {
     }
     shownFlagsAreJunk() {
         for (let c of this.contents) {
-            if (c instanceof Flag && c.isShown() && c.isJunkable() && !c.isJunk())
+            if (c instanceof Flag && c.isShown() && c.isJunkable() && !c.isJunk() && !c.isSet())
                 return false;
         }
         return true;
@@ -462,7 +462,7 @@ class Submap {
         this.marker.setIcon(getIcon(this.iconImage));
         showMarkerAsUnobtainable(this.marker);
     }
-    loadMarker(position=this.position) {
+    loadMarker(position=this.position, parentProvinceReqsAreMet=true) {
         if (!this.isShown() || layerCannotReload(this.marker))
             return;
         let requirementsAreMet = verifySubmapRequirements(this);
@@ -471,6 +471,8 @@ class Submap {
             let uniqueMarker = this.getUniqueShownMarker();
             if (uniqueMarker !== null) {
                 uniqueMarker.loadMarker(this.position);
+                if (!parentProvinceReqsAreMet)
+                    showMarkerAsUnobtainable(uniqueMarker.marker);
                 return;
             }
         }
@@ -1305,7 +1307,7 @@ class Province {
                 if (c instanceof Flag)
                     c.loadMarkerAsUnobtainable();
                 else if (c instanceof Submap) {
-                    c.loadMarker();
+                    c.loadMarker(c.position, false);
                     c.setMarkerAsUnobtainable();
                 }
                 else 
@@ -1476,6 +1478,8 @@ const Dungeons = Object.freeze({
         // North Water Room
         "Forest Temple North Deku Like Chest",
         "Forest Temple Monkey Behind Rocks",
+        FishingSpot.new([-4265, 4405], [[Fishes.Greengill, 2], [Fishes.Catfish, 1]]), // South
+        FishingSpot.new([-4105, 4340], [[Fishes.Catfish, 1], [Fishes.Greengill, 1]]), // North
         // Diababa Room
         "Forest Temple Diababa",
         "Forest Temple Diababa Heart Container",
@@ -1513,6 +1517,7 @@ const Dungeons = Object.freeze({
             Bottle.Fairy.new([-3644, 4560]),
             // Rotation Magnet Water Room
             "Goron Mines Chest Before Dangoro",
+            FishingSpot.new([-3797, 5069], [[Fishes.Greengill, 5], [Fishes.Bass, 2]]),
             // Gor Ebizo Room
             "Goron Mines Sign",
             "Goron Mines Gor Ebizo Key Shard",
@@ -1547,11 +1552,13 @@ const Dungeons = Object.freeze({
             "Lakebed Temple Central Room Spire Chest",
             "Lakebed Temple Boss Lock",
             Bottle.Fairy.new([-4365, 4362]),
+            FishingSpot.new([-4371, 4464], [[Fishes.Skullfish, 20]]),
             // Before Deku Toad Room
             "Lakebed Temple Before Deku Toad Underwater Right Chest",
             "Lakebed Temple Before Deku Toad Underwater Left Chest",
             // Big Key Room
             "Lakebed Temple Big Key Chest",
+            FishingSpot.new([-4565, 2670], [[Fishes.Loach, 2], [Fishes.Skullfish, 6]]),
         ], [ // 1F
             // Central Room
             "Lakebed Temple Central Room Small Chest",
@@ -1601,6 +1608,7 @@ const Dungeons = Object.freeze({
             Bottle.PurpleChu.new([-4179, 3396]),
             Bottle.RedChu.new([-4534, 3320]),
             Bottle.PurpleChu.new([-4592, 3318]),
+            FishingSpot.new([-4368, 2415], [[Fishes.Loach, 2], [Fishes.Greengill, 1], [Fishes.Skullfish, 14]])
         ], [ // 3F
 
         ], [ // 4F
@@ -1994,6 +2002,9 @@ const Provinces = Object.freeze({
             "Ordon First Goats Herding",
             // "Met Zelda",
             "Ordon Sign",
+            FishingSpot.new([-9158, 4848], [[Fishes.Greengill, 2], [Fishes.Catfish, 1]]),
+            FishingSpot.new([-8968, 5015], [[Fishes.Greengill, 4], [Fishes.Catfish, 4]]),
+            FishingSpot.new([-8851, 5116], [[Fishes.Catfish, 5]]),
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
                 ["Wooden Sword Chest"],
@@ -2086,6 +2097,9 @@ const Provinces = Object.freeze({
             horseGrass.new([-6666, 4936]),
             hawkGrass.new([-7325, 3569]),
             Bottle.BeeLarva.new([-7318, 3518]),
+            FishingSpot.new([-7691, 4711], [[Fishes.Greengill, 6], [Fishes.Catfish, 1]]),
+            FishingSpot.new([-7127, 3038], [[Fishes.Loach, 1], [Fishes.Greengill, 3]]),
+            FishingSpot.new([-6972, 3114], [[Fishes.Catfish, 2], [Fishes.Greengill, 2]]),
             new SimpleSubmap([-7447, 4718], entranceIconImage, "South Faron Cave", [
                 "South Faron Cave Chest"
             ], {
@@ -2106,7 +2120,8 @@ const Provinces = Object.freeze({
                 randoReqs: [shadowCrystalReq],
             }),
             newGrotto(5, [-5652, 4644], "Faron Field Fishing Grotto", [
-                Bottle.Worm.new([-5378, 4597])
+                Bottle.Worm.new([-5378, 4597]),
+                FishingSpot.new([-5600, 4634], [[Fishes.Catfish, 17], [Fishes.Greengill, 18], [Fishes.Loach, 4]])
             ], {
                 baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]],
                 randoReqs: [shadowCrystalReq],
@@ -2214,6 +2229,8 @@ const Provinces = Object.freeze({
             Bottle.RedChu.new([-5048, 6022]),
             Bottle.PurpleChu.new([-4928, 6102]),
             Bottle.YellowChu.new([-5000, 6106]),
+            FishingSpot.new([-5803, 7681], [[Fishes.Bass, 2], [Fishes.Greengill, 3]]),
+            FishingSpot.new([-5465, 8209], [[Fishes.Loach, 2], [Fishes.Greengill, 4]]),
             new SimpleSubmap([-5259, 7660], doorIconImage, 'Kakariko Empty House', [
                 "Kakariko Village Female Ant"
             ]),
@@ -2276,7 +2293,8 @@ const Provinces = Object.freeze({
             }),
             newGrotto(5, [-3249, 7223], "Eldin Field Fishing Grotto", [
                 "Eldin Field Water Bomb Fish Grotto Chest",
-                Bottle.BeeLarva.new([-2941, 7190])
+                Bottle.BeeLarva.new([-2941, 7190]),
+                FishingSpot.new([-3204, 7206], [[Fishes.Bombfish, 5], [Fishes.Skullfish, 3]]),
             ], {
                 baseReqs: [eldinTwilightCleared, [new AndRequirements(gorgeEldinBoulderReq, warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
                 randoReqs: [eldinTwilightCleared, shadowCrystalReq],
@@ -2620,6 +2638,12 @@ const Provinces = Object.freeze({
         Bottle.RareChu.new([-5353, 3456]),
         Bottle.RedChu.new([-5329, 3430]),
         Bottle.PurpleChu.new([-5382, 3488]),
+        FishingSpot.new([-664, 4913], [[Fishes.Reekfish, 3]]),
+        FishingSpot.new([-358, 6089], [[Fishes.Bass, 4], [Fishes.Catfish, 3], [Fishes.Catfish, 3], [Fishes.Pike, 1]]),
+        FishingSpot.new([-432, 5990], [[Fishes.Bass, 8], [Fishes.Greengill, 15], [Fishes.Pike, 4], [Fishes.Catfish, 2], [Fishes.Loach, 1]]),
+        FishingSpot.new([-935, 5897], [[Fishes.Pike, 5], [Fishes.Greengill, 16]]),
+        FishingSpot.new([-2736, 4982], [[Fishes.Greengill, 2], [Fishes.Pike, 2]]),
+        FishingSpot.new([-2643, 4820], [[Fishes.Pike, 3], [Fishes.Greengill, 1]]),
         new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle",[[
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
@@ -2733,7 +2757,8 @@ const Provinces = Object.freeze({
         }),
         newGrotto(5, [-5499, 3045], "Lake Hylia Water Toadpoli Grotto", [
             "Lake Hylia Water Toadpoli Grotto Chest",
-            Bottle.BeeLarva.new([-5191, 2990])
+            Bottle.BeeLarva.new([-5191, 2990]),
+            FishingSpot.new([-5441, 3023], [[Fishes.Loach, 10], [Fishes.Greengill, 16]]),
         ], {
             baseReqs: [lanayruTwilightCleared, shadowCrystalReq],
         }),
@@ -2744,7 +2769,8 @@ const Provinces = Object.freeze({
         }),
         newGrotto(5, [-4551, 4937], "Outside South Castle Town Tektite Grotto", [
             "Outside South Castle Town Tektite Grotto Chest",
-            Bottle.BeeLarva.new([-4238, 4905])
+            Bottle.BeeLarva.new([-4238, 4905]),
+            FishingSpot.new([-4503, 4920], [[Fishes.Pike, 10], [Fishes.Greengill, 15]]),
         ], {
             baseReqs: [lanayruTwilightCleared, shadowCrystalReq],
         }),
@@ -2759,7 +2785,8 @@ const Provinces = Object.freeze({
             "Lanayru Spring East Double Clawshot Chest",
             "Lanayru Spring Lower Underwater Boulder Rupee",
             "Lanayru Spring Upper Underwater Boulder Rupee",
-            "Lanayru Spring Sign"
+            "Lanayru Spring Sign",
+            FishingSpot.new([-5279, 3506], [[Fishes.Loach, 3], [Fishes.Greengill, 6]]),
         ], {
             baseReqs: [meltedIceReq],
         }),

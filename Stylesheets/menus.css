@@ -130,6 +130,11 @@
 #flagDetailsX {
     left: 22.75%;
 }
+#flagDetails h2 {
+    text-decoration: underline;
+    font-size: 1.6vmax;
+    text-align: center;
+}
 #flagDetails h3 {
     text-decoration: underline;
     font-size: 1.4vmax;
@@ -142,12 +147,36 @@
 #flagDetails .insideBordered {
     border-radius: 0;
 }
+#flagName {
+    display: none;
+}
 #flagNameDiv {
     text-align: center;
     font-size: 1.1dvw;
     padding: 1.5dvh 0.5vw;
 }
+#flagButtons {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+#setFlagButton {
+    width: 75%;
+    max-width: 100%;
+}
+#randoFlagButtons {
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+    column-gap: 1vw;
+    width: 100%;
+}
+#randoFlagButtons button {
+    width: 35.25%;
+    max-width: 100%;
+}
 #flagDescription {
+    display: none;
     visibility: hidden;
 }   
 #flagDescriptionDiv {
@@ -155,7 +184,8 @@
     text-align: center;
     padding: 0 2%;
 }
-#flagRequirements, #flagItem {  
+#flagRequirements, #flagItem, #fishesList { 
+    display: none;
     font-size: 1.2vw;
 }
 #flagItem {
@@ -164,7 +194,7 @@
 #flagItemDiv {
     justify-content: center;
 }
-#flagRequirementsDiv {
+#flagRequirementsDiv, #fishesList {
     display: flex;
     flex-direction: column;
     row-gap: 0.25dvh;
@@ -179,7 +209,7 @@
     max-width: 3.5vmax;
     max-height: 3.5vmax;
 }
-#flagRequirementsDiv span {
+#flagRequirementsDiv span, #fishesList span {
     font-size: 2vw;
     padding: 0 1vw;
 }
@@ -198,6 +228,9 @@
     font-size: 1.5vw;
     font-style: italic;
 }
+#fishes {
+    display: none;
+}
 
 /* Settings menu */
 #settings {
@@ -214,7 +247,7 @@
     column-gap: 2vw;
     padding-top: 1.5dvh;
 }
-#settings button {
+button {
     width: 8vmax;
     max-width: 8vmax;
     min-width: 50px;
@@ -229,8 +262,13 @@
     margin-bottom: 1vh;
     font-family: Arial, sans-serif;
 }
-#settings button:hover {
+button:hover {
     background-color: #272727;
+}
+.disabledButton {
+    background-color: #3f3f3f;
+    color: #8a8a8a;
+    cursor: 'pointer';
 }
 .selectContainer {
     padding-top: 2.5dvh;
