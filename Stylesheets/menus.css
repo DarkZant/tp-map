@@ -184,20 +184,24 @@
     text-align: center;
     padding: 0 2%;
 }
-#flagRequirements, #flagItem, #fishesList { 
+#flagRequirements, #flagItem{ 
     display: none;
     font-size: 1.2vw;
 }
 #flagItem {
     text-align: center;
 }
-#flagItemDiv {
+#flagItemDiv, #monsterGroupReward {
     justify-content: center;
 }
-#flagRequirementsDiv, #fishesList {
+.detailsList {
     display: flex;
     flex-direction: column;
     row-gap: 0.25dvh;
+}
+.detailsList span {
+    font-size: 2vw;
+    padding: 0 1vw;
 }
 .item {
     display: flex;
@@ -208,10 +212,6 @@
     padding-right: 1vw;
     max-width: 3.5vmax;
     max-height: 3.5vmax;
-}
-#flagRequirementsDiv span, #fishesList span {
-    font-size: 2vw;
-    padding: 0 1vw;
 }
 .oritems {
     display: flex;
@@ -228,9 +228,74 @@
     font-size: 1.5vw;
     font-style: italic;
 }
-#fishes {
+#fishes, #monsterGroup, #shopDetails {
     display: none;
+    font-size: 1.2vw;
 }
+#fishesList {
+    display: flex;
+}
+#shopDescription {
+    font-size: 1vw;
+    text-align: center;
+    margin-bottom: 2dvh;
+}
+#shopDetailsList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#shopDetailsList > div {
+    display: flex;
+    width: 92%;
+    flex-direction: column;
+    row-gap: 1vh;
+}
+#shopDetailsList > span {
+    display: flex;
+    width: 97%;
+    border-radius: 5px;
+    margin: 2dvh 0;
+    border: solid #3b3b3b;
+}
+.shopDetailsReplace {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5dvh;
+}
+.shopDetailsItem {
+    display: flex;
+}
+.shopDetailsLower {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 90%;
+    height: 5dvh;
+}
+.shopDetailsType {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 1vw;
+}
+#shopDetailsList .shopDetailsType img {
+    font-size: 1vw;
+    height: 60%;
+    padding-right: 0.75dvw;
+}
+.shopDetailsPrice {
+    font-size: 1.1vw;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+#shopDetailsList .shopDetailsPrice img {
+    height: 80%;
+    padding-right: 0.5dvw;
+}
+
 
 /* Settings menu */
 #settings {

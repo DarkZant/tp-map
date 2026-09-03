@@ -380,9 +380,9 @@ let randoNonCheckVisibilityParent = new ParentSetting('Rando_Non_Check_Visibilit
 ]);
 
 let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [ 
-    // Settings.Shop_Visibility,
+    Settings.Shop_Visibility,
     Settings.Bottle_Visibility,
-    // Settings.Monster_Rupee,
+    Settings.Monster_Rupee,
     Settings.Grass_Visibility,
     Settings.Postman_Visibility,
     Settings.Fishing_Visibility,
@@ -421,7 +421,7 @@ if (Settings.Rando_Non_Check_Visibility.isEnabled())
     Settings.Rando_Non_Check_Visibility.reset();
 Settings.Rando_Non_Check_Visibility.changeElementDisplay("none");
 
-Settings.Shop_Visibility.changeElementDisplay('none');
-Settings.Monster_Rupee.changeElementDisplay('none');
+// Settings.Shop_Visibility.changeElementDisplay('none');
+// Settings.Monster_Rupee.changeElementDisplay('none');
 Settings.Minigames_Visibility.changeElementDisplay('none');
 // Settings.Fishing_Visibility.changeElementDisplay('none');

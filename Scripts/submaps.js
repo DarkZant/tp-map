@@ -1797,6 +1797,9 @@ const Dungeons = Object.freeze({
             "City in the Sky Sign",
             Bottle.Fairy.new([-4495, 3767]),
             Bottle.PurpleChu.new([-4428, 2977]),
+            Shop.new([-5725, 4472], "Oocca Pod Shop", [
+                Buyables.Bombs30Rupees90, Buyables.Arrows30Rupees30, Buyables.RedPotionRupees30, Buyables.BluePotionRupees100, Buyables.LanternOilRupees20
+            ], "Available as soon as you enter City in the Sky.")
         ], [ // 2F
             "City in The Sky East Wing After Dinalfos Alcove Chest",
             "City in The Sky East Wing After Dinalfos Ledge Chest",
@@ -2011,7 +2014,10 @@ const Provinces = Object.freeze({
             ], {floorOffset: 2}),
             new SimpleSubmap([-8964, 4938], doorIconImage, "Sera's Shop", [
                 "Sera Shop Slingshot",
-                "Ordon Cat Rescue"
+                "Ordon Cat Rescue",
+                Shop.new([-8734, 4945], "Sera's Sundries", [
+                    Buyables.MilkRupees10, Buyables.BeeLarvaRupees10, Buyables.Slingshot
+                ], "Available after the first day of the Prologue."),
             ]),
             new SimpleSubmap([-9080, 4783], doorIconImage, "Rusl's House", [
                 "Ordon Sword"
@@ -2100,6 +2106,12 @@ const Provinces = Object.freeze({
             FishingSpot.new([-7691, 4711], [[Fishes.Greengill, 6], [Fishes.Catfish, 1]]),
             FishingSpot.new([-7127, 3038], [[Fishes.Loach, 1], [Fishes.Greengill, 3]]),
             FishingSpot.new([-6972, 3114], [[Fishes.Catfish, 2], [Fishes.Greengill, 2]]),
+            Shop.new([-7397, 4849], "Coro's Lantern Shop", [
+                Buyables.LanternOilRupees20, Buyables.CoroBottleRupees100
+            ], "Available after the first day of the Prologue."),
+            Shop.new([-7242, 4159], "Thrill's Shop", [
+                Buyables.LanternOilRupees20, Buyables.RedPotionRupees30
+            ], "Available after the first day of the Prologue."),
             new SimpleSubmap([-7447, 4718], entranceIconImage, "South Faron Cave", [
                 "South Faron Cave Chest"
             ], {
@@ -2114,7 +2126,8 @@ const Provinces = Object.freeze({
                 "Faron Field Corner Grotto Left Chest",
                 "Faron Field Corner Grotto Right Chest",
                 "Faron Field Corner Grotto Rear Chest",
-                Bottle.RareChu.new([-6571, 5153])
+                Bottle.RareChu.new([-6571, 5153]),
+                MonsterRupees.new([-6594, 5138], 25, [[Monsters.Keese, 3], [Monsters.Rat, 3], [Monsters.DekuBaba, 3]]),
             ], {
                 baseReqs: [[midnasLamentReq, new AndRequirements(eldinTwilight, gorgePortalReq), new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight)]],
                 randoReqs: [shadowCrystalReq],
@@ -2231,6 +2244,14 @@ const Provinces = Object.freeze({
             Bottle.YellowChu.new([-5000, 6106]),
             FishingSpot.new([-5803, 7681], [[Fishes.Bass, 2], [Fishes.Greengill, 3]]),
             FishingSpot.new([-5465, 8209], [[Fishes.Loach, 2], [Fishes.Greengill, 4]]),
+            MonsterRupees.new([-5469, 8097], 22, [[Monsters.Guay, 9]]),
+            MonsterRupees.new([-5368, 5942], 30, [[Monsters.Guay, 8]]),
+            Shop.new([-5218, 7616], "Kakariko Goron Night Shop", [
+                Buyables.LanternOilRupees20, Buyables.RedPotionRupees30, Buyables.BluePotionRupees100
+            ], "Available at night after clearing the Goron Mines."),
+            Shop.new([-3714, 8008], "Death Mountain Shop", [
+                Buyables.Arrows10Rupees10, Buyables.LanternOilRupees20, Buyables.WoodenShield, Buyables.MilkRupees20
+            ], "Available when you obtain the Iron Boots."),
             new SimpleSubmap([-5259, 7660], doorIconImage, 'Kakariko Empty House', [
                 "Kakariko Village Female Ant"
             ]),
@@ -2242,7 +2263,17 @@ const Provinces = Object.freeze({
                 []
             ]),
             new SimpleSubmap([-5162, 7670], doorIconImage, "Barnes' Shop", [
-                "Barnes Bomb Bag"
+                "Barnes Bomb Bag",
+                Shop.new([-5194, 7759], "Barnes' Bomb Shop", [
+                    Buyables.BombBag, Buyables.Bombs10Rupees30, Buyables.Bombs20Rupees60, Buyables.Bombs30Rupees90,
+                    Buyables.WaterBombs5Rupees30, Buyables.WaterBombs10Rupees60, Buyables.WaterBombs15Rupees90,
+                    Buyables.Bomblings1Rupees6, Buyables.Bomblings5Rupees30, Buyables.Bomblings10Rupees60
+                ], 
+                "Available after clearing the Goron Mines. Barnes can also buy your bombs at these rates, with the total floored:<br>" +
+                "Regular Bombs: 1.5 Rupees/Bomb<br>" +
+                "Water Bombs: 3 Rupees/Bomb<br>" +
+                "Bomblings: 3 Rupees/Bomb"
+                ),
             ]),
             new SimpleSubmap([-5228, 7769], doorIconImage, "Barnes' Bomb House", [
 
@@ -2258,6 +2289,9 @@ const Provinces = Object.freeze({
                 "Kakariko Village Malo Mart Hawkeye",
                 "Kakariko Village Malo Mart Bridge Repaired",
                 "Kakariko Village Malo Mart Castle Town Shop",
+                Shop.new([-5334, 7446], "Kakariko Village Malo Mart", [
+                    Buyables.Hawkeye, Buyables.WoodenShield, Buyables.HylianShield200
+                ], "Available after obtaining the Iron Boots.")
             ]),
             new SimpleFlooredSubmap([-5491, 7699], doorIconImage, 'Kakariko Sanctuary', [
                 ["Shad Dominion Rod"],
@@ -2277,7 +2311,7 @@ const Provinces = Object.freeze({
                 Bottle.YellowChu.new([-5604, 5704])
             ], {baseReqs: [boulderReq]}),
             newGrotto(2, [-5607, 6282], "Kakariko Gorge Keese Grotto", [
-
+                MonsterRupees.new([-5585, 6275], 25, [[Monsters.Keese, 20]]),
             ], {
                 baseReqs: [eldinTwilightCleared, [new AndRequirements(warpOutLanayruTwilightReq, lanayruTwilight), midnasLamentReq]],
                 randoReqs: [eldinTwilightCleared, shadowCrystalReq],
@@ -2639,11 +2673,24 @@ const Provinces = Object.freeze({
         Bottle.RedChu.new([-5329, 3430]),
         Bottle.PurpleChu.new([-5382, 3488]),
         FishingSpot.new([-664, 4913], [[Fishes.Reekfish, 3]]),
-        FishingSpot.new([-358, 6089], [[Fishes.Bass, 4], [Fishes.Catfish, 3], [Fishes.Catfish, 3], [Fishes.Pike, 1]]),
+        FishingSpot.new([-358, 6089], [[Fishes.Bass, 4], [Fishes.Catfish, 3], [Fishes.Greengill, 3], [Fishes.Pike, 1]]),
         FishingSpot.new([-432, 5990], [[Fishes.Bass, 8], [Fishes.Greengill, 15], [Fishes.Pike, 4], [Fishes.Catfish, 2], [Fishes.Loach, 1]]),
         FishingSpot.new([-935, 5897], [[Fishes.Pike, 5], [Fishes.Greengill, 16]]),
         FishingSpot.new([-2736, 4982], [[Fishes.Greengill, 2], [Fishes.Pike, 2]]),
         FishingSpot.new([-2643, 4820], [[Fishes.Pike, 3], [Fishes.Greengill, 1]]),
+        MonsterRupees.new([-4286, 3820], 71, [[Monsters.Guay, 15]]), 
+        MonsterRupees.new([-2603, 4407], 32, [[Monsters.Guay, 7]]), 
+        MonsterRupees.new([-4811, 3397], 31, [[Monsters.Guay, 10]]), 
+        MonsterRupees.new([-5185, 2741], 73, [[Monsters.Guay, 13]]),
+        MonsterRupees.new([-3969, 5116], 33, [[Monsters.Guay, 10]]),
+        MonsterRupees.new([-4530, 4888], 33, [[Monsters.Guay, 13]]),
+        MonsterRupees.new([-2603, 5166], 28, [[Monsters.Guay, 7]]),
+        Shop.new([-4191, 4729], "Castle Town Hot Springwater Shop", [
+            Buyables.HotSpringWaterRupees20
+        ], "Available after completing the Goron Springwater Rush side quest."),
+        Shop.new([-4059, 4707], "Castle Town Arrows Goron Shop", [
+                Buyables.Arrows30Rupees40
+        ], "Available after clearing the Lanayru Twilight."),
         new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle",[[
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
@@ -2684,6 +2731,14 @@ const Provinces = Object.freeze({
         }),
         new SimpleSubmap([-4060, 4759], doorIconImage, 'Malo Mart Castle Branch', [
             "Castle Town Malo Mart Magic Armor",
+            Shop.new([-4129, 4959], "Chudley's Fine Goods and Fancy Trinkets Emporium", [
+                Buyables.Bombs30Rupees3k, Buyables.WaterBombs15Rupees6k, Buyables.Bomblings10Rupees9k, Buyables.Arrows10Rupees2k,
+                Buyables.BluePotionRupees10k, Buyables.RedPotionRupees3k, Buyables.MagicArmorRupees100k
+            ], "Available after clearing the Lanayru Twilight. Requires having your shoes shined by the boy next to the shop to enter. This shop is fake and nothing can be bought even if you have the required amount of rupees."),
+            Shop.new([-4183, 4833], 'Malo Mart Castle Branch', [
+                Buyables.Bombs30Rupees45, Buyables.WaterBombs15Rupees45, Buyables.Bomblings10Rupees30, Buyables.Arrows10Rupees5,
+                Buyables.BluePotionRupees50, Buyables.RedPotionRupees15, Buyables.MagicArmorRupees598
+            ], "Available after donating enough rupees to Gor Ebizo to open the shop."),
         ], {
             baseReqs: [getFlagReq("Kakariko Village Malo Mart Castle Town Shop")],
         }),
@@ -2706,9 +2761,18 @@ const Provinces = Object.freeze({
             [
                 "Castle Town Goron Shop Red Potion",
                 'Castle Town Goron Shop Hylian Shield',
+                Shop.new([-4051, 4702], "Castle Town Hylian Shield Goron Shop", [
+                    Buyables.HylianShield210
+                ], "Available after clearing the Lanayru Twilight. If you buy the Hylian Shield here, it will be unavailable at Malo Mart and vice-versa."),
+                Shop.new([-4162, 4779], "Castle Town Red Potion Goron Shop", [
+                    Buyables.RedPotionRupees40
+                ], "Available after clearing the Lanayru Twilight."),
             ],
             [
-                'Castle Town Goron Shop Lantern Oil'
+                'Castle Town Goron Shop Lantern Oil',
+                Shop.new([-4319, 4547], "Castle Town Lantern Oil Goron Shop", [
+                    Buyables.LanternOilRupees30
+                ], "Available after clearing the Lanayru Twilight."),
             ]
         ], {
             baseReqs: [lanayruTwilightCleared],
@@ -2732,7 +2796,8 @@ const Provinces = Object.freeze({
             baseReqs: [lanayruTwilightCleared, clawshotReq, shadowCrystalReq],
         }),
         newGrotto(4, [-2121, 4843], "Lanayru Field Skulltula Grotto", [
-            "Lanayru Field Skulltula Grotto Chest"
+            "Lanayru Field Skulltula Grotto Chest",
+            MonsterRupees.new([-2003, 4793], 35, [[Monsters.Skulltula, 7]]), 
         ], {
             baseReqs: [morpheelReq],
             randoReqs: [lanayruTwilightCleared, shadowCrystalReq]

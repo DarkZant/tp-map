@@ -461,16 +461,8 @@ class Flag extends Storable {
                 break;
             }
         }
-        LeafletMap.on('click', hideDetails);
-        let detailsMenu = document.getElementById('flagDetails');
-        if (detailsMenu.style.visibility === "visible")
-            detailsMenu.targetedFlag.resetMarkerEvents();            
-        else 
-            detailsMenu.style.visibility = "visible";
-        detailsMenu.targetedFlag = this;
-        this.detailsOpened = true;
-        detailsMenu.style.width = "24.4vw";
-        setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);
+        
+        prepareDetails(this);
 
         document.getElementById("flagName").style.display = "inline";
         document.getElementById("flagNameTitle").innerHTML = this.getFlagNameType() + " Name";
@@ -637,6 +629,13 @@ class Flag extends Storable {
         }
         else
            flagDescDiv.innerHTML = description;
+    }
+    hideDetails() {
+        document.getElementById("flagName").style.display = "none";
+        document.getElementById('flagRequirements').style.display = "none";
+        document.getElementById('flagDescription').style.display = "none";
+        document.getElementById("flagButtons").style.display = "none";
+        document.getElementById('flagItem').style.display = "none"; 
     }
     isSettable() {
         return true;

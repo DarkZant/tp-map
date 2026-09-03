@@ -879,21 +879,32 @@ function showRequirementVisibilityButton() {
     dispatchSettingsUpdate();
 }
 
+function prepareDetails(opener) {
+    LeafletMap.on('click', hideDetails);
+    let detailsMenu = document.getElementById('flagDetails');
+    if (detailsMenu.style.visibility === "visible") {
+        detailsMenu.targetedFlag.resetMarkerEvents();            
+        detailsMenu.targetedFlag.hideDetails();
+    }
+    else 
+        detailsMenu.style.visibility = "visible";
+    detailsMenu.targetedFlag = opener;
+    opener.detailsOpened = true;
+    detailsMenu.style.width = "24.4vw";
+    setTimeout(function() {document.getElementById('flagDetailsX').style.visibility = "visible";}, 100);
+}
 
 function hideDetails() {
     document.getElementById('flagDetailsX').style.visibility = "hidden"; 
     let flagDetails = document.getElementById('flagDetails'); 
     flagDetails.targetedFlag.resetMarkerEvents();
+    flagDetails.targetedFlag.hideDetails();
+    flagDetails.targetedFlag = null;
     flagDetails.style.width = "0vw";
     setTimeout(function() {
         flagDetails.style.visibility = "hidden";
     }, 100);
-    document.getElementById("flagName").style.display = "none";
-    document.getElementById('flagRequirements').style.display = "none";
-    document.getElementById('flagDescription').style.display = "none";
-    document.getElementById("flagButtons").style.display = "none";
-    document.getElementById('flagItem').style.display = "none"; 
-    document.getElementById("fishes").style.display = "none";
+    
     
     LeafletMap.off('click', hideDetails);
 }

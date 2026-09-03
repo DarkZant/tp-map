@@ -1,3 +1,10 @@
+function pushGAEvent(eventName, eventParams={}) {
+    window.dataLayer.push({
+        'event': eventName,
+        ...eventParams
+    });
+}
+
 let trackerModified = true;
 document.addEventListener('trackerUpdated', function () {
     if (!trackerModified)

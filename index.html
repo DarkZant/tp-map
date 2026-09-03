@@ -123,7 +123,7 @@
             </div>
             <div id="flagRequirements">
                 <h3>Requirements</h3>
-                <div id="flagRequirementsDiv"></div>
+                <div id="flagRequirementsDiv" class="detailsList"></div>
             </div>
             <div id="flagDescription">
                 <h3>Description</h3>
@@ -132,8 +132,20 @@
             <div id="fishes">
                 <h2>Bobber Fishing Spot</h2>
                 <h3>Available Fishes</h3>
-                <div id="fishesList"></div>
-                <a>Bobber Fishing Guide Page</a>
+                <div id="fishesList" class="detailsList"></div>
+                <!-- <a>Bobber Fishing Guide Page</a> -->
+            </div>
+            <div id="monsterGroup">
+                <h2>Enemy Group Rupees</h2>
+                <h3>Reward</h3>
+                <div id="monsterGroupReward" class="item bordered"></div>
+                <h3>Enemies to defeat</h3>
+                <div id="monsters" class="detailsList"></div>
+            </div>
+            <div id="shopDetails">
+                <h3 id="shopName">!!! Shop Name !!!</h3>
+                <div id="shopDescription"></div>
+                <div id="shopDetailsList"></div>
             </div>
             <br>
         </div>
@@ -286,7 +298,7 @@
                 <label title="Dungeon Keys, Locks and Quest Flags are not considered in logic. This can be useful in a Randomizer if you know want to know how many checks are available in a dungeon.">
                     <input type="checkbox" id="Key_Logic">Ignore Dungeon Progression Content in Logic
                 </label>
-                <label class="bigSettingCheckboxLabel" title="Flags which require other Flags will be greyed out if the required flags are not set.">
+                <label class="bigSettingCheckboxLabel" title="Flags which require other Flags will be greyed out if the required flags are not set. Quest, Warp Portal and Lock Flags are the most important.">
                     <input type="checkbox" id="Flag_Logic" class="bigSettingCheckbox">Enable Flag Logic
                 </label>
                 <label style="display: none;" title="Hide Flags which requirements are not met.">
@@ -375,7 +387,7 @@
                     </label>
                     <label title="Show Shops"><input type="checkbox" id="Shop_Visibility">Show Shops</label>
                     <label title="Show Contents that can be put in a Bottle"><input type="checkbox" id="Bottle_Visibility">Show Bottle Contents</label>
-                    <label title="Show Monster Gatherings which reward you with Rupees upon defeat"><input type="checkbox" id="Monster_Rupee">Show Monster Rupees</label>
+                    <label title="Show Enemy Gatherings which reward you with Rupees upon defeat"><input type="checkbox" id="Monster_Rupee">Show Enemy Group Rupees</label>
                     <label title="Show Horse Grass and Hawk Grass"><input type="checkbox" id="Grass_Visibility">Show Horse & Hawk Grass</label>
                     <label title="Show the spots where the Postman can be found crouched"><input type="checkbox" id="Postman_Visibility">Show Postman</label>
                     <label title="Show spots where you can do Bobber Fishing"><input type="checkbox" id="Fishing_Visibility">Show Fishing Spots</label>
