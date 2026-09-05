@@ -95,6 +95,25 @@ class TrackerItem extends Storable {
         }
         this.initialized = true;
     }
+    syncWithLocalStorage() {
+        this.initialized = false;
+        let storedValue = this.storageUnit.getFlagAsNumber(this);
+        let itemState = this.item.getState();
+        if (itemState === storedValue) {
+            this.initialized = true;
+            return;
+        }
+        if (itemState <= storedValue) {
+            while (this.item.state < storedValue)
+                this.increase();
+        }
+        else {
+            while (this.item.state > storedValue)
+                this.decrease();
+        }
+
+        this.initialized = true;
+    }
     update() {
         this.updateElementBrightness();
         if (this.item instanceof ProgressiveItem)
@@ -263,6 +282,7 @@ class TrackerItem extends Storable {
 
 let trackerItems = new Map();
 let trackerSUName = "tracker";
+let trackerSU = null;
 
 // Assign Items to TrackerItems
 for (let item of trackedItems) {
@@ -293,9 +313,14 @@ for (let titemDiv of document.querySelectorAll('.titem')) {
 
 let skybookTracker = skybook.getTracker().setShowCounterState(2);
 
+function syncTrackerWithLocalStorage() {
+    for (let trackerItem of trackerItems.values()) 
+        trackerItem.syncWithLocalStorage();
+}
+
 function initializeMapTracker() {
-    trackerSU = new StorageUnit(trackerSUName, trackerItems.values());
     // Create StorageUnit for TrackerItems
+    trackerSU = new StorageUnit(trackerSUName, trackerItems.values());
     // Initialize TrackerItems
     for (let trackerItem of trackerItems.values()) 
         trackerItem.initialize();

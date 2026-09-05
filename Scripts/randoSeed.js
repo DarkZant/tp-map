@@ -291,7 +291,11 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 function displayInvalidFile(filename) {
+    let currentText = dropZoneText.innerHTML;
     dropZoneText.innerHTML = filename + "<br>is not a valid spoiler log file!";
+    setTimeout(() => {
+        dropZoneText.innerHTML = currentText;
+    }, 2000);
 }
 
 fileInput.addEventListener('change', (e) => {

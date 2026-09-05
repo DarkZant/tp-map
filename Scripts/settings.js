@@ -60,6 +60,11 @@ class SelectSetting extends Storable {
         this.element.value = this.value;
         this.startFunc();
     }
+    syncWithLocalStorage() {
+        this.value = this.storageUnit.getFlagAsNumber(this);
+        this.element.value = this.value;
+        this.func();
+    }
 }
 
 
@@ -130,6 +135,10 @@ class Setting extends Storable {
     }
     clickIfInactive() {
         if (!this.isEnabled())
+            this.element.click();
+    }
+    syncWithLocalStorage() {
+        if (this.active !== this.storageUnit.getFlagAsBool(this))
             this.element.click();
     }
 }
@@ -386,7 +395,7 @@ let nonFlagVisibilityParent = new ParentSetting('Non_Flag_Visibility_Parent', [
     Settings.Grass_Visibility,
     Settings.Postman_Visibility,
     Settings.Fishing_Visibility,
-    // Settings.Minigames_Visibility
+    Settings.Minigames_Visibility
 ]); 
 
 function addChildrenToMap(parent, map) {
@@ -414,14 +423,14 @@ function verifyCategoryVisibility(category) {
     return setting === undefined ? false : setting.isEnabled();  
 }
 
-for (let setting of Object.values(Settings))
-    setting.initialize();
-
 if (Settings.Rando_Non_Check_Visibility.isEnabled())
     Settings.Rando_Non_Check_Visibility.reset();
 Settings.Rando_Non_Check_Visibility.changeElementDisplay("none");
 
-// Settings.Shop_Visibility.changeElementDisplay('none');
-// Settings.Monster_Rupee.changeElementDisplay('none');
-Settings.Minigames_Visibility.changeElementDisplay('none');
-// Settings.Fishing_Visibility.changeElementDisplay('none');
+function syncSettingsWithLocalStorage() {
+    for (let setting of Object.values(Settings))
+        setting.syncWithLocalStorage();
+}
+
+for (let setting of Object.values(Settings))
+    setting.initialize();

@@ -106,7 +106,7 @@ class Flag extends Storable {
             this.parentGroup.increaseAmount();
     }
     unset() {
-        if (!this.isSet())
+        if (this.isUnset())
             return;
         this.state = FlagStates.Unset;
         this.onSetChange();
@@ -123,7 +123,7 @@ class Flag extends Storable {
         return this.state === FlagStates.Set;
     }
     setAsJunk() {
-        if (this.isJunk() || !this.isJunkable())
+        if (this.isJunk() || !this.isJunkable() || this.isSet() || this.isImportant())
             return;
         this.state = FlagStates.Junk;
         this.onJunkChange();
@@ -378,7 +378,7 @@ class Flag extends Storable {
                 return;
 
         }
-        if (!this.isJunkable())
+        if (this.isJunk() || !this.isJunkable() || this.isSet() || this.isImportant())
             return;
         this.setAsJunk();
         this.junkVisually();
@@ -389,7 +389,7 @@ class Flag extends Storable {
             if (e.button !== 1) 
                 return;
         }
-        if (this.isSet())
+        if (!this.isJunk())
             return;
         this.unsetAsJunk();
         this.unsetVisually();

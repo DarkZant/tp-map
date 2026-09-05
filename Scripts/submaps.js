@@ -96,6 +96,13 @@ class SubmapFloor {
         }
         return true;
     }
+    flagsCanBeUnjunked() {
+        for (let c of this.contents) {
+            if (c instanceof Flag && c.isShown() && c.isJunkable() && c.isUnset())
+                return false;
+        }
+        return true;
+    }
     hasCountableNonFlag() {
         if (!Settings.CountNonFlags.isEnabled())
             return false;
@@ -131,7 +138,7 @@ class SubmapFloor {
     manageJunkContent() {
         if (!randoIsActive())
             return;
-        if (this.shownFlagsAreJunk())
+        if (this.flagsCanBeUnjunked())
             this.unjunkMarkerShown();
         else
             this.junkMarkerShown();
@@ -2008,6 +2015,7 @@ const Provinces = Object.freeze({
             FishingSpot.new([-9158, 4848], [[Fishes.Greengill, 2], [Fishes.Catfish, 1]]),
             FishingSpot.new([-8968, 5015], [[Fishes.Greengill, 4], [Fishes.Catfish, 4]]),
             FishingSpot.new([-8851, 5116], [[Fishes.Catfish, 5]]),
+            Minigames.Goats.place([-9463, 4992]),
             new SimpleFlooredSubmap([-8791, 4941], doorIconImage, "Link's House", [
                 ["Links Basement Chest"],
                 ["Wooden Sword Chest"],
@@ -2252,6 +2260,7 @@ const Provinces = Object.freeze({
             Shop.new([-3714, 8008], "Death Mountain Shop", [
                 Buyables.Arrows10Rupees10, Buyables.LanternOilRupees20, Buyables.WoodenShield, Buyables.MilkRupees20
             ], "Available when you obtain the Iron Boots."),
+            Minigames.CatHunt.place([-2121, 6670]),
             new SimpleSubmap([-5259, 7660], doorIconImage, 'Kakariko Empty House', [
                 "Kakariko Village Female Ant"
             ]),
@@ -2269,7 +2278,7 @@ const Provinces = Object.freeze({
                     Buyables.WaterBombs5Rupees30, Buyables.WaterBombs10Rupees60, Buyables.WaterBombs15Rupees90,
                     Buyables.Bomblings1Rupees6, Buyables.Bomblings5Rupees30, Buyables.Bomblings10Rupees60
                 ], 
-                "Available after clearing the Goron Mines. Barnes can also buy your bombs at these rates, with the total floored:<br>" +
+                "Available after clearing the Goron Mines.<br>Barnes can also buy back your bombs at these rates, with the total floored:<br>" +
                 "Regular Bombs: 1.5 Rupees/Bomb<br>" +
                 "Water Bombs: 3 Rupees/Bomb<br>" +
                 "Bomblings: 3 Rupees/Bomb"
@@ -2521,6 +2530,7 @@ const Provinces = Object.freeze({
         "Snowboarding Shortcut Rupee 10",
         "Snowboarding Shortcut Rupee 11",
         "Snowpeak Portal",
+        Minigames.Snowboard.place([-685, 3060]),
         newGrotto(4, [-405, 3690], "Snowpeak Freezard Grotto", [
             "Snowpeak Freezard Grotto Chest"
         ], {
@@ -2690,7 +2700,10 @@ const Provinces = Object.freeze({
         ], "Available after completing the Goron Springwater Rush side quest."),
         Shop.new([-4059, 4707], "Castle Town Arrows Goron Shop", [
                 Buyables.Arrows30Rupees40
-        ], "Available after clearing the Lanayru Twilight."),
+        ], "Available after clearing the Lanayru Twilight. The Goron is on the balcony accessible through the Goron Merchants building."),
+        Minigames.FlightByFowl.place([-4605, 2938]),
+        Minigames.FruitPopFlight.place([-4948, 3908]),
+        Minigames.RapidsRide.place([-878, 6105]),
         new SimpleFlooredSubmap([-4147, 4586], doorIconImage, "Agitha's Castle",[[
             "Agitha Male Ant Reward",
             "Agitha Female Ant Reward",
@@ -2725,7 +2738,8 @@ const Provinces = Object.freeze({
        
         new SimpleSubmap([-4035, 4573], doorIconImage, 'STAR Tent', [
             "STAR Prize 1",
-            "STAR Prize 2"
+            "STAR Prize 2",
+            Minigames.STAR.place([-4031, 4572])
         ], {
             baseReqs: [lanayruTwilightCleared],
         }),
@@ -2734,7 +2748,7 @@ const Provinces = Object.freeze({
             Shop.new([-4129, 4959], "Chudley's Fine Goods and Fancy Trinkets Emporium", [
                 Buyables.Bombs30Rupees3k, Buyables.WaterBombs15Rupees6k, Buyables.Bomblings10Rupees9k, Buyables.Arrows10Rupees2k,
                 Buyables.BluePotionRupees10k, Buyables.RedPotionRupees3k, Buyables.MagicArmorRupees100k
-            ], "Available after clearing the Lanayru Twilight. Requires having your shoes shined by the boy next to the shop to enter. This shop is fake and nothing can be bought even if you have the required amount of rupees."),
+            ], "Available after clearing the Lanayru Twilight. Requires having your shoes shined for 10 Rupees by the boy next to the shop to enter. This shop is fake and nothing can be bought even if you have the required amount of rupees."),
             Shop.new([-4183, 4833], 'Malo Mart Castle Branch', [
                 Buyables.Bombs30Rupees45, Buyables.WaterBombs15Rupees45, Buyables.Bomblings10Rupees30, Buyables.Arrows10Rupees5,
                 Buyables.BluePotionRupees50, Buyables.RedPotionRupees15, Buyables.MagicArmorRupees598
@@ -2786,6 +2800,8 @@ const Provinces = Object.freeze({
         }),
         new SimpleSubmap([-612, 5828], doorIconImage, "Hena's Shop", [
             "Fishing Hole Frog Lure",
+            Minigames.Rollgoal.place([-762, 6252]),
+            Minigames.LureFishing.place([-789, 5735])
         ], {
             baseReqs: [lanayruTwilightCleared],
             randoReqs: [meltedIceReq],

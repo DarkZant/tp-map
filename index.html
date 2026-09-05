@@ -147,6 +147,12 @@
                 <div id="shopDescription"></div>
                 <div id="shopDetailsList"></div>
             </div>
+            <div id="minigameDetails">
+                <h3 id="minigameName">!!! Minigame  Name !!!</h3>
+                <div id="minigameDescription"></div>
+                <h3>Minigame Rewards</h3>
+                <div id="minigameDetailsList"></div>
+            </div>
             <br>
         </div>
 
@@ -230,7 +236,18 @@
             <div id="settingsButtons">
                 <button onclick="resetMap(this)" title="Reset all flags. If Tracker Autocompletion is enabled, this will also reset the tracker">Reset Flags</button>
                 <button onclick="trackerButton(this)" title="Reset all items on the tracker">Reset Tracker</button>
-            </div>      
+            </div>
+            <div id="mapStateButtons">
+                <button id="downloadState" onclick="downloadMapState()" title="Download the current state of the map as a JSON file. The map is saved automatically through browser sessions even if its state is not downloaded.">
+                    Download State
+                </button>
+                <div id="mapStateFile" title="Import a JSON map state by clicking or drag and dropping. WARNING: This will override your current map state if you haven't downloaded it yet.">
+                    <p id="mapStateFileText">
+                        Import State<br>
+                    </p>
+                    <input id="mapStateImport" type="file">
+                </div>
+            </div>
             <div id="gamemodeSelection" class="selectContainer">
                 <label id="gamemodesLabel" for="Gamemodes" class="selectLabel">Gamemode</label>
                     <select name="Gamemodes" id="Gamemodes">
@@ -258,9 +275,9 @@
                     </p>
                     <input id="spoilerLog" type="file">
                 </div>
-                <button id="Unload_Seed" onclick="unloadSeed()">Unload Seed</button>
+                <button id="Unload_Seed" onclick="unloadSeed()" title="Unload the current seed spoiler log.">Unload Seed</button>
                 <div id="loadedSeed">
-                    <a id="seedLink" target="_blank">
+                    <a id="seedLink" target="_blank" title="Opens a new tab to the seed on the official Randomizer Website.">
                         View Seed on the Rando Website
                         <img src="Icons/External_Link.png">
                     </a>
@@ -1019,6 +1036,7 @@
         <script src="Scripts/flagsData.js"></script>
         <script src="Scripts/submaps.js"></script>
         <script src="Scripts/randoSeed.js"></script>
+        <script src="Scripts/mapState.js"></script>
         <script src="Scripts/storageCleanup.js"></script>
         <script>loadMap();</script>
 

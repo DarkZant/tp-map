@@ -128,7 +128,7 @@
     /* overflow-y: scroll; */
 }
 #flagDetailsX {
-    left: 22.75%;
+    left: 23.25%;
 }
 #flagDetails h2 {
     text-decoration: underline;
@@ -211,7 +211,7 @@
 #flagDetails img {
     padding-right: 1vw;
     max-width: 3.5vmax;
-    max-height: 3.5vmax;
+    max-height: 3.25vmax;
 }
 .oritems {
     display: flex;
@@ -228,30 +228,32 @@
     font-size: 1.5vw;
     font-style: italic;
 }
-#fishes, #monsterGroup, #shopDetails {
+#fishes, #monsterGroup, #shopDetails, #minigameDetails {
     display: none;
     font-size: 1.2vw;
 }
 #fishesList {
     display: flex;
 }
-#shopDescription {
-    font-size: 1vw;
+#shopDescription, #minigameDescription {
+    font-size: 1dvw;
     text-align: center;
-    margin-bottom: 2dvh;
 }
-#shopDetailsList {
+#shopDetailsList, #minigameDetailsList {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-#shopDetailsList > div {
+#shopDetailsList > div, #minigameDetailsList > div {
     display: flex;
     width: 92%;
     flex-direction: column;
-    row-gap: 1vh;
+    row-gap: 1dvh;
 }
-#shopDetailsList > span {
+#minigameDetailsList > div {
+    row-gap: 2.5dvh;
+}
+#shopDetailsList > span, #minigameDetailsList > span {
     display: flex;
     width: 97%;
     border-radius: 5px;
@@ -264,8 +266,16 @@
     justify-content: center;
     height: 5dvh;
 }
-.shopDetailsItem {
+.shopDetailsItem, .minigameDetailsItem {
     display: flex;
+    align-items: center;
+    font-size: 1.2dvw;
+}
+.minigameDetailsLower {
+    display: flex;
+    width: 90%;
+    text-align: center;
+    font-size: 0.85dvw;
 }
 .shopDetailsLower {
     display: flex;
@@ -280,8 +290,7 @@
     align-items: center;
     font-size: 1vw;
 }
-#shopDetailsList .shopDetailsType img {
-    font-size: 1vw;
+#shopDetailsList .shopDetailsType img, #minigameDetailsList img {
     height: 60%;
     padding-right: 0.75dvw;
 }
@@ -306,7 +315,7 @@
     font-size: 1.3vmax;
     margin: 2vh 0;
 }
-#settingsButtons {
+#settingsButtons, #mapStateButtons {
     display: flex;
     justify-content: center;
     column-gap: 2vw;
@@ -367,7 +376,7 @@ select:hover {
     padding-top: 2dvh;
     padding-bottom: 1dvh;
 }
-#randoSeedFile {
+#randoSeedFile, #mapStateFile {
     width: 75%;
     border: 0.1vw dashed #c0c0c0;
     border-radius: 0.5vw;
@@ -375,17 +384,31 @@ select:hover {
     transition: background-color 0.1s, border-color 0.1s;
     user-select: none;
 }
-#randoSeedFile:hover {
+#mapStateFile {
+    width: 32%;
+    height: 5.25dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1vmax;
+}
+#mapStateFileText {
+    margin: 0;
+    padding: 0 0.5dvw;
+} 
+#mapStateImport {
+    display: none;
+}
+#randoSeedFile:hover, #mapStateFile:hover {
     background-color: #1d1a14;
 }
-#randoSeedFile:hover #randoSeedFileText {
+#randoSeedFile:hover #randoSeedFileText, #mapStateFile:hover #mapStateFileText {
     text-decoration: underline;
 }
-#randoSeedFile.dragover {
+#randoSeedFile.dragover, #mapStateFile.dragover {
     background-color: #1d1a14;
     border-color: #8a8a8a;
 }
-
 #randoSeedFileText {
     padding: 6dvh 1dvw;
     margin: 0;
@@ -393,7 +416,7 @@ select:hover {
     font-size: 0.9vw;
     line-height: 2.5dvh;
 }
-#spoilerLog {
+#spoilerLog{
     display: none;
     font-size: calc(5px + 0.3vw);
     width: 6.9dvw;

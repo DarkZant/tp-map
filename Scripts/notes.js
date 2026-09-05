@@ -7,6 +7,11 @@ window.addEventListener('DOMContentLoaded', () => {
 }
 });
 
+function setAndSaveNotes(value) {
+    notes.value = value;
+    localStorage.setItem(notesStorageName, value)
+}
+
 function keyboardEventIsOnNotes(event) {
     return event.target.tagName === "TEXTAREA";
 }

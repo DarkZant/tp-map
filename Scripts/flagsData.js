@@ -3339,6 +3339,7 @@ const flags = new Map([
                   "talk to his cat Gengle to receive a Silver Rupee (You must leave Castle Town to get another one).",
     })],
     ["Fishing Hole Sinking Lure", new UnsettableFlag(sinkingLure, [-199, 5976], {
+        baseCategory: Categories.Quest,
         baseReqs: [coralEarringReq], // TODO: Add Bass, Pike, and Catfish
         baseDesc: "After obtaining the Coral Earring and lure fishing the Hyrule Bass, Hyrule Pike and Hyrule Catfish, " +
                   "cast your fishing rod near the top of the eastern bank to catch the Sinking Lure. It can also be caught " +
@@ -3372,3 +3373,9 @@ initializeFlagRequirements();
 // Shared flags assignement
 flags.get("Kakariko Village Malo Mart Hylian Shield").setSharedFlag(flags.get('Castle Town Goron Shop Hylian Shield'))
 flags.get('Castle Town Goron Shop Hylian Shield').setSharedFlag(flags.get("Kakariko Village Malo Mart Hylian Shield"))
+
+function syncFlagsWithLocalStorage() {
+    for (let flag of flags.values())
+       flag.initialize();
+    agithaRewards.initialize();
+}

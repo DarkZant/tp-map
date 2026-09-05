@@ -67,6 +67,7 @@ class NonFlag {
 }
 
 let soldOutImage = getIconImage("Sold Out");
+let minigameImage = getIconImage("Controller");
 
 class Buyable {
     constructor(item, price, oneTimeBuy, replacement=null) {
@@ -78,10 +79,10 @@ class Buyable {
     getHTML() {
         let html = "";
         html += '<div class="item bordered">';
-        html += '<div class="shopDetailsItem">' + displayItem(this.item) + '</div>'
+        html += '<div class="shopDetailsItem">' + displayItem(this.item) + '</div>';
         html += '<div class="shopDetailsLower">';
-        html += '<div class="shopDetailsType">' + (this.oneTimeBuy ? '<img src="Icons/One_Time.png">One Time Buy' : '<img src="Icons/Recurring.png">Recurring Buy') + '</div>'
-        html += '<div class="shopDetailsPrice"><img src="Icons/Green_Rupee.png">&nbsp&nbsp×&nbsp&nbsp' + this.price + '</div>'
+        html += '<div class="shopDetailsType">' + (this.oneTimeBuy ? '<img src="Icons/One_Time.png">One Time Buy' : '<img src="Icons/Recurring.png">Recurring Buy') + '</div>';
+        html += '<div class="shopDetailsPrice"><img src="Icons/Green_Rupee.png">&nbsp&nbsp×&nbsp&nbsp' + this.price + '</div>';
         html += '</div>';
         html += '</div>';
         return html;
@@ -117,7 +118,6 @@ class Shop extends NonFlag {
         }
         document.getElementById('shopDetailsList').innerHTML = rdHtml;
     }
-    getByt
     hideDetails() {
         document.getElementById("shopDetails").style.display = "none";
     }
@@ -181,12 +181,37 @@ class MonsterRupees extends NonFlag {
 }
 
 class Minigame extends NonFlag {
-    constructor(image, category, name=image, position=[]) {
-        super(image, category, name, position);
+    constructor(name, rewards, description) {
+        super(minigameImage, Categories.Minigames, name, []);
+        this.rewards = rewards;
+        this.description = description;
+    }
+    place(position) {
+        this.position = position;
+        return this;
+    }
+    showDetails() {
+        prepareDetails(this);
+        
+        document.getElementById("minigameDetails").style.display = "inline";
+        document.getElementById("minigameName").innerHTML = this.name;
+        document.getElementById("minigameDescription").innerHTML = this.description;
+        let rdHtml = '';
+        for (let reward of this.rewards) {
+            let html = '<div class="item bordered">';
+            html += '<div class="minigameDetailsItem">' + displayItem(reward.item) + '</div>';
+            html += '<div class="minigameDetailsLower">' + reward.description + '</div>';
+            html += '</div>';
+            rdHtml += html;
+            if (reward !== this.rewards.at(-1))
+                rdHtml += '<span></span>'
+        }
+        document.getElementById('minigameDetailsList').innerHTML = rdHtml;
+    }
+    hideDetails() {
+        document.getElementById("minigameDetails").style.display = "none";
     }
 }
-
-
 
 let horseGrass = new NonFlag('Horse Grass', Categories.Grass);
 let hawkGrass = new NonFlag('Hawk Grass', Categories.Grass);
@@ -237,7 +262,6 @@ const Monsters = Object.freeze({
 });
 
 let redPotion30 = new Buyable(Bottle.RedPotion, 30, false);
-let woodenShield50 = new Buyable(woodenShields.getItemByIndex(1), 50, false);
 let arrows10Rupees10 = new Buyable(new MultiItem(arrows, 10), 10, false);
 let oil20 = new Buyable(Bottle.Oil, 20, false);
 
@@ -276,13 +300,94 @@ const Buyables = Object.freeze({
     Bomblings10Rupees60: new Buyable(new MultiItem(bomblings, 10), 60, false),
     Bomblings10Rupees9k: new Buyable(new MultiItem(bomblings, 10), 9_000, false),
     Bomblings10Rupees30: new Buyable(new MultiItem(bomblings, 10), 30, false),
+    WoodenShield: new Buyable(woodenShields.getItemByIndex(1), 50, false),
     Slingshot: new Buyable(slingshot, 50, true, oil20),
     Hawkeye: new Buyable(hawkeye, 100, true, arrows10Rupees10),
     BombBag: new Buyable(bombBag, 120, true),
     HylianShield200: new Buyable(hylianShield, 200, true, redPotion30),
     HylianShield210: new Buyable(hylianShield, 210, true),
-    WoodenShield: woodenShield50,
     MagicArmorRupees100k: new Buyable(magicArmor, 100_000, true),
     MagicArmorRupees598: new Buyable(magicArmor, 598, true),
+});
 
+const Minigames = Object.freeze({
+    Goats: new Minigame("Goat Herding", [{
+        item: heartPiece, 
+        description: "After retrieving Epona, heard all 20 goats under 3 minutes to receive the Heart Piece."
+    }], "Talk to Fado to heard the Ordon Ranch goats into the barn while riding Epona."),
+    Rollgoal: new Minigame("Rollgoal", [{
+        item: new MultiItem(rupees, 10),
+        description: "Beating a new level will reward you with 10 rupees."    
+    }, {
+        item: frogLure,
+        description: "Beating the 8th level will make Hena reward you with the Frog Lure."
+    }, {
+        item: rupees,
+        description: "Beating the last level, level 64, will make Hena fill up your wallet, no matter its size."
+    }], "Look at the minigame in first person to start it. The goal is to roll the ball into the goal under a certain amount of time. " +
+        "Playing a level costs 5 Rupees. After beating all 64 levels, the game can be played for free without a time limit and the level can be chosen."
+    ),
+    CatHunt: new Minigame("Cat Hunt", [{
+        item: heartPiece,
+        description: "After talking to all of the cats for the first time, you will be rewarded with a Heart Piece."
+    }, {
+        item: Rupees.Red,
+        description: "A Red Rupee will appear buried next to Impaz's house if the minigame is completed a subsequent time."
+    }], "Talk to the Cucco leader next to the Howling Stone after Ilia retrieved her memory. " + 
+        "After finding and talking to all the 20 cats, report back to the Cucco leader to end the minigame."
+    ),
+    FlightByFowl: new Minigame("Flight-by-Fowl", [{
+        item: Rupees.Orange,
+        description: "The chest on the top spinning platform is refilled with an Orange Rupee every time the minigame is played."
+    }], "Pay 20 Rupees to Falbi and grab a Cucco to reach a variety of elevated platforms in Lake Hylia. Chests, Poes and a Grotto are only accessible through this minigame."
+    ),
+    FruitPopFlight: new Minigame("Fruit-Pop-Flight", [{
+        item: heartPiece,
+        description: "Beating the minigame with more than 10 000 points for the first time will reward you with a Heart Piece."
+    }, {
+        item: Rupees.Orange,
+        description: "Beating the minigame with more than 10 000 points a subsequent time will reward you with an Orange Rupee."
+    }, {
+        item: Rupees.Silver,
+        description: "Beating the minigame with the maximum amount of points, 61 454, will reward you with a Silver Rupee if you have already obtained the Heart Piece."
+    }], "After calling the Kargarok with Hawk Grass, you can pop various fruit ballons to reach a high score. Since popping ballons of the same type leads to higher points, " + 
+        "popping the first 3 oranges, the first 2 watermelons and all the strawberries after that leads to the highest score of 61 454.<br>Your highest score is stored in your savefile."
+    ),
+    RapidsRide: new Minigame("Rapids Ride", [{
+        item: bombBag,
+        description: "Helping Iza destroy the rocks that are blocking the river will reward you with a Bomb Bag."
+    }, {
+        item: giantBombBag,
+        description: "Obtaining a score of 25 or higher for the first time will reward you with the Giant Bomb Bag."
+    }, {
+        item: Rupees.Purple,
+        description: "Obtaining a score of 25 or higher a subsequent time will reward you with a Purple Rupee."
+    }, {
+        item: Rupees.Orange,
+        description: "Obtaining a perfect score of 30 after obtaining the Giant Bomb Bag will reward you with an Orange Rupee."
+    }], "After saving Iza from the Shadow Beasts and destroying the rocks blocking the river, you can ride a canoe down the river for 20 Rupees and destroy pots to earn points."
+    ),
+    Snowboard: new Minigame("Snowboard Race", [{
+        item: heartPiece,
+        description: "After beating Yeto, beating Yeta for the first time will reward you with a Heart Piece."
+    }], "After clearing the Snowpeak Ruins, go back to the mountain top and talk to either of the Yetis to race them.<br>Your best race time is stored in your savefile."
+    ),
+    STAR: new Minigame("Star Game", [{
+        item: bigQuiver,
+        description: "After obtaining the Clawshot, beat the minigame within the time limit for the first time to obtain the Big Quiver."
+    }, {
+        item: giantQuiver,
+        description: "After obtaining the Double Clawshot, beat the new version of the minigame for the first time within the time limit to obtain the Giant Quiver.",
+    }, {
+        item: Rupees.Orange,
+        description: "After obtaining the Giant Quiver, beating your best time will reward you with an Orange Rupee, at the cost of 20 Rupees per game."
+    }], "After clearing the Lanayru Twilight, you can enter the tent and talk to Purlo to start the minigame. The goal is to collect orbs with the help of the Clawshots " + 
+        "within a time limit. Obtaining the Quivers costs 10 Rupees per game, and subsequent games cost 20 Rupees per game.<br>Your best time is stored in your save file."
+    ),
+    LureFishing: new Minigame("Lure Fishing", [{
+        item: new BoolItem(Fishes.Loach.image, {name: "Fishing Records"}),
+        description: "You can obtain fishing size records for different kinds of fishes and a photo of yourself catching the Hylian Loach."
+    }], "You can pay 20 Rupees to go lure fishing in a canoe. You can also pay 100 Rupees for Hena to accompany you, although the first time is offered at no additional costs. The goal is to catch " + 
+        "the biggest fishes possible, and once a record sized fish is caught, it can be kept to be displayed in the fish tank inside Hena's hut.<br>Your record fish sizes are stored in your save file."
+    )
 });

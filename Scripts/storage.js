@@ -15,11 +15,17 @@ class StorageUnit {
     getLength() {
         return this.defaultConfig.length;
     }
+    getName() {
+        return this.name;
+    }
     resetFlags() {
         localStorage.setItem(this.name, this.defaultConfig);
     }
     getAllFlags() {
         return localStorage.getItem(this.name);
+    }
+    setAllFlags(config) {
+        localStorage.setItem(this.name, config);
     }
     getFlagAsBool(storable) {
         return this.getAllFlags()[storable.index] === '1';
