@@ -1,5 +1,5 @@
-# tp-map
-Interactive map for the game [The Legend of Zelda: Twilight Princess](https://zelda.fandom.com/wiki/The_Legend_of_Zelda:_Twilight_Princess) and its [Randomizer](https://tprandomizer.com/).  
+# [tp-map](https://darkzant.github.io/tp-map)
+Interactive map for the game [The Legend of Zelda: Twilight Princess](https://zelda.fandom.com/wiki/The_Legend_of_Zelda:_Twilight_Princess) and both the [base game Randomizer](https://tprandomizer.com/) and the [Dusklight Randomizer](https://twilitrealm.dev/mods/dev.twilitrealm.randomizer/).  
 Every area of the game is mapped, including dungeons, grottos, caves, houses and shops.  
 Uses and extends [Leaflet](https://leafletjs.com/index.html) for rendering the map.  
 The maps are all handmade using an image editing software by modifying screenshots of the game's minimaps and map screen.  

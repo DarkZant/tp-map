@@ -814,6 +814,8 @@ function loadDusklightSpoilerLog(data, start=false) {
 
     // Set Rando Settings
     for (let [settingName, setting] of DusklightRandoSettingsMap.entries()) {
+        if (!(settingName in data))
+            continue;
         let settingStrValue = data[settingName];
         let settingValue;
         if (setting instanceof CheckboxRandoSetting)
@@ -835,90 +837,108 @@ function loadDusklightSpoilerLog(data, start=false) {
     for (let requiredElem of document.querySelectorAll(".tdungeon > span"))
         requiredElem.style.display = "none";
 
-    for (let dungeonName of data["Required Dungeons"]["World 1"]) {
-        let formattedId = removeWhitespaces(toPascalCase(dungeonName));
-        let requiredElem = document.getElementById(formattedId);
-        if (window.getComputedStyle(requiredElem).display === 'none')
-            requiredElem.style.display = 'inline';
+    if ("Required Dungeons" in data) {
+        for (let dungeonName of data["Required Dungeons"]["World 1"]) {
+            let formattedId = removeWhitespaces(toPascalCase(dungeonName));
+            let requiredElem = document.getElementById(formattedId);
+            if (window.getComputedStyle(requiredElem).display === 'none')
+                requiredElem.style.display = 'inline';
+        }
     }
 
     // Set Flags' Rando Items
-    let randoItems = data["All Locations"]["World 1"]
-    for (let [flagName, itemName] of Object.entries(randoItems)) {
-        let underscoreName = spaceToUnderscore(itemName)
-        let item = getRandoItem(underscoreName);
-        let skipEntry = false;
-        if (item === undefined) {
-            console.log(flagName + ": " + underscoreName + " is not in RandoItemMap");
-            skipEntry = true;
-        }
-        if (!flags.has(flagName)) {
-            if (AlternateDusklightFlagNames.has(flagName)) {
-                AlternateDusklightFlagNames.get(flagName).setRandoItem(item);
-                continue;
+    if ("All Locations" in data) {
+        let randoItems = data["All Locations"]["World 1"]
+        for (let [flagName, itemName] of Object.entries(randoItems)) {
+            let underscoreName = spaceToUnderscore(itemName)
+            let item = getRandoItem(underscoreName);
+            let skipEntry = false;
+            if (item === undefined) {
+                console.log(flagName + ": " + underscoreName + " is not in RandoItemMap");
+                skipEntry = true;
             }
-            console.log(flagName + " is not in Flags");
-            skipEntry = true;
+            if (!flags.has(flagName)) {
+                if (AlternateDusklightFlagNames.has(flagName)) {
+                    AlternateDusklightFlagNames.get(flagName).setRandoItem(item);
+                    continue;
+                }
+                console.log(flagName + " is not in Flags");
+                skipEntry = true;
+            }
+            if (skipEntry)
+                continue;
+    
+            flags.get(flagName).setRandoItem(item);
         }
-        if (skipEntry)
-            continue;
-
-        flags.get(flagName).setRandoItem(item);
     }
 
     // Set Hints' descriptions
-    let randoHints = data["Hints"]["World 1"];
-    flags.get("Agithas Castle Sign").setRandoDescription(randoHints["Agitha's Castle Sign"]);
-    let randoHintSigns = randoHints["Hint Signs"];
-    for (let [hintName, hintDescription] of Object.entries(randoHintSigns)) {
-        let formattedHintName = hintName.replace(" Hint ", " ");
-        if (!flags.has(formattedHintName)) {
-            if (AlternateDusklightFlagNames.has(formattedHintName)) {
-                AlternateDusklightFlagNames.get(formattedHintName).setRandoDescription(hintDescription);
-                continue;
+    if ("Hints" in data) {
+        let randoHints = data["Hints"]["World 1"];
+        if ("Agitha's Castle Sign" in randoHints)
+            flags.get("Agithas Castle Sign").setRandoDescription(randoHints["Agitha's Castle Sign"]);
+        if ("Hint Signs" in randoHints) {
+            let randoHintSigns = randoHints["Hint Signs"];
+            for (let [hintName, hintDescription] of Object.entries(randoHintSigns)) {
+                let formattedHintName = hintName.replace(" Hint ", " ");
+                if (!flags.has(formattedHintName)) {
+                    if (AlternateDusklightFlagNames.has(formattedHintName)) {
+                        AlternateDusklightFlagNames.get(formattedHintName).setRandoDescription(hintDescription);
+                        continue;
+                    }
+                    console.log(formattedHintName + " (hint) is not in Flags");
+                    continue;
+                }
+                flags.get(formattedHintName).setRandoDescription(hintDescription);
             }
-            console.log(formattedHintName + " (hint) is not in Flags");
-            continue;
         }
-        flags.get(formattedHintName).setRandoDescription(hintDescription);
     }
 
     // Increase Starting Items
-    loadStartingItems(data["All Starting Items"]["World 1"])
+    if ("All Starting Items" in data)
+        loadStartingItems(data["All Starting Items"]["World 1"]);
 
     // Setting Flags 
     setSettingsDependentFlags();
 
     // Setting randomized dungeon entrances
-    let dungeonEntrances = data["All Entrances"]["World 1"]["Dungeon"];
-    for (let [entrance, destination] of Object.entries(dungeonEntrances)) {
-        entrance = entrance.split(" -> ")[1];
-        let dungeonEntrance = RandoDungeonEntrancesMap.get(entrance);
-        let enteredDungeon = RandoDungeonEntrancesMap.get(destination);
-        if (dungeonEntrance && enteredDungeon)
-            dungeonEntrance.setRandoEntrance(enteredDungeon);
+    if ("All Entrances" in data && "Dungeon" in data["All Entrances"]["World 1"]) {
+        let dungeonEntrances = data["All Entrances"]["World 1"]["Dungeon"];
+        for (let [entrance, destination] of Object.entries(dungeonEntrances)) {
+            entrance = entrance.split(" -> ")[1];
+            let dungeonEntrance = RandoDungeonEntrancesMap.get(entrance);
+            let enteredDungeon = RandoDungeonEntrancesMap.get(destination);
+            if (dungeonEntrance && enteredDungeon)
+                dungeonEntrance.setRandoEntrance(enteredDungeon);
+        }
     }
 
     // Set version info
-    dropZoneText.innerHTML = "Loaded Dusklight Seed:<br><b>" + data["Hash"] +"</b><br>Click or Drag to load another seed.";
-    let seedVersion = data["Dusklight Randomizer Version"]
-    seedVersion = seedVersion.split("-")[0]
-    let mapRandoVersion = "v1.0.5";
-    if (seedVersion > mapRandoVersion) 
-        dropZoneText.innerHTML += `<br><br><b>Warning: The tracker is currently being updated to support the new features added in ${seedVersion} of the Dusklight Randomizer, so some new randomizer features may not work as intended.</b>`;
+    let hash = "Hash" in data ? data["Hash"] : "Unknown Seed";
+    dropZoneText.innerHTML = "Loaded Dusklight Seed:<br><b>" + hash +"</b><br>Click or Drag to load another seed.";
+    if ("Dusklight Randomizer Version" in data) {
+        let seedVersion = data["Dusklight Randomizer Version"]
+        seedVersion = seedVersion.split("-")[0]
+        let mapRandoVersion = "v1.0.5";
+        if (seedVersion > mapRandoVersion) 
+            dropZoneText.innerHTML += `<br><br><b>Warning: The tracker is currently being updated to support the new features added in ${seedVersion} of the Dusklight Randomizer, so some new randomizer features may not work as intended.</b>`;
+    }
 
-    populateSpheres(data["Playthrough"]);
+    if ("Playthrough" in data)
+        populateSpheres(data["Playthrough"]);
     seedIsLoaded = true;
     
     // Update Gamemode
     if (selectedGamemode === Gamemodes.Base)
         return;
-    let logicRules = data["Logic Rules"];
-    blockMapReloading();
-    if (selectedGamemode !== Gamemodes.Glitchless && logicRules === "All Locations Reachable")
-        Settings.Gamemode.setValue(Gamemodes.Glitchless);
-    else if (selectedGamemode === Gamemodes.Glitchless && logicRules !== "All Locations Reachable")
-        Settings.Gamemode.setValue(Gamemodes.Glitched);
-    if (!unblockMapReloading() && !start)
-        reloadMap();
+    if ("Logic Rules" in data) {
+        let logicRules = data["Logic Rules"];
+        blockMapReloading();
+        if (selectedGamemode !== Gamemodes.Glitchless && logicRules === "All Locations Reachable")
+            Settings.Gamemode.setValue(Gamemodes.Glitchless);
+        else if (selectedGamemode === Gamemodes.Glitchless && logicRules !== "All Locations Reachable")
+            Settings.Gamemode.setValue(Gamemodes.Glitched);
+        if (!unblockMapReloading() && !start)
+            reloadMap();
+    }
 }
