@@ -14,15 +14,16 @@
 #menuicons > div div {
     display: grid;
     place-items: center;
-    width: 2vw;
-    height: 2vw;
-    min-width: 20px;
+    width: 2dvw;
+    height: 2dvw;
+    min-width: 30px;
+    min-height: 30px;
     aspect-ratio: 1;
     border-style: solid;
     border-color: #38352e;
     border-width: 0.2vw;
     border-radius: 0.35vw;
-    padding: 7px;
+    padding: clamp(7px, 0.35dvw, 0.35dvw);
     cursor: pointer;
 }
 #menuicons > div div:hover {
