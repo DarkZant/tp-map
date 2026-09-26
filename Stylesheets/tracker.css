@@ -5,9 +5,9 @@
     justify-content: center;
     width: 29vw;
 }
-/* #tracker #traX {
-    position: fixed;
-} */
+#tracker #traX {
+    right: clamp(0px, 0.5dvw, 10px);
+}
 #tracker #mainTracker {
     height: 95dvh;
     background-color: transparent;

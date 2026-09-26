@@ -746,14 +746,6 @@ function hideRightMenu(menu) {
         menu.style.visibility = "hidden";  
     }, 100);  
 }
-function updateMenuXPosition(menuX) {
-    let menuXRight = window.getComputedStyle(menuX).right;
-    menuX.oldPosition = menuXRight;
-    menuX.style.right = "calc(" + menuXRight + " + 29vw)";
-}
-function resetMenuXPosition(menuX) {
-    menuX.style.right = menuX.oldPosition;
-}
 hideUnshowableTrackerItems();
 function showTracker() {
     if (Settings.TrackerOverlay.isEnabled()) {
@@ -793,8 +785,10 @@ function separateTrackerFromMap() {
         document.getElementById('trackerButton').style.display = 'none';
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = trackerWidth + 'vw';
-        for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
-            updateMenuXPosition(menuX);
+        for (let menuX of document.querySelectorAll(".menuX.scrollX"))  // Settings & Controls
+            menuX.style.right = trackerWidth + 0.5 + "dvw"; // Add a bit more distance for the scrollbar
+        for (let menuX of document.querySelectorAll(".menuX.noScrollX")) // Notes
+            menuX.style.right = trackerWidth + 0.1 + "dvw";
         updateMapSize((100 - trackerWidth) + 'vw');
     }
     else {
@@ -803,8 +797,10 @@ function separateTrackerFromMap() {
         document.getElementById('trackerButton').style.display = 'flex';
         for (let menu of document.querySelectorAll(".rightMenu:not(#tracker)"))
             menu.style.right = '0vw';
-        for (let menuX of document.querySelectorAll(".menuX:not(#flagDetailsX):not(#traX)"))
-            resetMenuXPosition(menuX);
+        for (let menuX of document.querySelectorAll(".menuX.scrollX"))
+            menuX.style.right = 0.5 + "dvw";
+        for (let menuX of document.querySelectorAll(".menuX.noScrollX"))
+            menuX.style.right = 0.1 + "dvw";
         updateMapSize('100vw');
     }
 }

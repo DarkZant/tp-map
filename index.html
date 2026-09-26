@@ -238,7 +238,7 @@
         </div>
         
         <div id="settings" class="menu rightMenu">
-            <div id="setX" class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
+            <div id="setX" class="xButton menuX scrollX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>Settings</h2>
             <button onclick="settingsButton(this)" title="Reset all settings to their default values">Reset Settings</button>
             <div id="settingsButtons">
@@ -442,7 +442,7 @@
         </div>
 
         <div id="controls" class="menu rightMenu">
-            <div id="contX" class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
+            <div id="contX" class="xButton menuX scrollX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>General Controls</h2>
             <ul>
                 <li>Use the <b>Mouse Wheel</b> to <i>Zoom</i></li>
@@ -1025,7 +1025,7 @@
             </div>
         </div>
         <div id="notes" class="menu rightMenu">
-            <div class="xButton menuX" onclick="hideRightMenu(this.parentElement)">×</div>
+            <div class="xButton menuX noScrollX" onclick="hideRightMenu(this.parentElement)">×</div>
             <h2>Notes</h2>
             <textarea class="scrollable" id="notesInput" placeholder="Write your notes here..." spellcheck="false"></textarea>
         </div>

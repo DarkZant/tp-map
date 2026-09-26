@@ -66,26 +66,25 @@
     right: 0;
 }
 .xButton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    margin: 0;
     color: #757575;
-    font: 1.4vmax Tahoma, Verdana, sans-serif;
+    font-family: Tahoma, Verdana, sans-serif;
+    font-size: clamp(30px, 1.7dvw, 1.7dvw); 
     font-weight: bolder;
     cursor: pointer;
     z-index: 1500;
 }
 .menuX {
     position: fixed;
-    top: 0;
-    right: 0.5%;
-    width: 1.4vw;
-    height: 1.4vw; 
+    top: -5px;
+}
+.scrollX {
+    right: 0.5dvw;
+}
+.noScrollX {
+    right: 0.1dvw;
 }
 .xButton:hover {
-    color: #585858;
+    color: #4e4e4e;
 }
 @supports not selector(::-webkit-scrollbar) {
     .menu, .scrollable {
@@ -126,10 +125,10 @@
     flex-direction: column;
     row-gap: 1dvh;
     padding-left: 0.6vw;
-    /* overflow-y: scroll; */
 }
 #flagDetailsX {
-    left: 23.25%;
+    align-self: flex-end;
+    /* margin-right: 0.1dvw; */
 }
 #flagDetails h2 {
     text-decoration: underline;
@@ -595,7 +594,7 @@ select:hover {
     text-align: center;
     overflow-y: hidden;
 }
-#notes > div {
+#notes .menuX {
     right: 0.1vw;
 }
 #notes h2 {
