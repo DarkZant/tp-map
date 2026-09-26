@@ -482,6 +482,8 @@ function manageFile(file) {
             resetRandoEntrances();
             if (isDusklightLog) {
                 loadDusklightSpoilerLog(data);
+                let seedId = "Seed" in data ? data["Seed"] : "Dusklight Seed";
+                pushGAEvent("seed_import", {seed_id: seedId});
             }
             else {
                 loadSpoilerLog(data);
@@ -822,7 +824,7 @@ function loadDusklightSpoilerLog(data, start=false) {
             settingValue = settingStrValue === "On";
         else 
             settingValue = settingStrValue;
-        setting.set(settings[settingName]);
+        setting.set(settingValue);
     }
     // --- Really complicated because many options ---
     // let castleReqs = HyruleCastleRandoReqs.get(settings["castleRequirements"]);
