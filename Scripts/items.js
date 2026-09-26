@@ -44,6 +44,7 @@ const Categories = Object.freeze({
     Bosses: "Bosses",
     Minibosses: "Minibosses",
     Quest: "Quests",
+    Tears: "Tears",
     Portals: "Warp Portals",
     // Non Flags
     Bottle: "Bottled Items",
@@ -803,8 +804,9 @@ let bomblings = new Obtainable("Bomblings", null, {category: Categories.Ammo});
 let arrows = new Obtainable("Arrows", null, {category: Categories.Ammo});
 let seeds = new Obtainable("Seeds", null, {category: Categories.Ammo});
 
-let gorEbizoDonation = new Obtainable('Gor Ebizo', null, {name: "Gor Ebizo Donations", category: Categories.Quest});
+let tearOfLight = new Obtainable("Tear of Light", null, {category: Categories.Tears});
 let vesselOfLight = new Obtainable("Vessel of Light", null, {category: Categories.Quest});
+let gorEbizoDonation = new Obtainable('Gor Ebizo', null, {name: "Gor Ebizo Donations", category: Categories.Quest});
 let goatHerding = new Obtainable('Goat', null, {name: "Goat Herding", category: Categories.Quest});
 let saveTalo = new Obtainable('Talo', null, {name: "Talo Saved", category: Categories.Quest});
 let metZelda = new Obtainable('Cloaked Zelda', null, {name: "Talked to Zelda", category: Categories.Quest});
@@ -813,7 +815,7 @@ let epona = new Obtainable("Epona", null, {name: "Retamed Epona", category: Cate
 let moltenShard = new Obtainable("Molten Shard", null, {name: "Molten Shard", category: Categories.Quest});
 let emptyBoulder = new Obtainable("Boulder", null, {category: Categories.Quest});
 let waterSupply = new Obtainable("Water Supply", null, {category: Categories.Quest});
-let midnasLament = new Obtainable("Midna", null, {name: "Midna's Lament", category: Categories.Quest})
+let midnasLament = new Obtainable("Midna", null, {name: "Midna's Desperate Hour", category: Categories.Quest})
 
 let randoHint = new Obtainable('Sign', null, {name: "Randomizer Hint", category: Categories.Hints});
 let randoFoolishItem = new Obtainable('FoolIce', null, {name: "Foolish Item", category: Categories.Fool});
@@ -822,3 +824,5 @@ let chest = new Container('Chest');
 let smallChest = new Container('Small Chest');
 let bossChest = new Container('Boss Chest');
 let rupeeBoulder = new Container('Rupee Boulder');
+
+let placeholder = new Obtainable("Block", null, {category: "Placeholder", name: "Placeholder"});

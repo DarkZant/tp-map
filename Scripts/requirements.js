@@ -449,8 +449,8 @@ let meltedIceReq = getFlagReq("Melted Zora's Domain Ice");
 let warpOutLanayruTwilightReq = getFlagReq("Zoras Domain Portal");
 let gorgeEldinBoulderReq = getFlagReq("Kakariko Gorge Eldin Field Boulder");
 let waterBombReq = zoraArmorReq.copyConditionAndImageAndName(waterBombs);
-let midnasLamentReq = getFlagReq("Midna's Lament Completed");
-let midnasLamentNotCompletedReq = getFlagReq("Midna's Lament Completed", false);
+let midnasLamentReq = getFlagReq("Midna's Desperate Hour Completed");
+let midnasLamentNotCompletedReq = getFlagReq("Midna's Desperate Hour Completed", false);
 
 let snowpeakPortalReq = getFlagReq("Snowpeak Portal");
 let snowpeakReq = [shadowCrystalReq, [reekfishScentReq, snowpeakPortalReq]];

@@ -3,8 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <title>Twilight Princess Interactive Map</title>
-        <link rel="icon" href="Icons/Midna.png">
+        <!-- Icon -->
+        <link rel="icon" type="image/x-icon" href="https://darkzant.github.io/tp-map/Icons/Midna.ico">
+        <link rel="shortcut icon" type="image/x-icon" href="https://darkzant.github.io/tp-map/Icons/Midna.ico">
+        <link rel="apple-touch-icon" href="https://darkzant.github.io/tp-map/Icons/Midna.ico">
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://darkzant.github.io/tp-map">
 
+        <!-- CSS Stylesheets -->
         <link rel="stylesheet" href="Stylesheets/tracker.css">
         <link rel="stylesheet" href="Stylesheets/menus.css">
         <link rel="stylesheet" href="Stylesheets/map.css">
@@ -16,22 +22,24 @@
         <meta name="author" content="Etienne Mitchell-Bouchard">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        <!-- Google Analytics -->
-        <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-6MQ2R4MNQC"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-6MQ2R4MNQC');
-        </script> --> 
-
+        <!-- Schema.org for page title on Google -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Twilight Princess Interactive Map",
+                "url": "https://darkzant.github.io/tp-map"
+            }
+        </script>
+        
         <!-- Open Graph -->
+        <meta property="og:site_name" content="Twilight Princess Interactive Map">
         <meta property="og:image" content="Submaps/Preview.png" />
         <meta property="og:title" content="Twilight Princess Interactive Map" />
         <meta property="og:description" content="Interactive Map for the game The Legend of Zelda: Twilight Princess and its Randomizer." />
+        <meta property="og:url" content="https://darkzant.github.io/tp-map" />
 
-         <!-- Google Tag Manager -->
+        <!-- Google Tag Manager -->
         <script>
             (function(w,d,s,l,i){
                 w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -265,6 +273,7 @@
                     </select>
             </div>
             <div id="randoSeed">
+                <div id="supportMessage">Supports both the base game<br> and Dusklight Randomizers!</div>
                 <div id="randoSeedFile">
                     <p id="randoSeedFileText">
                         Import Seed Spoiler Log<br>
@@ -291,7 +300,7 @@
                         <label class="bigSettingCheckboxLabel" title="Reveal the randomizer items of Checks when they are marked as Set, Junked or Important.">
                             <input type="checkbox" id="Reveal_Set_Junk_Flags" class="bigSettingCheckbox">Reveal the Rando Item of Marked Flags  
                         </label>
-                        <label class="bigSettingCheckboxLabel" title="Clicking a dungeon with a randomized entrance will load into the associated randomized entrance.">
+                        <label class="bigSettingCheckboxLabel" title="Clicking a dungeon with a randomized entrance will load into the associated randomized destination.">
                             <input type="checkbox" id="Entrance_Randomized" class="bigSettingCheckbox">Load into Randomized Entrances
                         </label>
                         <label class="bigSettingCheckboxLabel" title="Reveal the randomizer items of all Checks.">
@@ -1035,6 +1044,7 @@
         <script src="Scripts/flags.js"></script>
         <script src="Scripts/flagsData.js"></script>
         <script src="Scripts/submaps.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
         <script src="Scripts/randoSeed.js"></script>
         <script src="Scripts/mapState.js"></script>
         <script src="Scripts/storageCleanup.js"></script>

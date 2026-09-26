@@ -3304,7 +3304,7 @@ const flags = new Map([
         baseReqs: [bombBagReq, [bowReq, boomerangReq], [lakebed2SKReq, lakebedSecondLockReq], lakebedEastWaterReq],
         baseDesc: 'Go to the top of the room and pull the lever to activate the west water supply.'
     })],
-    ["Midna's Lament Completed", new Flag(midnasLament, [-3470, 4776], {
+    ["Midna's Desperate Hour Completed", new Flag(midnasLament, [-3470, 4776], {
         baseReqs: [morpheelReq],
         baseDesc: "Save Midna by bringing her to Zelda after she was injured during the encounter with Zant."
     })],

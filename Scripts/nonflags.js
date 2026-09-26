@@ -337,6 +337,9 @@ const Minigames = Object.freeze({
         "After finding and talking to all the 20 cats, report back to the Cucco leader to end the minigame."
     ),
     FlightByFowl: new Minigame("Flight-by-Fowl", [{
+        item: heartPiece,
+        description: "The highest chest on the stationary platform contains a Heart Piece."
+    }, {
         item: Rupees.Orange,
         description: "The chest on the top spinning platform is refilled with an Orange Rupee every time the minigame is played."
     }], "Pay 20 Rupees to Falbi and grab a Cucco to reach a variety of elevated platforms in Lake Hylia. Chests, Poes and a Grotto are only accessible through this minigame."
@@ -351,7 +354,7 @@ const Minigames = Object.freeze({
         item: Rupees.Silver,
         description: "Beating the minigame with the maximum amount of points, 61 454, will reward you with a Silver Rupee if you have already obtained the Heart Piece."
     }], "After calling the Kargarok with Hawk Grass, you can pop various fruit ballons to reach a high score. Since popping ballons of the same type leads to higher points, " + 
-        "popping the first 3 oranges, the first 2 watermelons and all the strawberries after that leads to the highest score of 61 454.<br>Your highest score is stored in your savefile."
+        "popping the first 3 oranges, the first 2 watermelons and all the strawberries after that leads to the highest score of 61 454.<br>Your highest score is stored in your game savefile."
     ),
     RapidsRide: new Minigame("Rapids Ride", [{
         item: bombBag,
@@ -370,7 +373,7 @@ const Minigames = Object.freeze({
     Snowboard: new Minigame("Snowboard Race", [{
         item: heartPiece,
         description: "After beating Yeto, beating Yeta for the first time will reward you with a Heart Piece."
-    }], "After clearing the Snowpeak Ruins, go back to the mountain top and talk to either of the Yetis to race them.<br>Your best race time is stored in your savefile."
+    }], "After clearing the Snowpeak Ruins, go back to the mountain top and talk to either of the Yetis to race them.<br>Your best race time is stored in your game savefile."
     ),
     STAR: new Minigame("Star Game", [{
         item: bigQuiver,
@@ -382,12 +385,12 @@ const Minigames = Object.freeze({
         item: Rupees.Orange,
         description: "After obtaining the Giant Quiver, beating your best time will reward you with an Orange Rupee, at the cost of 20 Rupees per game."
     }], "After clearing the Lanayru Twilight, you can enter the tent and talk to Purlo to start the minigame. The goal is to collect orbs with the help of the Clawshots " + 
-        "within a time limit. Obtaining the Quivers costs 10 Rupees per game, and subsequent games cost 20 Rupees per game.<br>Your best time is stored in your save file."
+        "within a time limit. Obtaining the Quivers costs 10 Rupees per game, and subsequent games cost 20 Rupees per game.<br>Your best time is stored in your game savefile."
     ),
     LureFishing: new Minigame("Lure Fishing", [{
         item: new BoolItem(Fishes.Loach.image, {name: "Fishing Records"}),
         description: "You can obtain fishing size records for different kinds of fishes and a photo of yourself catching the Hylian Loach."
     }], "You can pay 20 Rupees to go lure fishing in a canoe. You can also pay 100 Rupees for Hena to accompany you, although the first time is offered at no additional costs. The goal is to catch " + 
-        "the biggest fishes possible, and once a record sized fish is caught, it can be kept to be displayed in the fish tank inside Hena's hut.<br>Your record fish sizes are stored in your save file."
+        "the biggest fishes possible, and once a record sized fish is caught, it can be kept to be displayed in the fish tank inside Hena's hut.<br>Your record fish sizes are stored in your game savefile."
     )
 });

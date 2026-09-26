@@ -277,6 +277,7 @@ const imageSizes = new Map([
   ["Icons/Spinner.png", [179, 128]],
   ["Icons/Stallord.png", [344, 295]],
   ["Icons/Talo.png", [640, 1564]],
+  ["Icons/Tear_of_Light.png", [225, 202]],
   ["Icons/Tracker.png", [116, 116]],
   ["Icons/Vessel_of_Light.png", [121, 149]],
   ["Icons/Warp_Portal.png", [564, 579]],

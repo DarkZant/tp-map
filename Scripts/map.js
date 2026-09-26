@@ -870,9 +870,10 @@ function toggleNoRequirementsBlock() {
 
 Settings.HideNoReqs.setFunction(toggleNoRequirementsBlock);
 Settings.TrackerLogic.setFunction(showRequirementVisibilityButton);
+Settings.FlagLogic.setFunction(showRequirementVisibilityButton);
 
 function showRequirementVisibilityButton() {
-    if (Settings.TrackerLogic.isEnabled())
+    if (Settings.TrackerLogic.isEnabled() || Settings.FlagLogic.isEnabled())
         noReqVisMenuIcon.style.display = "flex";
     else 
         noReqVisMenuIcon.style.display = "none";

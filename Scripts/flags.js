@@ -425,6 +425,7 @@ class Flag extends Storable {
     importantVisually() {
         showMarkerAsImportant(this.marker, this.getMarkerImage());
         this.updateTooltipContent();
+        this.marker.on("contextmenu", this.boundSetMarker);
     }
     resetMarkerEvents() {
         this.detailsOpened = false;

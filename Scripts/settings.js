@@ -335,7 +335,7 @@ const Settings = Object.freeze({
     Rando_Portal_Visibility: new CategoryVisibilitySetting('Rando_Portal_Visibility', Categories.Portals),
     Entrances_Randomized: new Setting('Entrance_Randomized'),
     LocksConsumeKeys: new Setting("Locks_Consume_Keys"),
-    FlagLogic: new Setting("Flag_Logic"),
+    FlagLogic: new FunctionSetting("Flag_Logic"),
     KeyLogic: new Setting("Key_Logic"),
 }); // Always add settings at the end to preserve storage IDs
 

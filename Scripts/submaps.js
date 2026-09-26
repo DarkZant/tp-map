@@ -1966,7 +1966,7 @@ midnasLamentCastle = new SimpleFlooredSubmap(
         [],
         [],
         [new NonFlag("Purple Rupee", Categories.Rupees, undefined, [-3772, 4839])],
-        ["Midna's Lament Completed"],
+        ["Midna's Desperate Hour Completed"],
     ], {baseReqs: [morpheelReq, midnasLamentNotCompletedReq]}
 );
 
