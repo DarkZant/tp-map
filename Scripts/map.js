@@ -67,7 +67,7 @@ const LeafletMap = L.map('map', {
         trackResize: true,
         zoom: -5,
         minZoom: -5,
-        maxZoom: 0,
+        maxZoom: 1,
         center: mapCenter,
         crs: L.CRS.Simple,
         maxBoundsViscosity: 1,
@@ -81,7 +81,7 @@ const LeafletMap = L.map('map', {
 
 const TileLayerBounds = L.latLngBounds([0, 0], [-9826, 8515]);
 const TileLayer = L.tileLayer('Tiles/{z}/{x}/{y}.png', {
-    maxZoom: 0,
+    maxZoom: 1,
     minZoom: -6,
     zoomOffset: 6,
     crs: L.CRS.Simple,

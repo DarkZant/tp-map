@@ -8,6 +8,9 @@
 #tracker #traX {
     right: clamp(0px, 0.5dvw, 10px);
 }
+#tracker .traXDisabledColor {
+    color: #1D1D1D !important;
+}
 #tracker #mainTracker {
     height: 95dvh;
     background-color: transparent;
@@ -37,8 +40,8 @@
 }
 .tsubmenuX {
     position: absolute;
-    right: 0.25vw;
-    top: -0.25dvh;
+    right: 0.1dvw;
+    top: -7px;
     z-index: 1600;
 }
 #tbugs {

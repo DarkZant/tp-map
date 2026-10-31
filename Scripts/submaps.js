@@ -546,7 +546,7 @@ class Submap {
         this.activeFloor.load();  
     }
     stillZoomingInFromLoad() {
-        if (LeafletMap.getZoom() == 0)
+        if (LeafletMap.getZoom() >= 0)
             return true;
         return false;
     }
@@ -1493,7 +1493,7 @@ const Dungeons = Object.freeze({
         "Forest Temple Dungeon Reward",
     ]], {
         baseReqs: [faronTwilightCleared, lanternReq],
-        randoReqs: [[lanternReq, shadowCrystalReq, new AndRequirements([prologueNotSkippedReq, boulderReq])]] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
+        randoReqs: [] // No web blocking entrance but mist. Maybe skip prologue changes reqs?
     }),
     
     Mines: new Dungeon([-3643, 8137], [-3920, 8752], dungeonIconImage, 'Goron Mines', [
@@ -1546,7 +1546,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [ironBootsReq], 
-        randoReqs: [leaveFaronWoodsReq, ironBootsReq, [eldinTwilightCleared, openMinesReq]]
+        randoReqs: []
     }),
 
     Lakebed: new Dungeon([-4741, 3415], [-4960, 4208], dungeonIconImage, 'Lakebed Temple', [
@@ -1684,7 +1684,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 1, 
         baseReqs: [aurusMemoReq, bulblinKeyReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, aurusMemoReq, [bulblinKeyReq, arbitersCampReq]]
+        randoReqs: []
     }),
 
     Snowpeak: new Dungeon([-2626, 1229], [-2960, 2112], dungeonIconImage, 'Snowpeak Ruins', [ 
@@ -1731,7 +1731,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [snowpeakPortalReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, snowpeakPortalReq]
+        randoReqs: []
     }),
 
     Time: new Dungeon([-6618, 3681], [-6580, 4425], dungeonIconImage, 'Temple of Time', [
@@ -1776,7 +1776,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [blizzetaReq, masterSwordReq], 
-        randoReqs: [shadowCrystalReq, skullKidReq, [masterSwordReq, openToTReq]]
+        randoReqs: [],
     }),
 
     City: new Dungeon([-5306, 3144], [-5472, 3840], dungeonIconImage, 'City in the Sky', [
@@ -1838,7 +1838,7 @@ const Dungeons = Object.freeze({
         ]
     ], {floorOffset: 0, 
         baseReqs: [clawshotReq, completedSkybookReq],
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq, clawshotReq, [completedSkybookReq, openCityReq]],
+        randoReqs: [clawshotReq, [completedSkybookReq, openCityReq]],
     }),
 
     Palace: new Dungeon([-3636, 602], [-3800, 1520], "Mirror", 'Palace of Twilight', [
@@ -1881,7 +1881,7 @@ const Dungeons = Object.freeze({
         ]
     ], {
         baseReqs: [stallordReq, completedMirrorReq], 
-        randoReqs: [stallordReq]
+        randoReqs: []
     }),
 
     Castle: new Dungeon([-3250, 4712], [], 'Castle', 'Hyrule Castle', [
@@ -1936,7 +1936,7 @@ const Dungeons = Object.freeze({
         ]   
     ], {
         baseReqs: [zantReq], 
-        randoReqs: [leaveFaronWoodsReq, lanayruRandoReq]
+        randoReqs: []
     })
 });
 

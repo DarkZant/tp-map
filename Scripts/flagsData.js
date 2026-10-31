@@ -148,19 +148,19 @@ const flags = new Map([
         baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'The heart piece is on the leaves of a tree and can be grabbed with a long ranged item.',
         randoCategory: Categories.Main,
-        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq, ballAndChainReq]],
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is on the leaves of a tree and can be grabbed with a long ranged item.'
     })],
     ["Faron Field Male Beetle", new Flag(beetleM, [-6344, 4764], {
         baseReqs: [diababaReq],
         baseDesc: 'This ♂ Beetle is on a tree trunk, simply pick it up.',
-        randoReqs: [leaveFaronWoodsReq],
+        randoReqs: [],
         randoDesc: "The item is on the ground near the tree where the beetle usually is.",
     })],
     ["Faron Field Female Beetle", new Flag(beetleF, [-5985, 5151], {
         baseReqs: [diababaReq, [boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Beetle is on an elevated tree trunk, use the boomerang or the clawshot to bring it closer.',
-        randoReqs: [leaveFaronWoodsReq, [boomerangReq, clawshotReq]],
+        randoReqs: [[boomerangReq, clawshotReq]],
         randoDesc: 'The item is on an elevated tree trunk, use the boomerang or the clawshot to grab it.'
     })],
     ["Faron Mist Poe", new Flag(poeSoul, [-7184, 4515], {
@@ -189,12 +189,12 @@ const flags = new Map([
     ["Faron Field Bridge Chest", new Flag(chest.with(Rupees.Orange), [-6135, 4891], {
         baseReqs: [clawshotReq],
         baseDesc: 'The chest is under the bridge. Clawshot the target above the chest to reach it.',
-        randoReqs: [leaveFaronWoodsReq, clawshotReq]
+        randoReqs: [clawshotReq]
     })],
     ["Faron Field Poe", new Flag(nightPoe, [-5953, 4955], {
         baseReqs: [midnasLamentReq, nightReq],
         baseDesc: 'Above the flower patch on the elevated ledge.',
-        randoReqs: [leaveFaronWoodsReq, midnasLamentReq, shadowCrystalReq, nightReq]
+        randoReqs: [midnasLamentReq, shadowCrystalReq, nightReq]
     })],
     ["Lost Woods Waterfall Poe", new Flag(nightPoe, [-7172, 3043], {
         baseReqs: [blizzetaReq, shadowCrystalReq, nightReq],
@@ -243,15 +243,12 @@ const flags = new Map([
     })],
     ["Faron Field Corner Grotto Rear Chest", new Flag(smallChest.with(Rupees.Yellow), [-6928, 5138], {
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
-        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Faron Field Corner Grotto Right Chest", new Flag(smallChest.with(Rupees.Red), [-6533, 5308], {
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
-        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Faron Field Corner Grotto Left Chest", new Flag(smallChest.with(Rupees.Red), [-6370, 5050], {
         baseDesc: 'Defeat all the enemies and cut the grass to make it easier to reach the chest.',
-        randoReqs: [leaveFaronWoodsReq, shadowCrystalReq],
     })],
     ["Sacred Grove Baba Serpent Grotto Chest", new Flag(chest.with(heartPiece), [-6868, 3472], {
         baseReqs: [boulderReq, shadowCrystalReq],
@@ -261,18 +258,18 @@ const flags = new Map([
     ["Sacred Grove Female Snail", new Flag(snailF, [-7458, 3700], {
         baseReqs: [[boomerangReq, clawshotReq]],
         baseDesc: 'This ♀ Snail is too high to reach on the wall, use a long ranged item to make it come down.',
-        randoReqs: [[masterSwordReq, openSacredGroveReq], [boomerangReq, clawshotReq], skullKidReq],
+        randoReqs: [[boomerangReq, clawshotReq, ballAndChainReq]],
         randoDesc: 'The item is high up where the snail usually is, use a long ranged item to get it.'
     })],
     ["Sacred Grove Temple of Time Owl Statue Poe", new Flag(poeSoul, [-7470, 3618], {
         baseReqs: [pastDomRodReq, shadowCrystalReq],
         baseDesc: 'Move the Owl Statue to reveal the poe.',
-        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, shadowCrystalReq, skullKidReq]
+        randoReqs: [pastDomRodReq, shadowCrystalReq],
     })],
     ["Sacred Grove Past Owl Statue Chest", new Flag(chest.with(heartPiece), [-7504, 3704], {
         baseReqs: [pastDomRodReq],
         baseDesc: 'Move the Owl Statue and go to the end of the tunnel behind it to reach the chest.',
-        randoReqs: [[masterSwordReq, openSacredGroveReq], pastDomRodReq, skullKidReq]
+        randoReqs: [pastDomRodReq],
     })],
     ["North Faron Woods Howling Stone", new Flag(howlingStone, [-7340, 4043], {
         baseReqs: [midnasLamentReq],
@@ -353,7 +350,7 @@ const flags = new Map([
         "you reload the area) to:<br>1. Climb behind Malo Mart and make the jump to the inn<br>2. Climb on top of the inn and jump towards the top of Barnes' shop<br>" +
         "3. Climb to the base of the watchtower near the goron<br>" + 
         "4. Go to the left side of the watchtower, and jump towards the chest with the chicken.<br>The chest is above the path to Death Mountain.",
-        randoReqs: [boulderReq],
+        randoReqs: [eldinTwilightCleared, boulderReq],
     })],
     ["Eldin Spring Underwater Chest", new Flag(chest.with(heartPiece), [-5847, 7696], {
         baseReqs: [bombBagReq, ironBootsReq],
@@ -409,7 +406,7 @@ const flags = new Map([
     ["Kakariko Gorge Poe", new Flag(nightPoe, [-5347, 5978], {
         baseReqs: [midnasLamentReq, nightReq],
         baseDesc: "Behind the tree with the crows.",
-        randoReqs: [midnasLamentReq, shadowCrystalReq, nightReq],
+        randoReqs: [lanayruTwilightCleared, midnasLamentReq, shadowCrystalReq, nightReq],
     })],
     ["Gift From Ralis", new Flag(coralEarring, [-5473, 8235], {
         baseReqs: [asheisSketchReq],
@@ -546,17 +543,20 @@ const flags = new Map([
         baseReqs: [skybookReq],
         baseDesc: 'Show the Ancient Sky Book to Shad for him to do an encantation which gives power back to the Dominion Rod.',
         randoCategory: Categories.Gifts,
+        randoReqs: [eldinTwilightCleared, skybookReq],
         randoDesc: 'Show the Ancient Sky Book to Shad for him to give you the item',
     })],
     ["Renados Letter", new Flag(renadosLetter, [-5640, 7377], {
         baseReqs: [armogohmaReq],
         baseDesc: 'After clearing the Temple of Time, talk to Renado to obtain his letter to Telma. ',
+        randoReqs: [eldinTwilightCleared, armogohmaReq],
         randoCategory: Categories.Gifts,
         randoDesc: "After clearing the Temple of Time, talk to Renado to obtain his letter to Telma. This item is never Randomized."
     })],
     ["Ilia Memory Reward", new Flag(horseCall, [-5669, 7336], {
         baseReqs: [iliasCharmReq],
         baseDesc: 'Show the charm to Ilia for it to be revealed as the horse call and receive it back.',
+        randoReqs: [eldinTwilightCleared, iliasCharmReq],
         randoCategory: Categories.Gifts,
     })],
     ["Eldin Lantern Cave First Chest", new Flag(smallChest.with(Rupees.Red), [-5530, 5822], {
@@ -791,7 +791,7 @@ const flags = new Map([
         baseReqs: snowpeakReq,
         baseDesc: 'Above the grotto.',
     })],
-    ["Snowpeak Poe Among Trees", new Flag(nightPoe, [-344, 3334], {
+    ["Snowpeak Poe Among Trees", new Flag(nightPoe, [-414, 3359], {
         baseReqs: [...snowpeakReq, nightReq],
         baseDesc: 'Above the grotto, behind the tree.',
     })],
@@ -802,7 +802,8 @@ const flags = new Map([
     ["Snowboard Racing Prize", new Flag(heartPiece, [-691, 3013], {
         baseReqs: [blizzetaReq],
         baseDesc: 'After clearing Snowpeak Ruins, warp to the mountain top. Race Yeto and win, then go back to the mountain top and win against Yeta.',
-        randoCategory: Categories.Gifts
+        randoCategory: Categories.Gifts,
+        randoReqs: [...snowpeakReq, blizzetaReq],
     })],
     ["Snowpeak Cave Ice Poe", new Flag(poeSoul, [-655, 3300], {
         baseReqs: [...snowpeakReq, ballAndChainReq],
@@ -1027,7 +1028,7 @@ const flags = new Map([
     ["Lanayru Field Bridge Poe", new Flag(nightPoe, [-2598, 4901], {
         baseReqs: [midnasLamentReq, nightReq],
         baseDesc: 'On the bridge.',
-        randoReqs: [midnasLamentReq, shadowCrystalReq, nightReq],
+        randoReqs: [lanayruTwilightCleared, midnasLamentReq, shadowCrystalReq, nightReq],
     })],
     ["Upper Zoras River Poe", new Flag(nightPoe, [-1024, 5870], {
         baseReqs: [midnasLamentReq, nightReq],
@@ -1997,18 +1998,18 @@ const flags = new Map([
         baseDesc: 'Use the spinner ramp and defeat the 2 stalfos that are guarding the chest to open it.'
     })],
     ["Arbiters Grounds Boss Lock", new Flag(arbitersBossLock, [-4276, 4326], {
-        baseReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, arbiterBKReq],
+        baseReqs: [...poeGateReq, spinnerReq, arbiterBKReq],
         baseDesc: "Unlock this door to reach Stallord."
     })],
     ["Arbiters Grounds Stallord", new Flag(stallord, [-4530, 4332], {
-        baseReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
+        baseReqs: [...poeGateReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
         baseDesc: "Defeat Stallord to clear out the Arbiter's Grounds."
     })],
     ["Arbiters Grounds Stallord Heart Container", new Flag(heartContainer, [-4928, 4384], {
         baseReqs: [stallordReq],
         baseDesc: 'Defeat Stallord to obtain the Heart Container.',
         randoCategory: Categories.Main,
-        randoReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
+        randoReqs: [...poeGateReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
         randoDesc: 'Defeat Stallord to obtain the item.'
     })],
     ["Arbiters Grounds Dungeon Reward", new Flag(mirrorShard, [-4726, 4334], {
@@ -2016,7 +2017,7 @@ const flags = new Map([
         baseReqs: [stallordReq],
         baseDesc: 'Defeat Stallord to obtain the dungeon reward.',
         randoCategory: Categories.Main,
-        randoReqs: [...poeGateReq, [arbiter5SKReq, arbitersFifthLockReq], stalfosReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
+        randoReqs: [...poeGateReq, spinnerReq, [arbiterBKReq, arbitersBossLockReq]],
     })],
     // Snowpeak Ruins
     ["Snowpeak Ruins Lobby West Armor Chest", new Flag(smallChest.with(Rupees.Red), [-6017, 4105], {
@@ -2061,7 +2062,7 @@ const flags = new Map([
     ["Snowpeak Ruins Ordon Pumpkin Chest", new Flag(chest.with(pumpkin), [-4369, 5305], {
         baseReqs: [[snowpeak1SKReq, ruinsCorridorLockReq]],
         baseDesc: "Defeat the 2 Chilfos to unlock the door and gain access to the chest.",
-        randoReqs: [[snowpeak1SKReq, ruinsCorridorLockReq, new AndRequirements(ruinsLobbyLockReq, ballAndChainReq, clawshotReq)]],
+        randoReqs: [[snowpeak1SKReq, ruinsCorridorLockReq, new AndRequirements(cheeseReq, ballAndChainReq, [snowpeak2SKReq, ruinsLobbyLockReq])]],
     })],
     ["Snowpeak Ruins West Courtyard Buried Chest", new Flag(smallChest.with(snowpeakSK), [-4462, 3961], {
         baseReqs: [shadowCrystalReq, pumpkinReq],
@@ -2741,7 +2742,7 @@ const flags = new Map([
     ["Death Mountain Sign", new Flag(randoHint, [-3828, 8247])],
     ["Eldin Field Sign", new Flag(randoHint, [-4282, 5928])],
     ["Faron Field Sign", new Flag(randoHint, [-6202, 4889], {
-        randoReqs: [leaveFaronWoodsReq]
+        randoReqs: []
     })],
     ["Faron Woods Sign", new Flag(randoHint, [-7478, 4945])],
     ["Forest Temple Sign", new Flag(randoHint, [-5405, 4055], {

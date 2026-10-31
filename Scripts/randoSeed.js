@@ -234,6 +234,11 @@ const AlternateDusklightFlagNames = new Map([
     ["City in the Sky Argorok", flags.get("City in The Sky Argorok")],
     ["City in the Sky Argorok Heart Container", flags.get("City in The Sky Argorok Heart Container")],
     ["City in the Sky Dungeon Reward", flags.get("City in The Sky Dungeon Reward")],
+    // Mixed up 
+    ["Lake Lantern Cave Sixth Chest", flags.get("Lake Lantern Cave Seventh Chest")],
+    ["Lake Lantern Cave Seventh Chest", flags.get("Lake Lantern Cave Sixth Chest")],
+    ["Lake Lantern Cave Eleventh Chest", flags.get("Lake Lantern Cave Twelfth Chest")],
+    ["Lake Lantern Cave Twelfth Chest", flags.get("Lake Lantern Cave Eleventh Chest")],
     // Others
     ["Defeat Ganondorf", flags.get("Hyrule Castle Ganondorf")],
     ["Temple of Time Gilloutine Chest", flags.get("Temple of Time Guillotine Chest")],
@@ -482,7 +487,7 @@ function manageFile(file) {
             resetRandoEntrances();
             if (isDusklightLog) {
                 loadDusklightSpoilerLog(data);
-                let seedId = "Seed" in data ? data["Seed"] : "Dusklight Seed";
+                let seedId = "Seed" in data ? data["Hash"] : "Dusklight Seed";
                 pushGAEvent("seed_import", {seed_id: seedId});
             }
             else {
@@ -809,7 +814,7 @@ function toPascalCase(s) {
 
 
 function loadDusklightSpoilerLog(data, start=false) {
-    console.log(data);
+    // console.log(data);
     document.getElementById("loadedSeed").style.display = "flex";
     document.getElementById("Unload_Seed").style.display = "inline";
     seedLink.style.display = "none";
@@ -859,18 +864,21 @@ function loadDusklightSpoilerLog(data, start=false) {
                 console.log(flagName + ": " + underscoreName + " is not in RandoItemMap");
                 skipEntry = true;
             }
-            if (!flags.has(flagName)) {
-                if (AlternateDusklightFlagNames.has(flagName)) {
-                    AlternateDusklightFlagNames.get(flagName).setRandoItem(item);
-                    continue;
-                }
+            let flag;
+            if (AlternateDusklightFlagNames.has(flagName)) {
+                flag = AlternateDusklightFlagNames.get(flagName);
+            }
+            else if (flags.has(flagName)) {
+                flag = flags.get(flagName);
+            }
+            else {
                 console.log(flagName + " is not in Flags");
                 skipEntry = true;
             }
             if (skipEntry)
                 continue;
-    
-            flags.get(flagName).setRandoItem(item);
+
+            flag.setRandoItem(item);
         }
     }
 

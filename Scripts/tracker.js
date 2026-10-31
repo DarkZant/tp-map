@@ -335,7 +335,7 @@ function showTrackerSubmenu(submenuID) {
     document.getElementById('tracker').style.backgroundColor = "rgba(14, 13, 12, 0.85)";
 
     let trackerX = document.getElementById('traX');
-    trackerX.style.color = "#1D1D1D";
+    trackerX.classList.add("traXDisabledColor");
     trackerX.classList.add('disabled');
 
     let mainTracker = document.getElementById('mainTracker');
@@ -356,7 +356,7 @@ function hideTrackerSubmenu(submenu) {
     document.getElementById('tracker').style.backgroundColor = "rgb(56, 53, 46, 0.85)";
 
     let trackerX = document.getElementById('traX');
-    trackerX.style.color = "#757575";
+    trackerX.classList.remove("traXDisabledColor");
     trackerX.classList.remove('disabled');
 
     let mainTracker = document.getElementById('mainTracker');
